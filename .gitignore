@@ -1,0 +1,18 @@
+# Novel workflow state (local only)
+.state/
+
+# Agent configs (local only)
+.opencode/
+.serena/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+# Temp files
+*.tmp
+*.bak
