@@ -1,9 +1,16 @@
 # 众生界
 
-> 千山不现路难寻  
-> 万象空庭棋自沉  
-> 执子终成局中子  
-> 风碑无声证天涯
+<p align="center">
+  <img src="assets/封面.png" alt="众生界" width="600">
+</p>
+
+<p align="center">
+  <i>千山不现路难寻，万象空庭棋自沉</i>
+</p>
+
+<p align="center">
+  <i>执子终成局中子，风碑无声证天涯</i>
+</p>
 
 ---
 
