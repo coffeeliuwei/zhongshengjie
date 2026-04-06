@@ -1656,6 +1656,302 @@ class NovelWorkflow:
         """获取指定作家参与的所有场景"""
         return self.scene_mapping.get_scenes_by_writer(writer)
 
+    # ==================== 章节经验检索接口 ====================
+
+    def retrieve_chapter_experience(
+        self, current_chapter: int, scene_types: List[str], writer_name: str = "all"
+    ) -> Dict[str, List]:
+        """
+        检索前几章的经验日志 + 用户修改要求
+
+        Args:
+            current_chapter: 当前章节号
+            scene_types: 当前章节涉及的场景类型列表
+            writer_name: 当前创作的作家名（如"墨言"），默认"all"表示不过滤
+
+        Returns:
+            经验上下文字典
+        """
+        log_dir = PROJECT_DIR / "章节经验日志"
+
+        experiences = {
+            "what_worked": [],
+            "what_didnt_work": [],
+            "insights": [],
+            "for_next_chapter": [],
+            "user_modification_requests": [],
+        }
+
+        # Step 1: 检索前3章日志
+        if log_dir.exists():
+            for chapter in range(current_chapter - 1, max(0, current_chapter - 4), -1):
+                log_file = log_dir / f"第{chapter}章_log.json"
+                if not log_file.exists():
+                    continue
+                try:
+                    with open(log_file, "r", encoding="utf-8") as f:
+                        log = json.load(f)
+                    experiences["what_worked"].extend(log.get("what_worked", []))
+                    experiences["what_didnt_work"].extend(
+                        log.get("what_didnt_work", [])
+                    )
+                    experiences["for_next_chapter"].extend(
+                        log.get("for_next_chapter", [])
+                    )
+                    for insight in log.get("insights", []):
+                        if self._is_insight_relevant(insight, scene_types):
+                            experiences["insights"].append(insight)
+                except Exception as e:
+                    print(f"[经验检索] 读取日志失败 {log_file}: {e}")
+
+        # Step 2: 检索用户修改要求
+        standards_file = PROJECT_DIR / "写作标准积累" / "用户修改要求记录.md"
+        pending_requests = self._extract_pending_requests(standards_file)
+
+        # Step 2.1: 按作家过滤
+        filtered_requests = []
+        for req in pending_requests:
+            applies_to = req.get("适用作家", ["all"])
+            if writer_name == "all" or "all" in applies_to or writer_name in applies_to:
+                filtered_requests.append(req)
+
+        # Step 2.2: 按优先级排序
+        priority_order = {"L1": 0, "L2": 1, "L3": 2, "L4": 3}
+        filtered_requests.sort(
+            key=lambda r: priority_order.get(r.get("标准层级", "L3"), 2)
+        )
+
+        # Step 2.3: 限制数量
+        filtered_requests = filtered_requests[:5]
+
+        experiences["user_modification_requests"] = filtered_requests
+        return experiences
+
+    def _is_insight_relevant(self, insight: Dict, scene_types: List[str]) -> bool:
+        """判断洞察是否与当前场景相关"""
+        scene_condition = insight.get("scene_condition", "")
+
+        # 场景关键词映射
+        scene_keywords = {
+            "战斗": ["战斗", "代价", "胜利", "牺牲", "群体"],
+            "人物": ["人物", "角色", "情感", "成长", "出场"],
+            "世界观": ["世界观", "势力", "设定", "背景"],
+            "剧情": ["剧情", "伏笔", "悬念", "反转"],
+            "氛围": ["氛围", "意境", "描写", "环境"],
+        }
+
+        for scene_type in scene_types:
+            keywords = scene_keywords.get(scene_type, [])
+            for keyword in keywords:
+                if keyword in scene_condition or keyword in insight.get("content", ""):
+                    return True
+
+        return False
+
+    def _extract_pending_requests(self, standards_file: Path) -> List[Dict]:
+        """从用户修改要求记录.md中提取未应用的修改要求"""
+        import re
+
+        pending = []
+        if not standards_file.exists():
+            return pending
+
+        with open(standards_file, "r", encoding="utf-8") as f:
+            content = f.read()
+
+        request_blocks = re.findall(
+            r"### (REQ-\d+).*?(?=### REQ-\d+|## |$)", content, re.DOTALL
+        )
+
+        for block in request_blocks:
+            req_id = re.search(r"REQ-(\d+)", block)
+            level = re.search(r"标准层级:\s*(L[1-4])", block)
+            status = re.search(r"状态:\s*(\w+)", block)
+            applies_to = re.search(r"适用作家:\s*\[([^\]]+)\]", block)
+            standard = re.search(r"精炼标准:\s*(.+?)(?=\n|状态)", block, re.DOTALL)
+
+            if status and status.group(1) == "pending":
+                pending.append(
+                    {
+                        "id": req_id.group(0) if req_id else "REQ-???",
+                        "标准层级": level.group(1) if level else "L3",
+                        "适用作家": applies_to.group(1)
+                        .replace('"', "")
+                        .replace("'", "")
+                        .split(",")
+                        if applies_to
+                        else ["all"],
+                        "精炼标准": standard.group(1).strip() if standard else "",
+                        "状态": "pending",
+                    }
+                )
+
+        return pending
+
+    def format_experience_context(self, experiences: Dict) -> str:
+        """格式化经验上下文"""
+        if not any(experiences.values()):
+            return ""
+
+        context = "【前章经验参考】\n\n"
+
+        if experiences["what_worked"]:
+            context += "有效做法（可参考）：\n"
+            for item in experiences["what_worked"][:5]:
+                context += f"  - {item}\n"
+            context += "\n"
+
+        if experiences["what_didnt_work"]:
+            context += "避免重复错误：\n"
+            for item in experiences["what_didnt_work"][:5]:
+                context += f"  - {item}\n"
+            context += "\n"
+
+        if experiences["insights"]:
+            context += "可复用洞察：\n"
+            for insight in experiences["insights"][:3]:
+                context += f"  - {insight.get('content', '')}\n"
+                context += f"    适用：{insight.get('scene_condition', '')}\n"
+            context += "\n"
+
+        if experiences["for_next_chapter"]:
+            context += "前章建议：\n"
+            for item in experiences["for_next_chapter"][:5]:
+                context += f"  - {item}\n"
+
+        if experiences["user_modification_requests"]:
+            context += "\n用户修改要求（待应用）：\n"
+            for req in experiences["user_modification_requests"]:
+                context += (
+                    f"  [{req.get('标准层级', 'L3')}] {req.get('精炼标准', '')}\n"
+                )
+
+        return context
+
+    def write_chapter_log(
+        self, chapter_name: str, evaluation_result: Dict, techniques_used: List[Dict]
+    ) -> Path:
+        """
+        将评估结果写入章节经验日志
+
+        Args:
+            chapter_name: 章节名称
+            evaluation_result: Evaluator输出的评估结果
+            techniques_used: 使用的技法列表
+
+        Returns:
+            日志文件路径
+        """
+        from datetime import datetime
+        import re
+
+        log_dir = PROJECT_DIR / "章节经验日志"
+        log_dir.mkdir(parents=True, exist_ok=True)
+
+        # 提取章节号
+        match = re.search(r"第(\d+)章", chapter_name)
+        chapter_num = match.group(1) if match else "0"
+
+        log_file = log_dir / f"第{chapter_num}章_log.json"
+
+        # 提取洞察
+        insight_data = evaluation_result.get("反馈", {}).get("洞察提取", {})
+
+        # 构建日志内容
+        log_content = {
+            "chapter": chapter_name,
+            "created_at": datetime.now().isoformat(),
+            "techniques_used": techniques_used,
+            "what_worked": insight_data.get("有效做法", []),
+            "what_didnt_work": insight_data.get("无效做法", []),
+            "insights": [
+                {
+                    "content": i.get("content", ""),
+                    "scene_condition": i.get("scene_condition", ""),
+                    "reusable": i.get("可复用", True),
+                }
+                for i in insight_data.get("可复用洞察", [])
+            ],
+            "for_next_chapter": insight_data.get("给下一章建议", []),
+            "user_modification_requests": insight_data.get("用户修改要求", []),
+        }
+
+        # 写入文件
+        with open(log_file, "w", encoding="utf-8") as f:
+            json.dump(log_content, f, ensure_ascii=False, indent=2)
+
+        print(f"[经验写入] 已写入: {log_file}")
+        return log_file
+
+    def get_phase1_writers(self, scene_type: str) -> List[str]:
+        """
+        获取场景的Phase 1前置作家列表
+
+        根据scene_writer_mapping.json中的配置返回前置作家，
+        而非固定返回苍澜、玄一、墨言三人。
+
+        Args:
+            scene_type: 场景类型
+
+        Returns:
+            前置作家列表
+        """
+        collab = self.scene_mapping.get_scene_collaboration(scene_type)
+        if not collab:
+            # 默认返回三人
+            return ["苍澜", "玄一", "墨言"]
+
+        # 从collaboration中提取phase为"前置"的作家
+        phase1_writers = []
+        for c in collab.get("collaboration", []):
+            if c.get("phase") == "前置":
+                phase1_writers.append(c.get("writer"))
+
+        # 如果没有前置作家，返回默认三人
+        if not phase1_writers:
+            return ["苍澜", "玄一", "墨言"]
+
+        return phase1_writers
+
+
+# ============================================================
+# 独立函数（可独立调用）
+# ============================================================
+
+
+def retrieve_chapter_experience(
+    current_chapter: int, scene_types: List[str], writer_name: str = "all"
+) -> Dict[str, List]:
+    """
+    检索前几章的经验日志（独立函数版本）
+
+    可直接调用，无需实例化NovelWorkflow。
+
+    Args:
+        current_chapter: 当前章节号
+        scene_types: 当前章节涉及的场景类型列表
+        writer_name: 当前创作的作家名
+
+    Returns:
+        经验上下文字典
+    """
+    workflow = NovelWorkflow()
+    return workflow.retrieve_chapter_experience(
+        current_chapter, scene_types, writer_name
+    )
+
+
+def write_chapter_log(
+    chapter_name: str, evaluation_result: Dict, techniques_used: List[Dict]
+) -> Path:
+    """
+    写入章节经验日志（独立函数版本）
+
+    可直接调用，无需实例化NovelWorkflow。
+    """
+    workflow = NovelWorkflow()
+    return workflow.write_chapter_log(chapter_name, evaluation_result, techniques_used)
+
 
 # ============================================================
 # 命令行接口

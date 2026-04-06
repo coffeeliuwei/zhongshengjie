@@ -12,12 +12,14 @@
 3. 案例提取（提取高质量片段）
 4. 质量评估（多维度评分）
 5. 同步向量库（支持语义检索）
+6. 自动发现新场景类型（NEW）
 
 用法：
     python case_builder.py --init                    # 初始化案例库
     python case_builder.py --scan SOURCES...         # 扫描小说资源
     python case_builder.py --convert                 # 转换格式
     python case_builder.py --extract --limit 1000    # 提取案例
+    python case_builder.py --discover                # 自动发现新场景类型
     python case_builder.py --sync                    # 同步到向量库
     python case_builder.py --status                  # 查看状态
 """
@@ -142,6 +144,224 @@ SCENE_TYPES = {
         "position": "any",
         "min_len": 400,
         "max_len": 2000,
+    },
+    # ========== 新增场景类型 (18种) ==========
+    "环境场景": {
+        "keywords": [
+            "山脉",
+            "森林",
+            "宫殿",
+            "城池",
+            "荒野",
+            "天空",
+            "云雾",
+            "月光",
+            "风景",
+            "景色",
+        ],
+        "position": "any",
+        "min_len": 300,
+        "max_len": 1500,
+    },
+    "心理场景": {
+        "keywords": [
+            "心中",
+            "内心",
+            "思绪",
+            "纠结",
+            "矛盾",
+            "挣扎",
+            "沉思",
+            "暗想",
+            "心道",
+            "默念",
+        ],
+        "position": "any",
+        "min_len": 300,
+        "max_len": 1500,
+    },
+    "社交场景": {
+        "keywords": [
+            "宴席",
+            "聚会",
+            "酒楼",
+            "茶馆",
+            "客套",
+            "寒暄",
+            "礼节",
+            "应酬",
+            "交际",
+        ],
+        "position": "any",
+        "min_len": 400,
+        "max_len": 2000,
+    },
+    "冲突升级": {
+        "keywords": [
+            "矛盾",
+            "冲突",
+            "争执",
+            "争吵",
+            "对峙",
+            "剑拔弩张",
+            "火药味",
+            "激化",
+        ],
+        "position": "any",
+        "min_len": 400,
+        "max_len": 2000,
+    },
+    "阴谋揭露": {
+        "keywords": [
+            "阴谋",
+            "诡计",
+            "陷阱",
+            "幕后",
+            "黑手",
+            "真相",
+            "原来",
+            "早就",
+            "布局",
+        ],
+        "position": "any",
+        "min_len": 400,
+        "max_len": 2000,
+    },
+    "团队组建": {
+        "keywords": [
+            "结盟",
+            "联手",
+            "合作",
+            "同伴",
+            "队友",
+            "伙伴",
+            "组队",
+            "一起",
+            "同行",
+        ],
+        "position": "any",
+        "min_len": 400,
+        "max_len": 2000,
+    },
+    "修炼突破": {
+        "keywords": [
+            "突破",
+            "晋级",
+            "境界",
+            "修炼",
+            "感悟",
+            "顿悟",
+            "瓶颈",
+            "冲击",
+            "稳固",
+        ],
+        "position": "any",
+        "min_len": 400,
+        "max_len": 2000,
+    },
+    "势力登场": {
+        "keywords": [
+            "宗门",
+            "家族",
+            "门派",
+            "势力",
+            "组织",
+            "帮派",
+            "商会",
+            "联盟",
+            "朝廷",
+        ],
+        "position": "any",
+        "min_len": 400,
+        "max_len": 2000,
+    },
+    "成长蜕变": {
+        "keywords": ["成长", "蜕变", "改变", "觉悟", "明白", "懂得", "成熟", "不再是"],
+        "position": "any",
+        "min_len": 400,
+        "max_len": 2000,
+    },
+    "伏笔设置": {
+        "keywords": ["无意中", "不经意", "似乎", "隐约", "模糊", "若隐若现", "暗示"],
+        "position": "any",
+        "min_len": 300,
+        "max_len": 1500,
+    },
+    "伏笔回收": {
+        "keywords": ["原来如此", "终于明白", "想起", "回忆起", "当初", "之前", "那时"],
+        "position": "any",
+        "min_len": 300,
+        "max_len": 1500,
+    },
+    "危机降临": {
+        "keywords": [
+            "危机",
+            "灾难",
+            "浩劫",
+            "末日",
+            "大难",
+            "灭顶",
+            "危在旦夕",
+            "迫在眉睫",
+        ],
+        "position": "any",
+        "min_len": 400,
+        "max_len": 2000,
+    },
+    "资源获取": {
+        "keywords": [
+            "宝物",
+            "神器",
+            "灵药",
+            "秘籍",
+            "传承",
+            "收获",
+            "得到",
+            "获得",
+            "得到",
+        ],
+        "position": "any",
+        "min_len": 400,
+        "max_len": 2000,
+    },
+    "探索发现": {
+        "keywords": ["发现", "意外", "惊喜", "遗迹", "秘境", "古墓", "洞穴", "密室"],
+        "position": "any",
+        "min_len": 400,
+        "max_len": 2000,
+    },
+    "情报揭示": {
+        "keywords": ["消息", "情报", "传闻", "据说", "得知", "获悉", "打探", "消息"],
+        "position": "any",
+        "min_len": 300,
+        "max_len": 1500,
+    },
+    "反派出场": {
+        "keywords": ["反派", "敌人", "仇人", "对手", "恶人", "魔头", "邪修", "妖兽"],
+        "position": "any",
+        "min_len": 400,
+        "max_len": 2000,
+    },
+    "恢复休养": {
+        "keywords": ["疗伤", "恢复", "休养", "调息", "静养", "养伤", "恢复", "痊愈"],
+        "position": "any",
+        "min_len": 300,
+        "max_len": 1500,
+    },
+    "回忆场景": {
+        "keywords": [
+            "记得",
+            "记得当年",
+            "想起从前",
+            "当年",
+            "往事",
+            "曾经",
+            "回忆",
+            "那时",
+        ],
+        "position": "any",
+        "min_len": 300,
+        "max_len": 1500,
     },
 }
 
@@ -831,6 +1051,173 @@ python case_builder.py --sync
 
         return True
 
+    def discover_new_scenes(
+        self,
+        limit: int = 5000,
+        min_cluster_size: int = 10,
+        max_clusters: int = 20,
+        auto_apply: bool = False,
+    ):
+        """
+        自动发现新场景类型
+
+        Args:
+            limit: 最大收集片段数
+            min_cluster_size: 最小聚类大小
+            max_clusters: 最大发现场景数
+            auto_apply: 是否自动应用高置信度场景
+        """
+        print("\n" + "=" * 60)
+        print("自动发现新场景类型")
+        print("=" * 60)
+
+        # 导入发现器
+        try:
+            from scene_discovery import SceneDiscovery, CLUSTER_CONFIG
+        except ImportError as e:
+            print(f"    ✗ 未找到 scene_discovery.py: {e}")
+            return False
+
+        # 配置
+        config = {
+            "min_cluster_size": min_cluster_size,
+            "max_clusters": max_clusters,
+            "similarity_threshold": 0.75,
+            "keyword_min_freq": 3,
+            "keyword_top_k": 8,
+        }
+
+        # 创建发现器
+        discoverer = SceneDiscovery(self.case_library_dir, config, SCENE_TYPES)
+
+        # 收集未归类片段
+        print(f"\n收集未归类片段 (限制: {limit})...")
+        unclassified = discoverer.collect_unclassified_fragments(
+            self.converted_dir, limit
+        )
+
+        if not unclassified:
+            print("\n未发现未归类片段")
+            return True
+
+        # 发现新场景
+        print("\n聚类分析中...")
+        discovered = discoverer.discover_new_scenes(unclassified)
+
+        if discovered:
+            print(f"\n发现 {len(discovered)} 个新场景类型:")
+            for i, scene in enumerate(discovered, 1):
+                status_emoji = {
+                    "active": "✅",
+                    "can_activate": "🟡",
+                    "pending_activation": "⏳",
+                }.get(scene.suggested_status, "❓")
+                print(f"\n  [{i}] {status_emoji} {scene.scene_name}")
+                print(f"      关键词: {', '.join(scene.keywords[:5])}")
+                print(
+                    f"      片段数: {scene.fragment_count}, 置信度: {scene.confidence:.0%}"
+                )
+                print(f"      建议状态: {scene.suggested_status}")
+
+            # 自动应用高置信度场景
+            if auto_apply:
+                high_confidence = [s for s in discovered if s.confidence >= 0.8]
+                if high_confidence:
+                    print(f"\n自动应用 {len(high_confidence)} 个高置信度场景...")
+                    mapping_file = (
+                        self.case_library_dir.parent
+                        / ".vectorstore"
+                        / "scene_writer_mapping.json"
+                    )
+                    discoverer.apply_discovered_scenes(
+                        high_confidence,
+                        None,  # 不更新SCENE_TYPES文件
+                        mapping_file if mapping_file.exists() else None,
+                    )
+            else:
+                print("\n下一步:")
+                print("  1. 检查发现的场景是否合理")
+                print("  2. 运行 python scene_discovery.py --apply 应用到配置")
+        else:
+            print("\n未发现新场景类型（样本不足或模式不明显）")
+
+        return True
+
+    def apply_discovered_scenes(self, confidence_threshold: float = 0.6):
+        """
+        应用发现的新场景类型
+
+        Args:
+            confidence_threshold: 置信度阈值
+        """
+        print("\n" + "=" * 60)
+        print("应用发现的新场景类型")
+        print("=" * 60)
+
+        try:
+            from scene_discovery import SceneDiscovery
+        except ImportError:
+            print("    ✗ 未找到 scene_discovery.py")
+            return False
+
+        # 检查发现结果文件
+        discovery_dir = self.case_library_dir / "discovery"
+        discovered_file = discovery_dir / "discovered_scenes.json"
+
+        if not discovered_file.exists():
+            print("    没有发现的新场景")
+            print("    请先运行: python case_builder.py --discover")
+            return False
+
+        # 加载发现结果
+        with open(discovered_file, "r", encoding="utf-8") as f:
+            data = json.load(f)
+
+        from scene_discovery import DiscoveredScene
+
+        scenes = [DiscoveredScene(**s) for s in data.get("scenes", [])]
+
+        # 过滤置信度
+        valid_scenes = [s for s in scenes if s.confidence >= confidence_threshold]
+
+        if not valid_scenes:
+            print(f"    没有置信度 >= {confidence_threshold:.0%} 的新场景")
+            return False
+
+        print(f"    待应用的场景: {len(valid_scenes)} 个")
+        for scene in valid_scenes:
+            print(f"      - {scene.scene_name} (置信度: {scene.confidence:.0%})")
+
+        # 应用到配置
+        discoverer = SceneDiscovery(self.case_library_dir, {}, SCENE_TYPES)
+        mapping_file = (
+            self.case_library_dir.parent / ".vectorstore" / "scene_writer_mapping.json"
+        )
+
+        success = discoverer.apply_discovered_scenes(
+            valid_scenes, None, mapping_file if mapping_file.exists() else None
+        )
+
+        if success:
+            print("\n✓ 应用完成!")
+            print("  下次运行 --extract 时将包含新场景类型")
+
+            # 更新内存中的SCENE_TYPES
+            for scene in valid_scenes:
+                if scene.confidence >= 0.6:
+                    SCENE_TYPES[scene.scene_name] = {
+                        "keywords": scene.keywords,
+                        "position": "any",
+                        "min_len": 300,
+                        "max_len": 2000,
+                        "discovered": True,
+                        "discovery_confidence": scene.confidence,
+                    }
+        else:
+            print("\n✗ 应用失败，请检查日志")
+
+        return success
+
 
 def main():
     parser = argparse.ArgumentParser(description="案例库构建器")
@@ -844,6 +1231,10 @@ def main():
     parser.add_argument("--scan", nargs="+", metavar="DIR", help="扫描小说资源目录")
     parser.add_argument("--convert", action="store_true", help="转换小说格式")
     parser.add_argument("--extract", action="store_true", help="提取案例")
+    parser.add_argument("--discover", action="store_true", help="自动发现新场景类型")
+    parser.add_argument(
+        "--apply-discovered", action="store_true", help="应用发现的新场景"
+    )
     parser.add_argument("--sync", action="store_true", help="同步到向量库")
     parser.add_argument("--status", action="store_true", help="查看状态")
 
@@ -851,6 +1242,12 @@ def main():
     parser.add_argument("--limit", type=int, default=0, help="处理数量限制")
     parser.add_argument("--scenes", nargs="+", help="指定场景类型")
     parser.add_argument("--batch-size", type=int, default=50, help="批处理大小")
+    parser.add_argument("--min-cluster-size", type=int, default=10, help="最小聚类大小")
+    parser.add_argument("--max-clusters", type=int, default=20, help="最大发现场景数")
+    parser.add_argument("--confidence", type=float, default=0.6, help="置信度阈值")
+    parser.add_argument(
+        "--auto-apply", action="store_true", help="自动应用高置信度场景"
+    )
 
     args = parser.parse_args()
 
@@ -875,6 +1272,15 @@ def main():
         builder.convert_files(limit=args.limit)
     elif args.extract:
         builder.extract_cases(limit=args.limit or 1000, scene_types=args.scenes)
+    elif args.discover:
+        builder.discover_new_scenes(
+            limit=args.limit or 5000,
+            min_cluster_size=args.min_cluster_size,
+            max_clusters=args.max_clusters,
+            auto_apply=args.auto_apply,
+        )
+    elif args.apply_discovered:
+        builder.apply_discovered_scenes(confidence_threshold=args.confidence)
     elif args.sync:
         builder.sync_to_vectorstore(batch_size=args.batch_size)
     elif args.status:
@@ -886,6 +1292,13 @@ def main():
         print("  python case_builder.py --scan E:/小说资源")
         print("  python case_builder.py --convert")
         print("  python case_builder.py --extract --limit 1000")
+        print(
+            "  python case_builder.py --discover --limit 5000              # 发现新场景"
+        )
+        print(
+            "  python case_builder.py --discover --auto-apply              # 发现并自动应用"
+        )
+        print("  python case_builder.py --apply-discovered --confidence 0.7 # 手动应用")
         print("  python case_builder.py --sync")
 
 
