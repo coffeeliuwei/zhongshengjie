@@ -1,7 +1,7 @@
 # 众生界
 
 <p align="center">
-  <img src="assets/封面.png" alt="众生界" width="600">
+  <img src="assets/unnamed.png" alt="众生界" width="600">
 </p>
 
 <p align="center">
