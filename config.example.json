@@ -1,128 +1,151 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Novel Writing System Config",
-  "description": "Configuration template for novel writing system. Copy this to config.json and fill in your actual paths.",
-  "type": "object",
-  "properties": {
-    "project": {
-      "type": "object",
-      "properties": {
-        "name": {
-          "type": "string",
-          "description": "Project name",
-          "default": "My Novel"
-        },
-        "version": {
-          "type": "string",
-          "default": "1.0.0"
-        }
-      },
-      "required": ["name"]
+  "_说明": "========================================",
+  "_标题": "众生界小说创作系统 - 配置文件",
+  "_用法": "复制此文件为 config.json 并修改为您的实际路径",
+  "_说明结束": "========================================",
+
+  "project": {
+    "_说明": "项目基本信息（可选）",
+    "name": "My Novel",
+    "version": "1.0.0"
+  },
+
+  "paths": {
+    "_说明": "路径配置 - 所有路径支持相对路径（相对于项目根目录）或绝对路径",
+    
+    "project_root": {
+      "_说明": "项目根目录。设为 null 自动检测，或填写绝对路径",
+      "_示例_Windows": "D:/我的小说项目",
+      "_示例_Linux": "/home/user/my-novel",
+      "value": null
     },
-    "paths": {
-      "type": "object",
-      "description": "All paths are relative to data_base_path unless absolute",
-      "properties": {
-        "data_base_path": {
-          "type": "string",
-          "description": "Base directory for all novel data (REQUIRED)",
-          "examples": ["D:/NovelData", "/home/user/novel-data"]
-        },
-        "chapters": {
-          "type": "string",
-          "description": "Published chapters directory",
-          "default": "正文"
-        },
-        "outlines": {
-          "type": "string",
-          "description": "Chapter outlines directory",
-          "default": "章节大纲"
-        },
-        "settings": {
-          "type": "string",
-          "description": "World/character settings directory",
-          "default": "设定"
-        },
-        "experience_logs": {
-          "type": "string",
-          "description": "Chapter experience logs directory",
-          "default": "章节经验日志"
-        },
-        "writing_standards": {
-          "type": "string",
-          "description": "User feedback accumulation directory",
-          "default": "写作标准积累"
-        },
-        "techniques": {
-          "type": "string",
-          "description": "Writing techniques library directory",
-          "default": "创作技法"
-        },
-        "vectorstore": {
-          "type": "string",
-          "description": "Vector database directory",
-          "default": ".vectorstore"
-        },
-        "case_library": {
-          "type": "string",
-          "description": "Case library directory",
-          "default": ".case-library"
-        }
-      },
-      "required": ["data_base_path"]
+    
+    "settings_dir": {
+      "_说明": "设定目录，存放世界观、人物、势力等设定文件",
+      "value": "设定"
     },
-    "database": {
-      "type": "object",
-      "properties": {
-        "qdrant_host": {
-          "type": "string",
-          "description": "Qdrant server host",
-          "default": "localhost"
-        },
-        "qdrant_port": {
-          "type": "integer",
-          "description": "Qdrant server port",
-          "default": 6333
-        },
-        "collections": {
-          "type": "object",
-          "properties": {
-            "novel_settings": {
-              "type": "string",
-              "default": "novel_settings_v2"
-            },
-            "writing_techniques": {
-              "type": "string",
-              "default": "writing_techniques_v2"
-            },
-            "case_library": {
-              "type": "string",
-              "default": "case_library_v2"
-            }
-          }
-        }
-      }
+    
+    "techniques_dir": {
+      "_说明": "技法目录，存放写作技法库",
+      "value": "创作技法"
     },
-    "model": {
-      "type": "object",
-      "properties": {
-        "embedding_model": {
-          "type": "string",
-          "description": "Embedding model name or path",
-          "default": "BAAI/bge-m3"
-        },
-        "model_path": {
-          "type": "string",
-          "description": "Local model cache path (optional)",
-          "examples": ["E:/huggingface_cache/hub/models--BAAI--bge-m3/snapshots/..."]
-        },
-        "vector_size": {
-          "type": "integer",
-          "description": "Vector dimension",
-          "default": 1024
-        }
-      }
+    
+    "chapters_dir": {
+      "_说明": "章节大纲目录",
+      "value": "章节大纲"
+    },
+    
+    "content_dir": {
+      "_说明": "正文目录，存放已创作的章节",
+      "value": "正文"
+    },
+    
+    "experience_dir": {
+      "_说明": "章节经验日志目录",
+      "value": "章节经验日志"
+    },
+    
+    "standards_dir": {
+      "_说明": "写作标准积累目录",
+      "value": "写作标准积累"
+    },
+    
+    "vectorstore_dir": {
+      "_说明": "向量数据库存储目录",
+      "value": ".vectorstore"
+    },
+    
+    "case_library_dir": {
+      "_说明": "案例库目录，存放提取的标杆案例",
+      "value": ".case-library"
+    },
+    
+    "logs_dir": {
+      "_说明": "日志目录",
+      "value": "logs"
+    },
+    
+    "cache_dir": {
+      "_说明": "缓存目录",
+      "value": ".cache"
     }
   },
-  "required": ["project", "paths"]
+
+  "database": {
+    "_说明": "Qdrant向量数据库配置",
+    
+    "qdrant_host": {
+      "_说明": "Qdrant服务器地址。Docker默认 localhost",
+      "value": "localhost"
+    },
+    
+    "qdrant_port": {
+      "_说明": "Qdrant端口。Docker默认 6333",
+      "value": 6333
+    },
+    
+    "collections": {
+      "_说明": "Collection名称映射（一般无需修改）",
+      "novel_settings": "novel_settings_v2",
+      "writing_techniques": "writing_techniques_v2",
+      "case_library": "case_library_v2"
+    }
+  },
+
+  "model": {
+    "_说明": "嵌入模型配置 - 使用BGE-M3进行向量化",
+    
+    "embedding_model": {
+      "_说明": "模型名称，用于自动下载（需要联网）",
+      "value": "BAAI/bge-m3"
+    },
+    
+    "model_path": {
+      "_说明": "本地模型路径。设为 null 自动检测或下载",
+      "_说明2": "如果已下载模型，填写snapshots目录路径可加快启动速度",
+      "_示例_Windows": "E:/huggingface_cache/hub/models--BAAI--bge-m3/snapshots/具体的commit哈希",
+      "_示例_Linux": "/home/user/.cache/huggingface/hub/models--BAAI--bge-m3/snapshots/具体的commit哈希",
+      "_自动检测路径": [
+        "~/.cache/huggingface/hub/models--BAAI--bge-m3/snapshots/",
+        "Windows: C:/Users/用户名/.cache/huggingface/hub/..."
+      ],
+      "value": null
+    },
+    
+    "hf_cache_dir": {
+      "_说明": "HuggingFace缓存根目录。设为 null 使用默认位置",
+      "_示例_Windows": "E:/huggingface_cache",
+      "_示例_Linux": "/home/user/.cache/huggingface",
+      "value": null
+    },
+    
+    "vector_size": {
+      "_说明": "向量维度。BGE-M3固定为1024，无需修改",
+      "value": 1024
+    }
+  },
+
+  "novel_sources": {
+    "_说明": "外部小说资源目录 - 用于案例提取",
+    "_说明2": "支持多个目录，可以是绝对路径或相对路径",
+    "_用法": "运行 python tools/case_builder.py --scan 后会扫描这些目录",
+    
+    "directories": [
+      {
+        "_说明": "示例1：Windows绝对路径",
+        "path": "E:\\小说资源"
+      },
+      {
+        "_说明": "示例2：Linux绝对路径",
+        "path": "/data/novels"
+      },
+      {
+        "_说明": "示例3：项目内的相对路径",
+        "path": "./novels"
+      }
+    ],
+    
+    "_支持的格式": ["txt", "epub", "mobi"],
+    "_注意": "路径使用双反斜杠 \\\\ 或正斜杠 /"
+  }
 }

@@ -1,13 +1,14 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 from qdrant_client import QdrantClient
+from core.config_loader import get_qdrant_url
 from qdrant_client.http.models import Filter, FieldCondition, MatchValue
 import json
 import sys
 
 sys.stdout.reconfigure(encoding="utf-8")
 
-client = QdrantClient(url="http://localhost:6333")
+client = QdrantClient(url=get_qdrant_url())
 
 # 搜索技术基础类型实体
 results = client.scroll(

@@ -6,12 +6,17 @@
 """
 
 import json
+import sys
 from pathlib import Path
 from datetime import datetime
 
+# 添加项目根目录到 sys.path 以导入配置加载器
+sys.path.insert(0, str(__file__).rsplit(".vectorstore", 1)[0])
+from core.config_loader import get_project_root, get_vectorstore_dir, get_qdrant_url
+
 # 配置
-PROJECT_DIR = Path(r"D:\动画\众生界")
-VECTORSTORE_DIR = PROJECT_DIR / ".vectorstore"
+PROJECT_DIR = get_project_root()
+VECTORSTORE_DIR = get_vectorstore_dir()
 OUTPUT_FILE = VECTORSTORE_DIR / "technique_graph.html"
 
 TIMESTAMP = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -58,9 +63,9 @@ def load_techniques_from_qdrant():
 
     # 连接Docker Qdrant
     try:
-        client = QdrantClient(url="http://localhost:6333")
+        client = QdrantClient(url=get_qdrant_url())
         client.get_collections()
-        print("  连接: Docker Qdrant (localhost:6333)")
+        print("  连接: Docker Qdrant (get_qdrant_url())")
     except:
         QDRANT_DIR = VECTORSTORE_DIR / "qdrant"
         client = QdrantClient(path=str(QDRANT_DIR))

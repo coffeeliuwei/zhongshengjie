@@ -19,8 +19,10 @@ except ImportError:
     exit(1)
 
 # 配置
-VECTORSTORE_DIR = Path(r"D:\动画\众生界\.vectorstore")
-PROJECT_DIR = Path(r"D:\动画\众生界")
+from core.config_loader import get_project_root, get_vectorstore_dir
+
+PROJECT_DIR = get_project_root()
+VECTORSTORE_DIR = get_vectorstore_dir()
 GRAPH_FILE = VECTORSTORE_DIR / "knowledge_graph.json"
 
 # ============================================================

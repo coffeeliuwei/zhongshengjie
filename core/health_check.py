@@ -20,6 +20,8 @@ from datetime import datetime
 from pathlib import Path
 import json
 
+from .config_loader import get_project_root
+
 
 class HealthStatus(Enum):
     """健康状态"""
@@ -136,8 +138,8 @@ class HealthChecker:
         print(report.print_report())
     """
 
-    def __init__(self, project_root: str = "D:/动画/众生界"):
-        self.project_root = Path(project_root)
+    def __init__(self, project_root: str = None):
+        self.project_root = Path(project_root) if project_root else get_project_root()
         self.checks: Dict[str, Callable] = {
             "数据库": self.check_database,
             "技能文件": self.check_skills,

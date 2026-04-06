@@ -45,6 +45,14 @@ import json
 from pathlib import Path
 from typing import Dict, List, Optional, Any
 
+from core.config_loader import (
+    get_qdrant_url,
+    get_project_root,
+    get_model_path,
+    get_vectorstore_dir,
+    get_path,
+)
+
 try:
     from qdrant_client import QdrantClient
     from qdrant_client.http import models
@@ -57,12 +65,12 @@ except ImportError:
 # 配置
 # ============================================================
 
-PROJECT_DIR = Path(r"D:\动画\众生界")
-VECTORSTORE_DIR = PROJECT_DIR / ".vectorstore"
+PROJECT_DIR = get_project_root()
+VECTORSTORE_DIR = get_vectorstore_dir()
 QDRANT_DIR = VECTORSTORE_DIR / "qdrant"
 
 # Docker Qdrant 配置（优先使用）
-QDRANT_DOCKER_URL = "http://localhost:6333"
+QDRANT_DOCKER_URL = get_qdrant_url()
 
 # 集合名称 (v2版本)
 NOVEL_COLLECTION = "novel_settings_v2"
@@ -73,7 +81,7 @@ CASE_COLLECTION = "case_library_v2"
 VECTOR_SIZE = 1024
 
 # BGE-M3 模型路径
-BGE_M3_MODEL_PATH = r"E:\huggingface_cache\hub\models--BAAI--bge-m3\snapshots\5617a9f61b028005a4858fdac845db406aefb181"
+BGE_M3_MODEL_PATH = get_model_path()
 
 # 图谱文件
 GRAPH_FILE = VECTORSTORE_DIR / "knowledge_graph.json"
@@ -86,12 +94,14 @@ def get_qdrant_client():
     """获取Qdrant客户端，优先使用Docker"""
     try:
         # 连接Docker Qdrant（必须启动Docker）
-client = QdrantClient(url=QDRANT_DOCKER_URL)
-client.get_collections()  # 测试连接
-return client, "docker"
+        client = QdrantClient(url=QDRANT_DOCKER_URL)
+        client.get_collections()  # 测试连接
+        return client, "docker"
+    except Exception as e:
+        print(f"连接Docker Qdrant失败: {e}")
+        raise
 
 
-# ============================================================
 # 场景-作家映射读取器
 # ============================================================
 
@@ -230,9 +240,7 @@ class NovelSettingsSearcher:
                 from FlagEmbedding import BGEM3FlagModel
 
                 self._model = BGEM3FlagModel(
-                    BGE_M3_MODEL_PATH,
-                    use_fp16=True,
-                    device="cpu"
+                    BGE_M3_MODEL_PATH, use_fp16=True, device="cpu"
                 )
             except ImportError:
                 print("请安装 FlagEmbedding: pip install FlagEmbedding")
@@ -390,9 +398,7 @@ class TechniqueSearcher:
                 from FlagEmbedding import BGEM3FlagModel
 
                 self._model = BGEM3FlagModel(
-                    BGE_M3_MODEL_PATH,
-                    use_fp16=True,
-                    device="cpu"
+                    BGE_M3_MODEL_PATH, use_fp16=True, device="cpu"
                 )
             except ImportError:
                 print("请安装 FlagEmbedding: pip install FlagEmbedding")
@@ -516,9 +522,7 @@ class CaseSearcher:
                 from FlagEmbedding import BGEM3FlagModel
 
                 self._model = BGEM3FlagModel(
-                    BGE_M3_MODEL_PATH,
-                    use_fp16=True,
-                    device="cpu"
+                    BGE_M3_MODEL_PATH, use_fp16=True, device="cpu"
                 )
             except ImportError:
                 print("请安装 FlagEmbedding: pip install FlagEmbedding")

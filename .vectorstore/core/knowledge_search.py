@@ -39,6 +39,8 @@ import json
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 
+from core.config_loader import get_qdrant_url, get_project_root, get_model_path
+
 try:
     from qdrant_client import QdrantClient
     from qdrant_client.http import models
@@ -51,11 +53,11 @@ except ImportError:
 # 配置
 # ============================================================
 
-PROJECT_DIR = Path(r"D:\动画\众生界")
+PROJECT_DIR = get_project_root()
 VECTORSTORE_DIR = PROJECT_DIR / ".vectorstore"
 
 # Docker Qdrant URL (统一数据源)
-QDRANT_DOCKER_URL = "http://localhost:6333"
+QDRANT_DOCKER_URL = get_qdrant_url()
 
 # 集合名称 (v2版本)
 NOVEL_COLLECTION = "novel_settings_v2"  # 小说设定
@@ -66,7 +68,7 @@ CASE_COLLECTION = "case_library_v2"  # 标杆案例
 VECTOR_SIZE = 1024
 
 # BGE-M3 模型路径
-BGE_M3_MODEL_PATH = r"E:\huggingface_cache\hub\models--BAAI--bge-m3\snapshots\5617a9f61b028005a4858fdac845db406aefb181"
+BGE_M3_MODEL_PATH = get_model_path()
 
 # 实体类型
 ENTITY_TYPES = ["势力", "派系", "角色", "力量体系", "力量派别", "时代", "事件"]

@@ -40,6 +40,13 @@ import json
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 
+from core.config_loader import (
+    get_qdrant_url,
+    get_project_root,
+    get_model_path,
+    get_case_library_dir,
+)
+
 try:
     from qdrant_client import QdrantClient
     from qdrant_client.http import models
@@ -51,18 +58,18 @@ except ImportError:
 # 配置
 # ============================================================
 
-PROJECT_DIR = Path(r"D:\动画\众生界")
+PROJECT_DIR = get_project_root()
 VECTORSTORE_DIR = PROJECT_DIR / ".vectorstore"
-CASE_LIBRARY_DIR = PROJECT_DIR / ".case-library"
+CASE_LIBRARY_DIR = get_case_library_dir()
 
 # Collection 名称 (v2版本)
 CASE_COLLECTION = "case_library_v2"
 
 # Docker Qdrant配置
-QDRANT_DOCKER_URL = "http://localhost:6333"
+QDRANT_DOCKER_URL = get_qdrant_url()
 
 # BGE-M3 模型路径
-BGE_M3_MODEL_PATH = r"E:\huggingface_cache\hub\models--BAAI--bge-m3\snapshots\5617a9f61b028005a4858fdac845db406aefb181"
+BGE_M3_MODEL_PATH = get_model_path()
 
 # 向量维度
 VECTOR_SIZE = 1024

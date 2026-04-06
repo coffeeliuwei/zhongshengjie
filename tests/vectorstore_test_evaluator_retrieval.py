@@ -8,11 +8,13 @@
 import sys
 from pathlib import Path
 
-sys.path.insert(0, r"D:\动画\众生界\.vectorstore")
+# 动态获取项目根目录
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(PROJECT_ROOT / ".vectorstore"))
 from workflow import NovelWorkflow
 
 # 技法文件路径（回退用）
-TECHNIQUE_DIR = Path(r"D:\动画\众生界\创作技法")
+TECHNIQUE_DIR = PROJECT_ROOT / "创作技法"
 
 # 维度到文件映射
 DIMENSION_FILE_MAP = {

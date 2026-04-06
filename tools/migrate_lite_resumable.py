@@ -20,15 +20,20 @@ import signal
 from pathlib import Path
 from datetime import datetime
 
-# 离线模式在模型加载后设置
-# os.environ["HF_HUB_OFFLINE"] = "1"
-# os.environ["TRANSFORMERS_OFFLINE"] = "1"
+# 加载配置
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from core.config_loader import (
+    get_project_root,
+    get_model_path,
+    get_vectorstore_dir,
+    get_techniques_dir,
+    get_case_library_dir,
+)
 
-PROJECT_DIR = Path(__file__).parent.parent
-sys.path.insert(0, str(PROJECT_DIR))
+PROJECT_DIR = get_project_root()
 sys.path.insert(0, str(PROJECT_DIR / ".vectorstore"))
 
-PROGRESS_FILE = PROJECT_DIR / ".vectorstore" / "migration_lite_progress.json"
+PROGRESS_FILE = get_vectorstore_dir() / "migration_lite_progress.json"
 paused = False
 
 
@@ -88,9 +93,8 @@ def main():
     log("[1/3] 加载模型...")
     from FlagEmbedding import BGEM3FlagModel
 
-    # 使用本地缓存的模型路径
-    model_path = r"E:\huggingface_cache\hub\models--BAAI--bge-m3\snapshots\5617a9f61b028005a4858fdac845db406aefb181"
-    model = BGEM3FlagModel(model_path, use_fp16=True, device="cpu")
+    model_path = get_model_path()
+    model = BGEM3FlagModel(model_path or "BAAI/bge-m3", use_fp16=True, device="cpu")
     log("      完成")
 
     # 连接 Qdrant
@@ -102,7 +106,7 @@ def main():
     # 定义PointStruct别名供后续使用
     global PointStruct, SparseVector
 
-    client = QdrantClient(path=str(PROJECT_DIR / ".vectorstore" / "qdrant"))
+    client = QdrantClient(path=str(get_vectorstore_dir() / "qdrant"))
     log("      完成")
 
     progress = load_progress()
@@ -182,7 +186,7 @@ def sync_novel(model, client, progress):
 
     # 读取数据
     kg = json.load(
-        open(PROJECT_DIR / ".vectorstore" / "knowledge_graph.json", encoding="utf-8")
+        open(get_vectorstore_dir() / "knowledge_graph.json", encoding="utf-8")
     )
     entities = list(kg.get("实体", {}).items())
     total = len(entities)
@@ -279,7 +283,7 @@ def sync_technique(model, client, progress):
 
     # 收集技法
     techs = []
-    for f in (PROJECT_DIR / "创作技法").rglob("*.md"):
+    for f in get_techniques_dir().rglob("*.md"):
         if f.name in ["README.md", "01-创作检查清单.md", "00-学习路径规划.md"]:
             continue
         dim = DIM.get(f.parent.name, "未知")
@@ -358,7 +362,7 @@ def sync_case(model, client, progress):
 
     # 收集案例
     cases = []
-    cases_dir = PROJECT_DIR / ".case-library" / "cases"
+    cases_dir = get_case_library_dir() / "cases"
     for scene_dir in cases_dir.iterdir():
         if not scene_dir.is_dir():
             continue

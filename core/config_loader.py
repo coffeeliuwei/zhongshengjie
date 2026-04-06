@@ -1,0 +1,317 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+统一配置加载器
+==============
+
+提供全局配置访问，支持：
+1. config.json 文件配置
+2. 环境变量覆盖
+3. 默认值兜底
+
+用法：
+    from core.config_loader import get_config, get_project_dir, get_model_path
+
+    config = get_config()
+    project_dir = get_project_dir()
+    model_path = get_model_path()
+"""
+
+import os
+import json
+from pathlib import Path
+from typing import Optional, Dict, Any
+
+# 默认配置
+DEFAULT_CONFIG = {
+    "project": {
+        "name": "My Novel",
+        "version": "1.0.0",
+    },
+    "paths": {
+        "project_root": None,  # 自动检测
+        "settings_dir": "设定",
+        "techniques_dir": "创作技法",
+        "chapters_dir": "章节大纲",
+        "content_dir": "正文",
+        "experience_dir": "章节经验日志",
+        "standards_dir": "写作标准积累",
+        "vectorstore_dir": ".vectorstore",
+        "case_library_dir": ".case-library",
+        "logs_dir": "logs",
+        "cache_dir": ".cache",
+    },
+    "database": {
+        "qdrant_host": "localhost",
+        "qdrant_port": 6333,
+        "collections": {
+            "novel_settings": "novel_settings_v2",
+            "writing_techniques": "writing_techniques_v2",
+            "case_library": "case_library_v2",
+        },
+    },
+    "model": {
+        "embedding_model": "BAAI/bge-m3",
+        "model_path": None,  # 自动检测或从环境变量
+        "hf_cache_dir": None,  # HuggingFace缓存目录，None表示使用默认位置
+        "vector_size": 1024,
+    },
+    "novel_sources": {
+        "directories": [],  # 小说资源目录列表，如 ["E:\\小说资源"]
+    },
+}
+
+# 全局配置实例
+_global_config: Optional[Dict[str, Any]] = None
+_project_root: Optional[Path] = None
+
+
+def find_project_root() -> Path:
+    """自动检测项目根目录"""
+    # 从当前文件向上查找
+    current = Path(__file__).resolve()
+
+    # 标记文件：README.md, config.example.json, .gitignore
+    markers = ["README.md", "config.example.json", ".gitignore", "tools"]
+
+    for parent in current.parents:
+        if any((parent / marker).exists() for marker in markers):
+            # 额外检查是否有 tools 目录
+            if (parent / "tools").exists():
+                return parent
+
+    # 如果找不到，使用当前工作目录
+    return Path.cwd()
+
+
+def get_project_root() -> Path:
+    """获取项目根目录"""
+    global _project_root
+
+    if _project_root is None:
+        # 优先从环境变量
+        env_root = os.environ.get("NOVEL_PROJECT_ROOT")
+        if env_root:
+            _project_root = Path(env_root)
+        else:
+            # 自动检测（不依赖配置文件，避免循环引用）
+            _project_root = find_project_root()
+
+    return _project_root
+
+
+def get_config_path() -> Path:
+    """获取配置文件路径"""
+    # 优先级：环境变量 > 项目根目录/config.json
+    env_config = os.environ.get("NOVEL_CONFIG_PATH")
+    if env_config:
+        return Path(env_config)
+
+    return get_project_root() / "config.json"
+
+
+def load_config() -> Dict[str, Any]:
+    """加载配置"""
+    config = DEFAULT_CONFIG.copy()
+
+    config_path = get_config_path()
+    if config_path.exists():
+        try:
+            with open(config_path, "r", encoding="utf-8") as f:
+                user_config = json.load(f)
+
+            # 深度合并
+            def deep_merge(base: dict, override: dict) -> dict:
+                result = base.copy()
+                for key, value in override.items():
+                    if (
+                        key in result
+                        and isinstance(result[key], dict)
+                        and isinstance(value, dict)
+                    ):
+                        result[key] = deep_merge(result[key], value)
+                    else:
+                        result[key] = value
+                return result
+
+            config = deep_merge(config, user_config)
+        except Exception as e:
+            print(f"Warning: Failed to load config from {config_path}: {e}")
+
+    return config
+
+
+def get_config() -> Dict[str, Any]:
+    """获取全局配置"""
+    global _global_config
+
+    if _global_config is None:
+        _global_config = load_config()
+
+    return _global_config
+
+
+def get_path(path_name: str) -> Path:
+    """获取路径配置"""
+    project_root = get_project_root()
+    config = get_config()
+
+    path_config = config.get("paths", {})
+    relative_path = path_config.get(path_name)
+
+    if relative_path is None:
+        raise ValueError(f"Unknown path: {path_name}")
+
+    path = Path(relative_path)
+    if not path.is_absolute():
+        path = project_root / path
+
+    return path
+
+
+def get_model_path() -> Optional[str]:
+    """获取模型路径"""
+    # 优先级：环境变量 > 配置文件 > 自动检测
+
+    # 1. 环境变量
+    env_path = os.environ.get("BGE_M3_MODEL_PATH") or os.environ.get("NOVEL_MODEL_PATH")
+    if env_path:
+        return env_path
+
+    # 2. 配置文件
+    config = get_config()
+    config_path = config.get("model", {}).get("model_path")
+    if config_path:
+        return config_path
+
+    # 3. 自动检测常见位置
+    common_paths = [
+        Path.home() / ".cache" / "huggingface" / "hub" / "models--BAAI--bge-m3",
+        Path("E:/huggingface_cache/hub/models--BAAI--bge-m3"),
+        Path("C:/Users")
+        / os.environ.get("USERNAME", "")
+        / ".cache"
+        / "huggingface"
+        / "hub"
+        / "models--BAAI--bge-m3",
+    ]
+
+    for base_path in common_paths:
+        if base_path.exists():
+            # 查找 snapshots 目录
+            snapshots_dir = base_path / "snapshots"
+            if snapshots_dir.exists():
+                # 获取最新的 snapshot
+                snapshots = sorted(
+                    snapshots_dir.iterdir(),
+                    key=lambda x: x.stat().st_mtime,
+                    reverse=True,
+                )
+                if snapshots:
+                    return str(snapshots[0])
+
+    # 4. 返回 None，让模型自动下载
+    return None
+
+
+def get_hf_cache_dir() -> Optional[str]:
+    """
+    获取HuggingFace缓存目录
+
+    优先级：
+    1. 环境变量 HF_HOME
+    2. 配置文件 model.hf_cache_dir
+    3. 默认位置 (E:/huggingface_cache 或 ~/.cache/huggingface)
+
+    Returns:
+        str or None: 缓存目录路径
+    """
+    # 1. 环境变量
+    env_cache = os.environ.get("HF_HOME")
+    if env_cache:
+        return env_cache
+
+    # 2. 配置文件
+    config = get_config()
+    config_cache = config.get("model", {}).get("hf_cache_dir")
+    if config_cache:
+        return config_cache
+
+    # 3. 检查默认位置
+    default_paths = [
+        Path("E:/huggingface_cache"),
+        Path.home() / ".cache" / "huggingface",
+    ]
+
+    for default_path in default_paths:
+        if default_path.exists():
+            return str(default_path)
+
+    # 4. 返回 None，使用 HuggingFace 默认位置
+    return None
+
+
+def get_qdrant_url() -> str:
+    """获取Qdrant URL"""
+    config = get_config()
+    host = config.get("database", {}).get("qdrant_host", "localhost")
+    port = config.get("database", {}).get("qdrant_port", 6333)
+    return f"http://{host}:{port}"
+
+
+def get_collection_name(collection_type: str) -> str:
+    """获取collection名称"""
+    config = get_config()
+    collections = config.get("database", {}).get("collections", {})
+    return collections.get(collection_type, f"{collection_type}_v2")
+
+
+# 便捷函数
+def get_settings_dir() -> Path:
+    return get_path("settings_dir")
+
+
+def get_techniques_dir() -> Path:
+    return get_path("techniques_dir")
+
+
+def get_vectorstore_dir() -> Path:
+    return get_path("vectorstore_dir")
+
+
+def get_case_library_dir() -> Path:
+    return get_path("case_library_dir")
+
+
+def get_logs_dir() -> Path:
+    return get_path("logs_dir")
+
+
+def get_novel_sources() -> list:
+    """获取小说资源目录列表"""
+    config = get_config()
+    novel_sources = config.get("novel_sources", {})
+    directories = novel_sources.get("directories", [])
+    # 过滤空值并转换为Path对象
+    return [Path(d) for d in directories if d]
+
+
+def reset_config():
+    """重置配置（用于测试）"""
+    global _global_config, _project_root
+    _global_config = None
+    _project_root = None
+
+
+# 初始化时打印配置信息（可选）
+if __name__ == "__main__":
+    print("=" * 60)
+    print("配置信息")
+    print("=" * 60)
+    print(f"项目根目录: {get_project_root()}")
+    print(f"配置文件: {get_config_path()}")
+    print(f"Qdrant URL: {get_qdrant_url()}")
+    print(f"模型路径: {get_model_path() or '自动下载'}")
+    print(f"设定目录: {get_settings_dir()}")
+    print(f"技法目录: {get_techniques_dir()}")
+    print(f"向量库目录: {get_vectorstore_dir()}")

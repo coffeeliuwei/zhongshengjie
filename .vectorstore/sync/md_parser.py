@@ -7,21 +7,32 @@
 
 import re
 import json
+import sys
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 from dataclasses import asdict
 
+# 添加项目根目录到 sys.path 以导入配置加载器
+sys.path.insert(0, str(__file__).rsplit(".vectorstore", 1)[0])
+from core.config_loader import (
+    get_project_root,
+    get_vectorstore_dir,
+    get_settings_dir,
+    get_techniques_dir,
+)
+
 # 路径配置
-PROJECT_DIR = Path(r"D:\动画\众生界")
-VECTORSTORE_DIR = PROJECT_DIR / ".vectorstore"
+PROJECT_DIR = get_project_root()
+VECTORSTORE_DIR = get_vectorstore_dir()
+SETTINGS_DIR = get_settings_dir()
 
 # 源文件路径
 FILES = {
     "总大纲": PROJECT_DIR / "总大纲.md",
-    "十大势力": PROJECT_DIR / "设定" / "十大势力.md",
-    "人物谱": PROJECT_DIR / "设定" / "人物谱.md",
-    "时间线": PROJECT_DIR / "设定" / "时间线.md",
-    "力量体系": PROJECT_DIR / "设定" / "力量体系.md",
+    "十大势力": SETTINGS_DIR / "十大势力.md",
+    "人物谱": SETTINGS_DIR / "人物谱.md",
+    "时间线": SETTINGS_DIR / "时间线.md",
+    "力量体系": SETTINGS_DIR / "力量体系.md",
 }
 
 
@@ -976,7 +987,7 @@ class EventParser(MDParser):
 
 
 # 技法目录配置
-TECHNIQUE_DIR = PROJECT_DIR / "创作技法"
+TECHNIQUE_DIR = get_techniques_dir()
 
 # 维度映射
 DIMENSION_MAP = {
@@ -1192,17 +1203,17 @@ class TechBaseParser(MDParser):
     # 技术基础文件路径
     TECH_FILES = {
         # 已有的三个文明
-        "科技文明": PROJECT_DIR / "设定" / "科技文明技术基础.md",
-        "AI文明": PROJECT_DIR / "设定" / "AI文明技术基础.md",
-        "异化人文明": PROJECT_DIR / "设定" / "异化人文明技术基础.md",
+        "科技文明": SETTINGS_DIR / "科技文明技术基础.md",
+        "AI文明": SETTINGS_DIR / "AI文明技术基础.md",
+        "异化人文明": SETTINGS_DIR / "异化人文明技术基础.md",
         # 新增的七个文明/势力
-        "东方修仙": PROJECT_DIR / "设定" / "东方修仙技术基础.md",
-        "西方魔法": PROJECT_DIR / "设定" / "西方魔法技术基础.md",
-        "神殿教会": PROJECT_DIR / "设定" / "神术文明技术基础.md",
-        "佣兵联盟": PROJECT_DIR / "设定" / "武力技术基础.md",
-        "商盟": PROJECT_DIR / "设定" / "商业技术基础.md",
-        "世俗帝国": PROJECT_DIR / "设定" / "军阵技术基础.md",
-        "兽族文明": PROJECT_DIR / "设定" / "兽力技术基础.md",
+        "东方修仙": SETTINGS_DIR / "东方修仙技术基础.md",
+        "西方魔法": SETTINGS_DIR / "西方魔法技术基础.md",
+        "神殿教会": SETTINGS_DIR / "神术文明技术基础.md",
+        "佣兵联盟": SETTINGS_DIR / "武力技术基础.md",
+        "商盟": SETTINGS_DIR / "商业技术基础.md",
+        "世俗帝国": SETTINGS_DIR / "军阵技术基础.md",
+        "兽族文明": SETTINGS_DIR / "兽力技术基础.md",
     }
 
     def parse_all(self) -> List[Dict]:

@@ -17,6 +17,9 @@ import os
 from pathlib import Path
 from typing import Dict, List, Any, Optional
 
+# 从配置加载器导入路径获取函数
+from core.config_loader import get_project_root, get_qdrant_url, get_model_path
+
 try:
     from qdrant_client import QdrantClient
     from qdrant_client import models
@@ -78,19 +81,24 @@ class HybridSearchManager:
         self,
         project_dir: Optional[Path] = None,
         use_docker: bool = True,
-        docker_url: str = "http://localhost:6333",
+        docker_url: str = None,
         weight_preset: str = DEFAULT_WEIGHT_PRESET,
     ):
         """
         初始化混合检索管理器
 
         Args:
-            project_dir: 项目根目录
+            project_dir: 项目根目录（默认从配置加载）
             use_docker: 是否使用 Docker Qdrant
-            docker_url: Docker Qdrant URL
+            docker_url: Docker Qdrant URL（默认从配置加载）
             weight_preset: 权重预设 (general/semantic/exact/dense_only)
         """
-        self.project_dir = project_dir or Path(r"D:\动画\众生界")
+        # 从配置加载路径
+        if project_dir is None:
+            self.project_dir = get_project_root()
+        else:
+            self.project_dir = Path(project_dir)
+
         self.vectorstore_dir = self.project_dir / ".vectorstore"
         self.qdrant_dir = self.vectorstore_dir / "qdrant"
 
@@ -98,7 +106,12 @@ class HybridSearchManager:
         self._client = None
         self._model = None
         self.use_docker = use_docker
-        self.docker_url = docker_url
+
+        # 从配置加载 URL
+        if docker_url is None:
+            self.docker_url = get_qdrant_url()
+        else:
+            self.docker_url = docker_url
 
         # 权重配置
         self.weights = HYBRID_WEIGHTS.get(
@@ -112,7 +125,8 @@ class HybridSearchManager:
 
         # 设置 HuggingFace 缓存
         os.environ["HF_HOME"] = BGE_M3_CACHE_DIR
-        if os.path.exists("E:/huggingface_cache"):
+        model_path = get_model_path()
+        if model_path is not None:
             os.environ["HF_ENDPOINT"] = "https://hf-mirror.com"
 
     def _get_client(self) -> QdrantClient:
@@ -128,7 +142,7 @@ class HybridSearchManager:
                 self._client = QdrantClient(path=str(self.qdrant_dir))
         return self._client
 
-def _load_model(self):
+    def _load_model(self):
         """加载 BGE-M3 模型"""
         if self._model is None:
             try:
@@ -140,7 +154,9 @@ def _load_model(self):
                     device="cpu",
                 )
             except ImportError as e:
-                raise ImportError(f"请安装 FlagEmbedding: pip install FlagEmbedding ({e})")
+                raise ImportError(
+                    f"请安装 FlagEmbedding: pip install FlagEmbedding ({e})"
+                )
         return self._model
 
     def _encode_query(self, query: str) -> Dict[str, Any]:
@@ -563,7 +579,7 @@ def _load_model(self):
 
         try:
             model = self._load_model()
-            
+
             # 从 payload 获取文档内容并动态编码
             doc_contents = []
             for p in candidates:
@@ -572,20 +588,22 @@ def _load_model(self):
                     # 尝试其他字段
                     content = p.payload.get("description", "")
                 doc_contents.append(content[:500] if content else "空内容")
-            
+
             # 批量编码候选文档
             doc_output = model.encode(
                 doc_contents,
                 return_colbert_vecs=True,
             )
-            
+
             # 计算每个候选的 ColBERT 分数
             scores = []
-            query_colbert_tensor = query_colbert if hasattr(query_colbert, 'shape') else None
-            
+            query_colbert_tensor = (
+                query_colbert if hasattr(query_colbert, "shape") else None
+            )
+
             for i, candidate in enumerate(candidates):
-                doc_colbert = doc_output['colbert_vecs'][i]
-                
+                doc_colbert = doc_output["colbert_vecs"][i]
+
                 # 使用模型的 colbert_score 方法计算分数
                 if query_colbert_tensor is not None and doc_colbert is not None:
                     try:
@@ -594,24 +612,25 @@ def _load_model(self):
                         score = 0.0
                 else:
                     score = 0.0
-                
+
                 scores.append((candidate, score))
-            
+
             # 按分数排序
             scores.sort(key=lambda x: x[1], reverse=True)
-            
+
             # 返回 top_k 个结果
             reranked = []
             for candidate, score in scores[:top_k]:
                 # 更新分数
                 candidate.score = score
                 reranked.append(candidate)
-            
+
             return reranked
 
         except Exception as e:
             print(f"ColBERT 重排错误: {e}")
             import traceback
+
             traceback.print_exc()
             return candidates[:top_k]
 

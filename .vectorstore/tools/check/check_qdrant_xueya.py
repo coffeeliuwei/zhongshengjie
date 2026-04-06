@@ -1,13 +1,13 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """检查Qdrant中血牙的完整数据"""
 
 import sys
 
 sys.stdout.reconfigure(encoding="utf-8")
 import json
-from qdrant_client import QdrantClient
+from qdrant_client import QdrantClient\nfrom core.config_loader import get_qdrant_url
 
-client = QdrantClient(url="http://localhost:6333")
+client = QdrantClient(url=get_qdrant_url())
 results = client.scroll(
     collection_name="novel_settings_v2",
     with_payload=True,

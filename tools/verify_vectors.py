@@ -3,14 +3,19 @@
 """验证三向量存储"""
 
 import os
+import sys
+from pathlib import Path
+
+# 加载配置
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from core.config_loader import get_vectorstore_dir
 
 os.environ["HF_HUB_OFFLINE"] = "1"
 os.environ["TRANSFORMERS_OFFLINE"] = "1"
 
 from qdrant_client import QdrantClient
-from pathlib import Path
 
-client = QdrantClient(path=str(Path("D:/动画/众生界/.vectorstore/qdrant")))
+client = QdrantClient(path=str(get_vectorstore_dir() / "qdrant"))
 
 print("=== Collection 状态 ===")
 for c in client.get_collections().collections:

@@ -4,7 +4,13 @@ import os
 import sys
 
 # 设置环境变量（当前进程生效）
-os.environ["HF_HOME"] = "E:/huggingface_cache"
+# 使用配置加载器获取 HuggingFace 缓存目录
+sys.path.insert(0, str(__file__).rsplit(".vectorstore", 1)[0])
+from core.config_loader import get_hf_cache_dir
+
+hf_cache = get_hf_cache_dir()
+if hf_cache:
+    os.environ["HF_HOME"] = hf_cache
 os.environ["HF_ENDPOINT"] = "https://hf-mirror.com"
 
 sys.stdout.reconfigure(encoding="utf-8")

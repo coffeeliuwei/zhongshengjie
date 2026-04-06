@@ -11,6 +11,9 @@ from typing import Dict, List, Any, Optional
 from dataclasses import dataclass, asdict
 from datetime import datetime
 
+# 从配置加载器导入路径获取函数
+from core.config_loader import get_project_root
+
 
 @dataclass
 class KnowledgeUnit:
@@ -128,9 +131,9 @@ class VectorizerManager:
         初始化向量化管理器
 
         Args:
-            project_dir: 项目根目录
+            project_dir: 项目根目录（默认从配置加载）
         """
-        self.project_dir = project_dir or Path(r"D:\动画\众生界")
+        self.project_dir = project_dir or get_project_root()
         self.vectorstore_dir = self.project_dir / ".vectorstore"
 
         # 数据源路径

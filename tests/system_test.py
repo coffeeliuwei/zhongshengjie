@@ -11,7 +11,7 @@ from pathlib import Path
 from datetime import datetime
 
 # 添加项目根目录到路径
-project_root = Path(r"D:\动画\众生界")
+project_root = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(project_root))
 
 # 配置输出编码
@@ -97,17 +97,17 @@ def test_core_imports():
 def test_creation_module():
     # modules.creation 已存档，现在使用 skill 层
     skills_dir = Path("C:/Users/39477/.agents/skills")
-    
+
     # 检查 novelist-workflow skill
     workflow_skill = skills_dir / "novelist-workflow" / "SKILL.md"
     if not workflow_skill.exists():
         raise Exception("novelist-workflow skill 不存在")
-    
+
     # 检查 novel-workflow skill
     novel_workflow_skill = skills_dir / "novel-workflow" / "SKILL.md"
     if not novel_workflow_skill.exists():
         raise Exception("novel-workflow skill 不存在")
-    
+
     return "创作模块已迁移至 skill 层（novelist-workflow, novel-workflow）"
 
 
@@ -151,7 +151,7 @@ def test_scene_mapping():
     import json
     from pathlib import Path
 
-    mapping_file = Path("D:/动画/众生界/.vectorstore/scene_writer_mapping.json")
+    mapping_file = project_root / ".vectorstore" / "scene_writer_mapping.json"
     with open(mapping_file, "r", encoding="utf-8") as f:
         data = json.load(f)
 
@@ -168,12 +168,12 @@ def test_scene_mapping():
 # 测试 8: 向量数据库检索
 # ============================================
 def test_vector_search():
-    sys.path.insert(0, r"D:\动画\众生界\.vectorstore")
+    sys.path.insert(0, str(project_root / ".vectorstore"))
     from knowledge_search import KnowledgeSearcher
-    
+
     searcher = KnowledgeSearcher()
     results = searcher.search_novel("血牙", top_k=3)
-    
+
     return f"向量数据库检索通过 - 找到 {len(results)} 条结果"
 
 
@@ -181,12 +181,12 @@ def test_vector_search():
 # 测试 9: 技法检索
 # ============================================
 def test_technique_search():
-    sys.path.insert(0, r"D:\动画\众生界\.vectorstore")
+    sys.path.insert(0, str(project_root / ".vectorstore"))
     from technique_search import TechniqueSearcher
-    
+
     searcher = TechniqueSearcher()
     results = searcher.search("战斗代价", dimension="战斗", top_k=3)
-    
+
     return f"技法检索通过 - 找到 {len(results)} 条结果"
 
 

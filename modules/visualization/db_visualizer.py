@@ -26,6 +26,17 @@ try:
 except ImportError:
     QdrantClient = None
 
+# 配置导入
+try:
+    from core.config_loader import get_project_root, get_qdrant_url
+except ImportError:
+    # 兼容独立运行场景
+    def get_project_root():
+        return Path.cwd()
+
+    def get_qdrant_url():
+        return "http://localhost:6333"
+
 
 # ============================================================
 # 数据库可视化类
@@ -47,9 +58,9 @@ class DBVisualizer:
         初始化
 
         Args:
-            project_root: 项目根目录
+            project_root: 项目根目录，默认从配置自动获取
         """
-        self.project_root = project_root or Path.cwd()
+        self.project_root = project_root or get_project_root()
         self.vectorstore_dir = self.project_root / ".vectorstore"
         self.chroma_client = None
         self.qdrant_client = None
@@ -79,16 +90,19 @@ class DBVisualizer:
             print("警告: qdrant_client 未安装")
             return None
 
+        # 从配置获取 URL
+        qdrant_url = get_qdrant_url()
+
         # 尝试 Docker 连接
         try:
-            client = QdrantClient(url="http://localhost:6333")
+            client = QdrantClient(url=qdrant_url)
             client.get_collections()
-            print("连接: Docker Qdrant (localhost:6333)")
+            print(f"连接: Qdrant ({qdrant_url})")
             return client
         except:
             pass
 
-        # 回退到本地
+        # 回退到本地文件
         qdrant_path = self.vectorstore_dir / "qdrant"
         if qdrant_path.exists():
             client = QdrantClient(path=str(qdrant_path))

@@ -21,6 +21,11 @@ sys.path.insert(0, str(PROJECT_DIR))
 sys.path.insert(0, str(PROJECT_DIR / ".vectorstore"))
 sys.path.insert(0, str(PROJECT_DIR / "modules" / "knowledge_base"))
 
+# 加载配置
+from core.config_loader import get_qdrant_url
+
+QDRANT_URL = get_qdrant_url()
+
 
 def log(msg):
     """带时间戳的日志输出"""
@@ -51,7 +56,7 @@ def main():
         from qdrant_client import models
         from qdrant_client.http.models import PointStruct, SparseVector
 
-        client = QdrantClient(url="http://localhost:6333")
+        client = QdrantClient(url=QDRANT_URL)
         collections = client.get_collections()
         log(f"      已连接，当前 {len(collections.collections)} 个 Collection")
     except Exception as e:

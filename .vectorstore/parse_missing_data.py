@@ -10,12 +10,17 @@
 
 import json
 import re
+import sys
 from pathlib import Path
 from datetime import datetime
 
-PROJECT_DIR = Path(r"D:\动画\众生界")
-VECTORSTORE_DIR = PROJECT_DIR / ".vectorstore"
-SETTINGS_DIR = PROJECT_DIR / "设定"
+# 添加项目根目录到 sys.path 以导入配置加载器
+sys.path.insert(0, str(__file__).rsplit(".vectorstore", 1)[0])
+from core.config_loader import get_project_root, get_vectorstore_dir, get_settings_dir
+
+PROJECT_DIR = get_project_root()
+VECTORSTORE_DIR = get_vectorstore_dir()
+SETTINGS_DIR = get_settings_dir()
 KNOWLEDGE_GRAPH = VECTORSTORE_DIR / "knowledge_graph.json"
 
 # ============================================================

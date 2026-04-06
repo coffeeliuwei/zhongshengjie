@@ -9,13 +9,23 @@
 
 import gc
 import json
+import sys
 from pathlib import Path
 from datetime import datetime
 
-PROJECT_DIR = Path(r"D:\动画\众生界")
-BGE_M3_MODEL_PATH = r"E:\huggingface_cache\hub\models--BAAI--bge-m3\snapshots\5617a9f61b028005a4858fdac845db406aefb181"
-QDRANT_DOCKER_URL = "http://localhost:6333"
-PROGRESS_FILE = PROJECT_DIR / ".vectorstore" / "migration_progress.json"
+# 加载配置
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from core.config_loader import (
+    get_project_root,
+    get_model_path,
+    get_qdrant_url,
+    get_vectorstore_dir,
+)
+
+PROJECT_DIR = get_project_root()
+BGE_M3_MODEL_PATH = get_model_path()
+QDRANT_DOCKER_URL = get_qdrant_url()
+PROGRESS_FILE = get_vectorstore_dir() / "migration_progress.json"
 
 BATCH_SIZE = 50  # 每批处理数量
 MEMORY_RELEASE_INTERVAL = 20  # 每N批释放内存

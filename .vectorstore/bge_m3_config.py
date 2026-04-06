@@ -16,10 +16,18 @@ BGE-M3 混合检索配置
 - ColBERT: 禁用HNSW（仅用于重排，不需要索引）
 """
 
+import sys
+from pathlib import Path
+
+# 添加项目根目录到 sys.path 以导入配置加载器
+sys.path.insert(0, str(__file__).rsplit(".vectorstore", 1)[0])
+from core.config_loader import get_hf_cache_dir
+
 # ==================== 模型配置 ====================
 
 BGE_M3_MODEL_NAME = "BAAI/bge-m3"
-BGE_M3_CACHE_DIR = "E:/huggingface_cache/hub"
+# 从配置加载器获取 HuggingFace 缓存目录
+BGE_M3_CACHE_DIR = get_hf_cache_dir() or "E:/huggingface_cache/hub"
 
 # 向量维度
 DENSE_VECTOR_SIZE = 1024  # Dense向量维度

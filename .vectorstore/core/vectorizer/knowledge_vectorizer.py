@@ -13,6 +13,7 @@ import re
 import json
 import hashlib
 import argparse
+import sys
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 from dataclasses import dataclass, asdict
@@ -24,13 +25,21 @@ except ImportError:
     print("请安装 chromadb: pip install chromadb")
     exit(1)
 
+# 添加项目根目录到 sys.path
+sys.path.insert(0, str(__file__).rsplit(".vectorstore", 1)[0])
+from core.config_loader import (
+    get_project_root,
+    get_vectorstore_dir,
+    get_settings_dir,
+    get_techniques_dir,
+)
 
 # ============================================================
 # 配置
 # ============================================================
 
-PROJECT_DIR = Path(r"D:\动画\众生界")
-VECTORSTORE_DIR = PROJECT_DIR / ".vectorstore"
+PROJECT_DIR = get_project_root()
+VECTORSTORE_DIR = get_vectorstore_dir()
 COLLECTION_NAME = "novelist_knowledge"
 
 # 数据类型

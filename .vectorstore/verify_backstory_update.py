@@ -3,9 +3,14 @@
 """验证角色过往经历更新"""
 
 import json
+import sys
 from pathlib import Path
 
-KG_FILE = Path(r"D:\动画\众生界\.vectorstore\knowledge_graph.json")
+# 添加项目根目录到 sys.path 以导入配置加载器
+sys.path.insert(0, str(__file__).rsplit(".vectorstore", 1)[0])
+from core.config_loader import get_vectorstore_dir
+
+KG_FILE = get_vectorstore_dir() / "knowledge_graph.json"
 
 with open(KG_FILE, "r", encoding="utf-8") as f:
     kg = json.load(f)

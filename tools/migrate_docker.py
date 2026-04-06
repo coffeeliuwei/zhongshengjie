@@ -11,11 +11,21 @@ import gc
 from pathlib import Path
 from datetime import datetime
 
-PROJECT_DIR = Path(__file__).parent.parent
-sys.path.insert(0, str(PROJECT_DIR))
+# 加载配置
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from core.config_loader import (
+    get_project_root,
+    get_model_path,
+    get_vectorstore_dir,
+    get_case_library_dir,
+    get_qdrant_url,
+)
+
+PROJECT_DIR = get_project_root()
 sys.path.insert(0, str(PROJECT_DIR / ".vectorstore"))
 
-PROGRESS_FILE = PROJECT_DIR / ".vectorstore" / "migration_lite_progress.json"
+PROGRESS_FILE = get_vectorstore_dir() / "migration_lite_progress.json"
+QDRANT_URL = get_qdrant_url()
 
 
 def log(msg):
@@ -54,22 +64,22 @@ def main():
     log("[1/3] 加载模型...")
     from FlagEmbedding import BGEM3FlagModel
 
-    model_path = r"E:\huggingface_cache\hub\models--BAAI--bge-m3\snapshots\5617a9f61b028005a4858fdac845db406aefb181"
-    model = BGEM3FlagModel(model_path, use_fp16=True, device="cpu")
+    model_path = get_model_path()
+    model = BGEM3FlagModel(model_path or "BAAI/bge-m3", use_fp16=True, device="cpu")
     log("      完成")
 
     # 连接Docker Qdrant
-    log("[2/3] 连接Docker Qdrant (localhost:6333)...")
+    log(f"[2/3] 连接Docker Qdrant ({QDRANT_URL})...")
     from qdrant_client import QdrantClient
     from qdrant_client.http.models import PointStruct, SparseVector
 
-    client = QdrantClient(url="http://localhost:6333")
+    client = QdrantClient(url=QDRANT_URL)
     log("      完成")
 
     # 收集案例
     log("[3/3] 收集案例...")
     cases = []
-    cases_dir = PROJECT_DIR / ".case-library" / "cases"
+    cases_dir = get_case_library_dir() / "cases"
 
     for scene_dir in cases_dir.iterdir():
         if not scene_dir.is_dir():

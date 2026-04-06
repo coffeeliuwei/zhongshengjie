@@ -1,10 +1,11 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """验证JSON、数据库、网页数据同步"""
 
 import sys
 import json
 from pathlib import Path
+from core.config_loader import get_qdrant_url
 
 if sys.platform == "win32":
     try:
@@ -62,9 +63,9 @@ try:
     from qdrant_client import QdrantClient
 
     try:
-        client = QdrantClient(url="http://localhost:6333")
+        client = QdrantClient(url=get_qdrant_url())
         client.get_collections()
-        print("  连接方式: Docker Qdrant (localhost:6333)")
+        print("  连接方式: Docker Qdrant (get_qdrant_url())")
     except:
         client = QdrantClient(path=str(VECTORSTORE_DIR / "qdrant"))
         print("  连接方式: 本地文件")

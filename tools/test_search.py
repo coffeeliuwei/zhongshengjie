@@ -3,16 +3,21 @@
 """测试 BGE-M3 混合检索"""
 
 import os
+import sys
+from pathlib import Path
+
+# 加载配置
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from core.config_loader import get_vectorstore_dir, get_model_path
 
 os.environ["HF_HUB_OFFLINE"] = "1"
 os.environ["TRANSFORMERS_OFFLINE"] = "1"
 
 from qdrant_client import QdrantClient
-from pathlib import Path
 from FlagEmbedding import BGEM3FlagModel
 
 # 连接本地 Qdrant
-qdrant_path = Path("D:/动画/众生界/.vectorstore/qdrant")
+qdrant_path = get_vectorstore_dir() / "qdrant"
 client = QdrantClient(path=str(qdrant_path))
 
 # 检查 Collection 状态
@@ -24,7 +29,8 @@ for c in collections:
 
 # 测试 Dense 检索
 print("\n测试 Dense 检索 (novel_settings_v2):")
-model = BGEM3FlagModel("BAAI/bge-m3", use_fp16=True, device="cpu")
+model_path = get_model_path()
+model = BGEM3FlagModel(model_path or "BAAI/bge-m3", use_fp16=True, device="cpu")
 
 query = "林夕"
 output = model.encode([query], return_dense=True, return_sparse=True)

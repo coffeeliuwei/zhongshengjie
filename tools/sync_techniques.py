@@ -8,9 +8,19 @@ import json
 from pathlib import Path
 from datetime import datetime
 
-# 配置
-PROJECT_DIR = Path(r"D:\动画\众生界")
-TECHNIQUE_FILE = PROJECT_DIR / "创作技法" / "99-外部资源" / "高级写作技法大全.md"
+# 加载配置
+import sys
+
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from core.config_loader import (
+    get_project_root,
+    get_model_path,
+    get_techniques_dir,
+    get_qdrant_url,
+)
+
+PROJECT_DIR = get_project_root()
+TECHNIQUE_FILE = get_techniques_dir() / "99-外部资源" / "高级写作技法大全.md"
 
 
 def parse_techniques(content):
@@ -166,7 +176,7 @@ def main():
         SparseVectorParams,
     )
 
-    client = QdrantClient(url="http://localhost:6333")
+    client = QdrantClient(url=get_qdrant_url())
 
     # 检查collection
     try:
@@ -184,8 +194,8 @@ def main():
     print("\n[3] 加载BGE-M3模型...")
     from FlagEmbedding import BGEM3FlagModel
 
-    model_path = r"E:\huggingface_cache\hub\models--BAAI--bge-m3\snapshots\5617a9f61b028005a4858fdac845db406aefb181"
-    model = BGEM3FlagModel(model_path, use_fp16=True, device="cpu")
+    model_path = get_model_path()
+    model = BGEM3FlagModel(model_path or "BAAI/bge-m3", use_fp16=True, device="cpu")
     print("    模型加载完成")
 
     # 同步技法

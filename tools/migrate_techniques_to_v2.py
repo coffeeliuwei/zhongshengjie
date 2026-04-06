@@ -13,13 +13,15 @@ import sys
 from pathlib import Path
 from datetime import datetime
 
-# 配置
-PROJECT_DIR = Path(r"D:\动画\众生界")
-BGE_M3_MODEL_PATH = r"E:\huggingface_cache\hub\models--BAAI--bge-m3\snapshots\5617a9f61b028005a4858fdac845db406aefb181"
+# 加载配置
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from core.config_loader import get_project_root, get_model_path, get_qdrant_url
+
+PROJECT_DIR = get_project_root()
 
 OLD_COLLECTION = "writing_techniques"
 NEW_COLLECTION = "writing_techniques_v2"
-QDRANT_DOCKER_URL = "http://localhost:6333"
+QDRANT_DOCKER_URL = get_qdrant_url()
 
 
 def log(msg):
@@ -66,7 +68,8 @@ def main():
     log("\n[1] 加载BGE-M3模型...")
     from FlagEmbedding import BGEM3FlagModel
 
-    model = BGEM3FlagModel(BGE_M3_MODEL_PATH, use_fp16=True, device="cpu")
+    model_path = get_model_path()
+    model = BGEM3FlagModel(model_path or "BAAI/bge-m3", use_fp16=True, device="cpu")
     log("    模型加载完成")
 
     # 读取旧数据

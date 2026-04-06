@@ -9,11 +9,13 @@ import sys
 import re
 from pathlib import Path
 
-sys.path.insert(0, r"D:\动画\众生界\.vectorstore")
+# 动态获取项目根目录
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(PROJECT_ROOT / ".vectorstore"))
 from workflow import NovelWorkflow
 
 # 第一章内容
-CHAPTER_FILE = Path(r"D:\动画\众生界\正文\第一章-天裂.md")
+CHAPTER_FILE = PROJECT_ROOT / "正文" / "第一章-天裂.md"
 
 
 def detect_forbidden_items(content: str) -> dict:

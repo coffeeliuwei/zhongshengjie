@@ -9,6 +9,9 @@ import shutil
 from pathlib import Path
 from typing import Dict, List, Any, Optional
 
+# 从配置加载器导入路径获取函数
+from core.config_loader import get_project_root, get_qdrant_url
+
 try:
     from qdrant_client import QdrantClient
     from qdrant_client.http.models import Distance, VectorParams, PointStruct
@@ -76,17 +79,17 @@ class SyncManager:
         self,
         project_dir: Optional[Path] = None,
         use_docker: bool = True,
-        docker_url: str = "http://localhost:6333",
+        docker_url: str = None,
     ):
         """
         初始化同步管理器
 
         Args:
-            project_dir: 项目根目录
+            project_dir: 项目根目录（默认从配置加载）
             use_docker: 是否使用Docker Qdrant
-            docker_url: Docker Qdrant URL
+            docker_url: Docker Qdrant URL（默认从配置加载）
         """
-        self.project_dir = project_dir or Path(r"D:\动画\众生界")
+        self.project_dir = project_dir or get_project_root()
         self.vectorstore_dir = self.project_dir / ".vectorstore"
         self.qdrant_dir = self.vectorstore_dir / "qdrant"
 
@@ -99,7 +102,7 @@ class SyncManager:
         self._client = None
         self._model = None
         self.use_docker = use_docker
-        self.docker_url = docker_url
+        self.docker_url = docker_url or get_qdrant_url()
 
     def _get_client(self) -> QdrantClient:
         """获取Qdrant客户端"""

@@ -18,6 +18,12 @@ import sys
 from pathlib import Path
 from datetime import datetime
 
+# 加载配置
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from core.config_loader import get_qdrant_url
+
+QDRANT_URL = get_qdrant_url()
+
 
 def print_header(title):
     """打印标题"""
@@ -259,7 +265,7 @@ def verify_system(project_dir: Path):
     try:
         from qdrant_client import QdrantClient
 
-        client = QdrantClient(url="http://localhost:6333")
+        client = QdrantClient(url=QDRANT_URL)
 
         collections = {
             "writing_techniques_v2": "技法库",

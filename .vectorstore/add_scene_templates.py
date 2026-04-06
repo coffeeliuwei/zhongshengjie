@@ -8,12 +8,17 @@
 """
 
 import json
+import sys
 from pathlib import Path
 from typing import Dict, List
 
+# 添加项目根目录到 sys.path 以导入配置加载器
+sys.path.insert(0, str(__file__).rsplit(".vectorstore", 1)[0])
+from core.config_loader import get_project_root, get_vectorstore_dir
+
 # 配置
-PROJECT_DIR = Path(r"D:\动画\众生界")
-VECTORSTORE_DIR = PROJECT_DIR / ".vectorstore"
+PROJECT_DIR = get_project_root()
+VECTORSTORE_DIR = get_vectorstore_dir()
 KNOWLEDGE_GRAPH_FILE = VECTORSTORE_DIR / "knowledge_graph.json"
 
 # 16种场景预判模板

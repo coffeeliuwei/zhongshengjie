@@ -5,7 +5,11 @@ import sys
 
 sys.stdout.reconfigure(encoding="utf-8")
 
-file_path = r"D:\动画\众生界\设定\行为预判模板.md"
+# 添加项目根目录到 sys.path 以导入配置加载器
+sys.path.insert(0, str(__file__).rsplit(".vectorstore", 1)[0])
+from core.config_loader import get_settings_dir
+
+file_path = get_settings_dir() / "行为预判模板.md"
 with open(file_path, "r", encoding="utf-8") as f:
     content = f.read()
 

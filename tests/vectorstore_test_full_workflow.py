@@ -12,7 +12,7 @@ sys.stdout.reconfigure(encoding="utf-8")
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).parent.parent
-VECTORSTORE_CORE = PROJECT_ROOT / '.vectorstore' / 'core'
+VECTORSTORE_CORE = PROJECT_ROOT / ".vectorstore" / "core"
 sys.path.insert(0, str(VECTORSTORE_CORE))
 
 print("=" * 60)
@@ -55,7 +55,7 @@ print("-" * 40)
 def test_qdrant_connection():
     from qdrant_client import QdrantClient
 
-    client = QdrantClient(path=str(Path(r"D:\动画\众生界\.vectorstore\qdrant")))
+    client = QdrantClient(path=str(PROJECT_ROOT / ".vectorstore" / "qdrant"))
     collections = client.get_collections().collections
     print(f"  集合数量: {len(collections)}")
     for c in collections:
@@ -196,7 +196,7 @@ print("-" * 40)
 
 
 def test_file_structure():
-    project_dir = Path(r"D:\动画\众生界")
+    project_dir = PROJECT_ROOT
 
     required = [
         "设定/人物谱.md",
@@ -278,4 +278,3 @@ if failed_tests == 0:
     print("\n[SUCCESS] 所有测试通过！工作流已就绪。")
 else:
     print(f"\n[WARNING] {failed_tests}个测试失败，请检查。")
-

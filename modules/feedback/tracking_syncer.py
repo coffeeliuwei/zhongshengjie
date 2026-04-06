@@ -12,6 +12,14 @@ from difflib import SequenceMatcher
 
 from .types import ModificationLevel, TrackingUpdate
 
+# 配置导入
+try:
+    from core.config_loader import get_project_root
+except ImportError:
+    # 兼容独立运行场景
+    def get_project_root():
+        return Path.cwd()
+
 
 class TrackingSyncer:
     """追踪同步器"""
@@ -32,8 +40,17 @@ class TrackingSyncer:
         ModificationLevel.SETTING_CHANGE: True,  # 必须更新
     }
 
-    def __init__(self, project_root: str = "D:/动画/众生界"):
-        self.project_root = Path(project_root)
+    def __init__(self, project_root: str = None):
+        """
+        初始化追踪同步器
+
+        Args:
+            project_root: 项目根目录，默认从配置自动获取
+        """
+        if project_root is None:
+            self.project_root = get_project_root()
+        else:
+            self.project_root = Path(project_root)
 
     def sync(
         self,
@@ -282,6 +299,7 @@ def sync_tracking(
     modified_content: str,
     modification_level: ModificationLevel,
     tracking_files: Dict[str, Any] = None,
+    project_root: str = None,
 ) -> TrackingUpdate:
     """
     同步追踪文件（便捷函数）
@@ -291,11 +309,12 @@ def sync_tracking(
         modified_content: 修改后内容
         modification_level: 修改层级
         tracking_files: 当前追踪文件
+        project_root: 项目根目录，默认从配置自动获取
 
     Returns:
         追踪更新结果
     """
-    syncer = TrackingSyncer()
+    syncer = TrackingSyncer(project_root)
     return syncer.sync(
         original_content, modified_content, modification_level, tracking_files
     )

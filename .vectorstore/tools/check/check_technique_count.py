@@ -6,7 +6,11 @@ sys.stdout.reconfigure(encoding="utf-8")
 from pathlib import Path
 import re
 
-tech_dir = Path(r"D:\动画\众生界\创作技法")
+# 添加项目根目录到 sys.path 以导入配置加载器
+sys.path.insert(0, str(__file__).rsplit(".vectorstore", 1)[0])
+from core.config_loader import get_techniques_dir
+
+tech_dir = get_techniques_dir()
 
 # 统计每个文件内的技法条目数
 total_techniques = 0

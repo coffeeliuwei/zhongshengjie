@@ -12,6 +12,17 @@ try:
 except ImportError:
     raise ImportError("请安装 qdrant-client: pip install qdrant-client")
 
+# 配置导入
+try:
+    from core.config_loader import get_project_root, get_qdrant_url
+except ImportError:
+    # 兼容独立运行场景
+    def get_project_root():
+        return Path.cwd()
+
+    def get_qdrant_url():
+        return "http://localhost:6333"
+
 
 class SearchManager:
     """
@@ -53,17 +64,17 @@ class SearchManager:
         self,
         project_dir: Optional[Path] = None,
         use_docker: bool = True,
-        docker_url: str = "http://localhost:6333",
+        docker_url: str = None,
     ):
         """
         初始化检索管理器
 
         Args:
-            project_dir: 项目根目录
+            project_dir: 项目根目录，默认从配置自动获取
             use_docker: 是否使用Docker Qdrant
-            docker_url: Docker Qdrant URL
+            docker_url: Docker Qdrant URL，默认从配置自动获取
         """
-        self.project_dir = project_dir or Path(r"D:\动画\众生界")
+        self.project_dir = project_dir or get_project_root()
         self.vectorstore_dir = self.project_dir / ".vectorstore"
         self.qdrant_dir = self.vectorstore_dir / "qdrant"
 
@@ -71,7 +82,7 @@ class SearchManager:
         self._client = None
         self._model = None
         self.use_docker = use_docker
-        self.docker_url = docker_url
+        self.docker_url = docker_url or get_qdrant_url()
 
     def _get_client(self) -> QdrantClient:
         """获取Qdrant客户端"""

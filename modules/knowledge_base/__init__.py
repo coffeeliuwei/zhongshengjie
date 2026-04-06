@@ -20,8 +20,22 @@
 import sys
 from pathlib import Path
 
-# 添加项目根目录到路径
-project_root = Path(__file__).parent.parent.parent
+# 从配置加载器导入路径获取函数
+try:
+    from core.config_loader import get_project_root, get_qdrant_url
+
+    _config_host, _config_port = get_qdrant_url().replace("http://", "").split(":")
+    _config_port = int(_config_port)
+except ImportError:
+    # 兼容独立运行场景
+    def get_project_root():
+        return Path.cwd()
+
+    _config_host = "localhost"
+    _config_port = 6333
+
+# 添加项目根目录到路径（使用配置加载器获取路径）
+project_root = get_project_root()
 if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
@@ -63,7 +77,7 @@ class KnowledgeBase:
         初始化知识库
 
         Args:
-            use_docker: 是否优先使用Docker Qdrant (localhost:6333)
+            use_docker: 是否优先使用Docker Qdrant
             auto_check_db: 是否自动检测数据库连接
         """
         # 初始化数据库连接管理器
@@ -71,9 +85,9 @@ class KnowledgeBase:
         if DB_MANAGER_AVAILABLE and auto_check_db:
             try:
                 self.db_manager = get_db_manager(
-                    host="localhost",
-                    port=6333,
-                    cache_dir=project_root / ".cache" / "db_cache",
+                    host=_config_host,
+                    port=_config_port,
+                    cache_dir=get_project_root() / ".cache" / "db_cache",
                     auto_check=True,
                 )
             except Exception:

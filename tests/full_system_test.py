@@ -109,7 +109,7 @@ def test_core_imports():
 def test_creation_module():
     """测试创作模块（已迁移至 skill 层）"""
     skills_dir = Path("C:/Users/39477/.agents/skills")
-    
+
     required_skills = [
         "novelist-canglan",
         "novelist-xuanyi",
@@ -120,16 +120,16 @@ def test_creation_module():
         "novelist-workflow",
         "novelist-shared",
     ]
-    
+
     missing = []
     for skill in required_skills:
         skill_path = skills_dir / skill / "SKILL.md"
         if not skill_path.exists():
             missing.append(skill)
-    
+
     if missing:
         return f"缺少技能: {missing}"
-    
+
     return f"创作模块已迁移至 skill 层 - 所有 {len(required_skills)} 个技能文件存在"
 
 
@@ -226,7 +226,7 @@ def test_health_check():
 
 def test_knowledge_search():
     """测试知识检索"""
-    sys.path.insert(0, r"D:\动画\众生界\.vectorstore")
+    sys.path.insert(0, str(PROJECT_ROOT / ".vectorstore"))
     from knowledge_search import KnowledgeSearcher
 
     searcher = KnowledgeSearcher()
@@ -239,7 +239,7 @@ def test_knowledge_search():
 
 def test_technique_search():
     """测试技法检索"""
-    sys.path.insert(0, r"D:\动画\众生界\.vectorstore")
+    sys.path.insert(0, str(PROJECT_ROOT / ".vectorstore"))
     from technique_search import TechniqueSearcher
 
     searcher = TechniqueSearcher()
@@ -255,7 +255,7 @@ def test_scene_writer_mapping():
     import json
     from pathlib import Path
 
-    mapping_file = Path("D:/动画/众生界/.vectorstore/scene_writer_mapping.json")
+    mapping_file = PROJECT_ROOT / ".vectorstore" / "scene_writer_mapping.json"
 
     with open(mapping_file, "r", encoding="utf-8") as f:
         data = json.load(f)

@@ -12,10 +12,16 @@
 注意：只有在确认v2数据完整后才执行删除！
 """
 
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from core.config_loader import get_qdrant_url
+
 from qdrant_client import QdrantClient
 from datetime import datetime
 
-QDRANT_DOCKER_URL = "http://localhost:6333"
+QDRANT_DOCKER_URL = get_qdrant_url()
 
 
 def log(msg):

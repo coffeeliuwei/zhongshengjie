@@ -1,6 +1,11 @@
 """
 环境初始化器
 初始化新环境，创建目录结构和配置文件
+
+注意:
+    - 本模块为模板生成器，包含的路径示例仅供用户参考配置
+    - 生成的配置文件中包含占位符（如 "你的用户名"），需用户自行修改
+    - 初始化后的 system_config.json 中的路径应根据实际环境调整
 """
 
 import json
@@ -395,8 +400,9 @@ python -m core create --workflow
             },
             "writers": {
                 "scene_writer_mapping_file": "scene_writer_mapping.json",
+                # 注意: skills_base_path 为模板占位符，用户初始化后需修改为实际路径
                 "skills_base_path": "C:\\Users\\你的用户名\\.agents\\skills",
-                "writer_preferences": {},
+                "writer_preference": {},
             },
             "metadata": {"created_at": timestamp, "version": "2.0"},
         }

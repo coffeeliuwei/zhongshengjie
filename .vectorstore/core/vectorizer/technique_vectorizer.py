@@ -14,6 +14,7 @@
 import os
 import re
 import argparse
+import sys
 from pathlib import Path
 from typing import List, Dict, Any
 from dataclasses import dataclass
@@ -25,10 +26,13 @@ except ImportError:
     print("请安装 chromadb: pip install chromadb")
     exit(1)
 
+# 添加项目根目录到 sys.path
+sys.path.insert(0, str(__file__).rsplit(".vectorstore", 1)[0])
+from core.config_loader import get_project_root, get_vectorstore_dir, get_techniques_dir
 
 # 配置
-TECHNIQUE_DIR = Path(r"D:\动画\众生界\创作技法")
-VECTORSTORE_DIR = Path(r"D:\动画\众生界\.vectorstore")
+TECHNIQUE_DIR = get_techniques_dir()
+VECTORSTORE_DIR = get_vectorstore_dir()
 COLLECTION_NAME = "novelist_techniques"
 
 # 维度映射

@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 知识图谱可视化工具 - 从Qdrant数据库生成
@@ -7,6 +7,7 @@
 
 import json
 from pathlib import Path
+from core.config_loader import get_qdrant_url
 from typing import Dict, List
 from datetime import datetime
 
@@ -86,9 +87,9 @@ def load_from_qdrant() -> Dict:
     from qdrant_client import QdrantClient
 
     try:
-        client = QdrantClient(url="http://localhost:6333")
+        client = QdrantClient(url=get_qdrant_url())
         client.get_collections()
-        print("  连接: Docker Qdrant (localhost:6333)")
+        print("  连接: Docker Qdrant (get_qdrant_url())")
     except Exception as e:
         print(f"  Docker连接失败: {e}")
         QDRANT_DIR = VECTORSTORE_DIR / "qdrant"
