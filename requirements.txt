@@ -1,0 +1,13 @@
+# 众生界小说创作支持系统依赖
+# 核心依赖
+sentence-transformers>=2.2.0
+qdrant-client>=1.4.0
+numpy>=1.21.0
+torch>=2.0.0
+
+# 格式转换
+ebooklib>=0.18
+mobi>=0.3.3
+
+# 可选依赖
+# transformers>=4.30.0

@@ -1,0 +1,201 @@
+# ========================================
+# 所有众生界小说相关数据 - 禁止推送 GitHub
+# ========================================
+# 
+# 设计原则：只推送功能代码，不推送任何用户数据
+# 新用户应该使用 build_all.py 构建自己的数据
+#
+
+# ========== 用户原创内容（核心机密）==========
+正文/
+章节大纲/
+设定/
+章节经验日志/
+写作标准积累/
+存档/
+
+# ========== 提炼的数据（众生界特有机密）==========
+# 技法库（包含你整理的写作技法）
+创作技法/
+
+# 案例库（从外部小说提取的标杆片段）
+.case-library/
+
+# 小说提取器（提取过程数据）
+.novel-extractor/
+extracted/
+
+# ========== 向量库数据（机密）==========
+# 知识图谱（你的小说特有关系）
+.vectorstore/**/knowledge_graph.json
+knowledge_graph.json
+
+# 向量索引数据
+*.pickle
+*.index
+
+# 数据库文件
+*.sqlite
+*.sqlite3
+
+# 可视化报告
+*.html
+
+# 迁移进度和日志
+.vectorstore/**/migration*.json
+.vectorstore/**/*_log*.json
+.vectorstore/**/batch*.json
+.vectorstore/archive_log.json
+
+# 归档目录（旧数据）
+.vectorstore/archived/
+
+# Qdrant本地存储
+.vectorstore/qdrant_docker/
+.vectorstore/*/qdrant_local/
+
+# 场景映射（你的章节特有）
+.vectorstore/scene_writer_mapping.json
+
+# 验证历史
+.vectorstore/verification_history/
+
+# 其他数据文件
+.vectorstore/stats_report.*
+.vectorstore/technique_graph.*
+
+# ========================================
+# 向量库功能代码 - 可推送 GitHub
+# ========================================
+# 以下文件是功能代码，新用户需要：
+# !.vectorstore/core/*.py      # 检索功能代码
+# !.vectorstore/workflow.py    # 工作流代码
+# ========================================
+
+# Python缓存
+.vectorstore/__pycache__/
+.vectorstore/*/__pycache__/
+
+# Qdrant数据文件
+.vectorstore/*/segments/
+.vectorstore/*/temp_segments/
+
+# ========================================
+# 可推送的功能代码（不忽略）
+# ========================================
+# tools/                       # 构建工具
+# core/                        # 核心模块
+# modules/                     # 功能模块
+# tests/                       # 测试
+# docs/                        # 文档
+# README.md                    # 说明
+# config.example.json          # 配置模板
+
+# ========================================
+# 运行时状态 - 本地私有
+# ========================================
+
+.state/
+.opencode/
+.serena/
+.agents/
+
+# 日志和缓存
+logs/
+.cache/
+*.log
+*.cache
+
+# ========================================
+# 配置文件 - 含本地路径
+# ========================================
+
+config.json
+config.local.json
+system_config.json
+.env
+*.env
+
+# 排除所有JSON数据文件，但保留模板
+*.json
+!config.example.json
+!package.json
+!.gitignore
+
+# ========================================
+# 知识产权相关
+# ========================================
+
+*.draft
+*.草稿
+*-草稿.md
+*-优化版.md
+*-重写版.md
+
+# ========================================
+# IDE 和编辑器
+# ========================================
+
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ========================================
+# OS 文件
+# ========================================
+
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# ========================================
+# Python
+# ========================================
+
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# ========================================
+# 临时文件
+# ========================================
+
+*.tmp
+*.bak
+*.backup
+*.old
+*.orig
+
+# ========================================
+# 测试覆盖率
+# ========================================
+
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/

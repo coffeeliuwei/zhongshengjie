@@ -1,0 +1,128 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Novel Writing System Config",
+  "description": "Configuration template for novel writing system. Copy this to config.json and fill in your actual paths.",
+  "type": "object",
+  "properties": {
+    "project": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Project name",
+          "default": "My Novel"
+        },
+        "version": {
+          "type": "string",
+          "default": "1.0.0"
+        }
+      },
+      "required": ["name"]
+    },
+    "paths": {
+      "type": "object",
+      "description": "All paths are relative to data_base_path unless absolute",
+      "properties": {
+        "data_base_path": {
+          "type": "string",
+          "description": "Base directory for all novel data (REQUIRED)",
+          "examples": ["D:/NovelData", "/home/user/novel-data"]
+        },
+        "chapters": {
+          "type": "string",
+          "description": "Published chapters directory",
+          "default": "正文"
+        },
+        "outlines": {
+          "type": "string",
+          "description": "Chapter outlines directory",
+          "default": "章节大纲"
+        },
+        "settings": {
+          "type": "string",
+          "description": "World/character settings directory",
+          "default": "设定"
+        },
+        "experience_logs": {
+          "type": "string",
+          "description": "Chapter experience logs directory",
+          "default": "章节经验日志"
+        },
+        "writing_standards": {
+          "type": "string",
+          "description": "User feedback accumulation directory",
+          "default": "写作标准积累"
+        },
+        "techniques": {
+          "type": "string",
+          "description": "Writing techniques library directory",
+          "default": "创作技法"
+        },
+        "vectorstore": {
+          "type": "string",
+          "description": "Vector database directory",
+          "default": ".vectorstore"
+        },
+        "case_library": {
+          "type": "string",
+          "description": "Case library directory",
+          "default": ".case-library"
+        }
+      },
+      "required": ["data_base_path"]
+    },
+    "database": {
+      "type": "object",
+      "properties": {
+        "qdrant_host": {
+          "type": "string",
+          "description": "Qdrant server host",
+          "default": "localhost"
+        },
+        "qdrant_port": {
+          "type": "integer",
+          "description": "Qdrant server port",
+          "default": 6333
+        },
+        "collections": {
+          "type": "object",
+          "properties": {
+            "novel_settings": {
+              "type": "string",
+              "default": "novel_settings_v2"
+            },
+            "writing_techniques": {
+              "type": "string",
+              "default": "writing_techniques_v2"
+            },
+            "case_library": {
+              "type": "string",
+              "default": "case_library_v2"
+            }
+          }
+        }
+      }
+    },
+    "model": {
+      "type": "object",
+      "properties": {
+        "embedding_model": {
+          "type": "string",
+          "description": "Embedding model name or path",
+          "default": "BAAI/bge-m3"
+        },
+        "model_path": {
+          "type": "string",
+          "description": "Local model cache path (optional)",
+          "examples": ["E:/huggingface_cache/hub/models--BAAI--bge-m3/snapshots/..."]
+        },
+        "vector_size": {
+          "type": "integer",
+          "description": "Vector dimension",
+          "default": 1024
+        }
+      }
+    }
+  },
+  "required": ["project", "paths"]
+}
