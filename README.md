@@ -340,6 +340,8 @@ export HF_ENDPOINT=https://hf-mirror.com
 - `knowledge_graph.json` - 知识图谱
 - `scene_writer_mapping.json` - 场景映射
 - `章节经验日志/` - 经验日志
+- `章节大纲/` - 章节规划
+- `config.json` - 用户配置（含本地路径）
 
 ---
 

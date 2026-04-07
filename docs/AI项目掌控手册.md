@@ -4,7 +4,7 @@
 > 
 > **AI新环境快速启动**：阅读本文档后即可配置运行项目
 > 
-> **最后更新**：2026-04-06
+> **最后更新**：2026-04-07
 
 ---
 
@@ -108,18 +108,42 @@ cp config.example.json config.json
 
 ```python
 from core.config_loader import (
+    # 基础配置
     get_config,           # 获取完整配置
     get_project_root,     # 项目根目录 Path
-    get_model_path,       # 模型路径 str
+    get_config_path,      # 配置文件路径 Path
+    
+    # 数据库配置
     get_qdrant_url,       # Qdrant URL str
-    get_novel_sources,    # 小说资源目录列表 [Path]
+    get_collection_name,  # Collection名称
+    get_database_timeout, # 数据库超时（秒）int
+    
+    # 模型配置
+    get_model_path,       # 模型路径 str
+    get_batch_size,       # 批处理大小 int
+    
+    # 路径配置
     get_settings_dir,     # 设定目录 Path
     get_techniques_dir,   # 技法目录 Path
     get_vectorstore_dir,  # 向量库目录 Path
     get_case_library_dir, # 案例库目录 Path
     get_logs_dir,         # 日志目录 Path
+    get_cache_dir,        # 缓存目录 Path
+    get_contracts_dir,    # 场景契约目录 Path
+    get_skills_base_path, # Skills安装目录 Path
+    get_novel_sources,    # 小说资源目录列表 [Path]
+    
+    # 校验配置
+    get_realm_order,      # 境界等级顺序 list
+    get_skip_rules,       # 跳过的校验规则 list
+    
+    # 检索配置
+    get_retrieval_config, # 检索配置 dict
+    get_max_content_length, # 内容最大长度 int
+    get_max_payload_size,   # Payload最大大小 int
+    
+    # HuggingFace配置
     get_hf_cache_dir,     # HuggingFace缓存目录 str
-    get_collection_name,  # Collection名称
 )
 ```
 
@@ -440,6 +464,7 @@ class SceneContract:
 ### 9.5 API接口
 
 ```python
+import sys; sys.path.insert(0, '.vectorstore')
 from core.workflow import (
     create_scene_contract,     # 创建契约
     save_scene_contract,       # 保存契约
@@ -566,15 +591,18 @@ python tools/case_builder.py --sync
 - `modules/` - 功能模块
 - `.vectorstore/core/` - 检索代码
 - `docs/` - 文档
+- `正文/` - 已创作内容（成品展示）
 - `config.example.json` - 配置模板
+- `README.md` - 项目说明
 
 ### 不推送（敏感数据）
 - `创作技法/` - 技法库
 - `设定/` - 小说设定
 - `.case-library/` - 案例库
-- `config.json` - 用户配置
-- `knowledge_graph.json`
-- `scene_writer_mapping.json`
+- `章节大纲/` - 章节规划
+- `config.json` - 用户配置（含本地路径）
+- `knowledge_graph.json` - 知识图谱
+- `scene_writer_mapping.json` - 场景映射
 - `章节经验日志/` - 经验日志
 - `写作标准积累/` - 用户修改要求
 
@@ -584,19 +612,23 @@ python tools/case_builder.py --sync
 
 ### 配置API
 ```python
+import sys; sys.path.insert(0, '.vectorstore')
 from core.config_loader import (
     get_config, get_project_root, get_model_path, 
     get_qdrant_url, get_novel_sources, get_settings_dir,
-    get_techniques_dir, get_vectorstore_dir, get_case_library_dir
+    get_techniques_dir, get_vectorstore_dir, get_case_library_dir,
+    get_skills_base_path, get_cache_dir, get_contracts_dir,
+    get_realm_order, get_database_timeout, get_batch_size
 )
 ```
 
 ### 检索API
 ```python
-from vectorstore.core.technique_search import TechniqueSearch
-from vectorstore.core.knowledge_search import KnowledgeSearch
-from vectorstore.core.case_search import CaseSearch
-from vectorstore.core.workflow import NovelWorkflow
+import sys; sys.path.insert(0, '.vectorstore')
+from core.technique_search import TechniqueSearch
+from core.knowledge_search import KnowledgeSearch
+from core.case_search import CaseSearch
+from core.workflow import NovelWorkflow
 
 # 统一接口
 workflow = NovelWorkflow()
@@ -607,7 +639,8 @@ workflow.search_cases("战斗场景", top_k=5)
 
 ### 经验检索API
 ```python
-from workflow import retrieve_chapter_experience, write_chapter_log
+import sys; sys.path.insert(0, '.vectorstore')
+from core.workflow import retrieve_chapter_experience, write_chapter_log
 
 # 检索
 experience = retrieve_chapter_experience(
@@ -643,6 +676,4 @@ log_path = write_chapter_log(
 
 > **配置文件**: `config.json` (用户) / `config.example.json` (模板)
 > 
-> **详细配置说明**: `docs/配置说明.md`
-> 
-> **新人上手**: `docs/新人快速上手指南.md`
+> **用户文档**: `README.md`
