@@ -13,21 +13,23 @@
 ### 1.1 项目定位
 
 多Agent协作小说创作辅助系统，核心能力：
+- **四层专家架构**：方法论层 → 统一API层 → 技法/案例库层 → 世界观适配层
 - **技法检索**：按场景/维度检索写作技法（BGE-M3混合检索）
 - **设定检索**：自动检索相关设定确保一致性
 - **案例检索**：参考标杆片段（38万+案例）
 - **多Agent协作**：5作家+1审核
 - **自动场景发现**：从外部小说库自动学习新场景类型
 - **经验检索**：检索前几章创作经验指导当前创作
+- **多世界观支持**：可切换不同世界观配置
 
 ### 1.2 技术架构
 
 ```
-用户输入 → Skills (novel-*) → 向量检索 → 生成内容 → 评估 → 输出
-                ↑
-         配置加载器 (core/config_loader.py)
-                ↑
-         config.json (用户配置)
+用户输入 → Skills (novel-*) → 统一API层 → 向量检索 → 生成内容 → 评估 → 输出
+                 ↑                ↑
+          配置加载器        世界观适配层
+                 ↑                ↑
+          config.json    world_configs/*.json
 ```
 
 ### 1.3 核心组件
@@ -35,6 +37,8 @@
 | 组件 | 位置 | 作用 |
 |------|------|------|
 | 配置加载器 | `core/config_loader.py` | 统一配置管理 |
+| 世界观加载器 | `core/world_config_loader.py` | 世界观配置管理 |
+| 统一API层 | `core/*_api.py` | 作家专用接口 |
 | Skills | `~/.agents/skills/` | 作家技能定义（30个） |
 | 向量检索 | `.vectorstore/core/` | Qdrant检索接口 |
 | 工作流 | `.vectorstore/core/workflow.py` | 检索协调+经验检索 |
@@ -235,18 +239,99 @@ Phase 3: 收尾润色（云溪）
 | 场景类型 | **28种** |
 | 接口 | `.vectorstore/core/case_search.py` |
 
+### 4.4 世界观配置
+
+| 项目 | 值 |
+|------|-----|
+| 位置 | `.vectorstore/core/world_configs/` |
+| 配置文件 | `众生界.json`, `修仙世界示例.json`, `西方奇幻示例.json`, `科幻世界示例.json` |
+| 接口 | `.vectorstore/core/world_config_loader.py` |
+
 ---
 
-## 五、向量数据库
+## 五、统一API层
 
-### 5.1 连接
+### 5.1 API概览
+
+| API | 文件 | 作家 | 功能 |
+|-----|------|------|------|
+| WorldviewAPI | `worldview_api.py` | 苍澜 | 世界观架构 |
+| CharacterAPI | `character_api.py` | 墨言 | 人物刻画 |
+| PlotAPI | `plot_api.py` | 玄一 | 剧情编织 |
+| BattleAPI | `battle_api.py` | 剑尘 | 战斗设计 |
+| PoetryAPI | `poetry_api.py` | 云溪 | 诗词意境 |
+
+### 5.2 使用示例
+
+```python
+# 世界观API
+from worldview_api import get_worldview_api
+api = get_worldview_api()
+powers = api.get_power_systems_overview()
+factions = api.get_factions_overview()
+
+# 人物API
+from character_api import get_character_api
+api = get_character_api()
+profile = api.get_character_profile("血牙")
+guide = api.get_faction_character_guide("兽族文明")
+
+# 剧情API
+from plot_api import get_plot_api
+api = get_plot_api()
+conflicts = api.get_relationship_conflicts()
+techniques = api.search_foreshadowing_techniques()
+
+# 战斗API
+from battle_api import get_battle_api
+api = get_battle_api()
+guide = api.get_power_battle_guide("修仙")
+costs = api.get_battle_cost_rules("血脉燃烧")
+
+# 诗词API
+from poetry_api import get_poetry_api
+api = get_poetry_api()
+era_guide = api.get_era_poetry_guide("觉醒时代")
+material = api.compose_poetry_scene(era="觉醒时代", mood="压抑")
+```
+
+### 5.3 综合创作接口
+
+每个API都提供 `compose_*_scene()` 方法，整合：
+- 世界观适配（自动加载当前世界观配置）
+- 技法库检索（从986条技法中检索相关内容）
+- 案例库检索（从38万+案例中检索参考）
+- 返回完整创作素材
+
+```python
+# 综合生成创作素材
+api = get_battle_api()
+material = api.compose_battle_scene(
+    power_name="修仙",
+    combat_type="剑修",
+    keywords=["飞剑", "剑气"]
+)
+# 返回：{
+#   "world_context": {...},
+#   "power_guide": {...},
+#   "cost_rules": {...},
+#   "techniques": [...],
+#   "cases": [...]
+# }
+```
+
+---
+
+## 六、向量数据库
+
+### 6.1 连接
 
 ```python
 from core.config_loader import get_qdrant_url
 QDRANT_URL = get_qdrant_url()  # 默认 http://localhost:6333
 ```
 
-### 5.2 Collections
+### 6.2 Collections
 
 | Collection | 数据量 | 用途 |
 |------------|--------|------|
@@ -254,7 +339,7 @@ QDRANT_URL = get_qdrant_url()  # 默认 http://localhost:6333
 | novel_settings_v2 | 160 | 小说设定 |
 | case_library_v2 | **387,377** | 标杆案例 |
 
-### 5.3 模型
+### 6.3 模型
 
 - 模型：`BAAI/bge-m3`
 - 维度：1024
@@ -262,9 +347,9 @@ QDRANT_URL = get_qdrant_url()  # 默认 http://localhost:6333
 
 ---
 
-## 六、Skills系统
+## 七、Skills系统
 
-### 6.1 位置
+### 7.1 位置
 
 ```
 ~/.agents/skills/
@@ -283,7 +368,7 @@ QDRANT_URL = get_qdrant_url()  # 默认 http://localhost:6333
 └── ... (共30个技能)
 ```
 
-### 6.2 作家分工
+### 7.2 作家分工
 
 | Skill | 专长 | 维度 |
 |-------|------|------|
@@ -295,16 +380,16 @@ QDRANT_URL = get_qdrant_url()  # 默认 http://localhost:6333
 
 ---
 
-## 七、数据构建工具
+## 八、数据构建工具
 
-### 7.1 一键构建
+### 8.1 一键构建
 
 ```bash
 python tools/build_all.py
 python tools/build_all.py --status
 ```
 
-### 7.2 分类构建
+### 8.2 分类构建
 
 ```bash
 # 技法库
@@ -326,7 +411,7 @@ python tools/case_builder.py --sync
 python tools/scene_mapping_builder.py --init
 ```
 
-### 7.3 自动场景发现（新功能）
+### 8.3 自动场景发现（新功能）
 
 ```bash
 # 发现新场景类型
@@ -344,15 +429,64 @@ python tools/case_builder.py --apply-discovered
 - `scene_writer_mapping.json`
 - `novel-workflow/SKILL.md`
 
+### 8.4 世界观生成器
+
+从小说大纲自动生成世界观配置：
+
+```bash
+# 从大纲生成世界观配置
+python .vectorstore/core/worldview_generator.py --outline "总大纲.md" --name "我的世界"
+
+# 列出已有世界观
+python .vectorstore/core/worldview_generator.py --list
+
+# 生成AI提示词（让AI帮助完善）
+python .vectorstore/core/worldview_generator.py --outline "大纲.md" --ai-prompt
+```
+
+**同步工具**：
+
+```bash
+# 查看同步状态
+python .vectorstore/core/worldview_sync.py --status
+
+# 同步世界观配置
+python .vectorstore/core/worldview_sync.py --sync
+
+# 验证世界观配置
+python .vectorstore/core/worldview_sync.py --validate
+```
+
+**配置项**（`config.json`）：
+
+```json
+{
+  "worldview": {
+    "current_world": "众生界",
+    "outline_path": "总大纲.md",
+    "auto_sync": true,
+    "_说明": "auto_sync为true时，大纲改动自动同步世界观"
+  }
+}
+```
+
+**大纲元素自动提取**：
+- 力量体系（境界、代价、子类型）
+- 势力（组织结构、文化、建筑风格）
+- 角色（势力、能力、关系）
+- 时代（氛围、色调、象征）
+- 核心原则（道德观、主题、感情线）
+- `novel-workflow/SKILL.md`
+
 ---
 
-## 八、经验检索系统（新功能）
+## 九、经验检索系统
 
-### 8.1 功能说明
+### 9.1 功能说明
 
 从前面章节的经验日志中提取可复用的经验，注入到当前创作上下文。
 
-### 8.2 检索API
+### 9.2 检索API
 
 ```python
 from workflow import NovelWorkflow, retrieve_chapter_experience
@@ -376,7 +510,7 @@ experience = workflow.retrieve_chapter_experience(
 # }
 ```
 
-### 8.3 写入经验
+### 9.3 写入经验
 
 ```python
 # 阶段7：写入经验日志
@@ -389,9 +523,9 @@ workflow.write_chapter_log(
 
 ---
 
-## 九、场景契约系统（新功能）
+## 十、场景契约系统
 
-### 9.1 功能说明
+### 10.1 功能说明
 
 **解决多作家并行创作导致的拼接冲突问题**，将一致性校验前移至创作阶段。
 
@@ -400,7 +534,7 @@ workflow.write_chapter_log(
 - 墨言（人物）写"记住母亲的每句话"
 - 拼接时才发现矛盾，需要重写
 
-### 9.2 核心文件
+### 10.2 核心文件
 
 | 文件 | 位置 | 作用 |
 |------|------|------|
@@ -408,7 +542,7 @@ workflow.write_chapter_log(
 | contract_validator.py | `.vectorstore/core/` | 12大一致性校验规则 |
 | contract_sync.py | `.vectorstore/core/` | 同步管理器 |
 
-### 9.3 契约数据结构
+### 10.3 契约数据结构
 
 ```python
 class SceneContract:
@@ -444,7 +578,7 @@ class SceneContract:
     }
 ```
 
-### 9.4 12大一致性校验规则
+### 10.4 12大一致性校验规则
 
 | 规则 | 检查项 | 级别 |
 |------|--------|------|

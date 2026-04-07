@@ -7,6 +7,13 @@
     "version": "1.0.0"
   },
 
+  "worldview": {
+    "current_world": "众生界",
+    "outline_path": "总大纲.md",
+    "auto_sync": true,
+    "_说明": "current_world: 当前世界观名称，对应 world_configs/*.json；outline_path: 大纲文件路径；auto_sync: 大纲改动时是否自动同步世界观"
+  },
+
   "paths": {
     "project_root": null,
     "settings_dir": "设定",

@@ -291,6 +291,45 @@ def get_novel_sources() -> list:
     return config.get("novel_sources", {}).get("directories", [])
 
 
+def get_worldview_config() -> Dict[str, Any]:
+    """
+    获取世界观配置
+
+    Returns:
+        {
+            "current_world": "众生界",
+            "outline_path": "总大纲.md",
+            "auto_sync": True
+        }
+    """
+    config = get_config()
+    return config.get(
+        "worldview",
+        {"current_world": "众生界", "outline_path": "总大纲.md", "auto_sync": False},
+    )
+
+
+def get_current_world() -> str:
+    """获取当前世界观名称"""
+    worldview = get_worldview_config()
+    return worldview.get("current_world", "众生界")
+
+
+def get_outline_path() -> Optional[str]:
+    """获取大纲文件路径"""
+    worldview = get_worldview_config()
+    outline_path = worldview.get("outline_path")
+    if outline_path:
+        return str(get_project_root() / outline_path)
+    return None
+
+
+def is_auto_sync_enabled() -> bool:
+    """检查是否启用自动同步"""
+    worldview = get_worldview_config()
+    return worldview.get("auto_sync", False)
+
+
 def get_vectorstore_dir() -> Path:
     """获取向量库目录"""
     return get_path("vectorstore_dir")

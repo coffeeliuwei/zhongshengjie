@@ -44,12 +44,14 @@
 
 **核心特性**：
 - 5位专业作家 + 1位审核评估师
+- **四层专家架构**：方法论层 → 统一API层 → 技法/案例库层 → 世界观适配层
 - 技法库/知识库/案例库向量检索（BGE-M3混合检索）
 - 章节经验自动沉淀与检索
 - 用户反馈闭环机制
 - **自动场景发现**：从外部小说库学习新场景类型
 - **28种场景类型**：开篇/战斗/情感/悬念/转折等
 - **场景契约系统**：解决多作家并行创作拼接冲突（12大一致性规则）
+- **多世界观支持**：可切换不同世界观配置
 
 ---
 
@@ -285,6 +287,43 @@ export HF_ENDPOINT=https://hf-mirror.com
 
 ## 系统架构
 
+### 四层专家架构
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    SKILL.md（方法论层）                    │
+│   核心技法标准 + 调用方式 + 禁止项                          │
+├─────────────────────────────────────────────────────────┤
+│                   统一API层（接口层）                       │
+│   worldview_api / character_api / plot_api /             │
+│   battle_api / poetry_api                                │
+├─────────────────────────────────────────────────────────┤
+│                    技法库层（检索层）                        │
+│   writing_techniques_v2（986条）                          │
+├─────────────────────────────────────────────────────────┤
+│                    案例库层（检索层）                        │
+│   case_library_v2（38万+条）                              │
+├─────────────────────────────────────────────────────────┤
+│                   世界观适配层（配置层）                     │
+│   world_configs/众生界.json                              │
+└─────────────────────────────────────────────────────────┘
+```
+
+### 统一API使用
+
+```python
+# 任何作家都可以通过统一API获取创作素材
+from worldview_api import get_worldview_api
+from character_api import get_character_api
+from plot_api import get_plot_api
+from battle_api import get_battle_api
+from poetry_api import get_poetry_api
+
+# 自动适配当前世界观
+api = get_poetry_api()
+material = api.compose_poetry_scene(era="觉醒时代", mood="压抑")
+```
+
 ### 创作流程（8阶段）
 
 ```
@@ -309,6 +348,15 @@ export HF_ENDPOINT=https://hf-mirror.com
 | writing_techniques_v2 | 创作技法检索 | 986条 |
 | novel_settings_v2 | 小说设定检索 | 160条 |
 | case_library_v2 | 标杆案例检索 | **38万+条** |
+
+### 世界观配置
+
+| 配置文件 | 世界观类型 |
+|----------|------------|
+| `众生界.json` | 七大力量体系共存 |
+| `修仙世界示例.json` | 纯东方修仙 |
+| `西方奇幻示例.json` | 魔法+神术 |
+| `科幻世界示例.json` | 科技改造+AI |
 
 ### 技术栈
 
@@ -349,6 +397,32 @@ export HF_ENDPOINT=https://hf-mirror.com
 ---
 
 ## 新功能
+
+### 世界观生成器
+
+从小说大纲自动生成世界观配置，支持多用户和自动同步：
+
+```bash
+# 从大纲生成世界观配置
+python .vectorstore/core/worldview_generator.py --outline "总大纲.md" --name "我的世界"
+
+# 查看同步状态
+python .vectorstore/core/worldview_sync.py --status
+
+# 同步世界观配置
+python .vectorstore/core/worldview_sync.py --sync
+```
+
+**配置项**（`config.json`）：
+```json
+{
+  "worldview": {
+    "current_world": "众生界",
+    "outline_path": "总大纲.md",
+    "auto_sync": true
+  }
+}
+```
 
 ### 自动场景发现
 
@@ -413,17 +487,21 @@ experience = retrieve_chapter_experience(
 | 维度 | 众生界 | Novel-OS | BookWorld | 笔灵AI |
 |------|--------|----------|-----------|--------|
 | **多Agent协作** | ✅ 5作家+1审核 | ✅ 5-Agent | ✅ 多角色Agent | ❌ 单模型 |
+| **四层专家架构** | ✅ 方法论+API+检索+适配 | ❌ | ❌ | ❌ |
 | **技法检索** | ✅ 986条可检索 | ❌ | ❌ | ❌ |
 | **案例库** | ✅ 38万+条 | ❌ | ❌ | ❌ |
+| **多世界观支持** | ✅ 可切换配置 | ❌ | ❌ | ❌ |
 | **场景契约** | ✅ 12大一致性规则 | ✅ Guardian验证 | ❌ | ❌ |
 | **经验沉淀** | ✅ 自动复用 | ❌ | ❌ | ❌ |
 | **长篇支持** | ✅ 百万字级 | ✅ | ✅ | ⚠️ 短篇为主 |
 | **开源** | ✅ | ✅ | ✅ | ❌ |
 
 **核心差异**：
+- 四层架构 vs 单层架构
 - 检索驱动 vs Prompt驱动
 - 技法可学习 vs 技法隐含
 - 经验可积累 vs 无记忆
+- 世界观可适配 vs 固定世界观
 
 ---
 
