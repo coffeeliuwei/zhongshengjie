@@ -333,16 +333,6 @@ export HF_ENDPOINT=https://hf-mirror.com
 └── README.md
 ```
 
-**敏感数据（不推送GitHub）**：
-- `创作技法/` - 技法库
-- `设定/` - 小说设定
-- `.case-library/` - 案例库
-- `knowledge_graph.json` - 知识图谱
-- `scene_writer_mapping.json` - 场景映射
-- `章节经验日志/` - 经验日志
-- `章节大纲/` - 章节规划
-- `config.json` - 用户配置（含本地路径）
-
 ---
 
 ## 构建工具
