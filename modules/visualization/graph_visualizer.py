@@ -23,7 +23,11 @@ except ImportError:
 
 # 配置导入
 try:
-    from core.config_loader import get_project_root, get_qdrant_url
+    # 尝试从项目根目录导入
+    import sys
+
+    sys.path.insert(0, str(Path(__file__).parent.parent.parent / ".vectorstore"))
+    from config_loader import get_project_root, get_qdrant_url
 except ImportError:
     # 兼容独立运行场景
     def get_project_root():

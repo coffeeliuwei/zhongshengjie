@@ -108,7 +108,16 @@ def test_core_imports():
 
 def test_creation_module():
     """测试创作模块（已迁移至 skill 层）"""
-    skills_dir = Path("C:/Users/39477/.agents/skills")
+    # 从配置获取 skills 路径
+    try:
+        import sys
+
+        sys.path.insert(0, str(Path(__file__).parent.parent / ".vectorstore"))
+        from config_loader import get_skills_base_path
+
+        skills_dir = get_skills_base_path()
+    except Exception:
+        skills_dir = Path.home() / ".agents" / "skills"
 
     required_skills = [
         "novelist-canglan",
@@ -158,7 +167,16 @@ def test_database_connection():
 
 def test_skills_exist():
     """测试技能文件存在"""
-    skills_dir = Path("C:/Users/39477/.agents/skills")
+    # 从配置获取 skills 路径
+    try:
+        import sys
+
+        sys.path.insert(0, str(Path(__file__).parent.parent / ".vectorstore"))
+        from config_loader import get_skills_base_path
+
+        skills_dir = get_skills_base_path()
+    except Exception:
+        skills_dir = Path.home() / ".agents" / "skills"
 
     required_skills = [
         "novelist-canglan",

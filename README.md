@@ -49,6 +49,7 @@
 - 用户反馈闭环机制
 - **自动场景发现**：从外部小说库学习新场景类型
 - **28种场景类型**：开篇/战斗/情感/悬念/转折等
+- **场景契约系统**：解决多作家并行创作拼接冲突（12大一致性规则）
 
 ---
 
@@ -56,47 +57,238 @@
 
 | 文档 | 用途 |
 |------|------|
-| [新人快速上手指南](docs/新人快速上手指南.md) | 从零构建小说创作系统 |
 | [AI项目掌控手册](docs/AI项目掌控手册.md) | AI快速理解项目全貌 |
-| [配置说明](docs/配置说明.md) | 配置文件详细说明 |
 
-> `docs/archived/` 目录包含历史文档，仅供参考
+> 本项目文档极简，仅保留README.md（用户）和AI项目掌控手册.md（AI）。`docs/archived/` 目录包含历史文档。
 
 ---
 
 ## 快速开始
 
-### 新用户
+### 第一步：安装依赖
 
 ```bash
-# 1. 克隆项目
+# 克隆项目
 git clone https://github.com/coffeeliuwei/zhongshengjie.git
+cd zhongshengjie
 
-# 2. 一键构建
-python tools/build_all.py
+# 安装Python依赖
+pip install -r requirements.txt
 
-# 3. 开始创作
-# 在对话中说 "写第一章"
+# 启动Qdrant向量数据库
+docker run -d --name qdrant -p 6333:6333 qdrant/qdrant
 ```
 
-详细步骤请阅读 [新人快速上手指南](docs/新人快速上手指南.md)
+### 第二步：配置系统（⚠️ 必须完成）
 
-### 创作命令
+```bash
+# 1. 复制配置模板
+cp config.example.json config.json
 
-| 命令 | 说明 |
-|------|------|
-| `写第一章` | 启动章节创作 |
-| `帮我重写 第一章` | 情节保留重写 |
-| `查看评估报告` | 查看审核结果 |
+# 2. 编辑 config.json，修改以下必填项：
+```
+
+**必填配置项**：
+
+```json
+{
+  "paths": {
+    "project_root": "D:/动画/众生界",           // 👈 改为你的项目路径
+    "skills_base_path": "C:/Users/你的用户名/.agents/skills"  // 👈 Skills安装目录
+  },
+  "model": {
+    "model_path": "E:/huggingface_cache/...",  // 👈 BGE-M3模型路径（可选，null自动检测）
+    "hf_cache_dir": "E:/huggingface_cache"     // 👈 HuggingFace缓存目录（可选）
+  },
+  "novel_sources": {
+    "directories": ["E:\\小说资源"]            // 👈 小说资源目录（可选）
+  }
+}
+```
+
+**关键配置说明**：
+
+| 配置项 | 说明 | 如何获取 |
+|--------|------|----------|
+| `project_root` | 项目根目录 | 项目所在文件夹路径 |
+| `skills_base_path` | Skills安装目录 | 默认 `~/.agents/skills`，查看：`ls ~/.agents/skills` |
+| `model_path` | BGE-M3模型路径 | 已下载模型则填写，否则设为 `null` 自动检测 |
+| `hf_cache_dir` | HuggingFace缓存目录 | 模型下载位置，Windows常见 `E:/huggingface_cache` |
+
+**Windows 路径格式**：
+```json
+// ✅ 推荐
+"path": "D:/动画/众生界"
+"path": "D:\\动画\\众生界"
+
+// ❌ 错误（单反斜杠会转义）
+"path": "D:\动画\众生界"
+```
+
+### 第三步：构建数据
+
+```bash
+# 一键构建所有数据
+python tools/build_all.py
+
+# 检查构建状态
+python tools/build_all.py --status
+```
+
+### 第四步：开始创作
+
+在AI对话中说：**"写第一章"**
+
+系统将自动执行：需求澄清 → 大纲解析 → 场景创作 → 评估 → 输出
+
+---
+
+## 配置项详解
+
+### 路径配置 (`paths`)
+
+```json
+{
+  "paths": {
+    "project_root": null,           // 项目根目录，null自动检测
+    "settings_dir": "设定",          // 设定文件目录
+    "techniques_dir": "创作技法",     // 技法目录
+    "content_dir": "正文",           // 已创作正文目录
+    "skills_base_path": null,        // Skills安装目录
+    "cache_dir": ".cache",           // 缓存目录
+    "contracts_dir": "scene_contracts"  // 场景契约存储子目录
+  }
+}
+```
+
+### 校验规则配置 (`validation`)
+
+```json
+{
+  "validation": {
+    // 境界等级顺序（用于检测境界倒退）
+    "realm_order": ["凡人", "觉醒", "淬体", "凝脉", "结丹", "元婴", "化神"],
+    // 跳过的校验规则
+    "skip_rules": []
+  }
+}
+```
+
+**自定义境界体系**：
+```json
+// 玄幻小说
+"realm_order": ["炼气", "筑基", "金丹", "元婴", "化神", "渡劫", "大乘"]
+
+// 跳过境界检测
+"realm_order": null
+```
+
+### 数据库配置 (`database`)
+
+```json
+{
+  "database": {
+    "qdrant_host": "localhost",
+    "qdrant_port": 6333,
+    "timeout": 10  // 操作超时（秒）
+  }
+}
+```
+
+### 模型配置 (`model`)
+
+```json
+{
+  "model": {
+    "embedding_model": "BAAI/bge-m3",
+    "model_path": null,      // null自动检测
+    "batch_size": 20         // 批处理大小，内存充足可增大
+  }
+}
+```
+
+### 检索配置 (`retrieval`)
+
+```json
+{
+  "retrieval": {
+    "dense_limit": 100,       // 稠密向量检索数量
+    "sparse_limit": 100,      // 稀疏向量检索数量
+    "fusion_limit": 50,       // 混合检索融合数量
+    "max_content_length": 3000  // 内容最大长度
+  }
+}
+```
+
+---
+
+## 验证配置
+
+```bash
+# 快速检查
+python tools/build_all.py --status
+
+# 详细检查
+python -c "
+import sys; sys.path.insert(0, '.vectorstore')
+from config_loader import *
+print(f'项目: {get_project_root()}')
+print(f'Skills: {get_skills_base_path()}')
+print(f'模型: {get_model_path() or \"自动检测\"}')
+print(f'Qdrant: {get_qdrant_url()}')
+"
+```
+
+---
+
+## 常见问题
+
+### Q: Skills目录在哪里？
+
+```bash
+# 默认位置
+~/.agents/skills           # Linux/Mac
+C:\Users\你的用户名\.agents\skills  # Windows
+
+# 查看已安装Skills
+ls ~/.agents/skills
+# 输出：
+# novelist-canglan/   (苍澜-世界观架构师)
+# novelist-xuanyi/    (玄一-剧情编织师)
+# novelist-moyan/     (墨言-人物刻画师)
+# novelist-jianchen/  (剑尘-战斗设计师)
+# novelist-yunxi/     (云溪-意境营造师)
+# novelist-evaluator/ (审核评估师)
+```
+
+### Q: BGE-M3模型如何下载？
+
+```bash
+# 方法1：自动下载（首次运行时）
+python tools/build_all.py
+
+# 方法2：手动下载
+# 从 HuggingFace 下载 BAAI/bge-m3
+# 解压到：E:/huggingface_cache/hub/models--BAAI--bge-m3/snapshots/xxx
+
+# 方法3：使用镜像
+export HF_ENDPOINT=https://hf-mirror.com
+```
+
+### Q: 配置不生效？
+
+1. 检查文件名：必须是 `config.json`（不是 `config.example.json`）
+2. 检查JSON格式：使用 [JSONLint](https://jsonlint.com/) 校验
+3. 重启Python进程：配置在启动时加载
 
 ---
 
 ## 系统架构
 
-### 创作流程（7阶段）
+### 创作流程（8阶段）
 
 ```
-需求澄清 → 大纲解析 → 场景识别 → 经验检索 → 设定检索 → 逐场景创作 → 整章评估 → 经验写入
+需求澄清 → 大纲解析 → 场景识别 → 经验检索 → 设定检索 → 场景契约 → 逐场景创作 → 整章评估 → 经验写入
 ```
 
 ### 作家分工
@@ -135,8 +327,7 @@ python tools/build_all.py
 ├── core/               # 核心模块（预留）
 ├── modules/            # 功能模块（预留）
 ├── docs/               # 文档
-│   ├── 新人快速上手指南.md
-│   ├── AI项目掌控手册.md
+│   ├── AI项目掌控手册.md  # AI专用文档
 │   └── archived/       # 归档文档
 ├── config.example.json # 配置模板
 └── README.md

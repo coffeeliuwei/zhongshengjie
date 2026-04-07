@@ -61,7 +61,17 @@ def test_database():
 # 测试 2: 技能文件
 # ============================================
 def test_skills():
-    skills_dir = Path("C:/Users/39477/.agents/skills")
+    # 从配置获取 skills 路径
+    try:
+        import sys
+
+        sys.path.insert(0, str(Path(__file__).parent.parent / ".vectorstore"))
+        from config_loader import get_skills_base_path
+
+        skills_dir = get_skills_base_path()
+    except Exception:
+        skills_dir = Path.home() / ".agents" / "skills"
+
     required = [
         "novelist-canglan",
         "novelist-xuanyi",
@@ -96,7 +106,16 @@ def test_core_imports():
 # ============================================
 def test_creation_module():
     # modules.creation 已存档，现在使用 skill 层
-    skills_dir = Path("C:/Users/39477/.agents/skills")
+    # 从配置获取 skills 路径
+    try:
+        import sys
+
+        sys.path.insert(0, str(Path(__file__).parent.parent / ".vectorstore"))
+        from config_loader import get_skills_base_path
+
+        skills_dir = get_skills_base_path()
+    except Exception:
+        skills_dir = Path.home() / ".agents" / ".agents" / "skills"
 
     # 检查 novelist-workflow skill
     workflow_skill = skills_dir / "novelist-workflow" / "SKILL.md"

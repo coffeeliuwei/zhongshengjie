@@ -591,12 +591,27 @@ class CaseSearcher:
         return formatted
 
     def list_scene_types(self) -> List[str]:
-        """列出所有场景类型"""
+        """列出所有场景类型（从配置文件读取，避免扫描38万条数据库）"""
+        # 优先从 scene_writer_mapping.json 配置文件读取
+        # 这比 scroll 38万条数据快得多
+        try:
+            mapping_file = PROJECT_DIR / ".vectorstore" / "scene_writer_mapping.json"
+            if mapping_file.exists():
+                with open(mapping_file, "r", encoding="utf-8") as f:
+                    mapping = json.load(f)
+                scene_mapping = mapping.get("scene_writer_mapping", {})
+                scenes = list(scene_mapping.keys())
+                if scenes:
+                    return sorted(scenes)
+        except Exception:
+            pass
+
+        # 回退：从数据库扫描（仅作为备选）
         results = self.client.scroll(
             collection_name=CASE_COLLECTION,
             with_payload=True,
             with_vectors=False,
-            limit=10000,
+            limit=1000,  # 减少扫描数量
         )[0]
 
         scenes = set()
@@ -610,6 +625,134 @@ class CaseSearcher:
         """获取总数量"""
         info = self.client.get_collection(CASE_COLLECTION)
         return info.points_count
+
+
+# ============================================================
+# 诗词意象检索器
+# ============================================================
+
+IMAGERY_COLLECTION = "poetry_imagery_v2"
+
+
+class ImagerySearcher:
+    """诗词意象检索器 (BGE-M3 + Qdrant版)"""
+
+    def __init__(self, client: QdrantClient):
+        self.client = client
+        self._model = None
+
+    def _load_model(self):
+        if self._model is None:
+            try:
+                from FlagEmbedding import BGEM3FlagModel
+
+                self._model = BGEM3FlagModel(
+                    BGE_M3_MODEL_PATH, use_fp16=True, device="cpu"
+                )
+            except ImportError:
+                print("请安装 FlagEmbedding: pip install FlagEmbedding")
+            except Exception as e:
+                print(f"加载BGE-M3模型失败: {e}")
+        return self._model
+
+    def _get_embedding(self, text: str) -> List[float]:
+        model = self._load_model()
+        if model is None:
+            return [0.0] * VECTOR_SIZE
+        try:
+            out = model.encode([text], return_dense=True)
+            return out["dense_vecs"][0].tolist()
+        except Exception as e:
+            return [0.0] * VECTOR_SIZE
+
+    def search(
+        self,
+        query: str,
+        world_context: Optional[str] = None,
+        top_k: int = 5,
+    ) -> List[Dict[str, Any]]:
+        """
+        语义检索意象
+
+        Args:
+            query: 查询文本（如"虚无感、战争后"）
+            world_context: 世界观上下文（"众生界" / None）
+            top_k: 返回数量
+
+        Returns:
+            意象列表
+        """
+        query_vector = self._get_embedding(query)
+
+        # 构建过滤条件
+        query_filter = None
+        if world_context:
+            query_filter = models.Filter(
+                must=[
+                    models.FieldCondition(
+                        key="world_context",
+                        match=models.MatchValue(value=world_context),
+                    )
+                ]
+            )
+
+        results = self.client.query_points(
+            collection_name=IMAGERY_COLLECTION,
+            query=query_vector,
+            query_filter=query_filter,
+            limit=top_k,
+            with_payload=True,
+        )
+
+        formatted = []
+        for p in results.points:
+            formatted.append(
+                {
+                    "id": p.id,
+                    "name": p.payload.get("name", "未知"),
+                    "category": p.payload.get("category", "未知"),
+                    "emotion_core": p.payload.get("emotion_core", ""),
+                    "emotion_tags": p.payload.get("emotion_tags", []),
+                    "description": p.payload.get("description", ""),
+                    "usage_examples": p.payload.get("usage_examples", []),
+                    "world_context": p.payload.get("world_context"),
+                    "philosophy_link": p.payload.get("philosophy_link"),
+                    "score": p.score,
+                }
+            )
+        return formatted
+
+    def list_all(self, world_context: Optional[str] = None) -> List[str]:
+        """列出所有意象名称"""
+        query_filter = None
+        if world_context:
+            query_filter = models.Filter(
+                must=[
+                    models.FieldCondition(
+                        key="world_context",
+                        match=models.MatchValue(value=world_context),
+                    )
+                ]
+            )
+
+        results = self.client.scroll(
+            collection_name=IMAGERY_COLLECTION,
+            scroll_filter=query_filter,
+            with_payload=True,
+            with_vectors=False,
+            limit=1000,
+        )[0]
+
+        names = [p.payload.get("name", "") for p in results if p.payload.get("name")]
+        return sorted(names)
+
+    def count(self) -> int:
+        """获取总数量"""
+        try:
+            info = self.client.get_collection(IMAGERY_COLLECTION)
+            return info.points_count
+        except Exception:
+            return 0
 
 
 # ============================================================
@@ -1118,6 +1261,7 @@ class NovelWorkflow:
         self.settings = NovelSettingsSearcher(self.client)
         self.techniques = TechniqueSearcher(self.client)
         self.cases = CaseSearcher(self.client)
+        self.imagery = ImagerySearcher(self.client)  # 诗词意象检索器
         self.graph = KnowledgeGraphReader()
         self.scene_mapping = SceneWriterMapping()
 
@@ -1172,6 +1316,87 @@ class NovelWorkflow:
 
     def list_case_scenes(self) -> List[str]:
         return self.cases.list_scene_types()
+
+    # ==================== 诗词意象接口 ====================
+
+    def search_imagery(
+        self,
+        query: str,
+        world_context: Optional[str] = None,
+        top_k: int = 5,
+    ) -> List[Dict]:
+        """
+        检索诗词意象
+
+        Args:
+            query: 查询文本（如"虚无感、战争后"）
+            world_context: 世界观上下文（"众生界" / None）
+            top_k: 返回数量
+
+        Returns:
+            意象列表，包含name、emotion_core、usage_examples等
+        """
+        return self.imagery.search(query, world_context, top_k)
+
+    def list_imagery(self, world_context: Optional[str] = None) -> List[str]:
+        """列出所有意象名称"""
+        return self.imagery.list_all(world_context)
+
+    def create_poetry(
+        self,
+        scene: str,
+        emotion: Optional[str] = None,
+        world_context: Optional[str] = None,
+        character: Optional[str] = None,
+        poetry_type: str = "七言诗",
+        top_k: int = 5,
+    ) -> Dict[str, Any]:
+        """
+        诗词创作接口（返回意象和情感分析，由LLM生成最终诗句）
+
+        Args:
+            scene: 场景描述
+            emotion: 情感方向（可选，自动分析）
+            world_context: 世界观上下文（"众生界" / None）
+            character: 角色名（众生界模式）
+            poetry_type: 诗词类型
+            top_k: 检索意象数量
+
+        Returns:
+            {
+                "imagery": [...],  # 契合的意象列表
+                "emotion_core": "...",  # 情感内核
+                "world_context": "...",  # 世界观上下文
+                "character_style": {...}  # 角色诗风（可选）
+            }
+        """
+        # 检索意象
+        query = f"{scene} {emotion or ''}".strip()
+        imagery = self.search_imagery(query, world_context, top_k)
+
+        # 提取情感内核
+        emotion_core = None
+        if imagery:
+            emotion_core = imagery[0].get("emotion_core", "")
+
+        result = {
+            "imagery": imagery,
+            "emotion_core": emotion_core,
+            "world_context": world_context,
+            "poetry_type": poetry_type,
+        }
+
+        # 众生界模式：添加角色诗风
+        if world_context == "众生界" and character:
+            # 从知识图谱获取角色信息
+            char_entity = self.graph.get_entity(character)
+            if char_entity:
+                result["character_style"] = {
+                    "name": character,
+                    "philosophy": char_entity.get("属性", {}).get("哲学设定", ""),
+                }
+
+        return result
 
     # ==================== 知识图谱接口 ====================
 
@@ -1600,7 +1825,10 @@ class NovelWorkflow:
             },
             "案例库": {
                 "总数": self.cases.count(),
-                "场景类型": self.cases.list_scene_types(),
+            },
+            "诗词意象库": {
+                "总数": self.imagery.count(),
+                "众生界特色意象": self.imagery.list_all("众生界"),
             },
             "知识图谱": self.graph.get_stats(),
             "场景-作家映射": self.scene_mapping.get_scene_stats(),
@@ -2099,6 +2327,151 @@ def main():
         return
 
     parser.print_help()
+
+
+# ============================================================
+# 场景契约系统接口
+# ============================================================
+
+
+def create_scene_contract(
+    scene_id: str, chapter_id: str, scene_outline: Optional[Dict] = None
+) -> "SceneContract":
+    """
+    创建场景契约
+
+    Args:
+        scene_id: 场景ID
+        chapter_id: 章节ID
+        scene_outline: 场景大纲（可选）
+
+    Returns:
+        场景契约对象
+    """
+    from core.scene_contract import SceneContract, create_contract_from_outline
+
+    if scene_outline:
+        return create_contract_from_outline(scene_outline, chapter_id)
+
+    return SceneContract(scene_id=scene_id, chapter_id=chapter_id)
+
+
+def load_scene_contract(chapter_id: str, scene_id: str) -> Optional["SceneContract"]:
+    """
+    加载场景契约
+
+    Args:
+        chapter_id: 章节ID
+        scene_id: 场景ID
+
+    Returns:
+        场景契约对象，如果不存在返回None
+    """
+    from core.scene_contract import SceneContractStore
+
+    store = SceneContractStore(chapter_id)
+    return store.load_contract(scene_id)
+
+
+def save_scene_contract(contract: "SceneContract") -> Path:
+    """
+    保存场景契约
+
+    Args:
+        contract: 场景契约对象
+
+    Returns:
+        契约文件路径
+    """
+    from core.scene_contract import SceneContractStore
+
+    store = SceneContractStore(contract.chapter_id)
+    return store.save_contract(contract)
+
+
+def validate_scene_contracts(chapter_id: str) -> Dict:
+    """
+    校验章节的所有场景契约
+
+    Args:
+        chapter_id: 章节ID
+
+    Returns:
+        校验结果
+    """
+    from core.contract_sync import validate_chapter_contracts
+
+    return validate_chapter_contracts(chapter_id)
+
+
+def get_contract_dependency_graph(chapter_id: str) -> Dict:
+    """
+    获取章节的场景依赖图
+
+    Args:
+        chapter_id: 章节ID
+
+    Returns:
+        依赖图
+    """
+    from core.scene_contract import SceneContractStore
+
+    store = SceneContractStore(chapter_id)
+    return store.get_dependency_graph()
+
+
+def get_scene_execution_plan(chapter_id: str) -> Dict:
+    """
+    获取场景执行计划（包括并行分组）
+
+    Args:
+        chapter_id: 章节ID
+
+    Returns:
+        执行计划
+    """
+    from core.contract_sync import ContractSyncManager
+
+    manager = ContractSyncManager(chapter_id)
+    return manager.get_execution_plan()
+
+
+def register_scene_start(chapter_id: str, scene_id: str, timeout: int = 300) -> Dict:
+    """
+    注册场景开始（用于并行创作协调）
+
+    Args:
+        chapter_id: 章节ID
+        scene_id: 场景ID
+        timeout: 等待依赖的超时时间（秒）
+
+    Returns:
+        注册结果
+    """
+    from core.contract_sync import ContractSyncManager
+
+    manager = ContractSyncManager(chapter_id)
+    return manager.register_scene_start(scene_id, timeout)
+
+
+def register_scene_complete(
+    chapter_id: str, scene_id: str, updated_contract: Optional["SceneContract"] = None
+) -> Dict:
+    """
+    注册场景完成
+
+    Args:
+        chapter_id: 章节ID
+        scene_id: 场景ID
+        updated_contract: 更新后的契约（可选）
+
+    Returns:
+        完成结果
+    """
+    from core.contract_sync import ContractSyncManager
+
+    manager = ContractSyncManager(chapter_id)
+    return manager.register_scene_complete(scene_id, updated_contract)
 
 
 if __name__ == "__main__":

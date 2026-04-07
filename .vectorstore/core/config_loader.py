@@ -24,6 +24,12 @@ DEFAULT_CONFIG = {
         "techniques_dir": "创作技法",
         "vectorstore_dir": ".vectorstore",
         "case_library_dir": ".case-library",
+        "cache_dir": ".cache",
+        "contracts_dir": "scene_contracts",
+    },
+    "validation": {
+        "realm_order": ["凡人", "觉醒", "淬体", "凝脉", "结丹", "元婴", "化神"],
+        "skip_rules": [],
     },
     "database": {
         "qdrant_host": "localhost",
@@ -49,12 +55,20 @@ _project_root: Optional[Path] = None
 def find_project_root() -> Path:
     """自动检测项目根目录"""
     current = Path(__file__).resolve()
-    markers = ["README.md", "config.example.json", ".gitignore", "tools"]
+    # 必须同时存在这些文件/目录才能确认是项目根目录
+    required_markers = ["README.md", "config.example.json"]
+    optional_markers = [".gitignore", "tools", ".git"]
 
     for parent in current.parents:
-        if any((parent / marker).exists() for marker in markers):
-            if (parent / "tools").exists():
-                return parent
+        # 检查必需标记
+        if all((parent / marker).exists() for marker in required_markers):
+            return parent
+
+    # 回退：检查 config.json
+    for parent in current.parents:
+        if (parent / "config.json").exists():
+            return parent
+
     return Path.cwd()
 
 
@@ -62,18 +76,34 @@ def get_project_root() -> Path:
     """获取项目根目录"""
     global _project_root
     if _project_root is None:
+        # 优先级：环境变量 > 自动检测 > config.json
         env_root = os.environ.get("NOVEL_PROJECT_ROOT")
         if env_root:
             _project_root = Path(env_root)
         else:
+            # 先用自动检测
             _project_root = find_project_root()
+
+            # 再尝试从 config.json 读取覆盖
+            config_path = _project_root / "config.json"
+            if config_path.exists():
+                try:
+                    with open(config_path, "r", encoding="utf-8") as f:
+                        user_config = json.load(f)
+                    config_root = user_config.get("paths", {}).get("project_root")
+                    if config_root:
+                        _project_root = Path(config_root)
+                except Exception:
+                    pass
     return _project_root
 
 
 def get_config_path() -> Optional[Path]:
     """获取config.json文件的路径"""
+    # 使用 find_project_root() 避免循环依赖
+    root = find_project_root()
     config_paths = [
-        get_project_root() / "config.json",
+        root / "config.json",
         Path(__file__).parent.parent.parent / "config.json",
         Path(__file__).parent.parent / "config.json",
         Path.cwd() / "config.json",
@@ -131,8 +161,14 @@ def get_qdrant_url() -> str:
         return env_url
 
     config = get_config()
-    host = config.get("database", {}).get("qdrant_host", "localhost")
-    port = config.get("database", {}).get("qdrant_port", 6333)
+    db_config = config.get("database", {})
+
+    # 如果直接配置了 qdrant_url，优先使用
+    if "qdrant_url" in db_config:
+        return db_config["qdrant_url"]
+
+    host = db_config.get("qdrant_host", "localhost")
+    port = db_config.get("qdrant_port", 6333)
     return f"http://{host}:{port}"
 
 
@@ -192,6 +228,69 @@ def get_path(path_name: str) -> Path:
     return path
 
 
+def get_cache_dir() -> Path:
+    """获取缓存目录"""
+    return get_path("cache_dir")
+
+
+def get_contracts_dir() -> Path:
+    """获取场景契约存储目录"""
+    cache_dir = get_cache_dir()
+    config = get_config()
+    contracts_subdir = config.get("paths", {}).get("contracts_dir", "scene_contracts")
+    return cache_dir / contracts_subdir
+
+
+def get_realm_order() -> Optional[list]:
+    """
+    获取境界等级顺序（用于R012规则检测境界倒退）
+
+    Returns:
+        境界列表（从低到高），如果配置为null则返回None（跳过检测）
+    """
+    config = get_config()
+    return config.get("validation", {}).get("realm_order")
+
+
+def get_skip_rules() -> list:
+    """
+    获取跳过的校验规则列表
+
+    Returns:
+        规则ID列表，如 ["R007", "R008"]
+    """
+    config = get_config()
+    return config.get("validation", {}).get("skip_rules", [])
+
+
+def get_skills_base_path() -> Path:
+    """
+    获取Skills基础路径
+
+    Returns:
+        Skills目录路径
+    """
+    config = get_config()
+    skills_path = config.get("paths", {}).get("skills_base_path")
+
+    if skills_path:
+        return Path(skills_path)
+
+    # 默认位置
+    return Path.home() / ".agents" / "skills"
+
+
+def get_novel_sources() -> list:
+    """
+    获取小说资源目录列表
+
+    Returns:
+        目录路径列表
+    """
+    config = get_config()
+    return config.get("novel_sources", {}).get("directories", [])
+
+
 def get_vectorstore_dir() -> Path:
     """获取向量库目录"""
     return get_path("vectorstore_dir")
@@ -217,6 +316,54 @@ def get_collection_name(collection_type: str) -> str:
     config = get_config()
     collections = config.get("database", {}).get("collections", {})
     return collections.get(collection_type, f"{collection_type}_v2")
+
+
+def get_database_timeout() -> int:
+    """获取数据库超时时间（秒）"""
+    config = get_config()
+    return config.get("database", {}).get("timeout", 10)
+
+
+def get_batch_size() -> int:
+    """获取批处理大小"""
+    config = get_config()
+    return config.get("model", {}).get("batch_size", 20)
+
+
+def get_retrieval_config() -> dict:
+    """
+    获取检索配置
+
+    Returns:
+        {
+            "dense_limit": 100,
+            "sparse_limit": 100,
+            "fusion_limit": 50,
+            "max_content_length": 3000,
+            "max_payload_size": 8000
+        }
+    """
+    config = get_config()
+    return config.get(
+        "retrieval",
+        {
+            "dense_limit": 100,
+            "sparse_limit": 100,
+            "fusion_limit": 50,
+            "max_content_length": 3000,
+            "max_payload_size": 8000,
+        },
+    )
+
+
+def get_max_content_length() -> int:
+    """获取最大内容长度"""
+    return get_retrieval_config().get("max_content_length", 3000)
+
+
+def get_max_payload_size() -> int:
+    """获取最大payload大小"""
+    return get_retrieval_config().get("max_payload_size", 8000)
 
 
 if __name__ == "__main__":

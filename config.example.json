@@ -1,91 +1,38 @@
 {
-  "_说明": "========================================",
-  "_标题": "众生界小说创作系统 - 配置文件",
+  "_说明": "众生界小说创作系统 - 配置示例",
   "_用法": "复制此文件为 config.json 并修改为您的实际路径",
-  "_说明结束": "========================================",
 
   "project": {
-    "_说明": "项目基本信息（可选）",
     "name": "My Novel",
     "version": "1.0.0"
   },
 
   "paths": {
-    "_说明": "路径配置 - 所有路径支持相对路径（相对于项目根目录）或绝对路径",
-    
-    "project_root": {
-      "_说明": "项目根目录。设为 null 自动检测，或填写绝对路径",
-      "_示例_Windows": "D:/我的小说项目",
-      "_示例_Linux": "/home/user/my-novel",
-      "value": null
-    },
-    
-    "settings_dir": {
-      "_说明": "设定目录，存放世界观、人物、势力等设定文件",
-      "value": "设定"
-    },
-    
-    "techniques_dir": {
-      "_说明": "技法目录，存放写作技法库",
-      "value": "创作技法"
-    },
-    
-    "chapters_dir": {
-      "_说明": "章节大纲目录",
-      "value": "章节大纲"
-    },
-    
-    "content_dir": {
-      "_说明": "正文目录，存放已创作的章节",
-      "value": "正文"
-    },
-    
-    "experience_dir": {
-      "_说明": "章节经验日志目录",
-      "value": "章节经验日志"
-    },
-    
-    "standards_dir": {
-      "_说明": "写作标准积累目录",
-      "value": "写作标准积累"
-    },
-    
-    "vectorstore_dir": {
-      "_说明": "向量数据库存储目录",
-      "value": ".vectorstore"
-    },
-    
-    "case_library_dir": {
-      "_说明": "案例库目录，存放提取的标杆案例",
-      "value": ".case-library"
-    },
-    
-    "logs_dir": {
-      "_说明": "日志目录",
-      "value": "logs"
-    },
-    
-    "cache_dir": {
-      "_说明": "缓存目录",
-      "value": ".cache"
-    }
+    "project_root": null,
+    "settings_dir": "设定",
+    "techniques_dir": "创作技法",
+    "chapters_dir": "章节大纲",
+    "content_dir": "正文",
+    "experience_dir": "章节经验日志",
+    "standards_dir": "写作标准积累",
+    "vectorstore_dir": ".vectorstore",
+    "case_library_dir": ".case-library",
+    "logs_dir": "logs",
+    "cache_dir": ".cache",
+    "contracts_dir": "scene_contracts",
+    "skills_base_path": null
+  },
+
+  "validation": {
+    "realm_order": ["凡人", "觉醒", "淬体", "凝脉", "结丹", "元婴", "化神"],
+    "skip_rules": []
   },
 
   "database": {
-    "_说明": "Qdrant向量数据库配置",
-    
-    "qdrant_host": {
-      "_说明": "Qdrant服务器地址。Docker默认 localhost",
-      "value": "localhost"
-    },
-    
-    "qdrant_port": {
-      "_说明": "Qdrant端口。Docker默认 6333",
-      "value": 6333
-    },
-    
+    "qdrant_host": "localhost",
+    "qdrant_port": 6333,
+    "timeout": 10,
     "collections": {
-      "_说明": "Collection名称映射（一般无需修改）",
       "novel_settings": "novel_settings_v2",
       "writing_techniques": "writing_techniques_v2",
       "case_library": "case_library_v2"
@@ -93,59 +40,22 @@
   },
 
   "model": {
-    "_说明": "嵌入模型配置 - 使用BGE-M3进行向量化",
-    
-    "embedding_model": {
-      "_说明": "模型名称，用于自动下载（需要联网）",
-      "value": "BAAI/bge-m3"
-    },
-    
-    "model_path": {
-      "_说明": "本地模型路径。设为 null 自动检测或下载",
-      "_说明2": "如果已下载模型，填写snapshots目录路径可加快启动速度",
-      "_示例_Windows": "E:/huggingface_cache/hub/models--BAAI--bge-m3/snapshots/具体的commit哈希",
-      "_示例_Linux": "/home/user/.cache/huggingface/hub/models--BAAI--bge-m3/snapshots/具体的commit哈希",
-      "_自动检测路径": [
-        "~/.cache/huggingface/hub/models--BAAI--bge-m3/snapshots/",
-        "Windows: C:/Users/用户名/.cache/huggingface/hub/..."
-      ],
-      "value": null
-    },
-    
-    "hf_cache_dir": {
-      "_说明": "HuggingFace缓存根目录。设为 null 使用默认位置",
-      "_示例_Windows": "E:/huggingface_cache",
-      "_示例_Linux": "/home/user/.cache/huggingface",
-      "value": null
-    },
-    
-    "vector_size": {
-      "_说明": "向量维度。BGE-M3固定为1024，无需修改",
-      "value": 1024
-    }
+    "embedding_model": "BAAI/bge-m3",
+    "model_path": null,
+    "hf_cache_dir": null,
+    "vector_size": 1024,
+    "batch_size": 20
+  },
+
+  "retrieval": {
+    "dense_limit": 100,
+    "sparse_limit": 100,
+    "fusion_limit": 50,
+    "max_content_length": 3000,
+    "max_payload_size": 8000
   },
 
   "novel_sources": {
-    "_说明": "外部小说资源目录 - 用于案例提取",
-    "_说明2": "支持多个目录，可以是绝对路径或相对路径",
-    "_用法": "运行 python tools/case_builder.py --scan 后会扫描这些目录",
-    
-    "directories": [
-      {
-        "_说明": "示例1：Windows绝对路径",
-        "path": "E:\\小说资源"
-      },
-      {
-        "_说明": "示例2：Linux绝对路径",
-        "path": "/data/novels"
-      },
-      {
-        "_说明": "示例3：项目内的相对路径",
-        "path": "./novels"
-      }
-    ],
-    
-    "_支持的格式": ["txt", "epub", "mobi"],
-    "_注意": "路径使用双反斜杠 \\\\ 或正斜杠 /"
+    "directories": []
   }
 }

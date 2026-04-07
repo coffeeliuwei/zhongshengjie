@@ -116,7 +116,9 @@ class WriterConfig:
     """作家配置"""
 
     scene_writer_mapping_file: str = "scene_writer_mapping.json"
-    skills_base_path: str = "C:\\Users\\39477\\.agents\\skills"
+    skills_base_path: Optional[str] = (
+        None  # 从 config.json 读取，默认使用 ~/.agents/skills
+    )
 
     # 作家偏好映射
     writer_preferences: Dict[str, str] = field(
@@ -128,6 +130,12 @@ class WriterConfig:
             "氛围": "novelist-yunxi",
         }
     )
+
+    def get_skills_base_path(self) -> Path:
+        """获取 skills 基础路径"""
+        if self.skills_base_path:
+            return Path(self.skills_base_path)
+        return Path.home() / ".agents" / "skills"
 
 
 class ConfigManager:

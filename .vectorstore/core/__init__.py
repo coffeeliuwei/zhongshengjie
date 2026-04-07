@@ -10,7 +10,7 @@ from .technique_search import TechniqueSearcher
 from .case_search import CaseSearcher
 from .workflow import NovelWorkflow
 from .knowledge_graph import KnowledgeGraph
-from .data_model import DataType, VectorStoreConfig
+from .data_model import EntityType
 
 __all__ = [
     "KnowledgeSearcher",
@@ -18,6 +18,5 @@ __all__ = [
     "CaseSearcher",
     "NovelWorkflow",
     "KnowledgeGraph",
-    "DataType",
-    "VectorStoreConfig",
+    "EntityType",
 ]

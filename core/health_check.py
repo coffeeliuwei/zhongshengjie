@@ -248,7 +248,17 @@ class HealthChecker:
 
     def check_skills(self) -> HealthCheckResult:
         """检查技能文件"""
-        skills_dir = Path("C:/Users/39477/.agents/skills")
+        # 从配置获取 skills 路径
+        try:
+            import sys
+
+            sys.path.insert(0, str(Path(__file__).parent.parent / ".vectorstore"))
+            from config_loader import get_skills_base_path
+
+            skills_dir = get_skills_base_path()
+        except Exception:
+            # 回退到默认位置
+            skills_dir = Path.home() / ".agents" / "skills"
 
         required_skills = [
             "novelist-canglan",

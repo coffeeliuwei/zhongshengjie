@@ -365,7 +365,146 @@ workflow.write_chapter_log(
 
 ---
 
-## 九、常见操作
+## 九、场景契约系统（新功能）
+
+### 9.1 功能说明
+
+**解决多作家并行创作导致的拼接冲突问题**，将一致性校验前移至创作阶段。
+
+核心问题：多作家并行写场景后，拼接时发现逻辑冲突：
+- 苍澜（世界观）写"遗忘母亲名字"
+- 墨言（人物）写"记住母亲的每句话"
+- 拼接时才发现矛盾，需要重写
+
+### 9.2 核心文件
+
+| 文件 | 位置 | 作用 |
+|------|------|------|
+| scene_contract.py | `.vectorstore/core/` | 契约数据结构与存储 |
+| contract_validator.py | `.vectorstore/core/` | 12大一致性校验规则 |
+| contract_sync.py | `.vectorstore/core/` | 同步管理器 |
+
+### 9.3 契约数据结构
+
+```python
+class SceneContract:
+    scene_id: str          # 场景ID
+    chapter_id: str        # 章节ID
+    
+    # 人物清单
+    character_manifest: {
+        "count": {"male": 0, "female": 0, "total": 0},
+        "named_characters": [...],
+        "groups": [...]
+    }
+    
+    # 时间线
+    timeline: {
+        "relative_time": {"start": "T+0", "end": "T+30min"},
+        "causal_chain": [...]
+    }
+    
+    # 空间信息
+    spatial: {
+        "location": {"name": "...", "region": "..."},
+        "movement_path": [...]
+    }
+    
+    # 物体状态
+    object_states: {"objects": [...]}
+    
+    # 依赖关系
+    dependencies: {
+        "pre_scenes": [...],
+        "blocking_events": [...]
+    }
+```
+
+### 9.4 12大一致性校验规则
+
+| 规则 | 检查项 | 级别 |
+|------|--------|------|
+| R001 | 人物数量一致性 | Critical |
+| R002 | 时间因果性 | Critical |
+| R003 | 空间连续性 | Warning |
+| R004 | 代词一致性 | Critical |
+| R005 | 物体状态连续性 | Critical/Warning |
+| R006 | 角色状态转换合理性 | Critical |
+| R007 | 势力攻击类型一致性 | Critical |
+| R008 | 天气环境一致性 | Warning |
+| R009 | 角色特征一致性 | Critical |
+| R010 | 称呼一致性 | Warning |
+| R011 | 势力构成一致性 | Warning |
+| R012 | 能力技能一致性 | Critical |
+
+### 9.5 API接口
+
+```python
+from core.workflow import (
+    create_scene_contract,     # 创建契约
+    save_scene_contract,       # 保存契约
+    load_scene_contract,       # 加载契约
+    validate_scene_contracts,  # 校验章节契约
+    get_scene_execution_plan,  # 获取执行计划（含并行分组）
+    register_scene_start,      # 注册场景开始
+    register_scene_complete    # 注册场景完成
+)
+
+# 创建契约
+contract = create_scene_contract(
+    scene_id="scene_002",
+    chapter_id="chapter_001",
+    scene_outline={
+        "scene_type": "战斗",
+        "characters": [{"name": "林夕", "gender": "male"}],
+        "dependencies": {"pre_scenes": ["scene_001"]}
+    }
+)
+
+# 保存契约
+save_scene_contract(contract)
+
+# 校验章节契约
+result = validate_scene_contracts("chapter_001")
+# 返回：{"total_contracts": 5, "total_conflicts": 2, "conflicts": [...]}
+
+# 获取执行计划（含并行分组）
+plan = get_scene_execution_plan("chapter_001")
+# 返回：{"scene_order": [...], "parallel_groups": [["scene_001", "scene_002"], ...]}
+```
+
+### 9.6 工作流集成
+
+场景契约在工作流中的位置：
+
+```
+阶段3: 设定检索
+    ↓
+阶段3.5: 场景契约提取（新增）
+    ├── 为每个场景创建契约
+    ├── 建立场景依赖关系
+    └── 12大规则预检
+    ↓
+阶段4: 逐场景创作
+    ├── 读取契约 → 作家创作 → 更新契约
+    └── 实时一致性校验
+```
+
+### 9.7 契约存储位置
+
+```
+.cache/scene_contracts/
+├── chapter_001/
+│   ├── scene_001_contract.json
+│   ├── scene_002_contract.json
+│   └── contract_index.json
+└── chapter_002/
+    └── ...
+```
+
+---
+
+## 十一、常见操作
 
 ### 9.1 新环境初始化
 
@@ -419,7 +558,7 @@ python tools/case_builder.py --sync
 
 ---
 
-## 十、数据分离原则
+## 十二、数据分离原则
 
 ### 推送到GitHub
 - `tools/` - 构建工具
@@ -441,7 +580,7 @@ python tools/case_builder.py --sync
 
 ---
 
-## 十一、API速查
+## 十三、API速查
 
 ### 配置API
 ```python
@@ -487,7 +626,7 @@ log_path = write_chapter_log(
 
 ---
 
-## 十二、测试结果（2026-04-06）
+## 十四、测试结果（2026-04-06）
 
 | 测试模块 | 通过率 | 状态 |
 |----------|--------|------|
