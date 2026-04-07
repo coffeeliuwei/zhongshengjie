@@ -59,7 +59,7 @@
 |------|------|
 | [AI项目掌控手册](docs/AI项目掌控手册.md) | AI快速理解项目全貌 |
 
-> 本项目文档极简，仅保留README.md（用户）和AI项目掌控手册.md（AI）。`docs/archived/` 目录包含历史文档。
+> 建议使用 Claude Code 或 OpenCode 操作保持系统最大自由度。CLI模式待系统彻底稳定再加入。
 
 ---
 
