@@ -157,11 +157,6 @@ class ContractLifecycle:
     STORAGE_DIR = "scene_contracts"
     INDEX_FILE = "scene_contracts/index.json"
 
-    # 境界等级（从配置加载）
-    REALM_ORDER = VALIDATION_CONFIG.get(
-        "realm_order", ["凡人", "觉醒", "淬体", "凝脉", "结丹", "元婴", "化神"]
-    )
-
     def __init__(self, project_root: Optional[Path] = None):
         """
         初始化契约生命周期
@@ -176,6 +171,41 @@ class ContractLifecycle:
 
         # 加载世界观设定（用于验证）
         self.worldview_settings = self._load_worldview_settings()
+
+        # 加载所有力量体系的境界配置
+        self._realm_orders = self._load_realm_orders()
+
+    def _load_realm_orders(self) -> Dict[str, list]:
+        """加载所有力量体系的境界配置"""
+        try:
+            from core.config_loader import get_all_realm_orders
+
+            return get_all_realm_orders()
+        except ImportError:
+            # 向后兼容：使用单一境界配置
+            return {"default": VALIDATION_CONFIG.get("realm_order", [])}
+
+    def get_realm_order_for_character(self, character_name: str) -> list:
+        """
+        根据角色的力量体系获取对应的境界顺序
+
+        Args:
+            character_name: 角色名称
+
+        Returns:
+            该角色的境界顺序列表
+        """
+        # 从世界观设定中获取角色的力量体系
+        characters = self.worldview_settings.get("characters", {})
+        character_info = characters.get(character_name, {})
+
+        # 获取角色的力量体系
+        power_system = character_info.get("power_system", "default")
+
+        # 返回对应的境界顺序
+        return self._realm_orders.get(
+            power_system, self._realm_orders.get("default", [])
+        )
 
     def _ensure_storage(self) -> None:
         """确保存储目录和索引文件存在"""

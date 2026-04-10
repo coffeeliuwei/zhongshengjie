@@ -296,6 +296,125 @@ def get_novel_sources() -> list:
     return [Path(d) for d in directories if d]
 
 
+def get_realm_order(power_system: str = None) -> list:
+    """
+    获取境界等级顺序
+
+    支持两种配置方式：
+    1. 单一境界体系（向后兼容）：config.json 中的 validation.realm_order
+    2. 多境界体系：世界观配置中的 power_systems.*.realms
+
+    Args:
+        power_system: 力量体系名称，如 "修仙"、"魔法"、"兽力" 等
+                     如果为 None，返回 config.json 中的单一境界配置
+
+    Returns:
+        境界等级列表，如 ["炼气期", "筑基期", "金丹期", ...]
+    """
+    # 模式1：从 config.json 获取单一境界配置（向后兼容）
+    if power_system is None:
+        config = get_config()
+        return config.get("validation", {}).get("realm_order", [])
+
+    # 模式2：从世界观配置获取指定力量体系的境界
+    try:
+        # 尝试加载当前世界观配置
+        world_config = _load_current_world_config()
+        if world_config:
+            power_systems = world_config.get("power_systems", {})
+            system_config = power_systems.get(power_system, {})
+
+            # 不同力量体系使用不同的境界字段名
+            realm_fields = [
+                "realms",
+                "grades",
+                "faith_levels",
+                "upgrade_levels",
+                "blood_realms",
+                "ai_levels",
+            ]
+
+            for field in realm_fields:
+                if field in system_config:
+                    return system_config[field]
+    except Exception:
+        pass
+
+    return []
+
+
+def get_all_realm_orders() -> dict:
+    """
+    获取所有力量体系的境界配置
+
+    Returns:
+        {
+            "修仙": ["炼气期", "筑基期", ...],
+            "魔法": ["一级魔法", "二级魔法", ...],
+            ...
+        }
+    """
+    result = {}
+
+    # 首先添加 config.json 中的默认配置
+    config = get_config()
+    default_realms = config.get("validation", {}).get("realm_order", [])
+    if default_realms:
+        result["default"] = default_realms
+
+    # 然后添加世界观配置中的所有境界
+    try:
+        world_config = _load_current_world_config()
+        if world_config:
+            power_systems = world_config.get("power_systems", {})
+            realm_fields = [
+                "realms",
+                "grades",
+                "faith_levels",
+                "upgrade_levels",
+                "blood_realms",
+                "ai_levels",
+            ]
+
+            for system_name, system_config in power_systems.items():
+                for field in realm_fields:
+                    if field in system_config:
+                        result[system_name] = system_config[field]
+                        break
+    except Exception:
+        pass
+
+    return result
+
+
+def _load_current_world_config() -> dict:
+    """加载当前世界观配置"""
+    try:
+        import json
+        from pathlib import Path
+
+        # 从 config.json 获取当前世界观名称
+        config = get_config()
+        world_name = config.get("worldview", {}).get("current_world", "众生界")
+
+        # 尝试加载世界观配置文件
+        world_config_path = (
+            get_project_root()
+            / ".vectorstore"
+            / "core"
+            / "world_configs"
+            / f"{world_name}.json"
+        )
+
+        if world_config_path.exists():
+            with open(world_config_path, "r", encoding="utf-8") as f:
+                return json.load(f)
+    except Exception:
+        pass
+
+    return {}
+
+
 def reset_config():
     """重置配置（用于测试）"""
     global _global_config, _project_root
