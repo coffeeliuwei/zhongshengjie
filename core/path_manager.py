@@ -240,6 +240,26 @@ class PathManager:
 
     # ==================== 工具方法 ====================
 
+    def detect_project_root(self) -> Path:
+        """
+        检测项目根目录
+
+        从当前工作目录向上搜索，直到找到项目标志文件。
+        这是公共方法，避免多个模块重复实现相同逻辑。
+
+        Returns:
+            项目根目录Path对象
+        """
+        current = Path.cwd()
+        markers = ["config.json", ".git", "README.md", "总大纲.md"]
+
+        for parent in current.parents:
+            if any((parent / marker).exists() for marker in markers):
+                return parent
+
+        # 如果找不到，返回当前目录
+        return current
+
     def list_setting_files(self) -> List[Path]:
         """列出所有设定文件"""
         return list(self.config.dir_config.settings_dir.glob("*.md"))

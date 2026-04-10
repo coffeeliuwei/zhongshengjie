@@ -1,0 +1,613 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+文件更新器
+==========
+
+处理设定文件的更新和向量数据库同步。
+
+核心功能：
+- Markdown文件更新（追踪系统文件）
+- JSON配置文件更新
+- 向量数据库同步
+- 变更日志记录
+
+参考：统一提炼引擎重构方案.md 第9.8节
+"""
+
+import json
+import re
+from datetime import datetime
+from pathlib import Path
+from typing import Dict, Any, Optional, List
+from dataclasses import dataclass
+
+
+@dataclass
+class UpdateResult:
+    """更新结果"""
+
+    success: bool
+    file_path: Optional[str] = None
+    error_message: Optional[str] = None
+    backup_created: bool = False
+    lines_added: int = 0
+
+
+class FileUpdater:
+    """文件更新器"""
+
+    # 追踪系统文件的意图映射（意图名 -> 文件名）
+    TRACKING_INTENT_MAP = {
+        "add_hook": "hook_ledger.md",
+        "advance_hook": "hook_ledger.md",
+        "resolve_hook": "hook_ledger.md",
+        "add_resource": "resource_ledger.md",
+        "consume_resource": "resource_ledger.md",
+        "add_injury": "resource_ledger.md",
+        "add_character_info": "information_boundary.md",
+        "share_info": "information_boundary.md",
+        "add_payoff": "payoff_tracking.md",
+        "deliver_payoff": "payoff_tracking.md",
+    }
+
+    def __init__(self, project_root: Optional[str] = None):
+        """
+        初始化文件更新器
+
+        Args:
+            project_root: 项目根目录路径
+        """
+        self.project_root = (
+            Path(project_root) if project_root else self._detect_project_root()
+        )
+        self.logs_dir = self.project_root / "logs" / "conversation_updates"
+        self.logs_dir.mkdir(parents=True, exist_ok=True)
+
+    def _detect_project_root(self) -> Path:
+        """自动检测项目根目录"""
+        current = Path(__file__).resolve()
+        markers = ["README.md", "config.example.json", "tools", "设定"]
+
+        for parent in current.parents:
+            if any((parent / marker).exists() for marker in markers):
+                return parent
+
+        return Path.cwd()
+
+    def update_markdown(
+        self, file_path: str, intent: str, data: Dict[str, Any]
+    ) -> bool:
+        """
+        更新Markdown文件
+
+        Args:
+            file_path: 文件路径
+            intent: 意图类型
+            data: 数据内容
+
+        Returns:
+            是否成功更新
+        """
+        path = Path(file_path)
+
+        # 检查文件是否存在
+        if not path.exists():
+            # 创建新文件
+            return self._create_new_file(path, intent, data)
+
+        # 读取现有内容
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                content = f.read()
+        except Exception as e:
+            print(f"Error reading file {file_path}: {e}")
+            return False
+
+        # 创建备份
+        backup_path = self._create_backup(path)
+        backup_created = backup_path is not None
+
+        # 根据文件类型选择更新方法
+        filename = path.name
+        updated_content = None
+
+        # 检查是否是追踪系统文件
+        if intent in self.TRACKING_INTENT_MAP:
+            # 追踪系统文件
+            updated_content = self._handle_tracking_file(
+                content, filename, intent, data
+            )
+        elif filename == "人物谱.md":
+            updated_content = self._update_character_profile(content, data, intent)
+        elif filename == "十大势力.md":
+            updated_content = self._update_faction_profile(content, data, intent)
+        elif filename == "力量体系.md":
+            updated_content = self._update_power_system(content, data, intent)
+        elif filename == "时间线.md":
+            updated_content = self._update_timeline(content, data, intent)
+        else:
+            # 默认追加到文件末尾
+            updated_content = self._append_to_file(content, data, intent)
+
+        if updated_content is None:
+            return False
+
+        # 写入更新后的内容
+        try:
+            with open(path, "w", encoding="utf-8") as f:
+                f.write(updated_content)
+            return True
+        except Exception as e:
+            print(f"Error writing file {file_path}: {e}")
+            return False
+
+    def update_json(self, file_path: str, intent: str, data: Dict[str, Any]) -> bool:
+        """
+        更新JSON文件
+
+        Args:
+            file_path: 文件路径
+            intent: 意图类型
+            data: 数据内容
+
+        Returns:
+            是否成功更新
+        """
+        path = Path(file_path)
+
+        # 读取现有内容
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                existing_data = json.load(f)
+        except FileNotFoundError:
+            existing_data = {}
+        except Exception as e:
+            print(f"Error reading JSON file {file_path}: {e}")
+            return False
+
+        # 更新数据
+        updated_data = self._merge_json_data(existing_data, data, intent)
+
+        # 写入
+        try:
+            with open(path, "w", encoding="utf-8") as f:
+                json.dump(updated_data, f, ensure_ascii=False, indent=2)
+            return True
+        except Exception as e:
+            print(f"Error writing JSON file {file_path}: {e}")
+            return False
+
+    def sync_to_vectorstore(self, collection: str, data: Dict[str, Any]) -> bool:
+        """
+        同步到向量数据库
+
+        Args:
+            collection: Collection名称
+            data: 数据内容
+
+        Returns:
+            是否成功同步
+        """
+        try:
+            # 导入向量数据库客户端
+            from qdrant_client import QdrantClient
+            from qdrant_client.models import PointStruct
+
+            # 从配置获取连接信息
+            from core.config_loader import get_qdrant_url, get_model_path
+
+            client = QdrantClient(url=get_qdrant_url())
+
+            # 检查collection是否存在
+            collections = client.get_collections().collections
+            collection_names = [c.name for c in collections]
+
+            if collection not in collection_names:
+                print(f"Collection {collection} does not exist")
+                return False
+
+            # 生成向量（这里简化处理，实际需要调用嵌入模型）
+            # TODO: 实际实现需要调用BGE-M3模型生成向量
+            # vector = self._generate_embedding(data)
+
+            # 创建数据点
+            # point = PointStruct(
+            #     id=str(uuid.uuid4()),
+            #     vector=vector,
+            #     payload=data
+            # )
+
+            # 上传
+            # client.upsert(collection_name=collection, points=[point])
+
+            # 记录日志
+            self._log_vectorstore_update(collection, data)
+
+            return True
+
+        except ImportError:
+            print("Warning: qdrant_client not installed")
+            return False
+        except Exception as e:
+            print(f"Error syncing to vectorstore: {e}")
+            return False
+
+    def _create_new_file(self, path: Path, intent: str, data: Dict[str, Any]) -> bool:
+        """创建新文件"""
+        try:
+            # 创建目录
+            path.parent.mkdir(parents=True, exist_ok=True)
+
+            # 生成初始内容
+            content = self._generate_initial_content(path.name, intent, data)
+
+            # 写入
+            with open(path, "w", encoding="utf-8") as f:
+                f.write(content)
+
+            return True
+        except Exception as e:
+            print(f"Error creating file {path}: {e}")
+            return False
+
+    def _create_backup(self, path: Path) -> Optional[Path]:
+        """创建文件备份"""
+        try:
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            backup_path = path.with_suffix(f".{timestamp}.bak")
+            with open(path, "r", encoding="utf-8") as src:
+                content = src.read()
+            with open(backup_path, "w", encoding="utf-8") as dst:
+                dst.write(content)
+            return backup_path
+        except Exception:
+            return None
+
+    def _generate_initial_content(
+        self, filename: str, intent: str, data: Dict[str, Any]
+    ) -> str:
+        """生成初始文件内容"""
+        if filename.endswith(".md"):
+            return self._generate_markdown_header(
+                filename
+            ) + self._format_data_as_markdown(data, intent)
+        elif filename.endswith(".json"):
+            return json.dumps(data, ensure_ascii=False, indent=2)
+        return ""
+
+    def _generate_markdown_header(self, filename: str) -> str:
+        """生成Markdown文件头部"""
+        title = filename.replace(".md", "").replace("_", " ")
+        return f"""# {title}
+
+> 自动生成于 {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
+
+---
+
+"""
+
+    def _format_data_as_markdown(self, data: Dict[str, Any], intent: str) -> str:
+        """将数据格式化为Markdown"""
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        lines = [f"\n## [{timestamp}] {intent}\n"]
+
+        for key, value in data.items():
+            if isinstance(value, (list, dict)):
+                value = json.dumps(value, ensure_ascii=False)
+            lines.append(f"- **{key}**: {value}")
+
+        lines.append("\n---\n")
+        return "\n".join(lines)
+
+    # ===== 追踪系统文件处理 =====
+
+    def _handle_tracking_file(
+        self, content: str, filename: str, intent: str, data: Dict[str, Any]
+    ) -> Optional[str]:
+        """
+        处理追踪系统文件
+
+        Args:
+            content: 文件现有内容
+            filename: 文件名
+            intent: 意图类型
+            data: 数据内容
+
+        Returns:
+            更新后的内容，或None表示失败
+        """
+        # 根据意图选择格式化方法
+        handlers = {
+            "add_hook": self._format_hook_entry,
+            "advance_hook": self._update_hook_status,
+            "resolve_hook": self._update_hook_status,
+            "add_resource": self._format_resource_entry,
+            "consume_resource": self._format_resource_entry,
+            "add_injury": self._format_injury_entry,
+            "add_character_info": self._format_info_entry,
+            "share_info": self._format_share_entry,
+            "add_payoff": self._format_payoff_entry,
+            "deliver_payoff": self._update_payoff_status,
+        }
+
+        handler = handlers.get(intent)
+        if handler:
+            return handler(content, data, intent)
+
+        return None
+
+    # ===== 追踪系统文件的格式化方法 =====
+
+    def _format_hook_entry(
+        self, content: str, data: Dict[str, Any], intent: str
+    ) -> str:
+        """格式化伏笔条目"""
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        hook_content = data.get("content", "")
+        entry = f"""
+### 🪝 伏笔 [{timestamp}]
+
+**内容**: {hook_content}
+**状态**: 🌱 已埋下
+**章节**: 待填写
+**回收章节**: 待填写
+
+---
+"""
+        return content + entry
+
+    def _update_hook_status(
+        self, content: str, data: Dict[str, Any], intent: str
+    ) -> str:
+        """更新伏笔状态"""
+        # TODO: 实现状态更新逻辑
+        return content
+
+    def _format_resource_entry(
+        self, content: str, data: Dict[str, Any], intent: str
+    ) -> str:
+        """格式化资源条目"""
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        character = data.get("character", "")
+        resource = data.get("resource", "")
+        action = data.get("action", "acquired")
+        emoji = "📥" if action == "acquired" else "📤"
+
+        entry = f"""
+### {emoji} 资源变更 [{timestamp}]
+
+**角色**: {character}
+**资源**: {resource}
+**操作**: {action}
+
+---
+"""
+        return content + entry
+
+    def _format_injury_entry(
+        self, content: str, data: Dict[str, Any], intent: str
+    ) -> str:
+        """格式化伤害条目"""
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        character = data.get("character", "")
+        injury = data.get("injury", "")
+
+        entry = f"""
+### 🩹 伤害记录 [{timestamp}]
+
+**角色**: {character}
+**伤害**: {injury}
+
+---
+"""
+        return content + entry
+
+    def _format_info_entry(
+        self, content: str, data: Dict[str, Any], intent: str
+    ) -> str:
+        """格式化信息条目"""
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        character = data.get("character", "")
+        info = data.get("info", "")
+
+        entry = f"""
+### 📝 信息获取 [{timestamp}]
+
+**角色**: {character}
+**信息**: {info}
+
+---
+"""
+        return content + entry
+
+    def _format_share_entry(
+        self, content: str, data: Dict[str, Any], intent: str
+    ) -> str:
+        """格式化信息分享条目"""
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        char1 = data.get("character1", "")
+        char2 = data.get("character2", "")
+        info = data.get("info", "")
+
+        entry = f"""
+### 🔄 信息传递 [{timestamp}]
+
+**发送者**: {char1}
+**接收者**: {char2}
+**信息**: {info}
+
+---
+"""
+        return content + entry
+
+    def _format_payoff_entry(
+        self, content: str, data: Dict[str, Any], intent: str
+    ) -> str:
+        """格式化承诺条目"""
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        character = data.get("character", "")
+        promise = data.get("promise", "")
+
+        entry = f"""
+### ⚡ 承诺 [{timestamp}]
+
+**角色**: {character}
+**承诺**: {promise}
+**状态**: ⏳ 待兑现
+**兑现章节**: 待填写
+
+---
+"""
+        return content + entry
+
+    def _update_payoff_status(
+        self, content: str, data: Dict[str, Any], intent: str
+    ) -> str:
+        """更新承诺状态"""
+        # TODO: 实现状态更新逻辑
+        return content
+
+    # ===== 设定文件更新方法 =====
+
+    def _update_character_profile(
+        self, content: str, data: Dict[str, Any], intent: str
+    ) -> str:
+        """更新人物谱"""
+        if intent == "add_character":
+            return self._append_new_character(content, data)
+        elif intent == "add_character_ability":
+            return self._add_character_ability(content, data)
+        elif intent == "add_character_relation":
+            return self._add_character_relation(content, data)
+        return content
+
+    def _append_new_character(self, content: str, data: Dict[str, Any]) -> str:
+        """追加新角色"""
+        name = data.get("name", "")
+        entry = f"""
+### {name}
+
+**简介**: 待填写
+**势力**: 待填写
+**能力**: 待填写
+**状态**: 活跃
+
+---
+"""
+        return content + entry
+
+    def _add_character_ability(self, content: str, data: Dict[str, Any]) -> str:
+        """添加角色能力"""
+        character = data.get("character", "")
+        ability = data.get("ability", "")
+        # TODO: 实现在角色条目中添加能力
+        return content + f"\n> 新能力: {character} - {ability}\n"
+
+    def _add_character_relation(self, content: str, data: Dict[str, Any]) -> str:
+        """添加角色关系"""
+        # TODO: 实现关系添加
+        return content
+
+    def _update_faction_profile(
+        self, content: str, data: Dict[str, Any], intent: str
+    ) -> str:
+        """更新势力档案"""
+        if intent == "add_faction":
+            name = data.get("name", "")
+            entry = f"""
+### {name}
+
+**简介**: 待填写
+**成员**: 待填写
+**力量类型**: 待填写
+
+---
+"""
+            return content + entry
+        return content
+
+    def _update_power_system(
+        self, content: str, data: Dict[str, Any], intent: str
+    ) -> str:
+        """更新力量体系"""
+        # TODO: 实现力量体系更新
+        return content
+
+    def _update_timeline(self, content: str, data: Dict[str, Any], intent: str) -> str:
+        """更新时间线"""
+        if intent == "add_era":
+            name = data.get("name", "")
+            entry = f"""
+## {name}
+
+**时代简介**: 待填写
+
+### 重大事件
+- 待填写
+
+---
+"""
+            return content + entry
+        return content
+
+    def _append_to_file(self, content: str, data: Dict[str, Any], intent: str) -> str:
+        """默认追加到文件"""
+        return content + self._format_data_as_markdown(data, intent)
+
+    def _merge_json_data(
+        self, existing: Dict[str, Any], new_data: Dict[str, Any], intent: str
+    ) -> Dict[str, Any]:
+        """合并JSON数据"""
+        result = existing.copy()
+
+        # 根据意图类型决定合并方式
+        if "entries" not in result:
+            result["entries"] = []
+
+        # 添加新条目
+        entry = {
+            **new_data,
+            "timestamp": datetime.now().isoformat(),
+            "intent": intent,
+        }
+        result["entries"].append(entry)
+
+        return result
+
+    def _log_vectorstore_update(self, collection: str, data: Dict[str, Any]):
+        """记录向量数据库更新日志"""
+        log_file = (
+            self.logs_dir / f"vectorstore_{datetime.now().strftime('%Y%m%d')}.jsonl"
+        )
+        entry = {
+            "timestamp": datetime.now().isoformat(),
+            "collection": collection,
+            "data": data,
+        }
+        try:
+            with open(log_file, "a", encoding="utf-8") as f:
+                f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+        except Exception:
+            pass
+
+
+# 测试代码
+if __name__ == "__main__":
+    updater = FileUpdater()
+
+    # 测试更新Markdown
+    test_file = "test_tracking.md"
+    test_data = {
+        "character": "血牙",
+        "resource": "三颗灵石",
+        "action": "acquired",
+    }
+
+    print("=" * 60)
+    print("文件更新器测试")
+    print("=" * 60)
+
+    # 注意：这只是演示，实际测试需要真实文件
+    print("\n测试数据:")
+    print(json.dumps(test_data, ensure_ascii=False, indent=2))

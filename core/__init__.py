@@ -8,6 +8,7 @@
   - Web 界面后端 API
   - CLI 命令行工具（python -m core kb --stats）
   - 自动化后台脚本
+  - 会话数据提取（对话式工作流）
 
 对话形式使用时，AI 直接读取文件、调用 Skills，无需经过此模块。
 
@@ -18,6 +19,7 @@
   - db_connection.py: 数据库连接（含降级模式）
   - error_handler.py: 统一错误处理框架
   - health_check.py: 系统健康检查
+  - conversation/: 会话数据提取模块
 """
 
 from .config_manager import ConfigManager
@@ -45,6 +47,16 @@ from .health_check import (
     HealthCheckResult,
     HealthReport,
     run_health_check,
+)
+from .conversation import (
+    IntentClassifier,
+    IntentCategory,
+    IntentResult,
+    ConversationDataExtractor,
+    ExtractionResult,
+    FileUpdater,
+    UpdateResult,
+    process_user_input,
 )
 
 __all__ = [
@@ -76,4 +88,13 @@ __all__ = [
     "HealthCheckResult",
     "HealthReport",
     "run_health_check",
+    # 会话数据提取
+    "IntentClassifier",
+    "IntentCategory",
+    "IntentResult",
+    "ConversationDataExtractor",
+    "ExtractionResult",
+    "FileUpdater",
+    "UpdateResult",
+    "process_user_input",
 ]

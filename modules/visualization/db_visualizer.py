@@ -102,7 +102,8 @@ class DBVisualizer:
             client.get_collections()
             print(f"连接: Qdrant ({qdrant_url})")
             return client
-        except:
+        except Exception as e:
+            print(f"Qdrant连接失败: {e}")
             pass
 
         # 回退到本地文件
@@ -242,7 +243,8 @@ class DBVisualizer:
                 try:
                     collections = client.get_collections()
                     return [c.name for c in collections.collections]
-                except:
+                except Exception as e:
+                    print(f"获取Qdrant集合失败: {e}")
                     return []
 
         elif db_type == "chroma":
@@ -251,7 +253,8 @@ class DBVisualizer:
                 try:
                     collections = client.list_collections()
                     return [c.name for c in collections]
-                except:
+                except Exception as e:
+                    print(f"获取Chroma集合失败: {e}")
                     return []
 
         return []

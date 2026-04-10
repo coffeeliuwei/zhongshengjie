@@ -1,0 +1,575 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+意图分类器
+==========
+
+识别用户对话中的意图类型，支持25+种意图类型的自动分类。
+
+核心功能：
+- 识别核心意图（设定更新、工作流控制、数据提炼）
+- 识别扩展意图（伏笔、资源、信息、承诺等追踪系统）
+- 提取实体信息
+- 计算置信度
+
+参考：统一提炼引擎重构方案.md 第9.11节
+"""
+
+import re
+from typing import Dict, List, Optional, Any, Tuple
+from dataclasses import dataclass
+from enum import Enum
+
+
+class IntentCategory(Enum):
+    """意图分类"""
+
+    WORKFLOW = "workflow"  # 工作流控制
+    DATA_EXTRACTION = "extraction"  # 数据提炼
+    WORKFLOW_CONTROL = "workflow_control"  # 工作流控制（新增）
+    SETTING_UPDATE = "setting_update"  # 设定更新（新增）
+    CHARACTER = "character"  # 角色设定
+    FACTION = "faction"  # 势力设定
+    POWER = "power"  # 力量体系
+    TIMELINE = "timeline"  # 时间线
+    TRACKING = "tracking"  # 追踪系统
+    PLOT = "plot"  # 剧情
+    QUERY = "query"  # 查询
+    UNKNOWN = "unknown"  # 未知
+
+
+@dataclass
+class IntentResult:
+    """意图识别结果"""
+
+    intent: str  # 意图类型
+    category: IntentCategory  # 意图分类
+    confidence: float  # 置信度 (0.0-1.0)
+    entities: Dict[str, str]  # 提取的实体
+    is_ambiguous: bool = False  # 是否模糊
+    matched_pattern: Optional[str] = None  # 匹配的模式
+    alternatives: Optional[List[Dict[str, Any]]] = None  # 替代结果
+
+
+class IntentClassifier:
+    """意图分类器"""
+
+    # 核心意图（高优先级）
+    CORE_INTENTS = {
+        # 工作流控制
+        "start_chapter": {
+            "patterns": [
+                r"写第(.+?)章",
+                r"开始创作第(.+?)章",
+                r"帮我写第(.+?)章",
+                r"创作第(.+?)章",
+            ],
+            "category": IntentCategory.WORKFLOW,
+            "entities": ["chapter"],
+        },
+        "continue_workflow": {
+            "patterns": [
+                r"继续",
+                r"继续写",
+                r"接着刚才",
+                r"往下写",
+            ],
+            "category": IntentCategory.WORKFLOW,
+            "entities": [],
+        },
+        "pause_workflow": {
+            "patterns": [
+                r"暂停",
+                r"等一下",
+                r"先停",
+                r"休息一下",
+            ],
+            "category": IntentCategory.WORKFLOW,
+            "entities": [],
+        },
+        "undo_last": {
+            "patterns": [
+                r"撤销",
+                r"不对",
+                r"我说错了",
+                r"重写",
+                r"重来",
+            ],
+            "category": IntentCategory.WORKFLOW,
+            "entities": [],
+        },
+        # 数据提炼
+        "full_extraction": {
+            "patterns": [
+                r"提炼数据",
+                r"初始化数据",
+                r"全面提炼",
+                r"更新案例库",
+                r"重新提炼",
+                r"全量提炼",
+            ],
+            "category": IntentCategory.DATA_EXTRACTION,
+            "entities": [],
+        },
+        "incremental_extraction": {
+            "patterns": [
+                r"增量提炼",
+                r"同步新小说",
+                r"更新数据",
+                r"同步小说库",
+                r"增量同步",
+            ],
+            "category": IntentCategory.DATA_EXTRACTION,
+            "entities": [],
+        },
+        # 角色设定
+        "add_character": {
+            "patterns": [
+                r"加个新角色叫(.+)",
+                r"新增角色(.+)",
+                r"有个新角色(.+)",
+                r"加一个角色(.+)",
+            ],
+            "category": IntentCategory.CHARACTER,
+            "entities": ["character_name"],
+        },
+        "add_character_ability": {
+            "patterns": [
+                r"(.+?)有个新能力叫(.+)",
+                r"(.+?)的血脉能力是(.+)",
+                r"(.+?)获得了(.+)能力",
+                r"(.+?)学会了(.+)",
+                r"(.+?)觉醒了(.+)能力",
+            ],
+            "category": IntentCategory.CHARACTER,
+            "entities": ["character", "ability"],
+        },
+        "add_character_relation": {
+            "patterns": [
+                r"(.+?)和(.+?)是(.+)",
+                r"(.+?)和(.+?)的关系是(.+)",
+                r"(.+?)是(.+?)的(.+)",
+            ],
+            "category": IntentCategory.CHARACTER,
+            "entities": ["character1", "character2", "relation"],
+        },
+        "modify_character": {
+            "patterns": [
+                r"(.+?)的性格改成(.+)",
+                r"(.+?)的设定改成(.+)",
+                r"修改(.+?)的(.+)",
+            ],
+            "category": IntentCategory.CHARACTER,
+            "entities": ["character", "attribute", "value"],
+        },
+        # 势力设定
+        "add_faction": {
+            "patterns": [
+                r"加个新势力叫(.+)",
+                r"有个新势力叫(.+)",
+                r"新增势力(.+)",
+                r"加一个势力(.+)",
+            ],
+            "category": IntentCategory.FACTION,
+            "entities": ["faction_name"],
+        },
+        "add_faction_member": {
+            "patterns": [
+                r"(.+?)加入(.+)",
+                r"(.+?)归属于(.+)",
+                r"(.+?)属于(.+)",
+            ],
+            "category": IntentCategory.FACTION,
+            "entities": ["character", "faction"],
+        },
+        # 剧情修改
+        "modify_plot": {
+            "patterns": [
+                r"剧情改成(.+)",
+                r"(.+?)改成(.+)",
+                r"修改剧情(.+)",
+                r"剧情变成(.+)",
+            ],
+            "category": IntentCategory.PLOT,
+            "entities": ["plot_change"],
+        },
+        "add_plot_point": {
+            "patterns": [
+                r"加个剧情(.+)",
+                r"新增剧情(.+)",
+                r"加一个情节(.+)",
+            ],
+            "category": IntentCategory.PLOT,
+            "entities": ["plot_point"],
+        },
+    }
+
+    # 扩展意图（追踪系统）
+    EXTENDED_INTENTS = {
+        # 伏笔追踪
+        "add_hook": {
+            "patterns": [
+                r"这里埋个伏笔[：:]?(.+)",
+                r"埋下伏笔[：:]?(.+)",
+                r"伏笔(.+)",
+            ],
+            "category": IntentCategory.TRACKING,
+            "entities": ["hook_content"],
+        },
+        "advance_hook": {
+            "patterns": [
+                r"这个伏笔推进一下",
+                r"推进伏笔(.+)",
+                r"伏笔(.+?)推进",
+            ],
+            "category": IntentCategory.TRACKING,
+            "entities": ["hook_name"],
+        },
+        "resolve_hook": {
+            "patterns": [
+                r"这个伏笔回收了",
+                r"回收伏笔(.+)",
+                r"伏笔(.+?)回收",
+            ],
+            "category": IntentCategory.TRACKING,
+            "entities": ["hook_name"],
+        },
+        # 资源追踪
+        "add_resource": {
+            "patterns": [
+                r"(.+?)获得了(.+)",
+                r"(.+?)得到(.+)",
+                r"(.+?)拥有了(.+)",
+            ],
+            "category": IntentCategory.TRACKING,
+            "entities": ["character", "resource"],
+        },
+        "consume_resource": {
+            "patterns": [
+                r"(.+?)用了(.+)",
+                r"(.+?)消耗了(.+)",
+                r"(.+?)花费了(.+)",
+            ],
+            "category": IntentCategory.TRACKING,
+            "entities": ["character", "resource"],
+        },
+        "add_injury": {
+            "patterns": [
+                r"(.+?)受了(.+)",
+                r"(.+?)受伤(.+)",
+                r"(.+?)的伤(.+)",
+            ],
+            "category": IntentCategory.TRACKING,
+            "entities": ["character", "injury"],
+        },
+        # 信息边界
+        "add_character_info": {
+            "patterns": [
+                r"(.+?)知道了(.+)",
+                r"(.+?)发现(.+)",
+                r"(.+?)得知(.+)",
+            ],
+            "category": IntentCategory.TRACKING,
+            "entities": ["character", "info"],
+        },
+        "share_info": {
+            "patterns": [
+                r"(.+?)告诉(.+?)(.+)",
+                r"(.+?)向(.+?)透露(.+)",
+                r"(.+?)通知(.+?)(.+)",
+            ],
+            "category": IntentCategory.TRACKING,
+            "entities": ["character1", "character2", "info"],
+        },
+        # 承诺追踪
+        "add_payoff": {
+            "patterns": [
+                r"(.+?)发誓要(.+)",
+                r"(.+?)承诺(.+)",
+                r"(.+?)决心(.+)",
+                r"(.+?)发誓(.+)",
+            ],
+            "category": IntentCategory.TRACKING,
+            "entities": ["character", "promise"],
+        },
+        "deliver_payoff": {
+            "patterns": [
+                r"这个承诺兑现了",
+                r"兑现承诺(.+)",
+                r"承诺(.+?)完成",
+            ],
+            "category": IntentCategory.TRACKING,
+            "entities": ["promise_name"],
+        },
+        # 力量体系
+        "add_power_type": {
+            "patterns": [
+                r"加个新力量体系叫(.+)",
+                r"新增力量体系(.+)",
+                r"加一个力量类型(.+)",
+            ],
+            "category": IntentCategory.POWER,
+            "entities": ["power_type"],
+        },
+        "add_power_level": {
+            "patterns": [
+                r"力量体系加个新境界(.+)",
+                r"(.+?)的力量境界是(.+)",
+                r"加一个境界(.+)",
+            ],
+            "category": IntentCategory.POWER,
+            "entities": ["power_system", "level"],
+        },
+        "add_power_cost": {
+            "patterns": [
+                r"(.+?)的代价是(.+)",
+                r"使用(.+?)代价(.+)",
+                r"(.+?)代价(.+)",
+            ],
+            "category": IntentCategory.POWER,
+            "entities": ["power", "cost"],
+        },
+        # 时间线
+        "add_era": {
+            "patterns": [
+                r"加个新时代叫(.+)",
+                r"新增时代(.+)",
+                r"加一个时代(.+)",
+            ],
+            "category": IntentCategory.TIMELINE,
+            "entities": ["era_name"],
+        },
+        "add_era_event": {
+            "patterns": [
+                r"(.+?)时代加个事件(.+)",
+                r"(.+?)时代发生(.+)",
+                r"(.+?)时代事件(.+)",
+            ],
+            "category": IntentCategory.TIMELINE,
+            "entities": ["era", "event"],
+        },
+        # 查询
+        "query_character": {
+            "patterns": [
+                r"(.+?)是什么设定",
+                r"查一下(.+?)",
+                r"(.+?)的设定",
+                r"查询角色(.+)",
+            ],
+            "category": IntentCategory.QUERY,
+            "entities": ["character_name"],
+        },
+        "query_progress": {
+            "patterns": [
+                r"进度",
+                r"写到哪了",
+                r"现在在干什么",
+                r"当前状态",
+            ],
+            "category": IntentCategory.QUERY,
+            "entities": [],
+        },
+    }
+
+    def __init__(self):
+        """初始化意图分类器"""
+        # 合并所有意图
+        self._all_intents = {**self.CORE_INTENTS, **self.EXTENDED_INTENTS}
+        # 预编译正则表达式
+        self._compiled_patterns: Dict[str, List[Tuple[re.Pattern, List[str]]]] = {}
+        self._compile_patterns()
+
+    def _compile_patterns(self):
+        """预编译所有正则表达式"""
+        for intent_name, intent_config in self._all_intents.items():
+            patterns = []
+            for pattern_str in intent_config["patterns"]:
+                try:
+                    compiled = re.compile(pattern_str, re.IGNORECASE)
+                    patterns.append((compiled, intent_config["entities"]))
+                except re.error as e:
+                    print(
+                        f"Warning: Invalid pattern for {intent_name}: {pattern_str} - {e}"
+                    )
+            self._compiled_patterns[intent_name] = patterns
+
+    def classify(self, user_input: str) -> IntentResult:
+        """
+        分类用户输入的意图
+
+        Args:
+            user_input: 用户输入的文本
+
+        Returns:
+            IntentResult: 意图识别结果
+        """
+        # 先匹配核心意图（优先级高）
+        result = self._match_patterns(user_input, self.CORE_INTENTS, True)
+
+        # 如果核心意图没有匹配，尝试扩展意图
+        if result is None:
+            result = self._match_patterns(user_input, self.EXTENDED_INTENTS, False)
+
+        # 如果都没有匹配，返回未知意图
+        if result is None:
+            return IntentResult(
+                intent="unknown",
+                category=IntentCategory.UNKNOWN,
+                confidence=0.0,
+                entities={},
+                is_ambiguous=False,
+            )
+
+        return result
+
+    def _match_patterns(
+        self, text: str, intent_configs: Dict, is_core: bool
+    ) -> Optional[IntentResult]:
+        """
+        匹配意图模式
+
+        Args:
+            text: 输入文本
+            intent_configs: 意图配置字典
+            is_core: 是否核心意图
+
+        Returns:
+            IntentResult or None
+        """
+        matches = []
+
+        for intent_name, intent_config in intent_configs.items():
+            for compiled_pattern, entity_names in self._compiled_patterns[intent_name]:
+                match = compiled_pattern.search(text)
+                if match:
+                    entities = self._extract_entities(match, entity_names)
+                    confidence = self._calculate_confidence(match, text, is_core)
+                    matches.append(
+                        {
+                            "intent": intent_name,
+                            "category": intent_config["category"],
+                            "confidence": confidence,
+                            "entities": entities,
+                            "matched_pattern": compiled_pattern.pattern,
+                            "match_span": match.span(),
+                        }
+                    )
+
+        if not matches:
+            return None
+
+        # 按置信度排序
+        matches.sort(key=lambda x: x["confidence"], reverse=True)
+
+        # 检查是否有多个高置信度匹配（模糊情况）
+        best_match = matches[0]
+        is_ambiguous = len(matches) > 1 and matches[1]["confidence"] > 0.7
+
+        return IntentResult(
+            intent=best_match["intent"],
+            category=best_match["category"],
+            confidence=best_match["confidence"],
+            entities=best_match["entities"],
+            is_ambiguous=is_ambiguous,
+            matched_pattern=best_match["matched_pattern"],
+            alternatives=matches[1:] if is_ambiguous else None,
+        )
+
+    def _extract_entities(
+        self, match: re.Match, entity_names: List[str]
+    ) -> Dict[str, str]:
+        """
+        从正则匹配中提取实体
+
+        Args:
+            match: 正则匹配对象
+            entity_names: 实体名称列表
+
+        Returns:
+            实体字典
+        """
+        entities = {}
+        groups = match.groups()
+
+        for i, entity_name in enumerate(entity_names):
+            if i < len(groups) and groups[i]:
+                entities[entity_name] = groups[i].strip()
+
+        return entities
+
+    def _calculate_confidence(self, match: re.Match, text: str, is_core: bool) -> float:
+        """
+        计算置信度
+
+        Args:
+            match: 正则匹配对象
+            text: 输入文本
+            is_core: 是否核心意图
+
+        Returns:
+            置信度 (0.0-1.0)
+        """
+        # 基础置信度
+        base_confidence = 0.9 if is_core else 0.8
+
+        # 匹配长度占比
+        match_length = match.end() - match.start()
+        text_length = len(text)
+        length_ratio = match_length / text_length if text_length > 0 else 0
+
+        # 如果匹配覆盖大部分文本，置信度更高
+        confidence = base_confidence + (length_ratio * 0.1)
+
+        # 如果匹配了多个实体，置信度更高
+        entity_count = len(match.groups())
+        if entity_count > 0:
+            filled_entities = sum(1 for g in match.groups() if g)
+            confidence += (filled_entities / entity_count) * 0.05
+
+        return min(confidence, 1.0)
+
+    def get_intent_info(self, intent_name: str) -> Optional[Dict]:
+        """获取意图详细信息"""
+        return self._all_intents.get(intent_name)
+
+    def get_all_intents(self) -> Dict[str, List[str]]:
+        """获取所有支持的意图类型"""
+        return {name: config["patterns"] for name, config in self._all_intents.items()}
+
+    def get_intents_by_category(self, category: IntentCategory) -> List[str]:
+        """按分类获取意图类型"""
+        return [
+            name
+            for name, config in self._all_intents.items()
+            if config["category"] == category
+        ]
+
+
+# 测试代码
+if __name__ == "__main__":
+    classifier = IntentClassifier()
+
+    test_inputs = [
+        "写第一章",
+        "血牙有个新能力叫血脉守护",
+        "加个新势力叫暗影宗",
+        "这里埋个伏笔：血牙的身世之谜",
+        "提炼数据",
+        "继续",
+        "血牙获得了三颗灵石",
+        "血牙发誓要杀了魔王",
+        "查一下血牙的设定",
+    ]
+
+    print("=" * 60)
+    print("意图分类器测试")
+    print("=" * 60)
+
+    for input_text in test_inputs:
+        result = classifier.classify(input_text)
+        print(f"\n输入: {input_text}")
+        print(f"意图: {result.intent}")
+        print(f"分类: {result.category.value}")
+        print(f"置信度: {result.confidence:.2f}")
+        print(f"实体: {result.entities}")
+        print(f"模糊: {result.is_ambiguous}")

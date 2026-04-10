@@ -28,10 +28,33 @@ import argparse
 import json
 import re
 import hashlib
+import sys
 from pathlib import Path
 from datetime import datetime
 from typing import Dict, List, Any, Optional, Set
 from dataclasses import dataclass, asdict
+
+# 添加 .vectorstore/core 到路径
+_project_root = Path(__file__).resolve().parent.parent
+if str(_project_root / ".vectorstore" / "core") not in sys.path:
+    sys.path.insert(0, str(_project_root / ".vectorstore" / "core"))
+
+# 尝试导入统一配置加载器
+try:
+    from config_loader import (
+        get_config,
+        get_qdrant_url,
+        get_model_path,
+        get_case_library_dir,
+        get_collection_name,
+        get_novel_sources,
+        get_project_root,
+    )
+
+    HAS_CONFIG_LOADER = True
+except ImportError:
+    HAS_CONFIG_LOADER = False
+    print("[case_builder] 警告: 未找到 config_loader，使用默认配置")
 
 
 # 场景类型定义
@@ -410,20 +433,45 @@ class Case:
 class CaseBuilder:
     """案例库构建器"""
 
-    def __init__(self, case_library_dir: Path, config: Optional[Dict] = None):
-        self.case_library_dir = case_library_dir
-        self.config = config or {}
-        self.qdrant_url = self.config.get("qdrant_url", "http://localhost:6333")
-        self.collection_name = self.config.get("collections", {}).get(
-            "case_library", "case_library_v2"
-        )
+    def __init__(self, case_library_dir: Path = None, config: Optional[Dict] = None):
+        """
+        初始化案例库构建器
+
+        Args:
+            case_library_dir: 案例库目录，None 则使用 config_loader 获取
+            config: 配置字典，None 则使用 config_loader 获取
+        """
+        # 使用统一配置加载器
+        if HAS_CONFIG_LOADER:
+            self.config = config or get_config()
+            self.qdrant_url = get_qdrant_url()
+            self.collection_name = get_collection_name("case_library")
+            self.case_library_dir = case_library_dir or get_case_library_dir()
+            self.model_path = get_model_path()
+            self.novel_sources = get_novel_sources()
+        else:
+            # 回退到旧方式
+            self.config = config or {}
+            self.qdrant_url = self.config.get("qdrant_url", "http://localhost:6333")
+            self.collection_name = self.config.get("collections", {}).get(
+                "case_library", "case_library_v2"
+            )
+            self.case_library_dir = case_library_dir or Path(".case-library")
+            self.model_path = self.config.get("model_path")
+            self.novel_sources = self.config.get("novel_sources", {}).get(
+                "directories", []
+            )
+
+        # 确保 case_library_dir 是 Path 对象
+        if not isinstance(self.case_library_dir, Path):
+            self.case_library_dir = Path(self.case_library_dir)
 
         # 目录结构
-        self.converted_dir = case_library_dir / "converted"
-        self.cases_dir = case_library_dir / "cases"
-        self.logs_dir = case_library_dir / "logs"
-        self.index_file = case_library_dir / "case_index.json"
-        self.stats_file = case_library_dir / "case_stats.json"
+        self.converted_dir = self.case_library_dir / "converted"
+        self.cases_dir = self.case_library_dir / "cases"
+        self.logs_dir = self.case_library_dir / "logs"
+        self.index_file = self.case_library_dir / "case_index.json"
+        self.stats_file = self.case_library_dir / "case_stats.json"
 
         # 内部状态
         self.novel_index: Dict[str, Any] = {}
@@ -534,11 +582,25 @@ python case_builder.py --sync
         print(f"目录位置: {self.case_library_dir}")
         return True
 
-    def scan_sources(self, source_dirs: List[Path]):
-        """扫描小说资源目录"""
+    def scan_sources(self, source_dirs: List[Path] = None):
+        """
+        扫描小说资源目录
+
+        Args:
+            source_dirs: 要扫描的目录列表，None 则使用 config.json 中的 novel_sources
+        """
         print("\n" + "=" * 60)
         print("扫描小说资源")
         print("=" * 60)
+
+        # 如果未指定目录，使用配置中的 novel_sources
+        if source_dirs is None or len(source_dirs) == 0:
+            if self.novel_sources:
+                source_dirs = [Path(d) for d in self.novel_sources]
+                print(f"    使用配置中的 novel_sources: {len(source_dirs)} 个目录")
+            else:
+                print("    ✗ 未指定扫描目录，且 config.json 中未配置 novel_sources")
+                return False
 
         total_files = 0
         file_types = {"txt": 0, "epub": 0, "mobi": 0, "other": 0}
@@ -940,7 +1002,8 @@ python case_builder.py --sync
 
         print(f"    找到 {len(all_cases)} 条案例")
 
-        # 连接Qdrant
+        # 连接Qdrant（使用统一配置）
+        print(f"    连接 Qdrant: {self.qdrant_url}")
         client = QdrantClient(url=self.qdrant_url)
 
         # 检查collection
@@ -957,19 +1020,15 @@ python case_builder.py --sync
                 sparse_vectors_config={"sparse": SparseVectorParams()},
             )
 
-        # 加载模型
+        # 加载模型（使用统一配置）
         print("\n加载BGE-M3模型...")
-        model_path = self.config.get("model_path")
-        if model_path:
-            model = BGEM3FlagModel(model_path, use_fp16=True, device="cpu")
+        if self.model_path:
+            print(f"    模型路径: {self.model_path}")
+            model = BGEM3FlagModel(self.model_path, use_fp16=True, device="cpu")
         else:
-            import os
-
-            cache_path = os.environ.get("BGE_M3_MODEL_PATH")
-            if cache_path:
-                model = BGEM3FlagModel(cache_path, use_fp16=True, device="cpu")
-            else:
-                model = BGEM3FlagModel("BAAI/bge-m3", use_fp16=True, device="cpu")
+            # 回退到自动下载
+            print("    自动下载模型...")
+            model = BGEM3FlagModel("BAAI/bge-m3", use_fp16=True, device="cpu")
         print("    模型加载完成")
 
         # 同步
@@ -1228,7 +1287,12 @@ def main():
 
     # 命令
     parser.add_argument("--init", action="store_true", help="初始化案例库")
-    parser.add_argument("--scan", nargs="+", metavar="DIR", help="扫描小说资源目录")
+    parser.add_argument(
+        "--scan",
+        nargs="*",
+        metavar="DIR",
+        help="扫描小说资源目录（无参数则使用 config.json 中的 novel_sources）",
+    )
     parser.add_argument("--convert", action="store_true", help="转换小说格式")
     parser.add_argument("--extract", action="store_true", help="提取案例")
     parser.add_argument("--discover", action="store_true", help="自动发现新场景类型")
@@ -1251,23 +1315,29 @@ def main():
 
     args = parser.parse_args()
 
-    # 加载配置
-    config = {}
+    # 加载配置（可选）
+    config = None
     if args.config:
         config_path = Path(args.config)
         if config_path.exists():
             with open(config_path, "r", encoding="utf-8") as f:
                 config = json.load(f)
 
-    # 案例库目录
-    case_library_dir = Path(args.case_library_dir)
+    # 案例库目录（可选，None 则使用 config_loader）
+    case_library_dir = None
+    if args.case_library_dir and args.case_library_dir != ".case-library":
+        case_library_dir = Path(args.case_library_dir)
+
+    # 创建构建器（使用统一配置）
     builder = CaseBuilder(case_library_dir, config)
 
     # 执行命令
     if args.init:
         builder.init_structure()
-    elif args.scan:
-        builder.scan_sources([Path(d) for d in args.scan])
+    elif args.scan is not None:  # --scan 被指定（可能有参数也可能没有）
+        # 支持有参数和无参数两种方式
+        scan_dirs = [Path(d) for d in args.scan] if args.scan else None
+        builder.scan_sources(scan_dirs)
     elif args.convert:
         builder.convert_files(limit=args.limit)
     elif args.extract:
@@ -1289,7 +1359,9 @@ def main():
         parser.print_help()
         print("\n示例:")
         print("  python case_builder.py --init")
-        print("  python case_builder.py --scan E:/小说资源")
+        print(
+            "  python case_builder.py --scan  # 自动使用 config.json 中的 novel_sources"
+        )
         print("  python case_builder.py --convert")
         print("  python case_builder.py --extract --limit 1000")
         print(
@@ -1300,6 +1372,8 @@ def main():
         )
         print("  python case_builder.py --apply-discovered --confidence 0.7 # 手动应用")
         print("  python case_builder.py --sync")
+        print()
+        print("配置来源: config.json (通过 config_loader.py 统一加载)")
 
 
 if __name__ == "__main__":
