@@ -407,3 +407,133 @@ if __name__ == "__main__":
     principles = api.get_world_principles()
     print(f"   道德观: {principles['moral_view']}")
     print(f"   核心主题: {principles['core_theme']}")
+
+    # ============================================================
+    # 世界观元素命名规律检索（新增）
+    # ============================================================
+
+    def search_naming_patterns(
+        self,
+        element_type: str = None,
+        query: str = None,
+        min_frequency: int = 3,
+        limit: int = 20,
+    ) -> List[Dict[str, Any]]:
+        """
+        检索世界观元素命名规律
+
+        从 worldview_element_v1 Collection 检索命名模式，
+        用于创作新地名/组织名时参考。
+
+        Args:
+            element_type: 元素类型（地点/组织/势力）
+            query: 查询文本（如"城"、"宗"、"门"）
+            min_frequency: 最小出现频次
+            limit: 返回数量
+
+        Returns:
+            命名规律列表：
+            [
+                {
+                    "element_name": "玄武城",
+                    "element_type": "地点",
+                    "total_frequency": 156,
+                    "novel_count": 12,
+                    "naming_pattern": "形容词+城",
+                    "is_cross_novel": True
+                },
+                ...
+            ]
+
+        Example:
+            # 获取城类命名规律
+            patterns = api.search_naming_patterns(element_type="地点", query="城")
+
+            # 获取宗门类命名规律
+            patterns = api.search_naming_patterns(element_type="组织", query="宗")
+        """
+        try:
+            from qdrant_client import QdrantClient
+
+            client = QdrantClient(url="http://localhost:6333")
+
+            # 构建 filter
+            filter_conditions = []
+            if element_type:
+                filter_conditions.append(
+                    models.Filter(
+                        must=[
+                            models.FieldCondition(
+                                key="element_type",
+                                match=models.MatchValue(value=element_type),
+                            )
+                        ]
+                    )
+                )
+
+            filter_obj = (
+                models.Filter(must=filter_conditions) if filter_conditions else None
+            )
+
+            # scroll 获取数据
+            results = client.scroll(
+                collection_name="worldview_element_v1",
+                with_payload=True,
+                with_vectors=False,
+                limit=limit * 5,  # 扩大召回范围
+                query_filter=filter_obj,
+            )[0]
+
+            # 过滤低频元素
+            filtered = []
+            for point in results:
+                payload = point.payload
+                freq = payload.get("total_frequency", 0)
+                if freq >= min_frequency:
+                    # 如果有query，检查是否匹配
+                    if query:
+                        element_name = payload.get("element_name", "")
+                        if query in element_name:
+                            filtered.append(payload)
+                    else:
+                        filtered.append(payload)
+
+            # 按频次排序
+            filtered.sort(key=lambda x: x.get("total_frequency", 0), reverse=True)
+
+            return filtered[:limit]
+
+        except Exception as e:
+            print(f"[警告] 世界观元素检索失败: {e}")
+            return []
+
+    def get_element_statistics(self) -> Dict[str, Any]:
+        """
+        获取世界观元素统计信息
+
+        Returns:
+            {
+                "total_elements": 209223,
+                "by_type": {"地点": 85600, "组织": 72400, "势力": 51223},
+                "cross_novel_count": 156,
+                "top_elements": [...]
+            }
+        """
+        try:
+            from qdrant_client import QdrantClient
+
+            client = QdrantClient(url="http://localhost:6333")
+
+            # 获取 Collection 信息
+            info = client.get_collection("worldview_element_v1")
+
+            stats = {
+                "total_elements": info.points_count,
+                "collection_status": info.status.value,
+            }
+
+            return stats
+
+        except Exception as e:
+            print(f"[警告] 统计信息获取失败: {e}")
+            return {"total_elements": 0}

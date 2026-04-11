@@ -12,7 +12,21 @@ from dataclasses import dataclass, asdict
 from datetime import datetime
 
 # 从配置加载器导入路径获取函数
-from core.config_loader import get_project_root
+import sys
+from pathlib import Path
+
+_project_root = Path(__file__).resolve().parent.parent.parent
+if str(_project_root) not in sys.path:
+    sys.path.insert(0, str(_project_root))
+if str(_project_root / ".vectorstore" / "core") not in sys.path:
+    sys.path.insert(0, str(_project_root / ".vectorstore" / "core"))
+
+try:
+    from config_loader import get_project_root, get_vectorstore_dir
+
+    HAS_CONFIG_LOADER = True
+except ImportError:
+    HAS_CONFIG_LOADER = False
 
 
 @dataclass
@@ -133,8 +147,14 @@ class VectorizerManager:
         Args:
             project_dir: 项目根目录（默认从配置加载）
         """
-        self.project_dir = project_dir or get_project_root()
-        self.vectorstore_dir = self.project_dir / ".vectorstore"
+        self.project_dir = project_dir or (
+            get_project_root() if HAS_CONFIG_LOADER else Path.cwd()
+        )
+        self.vectorstore_dir = (
+            get_vectorstore_dir()
+            if HAS_CONFIG_LOADER
+            else self.project_dir / ".vectorstore"
+        )
 
         # 数据源路径
         self.outline_dir = self.project_dir / "章节大纲"

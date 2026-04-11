@@ -42,21 +42,29 @@ import traceback
 # 添加项目路径
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
-sys.path.insert(0, str(PROJECT_ROOT / ".novel-extractor"))
-sys.path.insert(0, str(PROJECT_ROOT / ".vectorstore" / "core"))
 
-# 导入现有模块
+# 导入配置加载器
 try:
     from core.config_loader import (
         get_config,
         get_project_root,
         get_qdrant_url,
         get_novel_sources,
+        get_novel_extractor_dir,
+        get_vectorstore_dir,
     )
 
     HAS_CONFIG_LOADER = True
 except ImportError:
     HAS_CONFIG_LOADER = False
+
+# 从配置加载路径
+if HAS_CONFIG_LOADER:
+    sys.path.insert(0, str(get_novel_extractor_dir()))
+    sys.path.insert(0, str(get_vectorstore_dir() / "core"))
+else:
+    sys.path.insert(0, str(PROJECT_ROOT / ".novel-extractor"))
+    sys.path.insert(0, str(PROJECT_ROOT / ".vectorstore" / "core"))
 
 try:
     from unified_config import (
@@ -186,9 +194,15 @@ class UnifiedExtractor:
         """初始化统一提炼引擎"""
         self.config = config or {}
         self.project_root = PROJECT_ROOT
-        self.progress_file = (
-            self.project_root / ".novel-extractor" / "unified_progress.json"
-        )
+
+        # 从配置加载路径
+        if HAS_CONFIG_LOADER:
+            self.progress_file = get_novel_extractor_dir() / "unified_progress.json"
+        else:
+            self.progress_file = (
+                self.project_root / ".novel-extractor" / "unified_progress.json"
+            )
+
         self.progress = self._load_progress()
         self._lock = Lock()
 

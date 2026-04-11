@@ -18,7 +18,13 @@ from pathlib import Path
 from typing import Dict, List, Any, Optional
 
 # 从配置加载器导入路径获取函数
-from core.config_loader import get_project_root, get_qdrant_url, get_model_path
+from core.config_loader import (
+    get_project_root,
+    get_qdrant_url,
+    get_model_path,
+    get_vectorstore_dir,
+    get_qdrant_storage_dir,
+)
 
 try:
     from qdrant_client import QdrantClient
@@ -30,7 +36,7 @@ except ImportError:
 # 导入配置
 import sys
 
-config_dir = Path(__file__).parent.parent.parent / ".vectorstore"
+config_dir = get_vectorstore_dir()
 if str(config_dir) not in sys.path:
     sys.path.insert(0, str(config_dir))
 from bge_m3_config import (
@@ -99,8 +105,8 @@ class HybridSearchManager:
         else:
             self.project_dir = Path(project_dir)
 
-        self.vectorstore_dir = self.project_dir / ".vectorstore"
-        self.qdrant_dir = self.vectorstore_dir / "qdrant"
+        self.vectorstore_dir = get_vectorstore_dir()
+        self.qdrant_dir = get_qdrant_storage_dir()
 
         # Qdrant 客户端
         self._client = None
@@ -253,24 +259,22 @@ class HybridSearchManager:
 
             results = client.query_points(
                 collection_name=collection_name,
-                query=models.FusionQuery(
-                    fusion=models.Fusion.RRF,
-                    prefetch=[
-                        models.Prefetch(
-                            query=query_vectors["dense"],
-                            using="dense",
-                            limit=self.recall_config["dense_limit"],
-                            filter=query_filter,
-                        ),
-                        models.Prefetch(
-                            query=sparse_vector,
-                            using="sparse",
-                            limit=self.recall_config["sparse_limit"],
-                            filter=query_filter,
-                        ),
-                    ],
-                    limit=self.recall_config["fusion_limit"],
-                ),
+                prefetch=[
+                    models.Prefetch(
+                        query=query_vectors["dense"],
+                        using="dense",
+                        limit=self.recall_config["dense_limit"],
+                        filter=query_filter,
+                    ),
+                    models.Prefetch(
+                        query=sparse_vector,
+                        using="sparse",
+                        limit=self.recall_config["sparse_limit"],
+                        filter=query_filter,
+                    ),
+                ],
+                query=models.FusionQuery(fusion=models.Fusion.RRF),
+                limit=self.recall_config["fusion_limit"],
                 with_payload=True,
             )
         except Exception as e:
@@ -373,24 +377,22 @@ class HybridSearchManager:
 
             results = client.query_points(
                 collection_name=collection_name,
-                query=models.FusionQuery(
-                    fusion=models.Fusion.RRF,
-                    prefetch=[
-                        models.Prefetch(
-                            query=query_vectors["dense"],
-                            using="dense",
-                            limit=self.recall_config["dense_limit"],
-                            filter=query_filter,
-                        ),
-                        models.Prefetch(
-                            query=sparse_vector,
-                            using="sparse",
-                            limit=self.recall_config["sparse_limit"],
-                            filter=query_filter,
-                        ),
-                    ],
-                    limit=self.recall_config["fusion_limit"],
-                ),
+                prefetch=[
+                    models.Prefetch(
+                        query=query_vectors["dense"],
+                        using="dense",
+                        limit=self.recall_config["dense_limit"],
+                        filter=query_filter,
+                    ),
+                    models.Prefetch(
+                        query=sparse_vector,
+                        using="sparse",
+                        limit=self.recall_config["sparse_limit"],
+                        filter=query_filter,
+                    ),
+                ],
+                query=models.FusionQuery(fusion=models.Fusion.RRF),
+                limit=self.recall_config["fusion_limit"],
                 with_payload=True,
             )
         except Exception as e:
@@ -496,24 +498,22 @@ class HybridSearchManager:
 
             results = client.query_points(
                 collection_name=collection_name,
-                query=models.FusionQuery(
-                    fusion=models.Fusion.RRF,
-                    prefetch=[
-                        models.Prefetch(
-                            query=query_vectors["dense"],
-                            using="dense",
-                            limit=self.recall_config["dense_limit"],
-                            filter=query_filter,
-                        ),
-                        models.Prefetch(
-                            query=sparse_vector,
-                            using="sparse",
-                            limit=self.recall_config["sparse_limit"],
-                            filter=query_filter,
-                        ),
-                    ],
-                    limit=self.recall_config["fusion_limit"],
-                ),
+                prefetch=[
+                    models.Prefetch(
+                        query=query_vectors["dense"],
+                        using="dense",
+                        limit=self.recall_config["dense_limit"],
+                        filter=query_filter,
+                    ),
+                    models.Prefetch(
+                        query=sparse_vector,
+                        using="sparse",
+                        limit=self.recall_config["sparse_limit"],
+                        filter=query_filter,
+                    ),
+                ],
+                query=models.FusionQuery(fusion=models.Fusion.RRF),
+                limit=self.recall_config["fusion_limit"],
                 with_payload=True,
             )
         except Exception as e:
@@ -706,6 +706,252 @@ class HybridSearchManager:
                 if p.payload.get("type") == "势力"
             ]
         except Exception:
+            return []
+
+    # ==================== 扩展维度检索 ====================
+
+    def search_worldview(
+        self,
+        query: str,
+        element_type: Optional[str] = None,
+        top_k: int = 10,
+    ) -> List[Dict[str, Any]]:
+        """检索世界观元素"""
+        collection_name = COLLECTION_NAMES.get("worldview_element")
+        if not collection_name:
+            return []
+
+        client = self._get_client()
+        collections = [c.name for c in client.get_collections().collections]
+        if collection_name not in collections:
+            return []
+
+        query_vectors = self._encode_query(query)
+
+        try:
+            results = client.query_points(
+                collection_name=collection_name,
+                query=query_vectors["dense"],
+                using="dense",
+                limit=top_k,
+                with_payload=True,
+            )
+
+            formatted = []
+            for p in results.points:
+                formatted.append(
+                    {
+                        "id": p.id,
+                        "text": p.payload.get("text", ""),
+                        "element_type": p.payload.get("element_type", ""),
+                        "total_frequency": p.payload.get("total_frequency", 0),
+                        "score": p.score,
+                    }
+                )
+
+            if element_type:
+                formatted = [
+                    r for r in formatted if element_type in r.get("element_type", "")
+                ]
+
+            return formatted
+        except Exception as e:
+            print(f"世界观检索错误: {e}")
+            return []
+
+    def search_power_vocabulary(
+        self,
+        query: str,
+        category: Optional[str] = None,
+        top_k: int = 10,
+    ) -> List[Dict[str, Any]]:
+        """检索力量词汇"""
+        collection_name = COLLECTION_NAMES.get("power_vocabulary")
+        if not collection_name:
+            return []
+
+        client = self._get_client()
+        collections = [c.name for c in client.get_collections().collections]
+        if collection_name not in collections:
+            return []
+
+        query_vectors = self._encode_query(query)
+
+        try:
+            results = client.query_points(
+                collection_name=collection_name,
+                query=query_vectors["dense"],
+                using="dense",
+                limit=top_k,
+                with_payload=True,
+            )
+
+            formatted = []
+            for p in results.points:
+                formatted.append(
+                    {
+                        "id": p.id,
+                        "text": p.payload.get("text", ""),
+                        "category": p.payload.get("category", ""),
+                        "power_type": p.payload.get("power_type", ""),
+                        "score": p.score,
+                    }
+                )
+
+            if category:
+                formatted = [r for r in formatted if category in r.get("category", "")]
+
+            return formatted
+        except Exception as e:
+            print(f"力量词汇检索错误: {e}")
+            return []
+
+    def search_character_relation(
+        self,
+        query: str,
+        character: Optional[str] = None,
+        top_k: int = 10,
+    ) -> List[Dict[str, Any]]:
+        """检索人物关系"""
+        collection_name = COLLECTION_NAMES.get("character_relation")
+        if not collection_name:
+            return []
+
+        client = self._get_client()
+        collections = [c.name for c in client.get_collections().collections]
+        if collection_name not in collections:
+            return []
+
+        query_vectors = self._encode_query(query)
+
+        try:
+            results = client.query_points(
+                collection_name=collection_name,
+                query=query_vectors["dense"],
+                using="dense",
+                limit=top_k,
+                with_payload=True,
+            )
+
+            formatted = []
+            for p in results.points:
+                formatted.append(
+                    {
+                        "id": p.id,
+                        "text": p.payload.get("text", ""),
+                        "character1": p.payload.get("character1", ""),
+                        "character2": p.payload.get("character2", ""),
+                        "score": p.score,
+                    }
+                )
+
+            if character:
+                formatted = [
+                    r
+                    for r in formatted
+                    if character in r.get("character1", "")
+                    or character in r.get("character2", "")
+                ]
+
+            return formatted
+        except Exception as e:
+            print(f"人物关系检索错误: {e}")
+            return []
+
+    def retrieve_for_scene(
+        self,
+        scene_type: str,
+        context: Optional[str] = None,
+        top_k: int = 3,
+    ) -> Dict[str, List[Dict[str, Any]]]:
+        """
+        场景创作素材检索
+
+        根据场景类型自动选择合适的检索源，返回技法+案例+词汇的完整素材包
+
+        Args:
+            scene_type: 场景类型 "战斗"/"开篇"/"情感"等
+            context: 额外上下文
+            top_k: 每类返回数量
+
+        Returns:
+            Dict[str, List]: 按类型分组的素材
+        """
+        query = scene_type + "场景"
+        if context:
+            query = context + " " + scene_type + "场景"
+
+        source_map = {
+            "战斗": ["technique", "case", "power_vocabulary"],
+            "开篇": ["technique", "case", "worldview_element"],
+            "情感": ["technique", "case"],
+            "对话": ["technique", "dialogue_style"],
+            "悬念": ["technique", "case"],
+            "转折": ["technique", "case"],
+            "心理": ["technique", "case"],
+            "环境": ["technique", "worldview_element"],
+        }
+
+        sources = source_map.get(scene_type, ["technique", "case"])
+
+        results = {}
+        for source in sources:
+            if source == "technique":
+                results["technique"] = self.search_technique(query, top_k=top_k)
+            elif source == "case":
+                results["case"] = self.search_case(query, top_k=top_k)
+            elif source == "power_vocabulary":
+                results["power"] = self.search_power_vocabulary(query, top_k=top_k)
+            elif source == "worldview_element":
+                results["worldview"] = self.search_worldview(query, top_k=top_k)
+            elif source == "dialogue_style":
+                results["dialogue"] = self.search_extended(
+                    "dialogue_style", query, top_k=top_k
+                )
+
+        return results
+
+    def search_extended(
+        self,
+        collection_key: str,
+        query: str,
+        top_k: int = 10,
+    ) -> List[Dict[str, Any]]:
+        """通用扩展维度检索"""
+        collection_name = COLLECTION_NAMES.get(collection_key)
+        if not collection_name:
+            return []
+
+        client = self._get_client()
+        collections = [c.name for c in client.get_collections().collections]
+        if collection_name not in collections:
+            return []
+
+        query_vectors = self._encode_query(query)
+
+        try:
+            results = client.query_points(
+                collection_name=collection_name,
+                query=query_vectors["dense"],
+                using="dense",
+                limit=top_k,
+                with_payload=True,
+            )
+
+            formatted = []
+            for p in results.points:
+                formatted.append(
+                    {
+                        "id": p.id,
+                        "text": p.payload.get("text", p.payload.get("content", "")),
+                        "payload": p.payload,
+                        "score": p.score,
+                    }
+                )
+
+            return formatted
+        except Exception as e:
+            print(f"扩展检索错误: {e}")
             return []
 
 

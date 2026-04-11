@@ -21,9 +21,25 @@
 
 import argparse
 import json
+import sys
 from pathlib import Path
 from datetime import datetime
 from typing import Dict, List, Optional
+
+# 添加项目路径
+_project_root = Path(__file__).resolve().parent.parent
+if str(_project_root) not in sys.path:
+    sys.path.insert(0, str(_project_root))
+if str(_project_root / ".vectorstore" / "core") not in sys.path:
+    sys.path.insert(0, str(_project_root / ".vectorstore" / "core"))
+
+# 尝试导入统一配置加载器
+try:
+    from config_loader import get_scene_writer_mapping_path, get_vectorstore_dir
+
+    HAS_CONFIG_LOADER = True
+except ImportError:
+    HAS_CONFIG_LOADER = False
 
 
 # 默认场景-作家映射
@@ -138,9 +154,14 @@ DEFAULT_SCENE_MAPPING = {
 class SceneMappingBuilder:
     """场景映射构建器"""
 
-    def __init__(self, vectorstore_dir: Path):
-        self.vectorstore_dir = vectorstore_dir
-        self.mapping_file = vectorstore_dir / "scene_writer_mapping.json"
+    def __init__(self, vectorstore_dir: Path = None):
+        # 使用统一配置加载器
+        if HAS_CONFIG_LOADER:
+            self.vectorstore_dir = vectorstore_dir or get_vectorstore_dir()
+            self.mapping_file = get_scene_writer_mapping_path()
+        else:
+            self.vectorstore_dir = vectorstore_dir or Path(".vectorstore")
+            self.mapping_file = self.vectorstore_dir / "scene_writer_mapping.json"
         self.mapping = None
 
     def init_mapping(self):
@@ -306,7 +327,7 @@ class SceneMappingBuilder:
 
 def main():
     parser = argparse.ArgumentParser(description="场景映射构建器")
-    parser.add_argument("--vectorstore-dir", default=".vectorstore", help="向量库目录")
+    parser.add_argument("--vectorstore-dir", default=None, help="向量库目录")
 
     # 命令
     parser.add_argument("--init", action="store_true", help="初始化默认映射")
@@ -326,7 +347,7 @@ def main():
 
     args = parser.parse_args()
 
-    vectorstore_dir = Path(args.vectorstore_dir)
+    vectorstore_dir = Path(args.vectorstore_dir) if args.vectorstore_dir else None
     builder = SceneMappingBuilder(vectorstore_dir)
 
     if args.init:

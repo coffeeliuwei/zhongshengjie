@@ -332,6 +332,131 @@ class CharacterAPI:
 
         return all_techniques
 
+    # ============================================================
+    # 人物关系图谱检索（新增）
+    # ============================================================
+
+    def search_relation_patterns(
+        self,
+        relation_type: str = None,
+        character_name: str = None,
+        min_cooccurrence: int = 3,
+        limit: int = 20,
+    ) -> List[Dict[str, Any]]:
+        """
+        检索人物关系模式
+
+        从 character_relation_v1 Collection 检索人物共现关系，
+        用于创作人物关系描写时参考。
+
+        Args:
+            relation_type: 关系类型（师徒/同门/敌对/爱慕等）
+            character_name: 角色名称（用于查找该角色的关系）
+            min_cooccurrence: 最小共现次数
+            limit: 返回数量
+
+        Returns:
+            关系模式列表：
+            [
+                {
+                    "character1": "林雷",
+                    "character2": "迪莉娅",
+                    "cooccurrence_count": 156,
+                    "relation_type": "爱慕",
+                    "novel_count": 12
+                },
+                ...
+            ]
+
+        Example:
+            # 获取师徒关系模式
+            patterns = api.search_relation_patterns(min_cooccurrence=10)
+
+            # 获取特定角色的关系
+            patterns = api.search_relation_patterns(character_name="林雷")
+        """
+        try:
+            from qdrant_client import QdrantClient
+            from qdrant_client.http import models
+
+            client = QdrantClient(url="http://localhost:6333")
+
+            # 构建 filter
+            filter_conditions = []
+            if character_name:
+                # 搜索包含该角色的关系
+                filter_conditions.append(
+                    models.Filter(
+                        should=[
+                            models.FieldCondition(
+                                key="character1",
+                                match=models.MatchValue(value=character_name),
+                            ),
+                            models.FieldCondition(
+                                key="character2",
+                                match=models.MatchValue(value=character_name),
+                            ),
+                        ]
+                    )
+                )
+
+            filter_obj = (
+                models.Filter(must=filter_conditions) if filter_conditions else None
+            )
+
+            # scroll 获取数据
+            results = client.scroll(
+                collection_name="character_relation_v1",
+                with_payload=True,
+                with_vectors=False,
+                limit=limit * 5,
+                query_filter=filter_obj,
+            )[0]
+
+            # 过滤低频关系
+            filtered = []
+            for point in results:
+                payload = point.payload
+                count = payload.get("cooccurrence_count", 0)
+                if count >= min_cooccurrence:
+                    filtered.append(payload)
+
+            # 按共现次数排序
+            filtered.sort(key=lambda x: x.get("cooccurrence_count", 0), reverse=True)
+
+            return filtered[:limit]
+
+        except Exception as e:
+            print(f"[警告] 人物关系检索失败: {e}")
+            return []
+
+    def get_relation_statistics(self) -> Dict[str, Any]:
+        """
+        获取人物关系统计信息
+
+        Returns:
+            {
+                "total_relations": 198500,
+                "top_pairs": [...],
+                "collection_status": "green"
+            }
+        """
+        try:
+            from qdrant_client import QdrantClient
+
+            client = QdrantClient(url="http://localhost:6333")
+
+            info = client.get_collection("character_relation_v1")
+
+            return {
+                "total_relations": info.points_count,
+                "collection_status": info.status.value,
+            }
+
+        except Exception as e:
+            print(f"[警告] 统计信息获取失败: {e}")
+            return {"total_relations": 0}
+
 
 # 全局API实例
 _character_api: Optional[CharacterAPI] = None

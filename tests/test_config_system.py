@@ -35,8 +35,8 @@ from core.config_loader import (
 test_results = {"passed": [], "failed": [], "details": {}}
 
 
-def test_api(api_name: str, func, expected_type=None, path_check=False):
-    """通用测试函数"""
+def _check_api(api_name: str, func, expected_type=None, path_check=False):
+    """通用API检查函数（非pytest测试）"""
     try:
         result = func()
 
@@ -98,23 +98,23 @@ def run_tests():
     # ==================== 1. 基础配置 ====================
     print("\n### 1. 基础配置")
 
-    test_api("get_config", get_config, dict)
-    test_api("get_project_root", get_project_root, Path, path_check=True)
-    test_api("get_config_path", get_config_path, Path)
+    _check_api("get_config", get_config, dict)
+    _check_api("get_project_root", get_project_root, Path, path_check=True)
+    _check_api("get_config_path", get_config_path, Path)
 
     # ==================== 2. 路径API ====================
     print("\n### 2. 路径API")
 
-    test_api("get_settings_dir", get_settings_dir, Path)
-    test_api("get_techniques_dir", get_techniques_dir, Path)
-    test_api("get_vectorstore_dir", get_vectorstore_dir, Path, path_check=True)
-    test_api("get_case_library_dir", get_case_library_dir, Path)
-    test_api("get_logs_dir", get_logs_dir, Path)
+    _check_api("get_settings_dir", get_settings_dir, Path)
+    _check_api("get_techniques_dir", get_techniques_dir, Path)
+    _check_api("get_vectorstore_dir", get_vectorstore_dir, Path, path_check=True)
+    _check_api("get_case_library_dir", get_case_library_dir, Path)
+    _check_api("get_logs_dir", get_logs_dir, Path)
 
     # ==================== 3. 数据库API ====================
     print("\n### 3. 数据库API")
 
-    test_api("get_qdrant_url", get_qdrant_url, str)
+    _check_api("get_qdrant_url", get_qdrant_url, str)
 
     # 测试collection_name (需要参数)
     try:

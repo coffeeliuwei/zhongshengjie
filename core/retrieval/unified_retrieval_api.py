@@ -67,14 +67,20 @@ class UnifiedRetrievalAPI:
     - emotion_arc: 情感弧线检索
     """
 
-    # 支持的数据源
+    # 支持的数据源（扩展版：支持8个JSON库）
     SOURCE_TYPES = [
         "novel",
         "technique",
         "case",
+        # 8个扩展维度（JSON库）
+        "worldview_element",
+        "character_relation",
         "power_vocabulary",
         "dialogue_style",
         "emotion_arc",
+        "author_style",
+        "foreshadow_pair",
+        "power_cost",
     ]
 
     # 技法维度列表（与 HybridSearchManager 保持一致）
@@ -301,6 +307,39 @@ class UnifiedRetrievalAPI:
                 result = self.search_emotion_arc(
                     query=query,
                     arc_type=source_filters.get("arc_type"),
+                    top_k=top_k,
+                    use_rerank=use_rerank,
+                )
+            elif source == "worldview_element":
+                result = self.search_worldview_element(
+                    query=query,
+                    element_type=source_filters.get("element_type"),
+                    top_k=top_k,
+                    use_rerank=use_rerank,
+                )
+            elif source == "character_relation":
+                result = self.search_character_relation(
+                    query=query,
+                    relation_type=source_filters.get("relation_type"),
+                    top_k=top_k,
+                    use_rerank=use_rerank,
+                )
+            elif source == "author_style":
+                result = self.search_author_style(
+                    query=query,
+                    top_k=top_k,
+                    use_rerank=use_rerank,
+                )
+            elif source == "foreshadow_pair":
+                result = self.search_foreshadow_pair(
+                    query=query,
+                    top_k=top_k,
+                    use_rerank=use_rerank,
+                )
+            elif source == "power_cost":
+                result = self.search_power_cost(
+                    query=query,
+                    power_type=source_filters.get("power_type"),
                     top_k=top_k,
                     use_rerank=use_rerank,
                 )
@@ -604,6 +643,239 @@ class UnifiedRetrievalAPI:
         filtered = [r for r in combined[: top_k * 2] if r.get("score", 0) >= min_score]
 
         return filtered[:top_k]
+
+    # ==================== 新增扩展维度检索（8个JSON库） ====================
+
+    def search_worldview_element(
+        self,
+        query: str,
+        element_type: Optional[str] = None,
+        top_k: int = 10,
+        min_score: float = 0.3,
+        use_rerank: bool = True,
+    ) -> List[Dict[str, Any]]:
+        """
+        世界观元素检索
+
+        Args:
+            query: 查询文本（如 "城"、"宗"、"门"）
+            element_type: 元素类型过滤（地点/组织/势力）
+            top_k: 返回数量
+            min_score: 最低相似度
+            use_rerank: 是否使用重排
+
+        Returns:
+            命名规律列表
+        """
+        try:
+            from qdrant_client import QdrantClient
+            from qdrant_client.http import models
+
+            client = QdrantClient(url="http://localhost:6333")
+
+            # 构建filter
+            filter_conditions = []
+            if element_type:
+                filter_conditions.append(
+                    models.FieldCondition(
+                        key="element_type",
+                        match=models.MatchValue(value=element_type),
+                    )
+                )
+
+            filter_obj = (
+                models.Filter(must=filter_conditions) if filter_conditions else None
+            )
+
+            # scroll获取数据
+            results = client.scroll(
+                collection_name="worldview_element_v1",
+                with_payload=True,
+                with_vectors=False,
+                limit=top_k * 3,
+                query_filter=filter_obj,
+            )[0]
+
+            # 按频次排序
+            sorted_results = sorted(
+                [p.payload for p in results],
+                key=lambda x: x.get("total_frequency", 0),
+                reverse=True,
+            )
+
+            return sorted_results[:top_k]
+
+        except Exception as e:
+            print(f"[警告] 世界观元素检索失败: {e}")
+            return []
+
+    def search_character_relation(
+        self,
+        query: str,
+        relation_type: Optional[str] = None,
+        top_k: int = 10,
+        min_score: float = 0.3,
+        use_rerank: bool = True,
+    ) -> List[Dict[str, Any]]:
+        """
+        人物关系检索
+
+        Args:
+            query: 查询文本（如 "师徒"、"同门"）
+            relation_type: 关系类型过滤
+            top_k: 返回数量
+            min_score: 最低相似度
+
+        Returns:
+            关系模式列表
+        """
+        try:
+            from qdrant_client import QdrantClient
+
+            client = QdrantClient(url="http://localhost:6333")
+
+            results = client.scroll(
+                collection_name="character_relation_v1",
+                with_payload=True,
+                with_vectors=False,
+                limit=top_k * 3,
+            )[0]
+
+            # 按共现次数排序
+            sorted_results = sorted(
+                [p.payload for p in results],
+                key=lambda x: x.get("cooccurrence_count", 0),
+                reverse=True,
+            )
+
+            return sorted_results[:top_k]
+
+        except Exception as e:
+            print(f"[警告] 人物关系检索失败: {e}")
+            return []
+
+    def search_author_style(
+        self,
+        query: str,
+        top_k: int = 10,
+        min_score: float = 0.3,
+        use_rerank: bool = True,
+    ) -> List[Dict[str, Any]]:
+        """
+        作者风格检索
+
+        Args:
+            query: 查询文本（如 "简洁"、"华丽"）
+            top_k: 返回数量
+            min_score: 最低相似度
+
+        Returns:
+            风格特征列表
+        """
+        try:
+            from qdrant_client import QdrantClient
+
+            client = QdrantClient(url="http://localhost:6333")
+
+            results = client.scroll(
+                collection_name="author_style_v1",
+                with_payload=True,
+                with_vectors=False,
+                limit=top_k,
+            )[0]
+
+            return [p.payload for p in results]
+
+        except Exception as e:
+            print(f"[警告] 作者风格检索失败: {e}")
+            return []
+
+    def search_foreshadow_pair(
+        self,
+        query: str,
+        top_k: int = 10,
+        min_score: float = 0.3,
+        use_rerank: bool = True,
+    ) -> List[Dict[str, Any]]:
+        """
+        伏笔配对检索
+
+        Args:
+            query: 查询文本（如 "悬念伏笔"）
+            top_k: 返回数量
+
+        Returns:
+            伏笔配对列表
+        """
+        try:
+            from qdrant_client import QdrantClient
+
+            client = QdrantClient(url="http://localhost:6333")
+
+            results = client.scroll(
+                collection_name="foreshadow_pair_v1",
+                with_payload=True,
+                with_vectors=False,
+                limit=top_k,
+            )[0]
+
+            return [p.payload for p in results]
+
+        except Exception as e:
+            print(f"[警告] 伏笔配对检索失败: {e}")
+            return []
+
+    def search_power_cost(
+        self,
+        query: str,
+        power_type: Optional[str] = None,
+        top_k: int = 10,
+        min_score: float = 0.3,
+        use_rerank: bool = True,
+    ) -> List[Dict[str, Any]]:
+        """
+        力量代价检索
+
+        Args:
+            query: 查询文本（如 "体力代价"）
+            power_type: 力量类型过滤
+            top_k: 返回数量
+
+        Returns:
+            代价模板列表
+        """
+        try:
+            from qdrant_client import QdrantClient
+            from qdrant_client.http import models
+
+            client = QdrantClient(url="http://localhost:6333")
+
+            filter_conditions = []
+            if power_type:
+                filter_conditions.append(
+                    models.FieldCondition(
+                        key="power_type",
+                        match=models.MatchValue(value=power_type),
+                    )
+                )
+
+            filter_obj = (
+                models.Filter(must=filter_conditions) if filter_conditions else None
+            )
+
+            results = client.scroll(
+                collection_name="power_cost_v1",
+                with_payload=True,
+                with_vectors=False,
+                limit=top_k,
+                query_filter=filter_obj,
+            )[0]
+
+            return [p.payload for p in results]
+
+        except Exception as e:
+            print(f"[警告] 力量代价检索失败: {e}")
+            return []
 
     # ==================== 辅助方法 ====================
 

@@ -308,6 +308,89 @@ class PlotAPI:
 
         return all_techniques
 
+    # ============================================================
+    # 伏笔配对检索（新增）
+    # ============================================================
+
+    def search_foreshadow_pairs(
+        self,
+        relation_type: str = None,
+        min_distance: int = 5,
+        limit: int = 20,
+    ) -> List[Dict[str, Any]]:
+        """
+        检索伏笔配对模式
+
+        从 foreshadow_pair_v1 Collection 检索伏笔-回收配对，
+        用于伏笔设计和回收时参考。
+
+        Args:
+            relation_type: 配对类型（悬念伏笔/情感伏笔/剧情伏笔）
+            min_distance: 最小章节距离
+            limit: 返回数量
+
+        Returns:
+            伏笔配对列表：
+            [
+                {
+                    "relation_type": "悬念伏笔",
+                    "pair_count": 156,
+                    "avg_distance": 12.5,
+                    "description": "悬念设置与回收模式"
+                },
+                ...
+            ]
+
+        Example:
+            # 获取悬念伏笔配对
+            pairs = api.search_foreshadow_pairs(relation_type="悬念伏笔")
+
+            # 获取所有伏笔配对
+            pairs = api.search_foreshadow_pairs()
+        """
+        try:
+            from qdrant_client import QdrantClient
+            from qdrant_client.http import models
+
+            client = QdrantClient(url="http://localhost:6333")
+
+            # 构建 filter
+            filter_conditions = []
+            if relation_type:
+                filter_conditions.append(
+                    models.FieldCondition(
+                        key="relation_type",
+                        match=models.MatchValue(value=relation_type),
+                    )
+                )
+
+            filter_obj = (
+                models.Filter(must=filter_conditions) if filter_conditions else None
+            )
+
+            # scroll 获取数据
+            results = client.scroll(
+                collection_name="foreshadow_pair_v1",
+                with_payload=True,
+                with_vectors=False,
+                limit=limit,
+                query_filter=filter_obj,
+            )[0]
+
+            # 过滤距离过小的配对
+            filtered = []
+            for point in results:
+                payload = point.payload
+                avg_dist = payload.get("avg_distance", 0)
+                if avg_dist >= min_distance:
+                    filtered.append(payload)
+
+            return filtered
+
+        except Exception as e:
+            print(f"[警告] 伏笔配对检索失败: {e}")
+            return []
+
 
 # 全局API实例
 _plot_api: Optional[PlotAPI] = None

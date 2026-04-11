@@ -26,13 +26,20 @@ def get_world_configs_dir() -> Path:
     """获取世界观配置目录"""
     # 从config_loader导入
     try:
-        from config_loader import get_project_root
+        from core.config_loader import get_world_configs_dir as _get_world_configs_dir
 
-        project_root = get_project_root()
+        return _get_world_configs_dir()
     except ImportError:
-        project_root = Path(__file__).parent
+        try:
+            from config_loader import get_world_configs_dir as _get_world_configs_dir
 
-    return project_root / ".vectorstore" / "core" / "world_configs"
+            return _get_world_configs_dir()
+        except ImportError:
+            # 回退
+            from core.config_loader import get_project_root
+
+            project_root = get_project_root()
+            return project_root / "config" / "worlds"
 
 
 def load_world_config(world_name: str) -> Dict[str, Any]:
@@ -68,20 +75,20 @@ def load_world_config(world_name: str) -> Dict[str, Any]:
 
 def get_current_world() -> str:
     """获取当前激活的世界观"""
+    global _current_world
     if _current_world is None:
         # 尝试从 config.json 读取
         try:
+            from core.config_loader import get_config
+        except ImportError:
             from config_loader import get_config
 
-            config = get_config()
-            worldview_config = config.get("worldview", {})
-            current_world = worldview_config.get("current_world", DEFAULT_WORLD)
-            # 写入需要锁保护
-            with _config_lock:
-                _current_world = current_world
-        except Exception:
-            with _config_lock:
-                _current_world = DEFAULT_WORLD
+        config = get_config()
+        worldview_config = config.get("worldview", {})
+        current = worldview_config.get("current_world", DEFAULT_WORLD)
+        # 写入需要锁保护
+        with _config_lock:
+            _current_world = current
     return _current_world
 
 
@@ -94,6 +101,7 @@ def set_current_world(world_name: str) -> bool:
     Returns:
         是否成功设置
     """
+    global _current_world
     try:
         # 验证配置存在
         load_world_config(world_name)

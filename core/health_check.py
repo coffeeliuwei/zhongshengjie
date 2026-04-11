@@ -20,7 +20,13 @@ from datetime import datetime
 from pathlib import Path
 import json
 
-from .config_loader import get_project_root
+# 从配置加载器导入路径获取函数
+try:
+    from .config_loader import get_project_root
+
+    HAS_CONFIG_LOADER = True
+except ImportError:
+    HAS_CONFIG_LOADER = False
 
 
 class HealthStatus(Enum):
@@ -139,7 +145,12 @@ class HealthChecker:
     """
 
     def __init__(self, project_root: str = None):
-        self.project_root = Path(project_root) if project_root else get_project_root()
+        if HAS_CONFIG_LOADER:
+            self.project_root = (
+                Path(project_root) if project_root else get_project_root()
+            )
+        else:
+            self.project_root = Path(project_root) if project_root else Path.cwd()
         self.checks: Dict[str, Callable] = {
             "数据库": self.check_database,
             "技能文件": self.check_skills,

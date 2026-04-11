@@ -39,6 +39,10 @@ from core.config_loader import (
     get_model_path,
     get_config,
     get_collection_name,
+    get_vectorstore_dir,
+    get_qdrant_storage_dir,
+    get_case_library_dir,
+    get_knowledge_graph_path,
 )
 
 # 导入现有模块（复用代码）
@@ -141,8 +145,8 @@ class DataMigrator:
             docker_url: Docker Qdrant URL
         """
         self.project_dir = project_dir or get_project_root()
-        self.vectorstore_dir = self.project_dir / ".vectorstore"
-        self.case_library_dir = self.project_dir / ".case-library"
+        self.vectorstore_dir = get_vectorstore_dir()
+        self.case_library_dir = get_case_library_dir()
 
         # 复用现有管理器
         self.sync_manager = SyncManager(
@@ -174,11 +178,9 @@ class DataMigrator:
                     self._client = QdrantClient(url=self.docker_url)
                     self._client.get_collections()
                 except Exception:
-                    qdrant_dir = self.vectorstore_dir / "qdrant"
-                    self._client = QdrantClient(path=str(qdrant_dir))
+                    self._client = QdrantClient(path=str(get_qdrant_storage_dir()))
             else:
-                qdrant_dir = self.vectorstore_dir / "qdrant"
-                self._client = QdrantClient(path=str(qdrant_dir))
+                self._client = QdrantClient(path=str(get_qdrant_storage_dir()))
         return self._client
 
     def _load_model(self):

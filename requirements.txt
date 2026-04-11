@@ -9,5 +9,9 @@ torch>=2.0.0
 ebooklib>=0.18
 mobi>=0.3.3
 
+# 数据清洗依赖
+lz4>=4.0.0
+jieba>=0.42.1
+
 # 可选依赖
 # transformers>=4.30.0

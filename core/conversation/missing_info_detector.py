@@ -78,7 +78,7 @@ class MissingInfoDetector:
             },
             "worldview_config": {
                 "check": lambda project_root: (
-                    Path(project_root) / "world_configs"
+                    Path(project_root) / "config" / "worlds"
                 ).exists(),
                 "message": "世界观配置目录不存在",
                 "suggestion": "使用默认世界观或创建自定义配置",
@@ -446,7 +446,7 @@ class MissingInfoDetector:
 
     def _create_default_worldview(self) -> bool:
         """创建默认世界观配置"""
-        worldview_dir = self.project_root / "world_configs"
+        worldview_dir = self.project_root / "config" / "worlds"
         worldview_dir.mkdir(parents=True, exist_ok=True)
 
         # 复制默认配置

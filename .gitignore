@@ -102,6 +102,10 @@ knowledge_graph.json
 .opencode/
 .serena/
 .agents/
+.project_memory/
+
+# Qdrant本地数据
+.vectorstore/qdrant/
 
 # 日志和缓存
 logs/
@@ -187,6 +191,17 @@ wheels/
 *.backup
 *.old
 *.orig
+
+# 根目录临时测试文件
+/test_*.py
+/test_*.txt
+/temp_*.txt
+/verify_*.py
+/fix_*.py
+
+# 测试数据库
+.test_chroma/
+.test_qdrant/
 
 # ========================================
 # 测试覆盖率

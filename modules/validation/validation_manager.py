@@ -26,6 +26,25 @@ from pathlib import Path
 from datetime import datetime
 from typing import Dict, List, Optional, Any, Tuple
 
+# 添加项目路径
+_project_root = Path(__file__).resolve().parent.parent.parent
+if str(_project_root) not in sys.path:
+    sys.path.insert(0, str(_project_root))
+if str(_project_root / ".vectorstore" / "core") not in sys.path:
+    sys.path.insert(0, str(_project_root / ".vectorstore" / "core"))
+
+# 尝试导入统一配置加载器
+try:
+    from config_loader import (
+        get_project_root,
+        get_vectorstore_dir,
+        get_knowledge_graph_path,
+    )
+
+    HAS_CONFIG_LOADER = True
+except ImportError:
+    HAS_CONFIG_LOADER = False
+
 # Windows 编码修复
 if sys.platform == "win32":
     try:
@@ -47,7 +66,12 @@ class ValidationHistory:
         Args:
             history_dir: 历史记录存储目录
         """
-        self.history_dir = history_dir or Path(".vectorstore/verification_history")
+        if history_dir is None:
+            if HAS_CONFIG_LOADER:
+                history_dir = get_vectorstore_dir() / "verification_history"
+            else:
+                history_dir = Path(".vectorstore/verification_history")
+        self.history_dir = history_dir
         self.history_file = self.history_dir / "history.json"
         self._ensure_dir()
         self._history = self._load_history()
@@ -205,10 +229,16 @@ class ValidationManager:
         初始化验证管理器
 
         Args:
-            project_root: 项目根目录，默认为当前工作目录
+            project_root: 项目根目录，默认从配置自动获取
         """
-        self.project_root = project_root or Path.cwd()
-        self.vectorstore_dir = self.project_root / ".vectorstore"
+        if HAS_CONFIG_LOADER:
+            self.project_root = project_root or get_project_root()
+            self.vectorstore_dir = get_vectorstore_dir()
+            self.knowledge_graph_path = get_knowledge_graph_path()
+        else:
+            self.project_root = project_root or Path.cwd()
+            self.vectorstore_dir = self.project_root / ".vectorstore"
+            self.knowledge_graph_path = self.vectorstore_dir / "knowledge_graph.json"
         self.history = ValidationHistory(self.vectorstore_dir / "verification_history")
 
     def _run_script(self, script_path: Path) -> Tuple[bool, str]:
@@ -242,13 +272,11 @@ class ValidationManager:
 
         整合 verify_merge.py 功能
         """
-        knowledge_graph = self.vectorstore_dir / "knowledge_graph.json"
-
-        if not knowledge_graph.exists():
+        if not self.knowledge_graph_path.exists():
             return False, {"error": "knowledge_graph.json 不存在"}
 
         try:
-            with open(knowledge_graph, "r", encoding="utf-8") as f:
+            with open(self.knowledge_graph_path, "r", encoding="utf-8") as f:
                 data = json.load(f)
         except Exception as e:
             return False, {"error": f"加载失败: {e}"}
@@ -282,13 +310,11 @@ class ValidationManager:
 
         整合 verify_worldview.py 功能
         """
-        knowledge_graph = self.vectorstore_dir / "knowledge_graph.json"
-
-        if not knowledge_graph.exists():
+        if not self.knowledge_graph_path.exists():
             return False, {"error": "knowledge_graph.json 不存在"}
 
         try:
-            with open(knowledge_graph, "r", encoding="utf-8") as f:
+            with open(self.knowledge_graph_path, "r", encoding="utf-8") as f:
                 data = json.load(f)
         except Exception as e:
             return False, {"error": f"加载失败: {e}"}

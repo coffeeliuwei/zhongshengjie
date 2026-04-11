@@ -60,12 +60,12 @@ class SnapshotDiff:
 # 配置文件路径定义
 CONFIG_FILES = {
     "main_config": "config.json",
-    "world_config": "world_configs/众生界.json",
+    "world_config": "config/worlds/众生界.json",
     "scene_types": "config/dimensions/scene_types.json",
     "power_types": "config/dimensions/power_types.json",
     "faction_types": "config/dimensions/faction_types.json",
     "technique_types": "config/dimensions/technique_types.json",
-    "scene_writer_mapping": "scene_writer_mapping.json",
+    "scene_writer_mapping": "config/scene_writer_mapping.json",
 }
 
 

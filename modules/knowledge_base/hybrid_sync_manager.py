@@ -17,7 +17,21 @@ from typing import Dict, List, Any, Optional, Tuple
 from tqdm import tqdm
 
 # 从配置加载器导入路径获取函数
-from core.config_loader import get_project_root, get_qdrant_url, get_model_path
+try:
+    from core.config_loader import (
+        get_project_root,
+        get_qdrant_url,
+        get_model_path,
+        get_vectorstore_dir,
+        get_qdrant_storage_dir,
+        get_knowledge_graph_path,
+        get_techniques_dir,
+        get_case_library_dir,
+    )
+
+    HAS_CONFIG_LOADER = True
+except ImportError:
+    HAS_CONFIG_LOADER = False
 
 try:
     from qdrant_client import QdrantClient
@@ -106,14 +120,20 @@ class HybridSyncManager:
             use_docker: 是否使用 Docker Qdrant
             docker_url: Docker Qdrant URL（默认从配置加载）
         """
-        self.project_dir = project_dir or get_project_root()
-        self.vectorstore_dir = self.project_dir / ".vectorstore"
-        self.qdrant_dir = self.vectorstore_dir / "qdrant"
-
-        # 数据源路径
-        self.knowledge_graph_file = self.vectorstore_dir / "knowledge_graph.json"
-        self.techniques_dir = self.project_dir / "创作技法"
-        self.case_library_dir = self.project_dir / ".case-library"
+        if HAS_CONFIG_LOADER:
+            self.project_dir = project_dir or get_project_root()
+            self.vectorstore_dir = get_vectorstore_dir()
+            self.qdrant_dir = get_qdrant_storage_dir()
+            self.knowledge_graph_file = get_knowledge_graph_path()
+            self.techniques_dir = get_techniques_dir()
+            self.case_library_dir = get_case_library_dir()
+        else:
+            self.project_dir = project_dir or Path.cwd()
+            self.vectorstore_dir = self.project_dir / ".vectorstore"
+            self.qdrant_dir = self.vectorstore_dir / "qdrant"
+            self.knowledge_graph_file = self.vectorstore_dir / "knowledge_graph.json"
+            self.techniques_dir = self.project_dir / "创作技法"
+            self.case_library_dir = self.project_dir / ".case-library"
 
         # Qdrant 客户端
         self._client = None

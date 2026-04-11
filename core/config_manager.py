@@ -9,6 +9,14 @@ from pathlib import Path
 from typing import Dict, Any, Optional
 from dataclasses import dataclass, field
 
+# 从配置加载器导入路径获取函数
+try:
+    from .config_loader import get_project_root
+
+    HAS_CONFIG_LOADER = True
+except ImportError:
+    HAS_CONFIG_LOADER = False
+
 
 @dataclass
 class DatabaseConfig:
@@ -146,9 +154,12 @@ class ConfigManager:
         初始化配置管理器
 
         Args:
-            project_root: 项目根目录，默认为当前工作目录
+            project_root: 项目根目录，默认从配置加载或当前工作目录
         """
-        self.project_root = project_root or Path.cwd()
+        if HAS_CONFIG_LOADER:
+            self.project_root = project_root or get_project_root()
+        else:
+            self.project_root = project_root or Path.cwd()
         self.config_file = self.project_root / "CONFIG.md"
         self.system_config_file = self.project_root / "system_config.json"
 

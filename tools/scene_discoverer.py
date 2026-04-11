@@ -34,14 +34,35 @@ from dataclasses import dataclass, asdict, field
 
 # 添加项目路径
 PROJECT_ROOT = Path(__file__).parent.parent
-sys.path.insert(0, str(PROJECT_ROOT / "tools"))
-sys.path.insert(0, str(PROJECT_ROOT / ".vectorstore" / "core"))
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+if str(PROJECT_ROOT / ".vectorstore" / "core") not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT / ".vectorstore" / "core"))
 
-# 配置路径
-CASE_BUILDER_PATH = PROJECT_ROOT / "tools" / "case_builder.py"
-SCENE_MAPPING_PATH = PROJECT_ROOT / ".vectorstore" / "scene_writer_mapping.json"
+# 尝试导入统一配置加载器
+try:
+    from config_loader import (
+        get_project_root,
+        get_scene_writer_mapping_path,
+        get_case_library_dir,
+    )
+
+    HAS_CONFIG_LOADER = True
+except ImportError:
+    HAS_CONFIG_LOADER = False
+
+# 配置路径（使用 config_loader 动态获取）
+if HAS_CONFIG_LOADER:
+    _root = get_project_root()
+    CASE_BUILDER_PATH = _root / "tools" / "case_builder.py"
+    SCENE_MAPPING_PATH = get_scene_writer_mapping_path()
+    DISCOVERED_SCENES_PATH = get_case_library_dir() / "discovered_scenes.json"
+else:
+    CASE_BUILDER_PATH = PROJECT_ROOT / "tools" / "case_builder.py"
+    SCENE_MAPPING_PATH = PROJECT_ROOT / ".vectorstore" / "scene_writer_mapping.json"
+    DISCOVERED_SCENES_PATH = PROJECT_ROOT / ".case-library" / "discovered_scenes.json"
+
 SKILL_PATH = Path.home() / ".agents" / "skills" / "novelist-workflow" / "SKILL.md"
-DISCOVERED_SCENES_PATH = PROJECT_ROOT / ".case-library" / "discovered_scenes.json"
 
 
 @dataclass

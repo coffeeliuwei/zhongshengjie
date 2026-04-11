@@ -266,6 +266,104 @@ def get_collection_name(collection_type: str) -> str:
     return collections.get(collection_type, f"{collection_type}_v2")
 
 
+def get_database_timeout() -> int:
+    """获取数据库超时时间（秒）"""
+    config = get_config()
+    return config.get("database", {}).get("timeout", 10)
+
+
+def get_batch_size() -> int:
+    """获取批处理大小"""
+    config = get_config()
+    return config.get("model", {}).get("batch_size", 20)
+
+
+def get_retrieval_config() -> dict:
+    """
+    获取检索配置
+
+    Returns:
+        {
+            "dense_limit": 100,
+            "sparse_limit": 100,
+            "fusion_limit": 50,
+            "max_content_length": 3000,
+            "max_payload_size": 8000
+        }
+    """
+    config = get_config()
+    return config.get(
+        "retrieval",
+        {
+            "dense_limit": 100,
+            "sparse_limit": 100,
+            "fusion_limit": 50,
+            "max_content_length": 3000,
+            "max_payload_size": 8000,
+        },
+    )
+
+
+def get_max_content_length() -> int:
+    """获取最大内容长度"""
+    return get_retrieval_config().get("max_content_length", 3000)
+
+
+def get_max_payload_size() -> int:
+    """获取最大payload大小"""
+    return get_retrieval_config().get("max_payload_size", 8000)
+
+
+def get_skip_rules() -> list:
+    """
+    获取跳过的校验规则列表
+
+    Returns:
+        规则ID列表，如 ["R007", "R008"]
+    """
+    config = get_config()
+    return config.get("validation", {}).get("skip_rules", [])
+
+
+def get_worldview_config() -> dict:
+    """
+    获取世界观配置
+
+    Returns:
+        {
+            "current_world": "众生界",
+            "outline_path": "总大纲.md",
+            "auto_sync": True
+        }
+    """
+    config = get_config()
+    return config.get(
+        "worldview",
+        {"current_world": "众生界", "outline_path": "总大纲.md", "auto_sync": False},
+    )
+
+
+def get_current_world() -> str:
+    """获取当前世界观名称"""
+    worldview = get_worldview_config()
+    return worldview.get("current_world", "众生界")
+
+
+def get_outline_path() -> Optional[str]:
+    """获取大纲文件路径"""
+    worldview = get_worldview_config()
+    outline_path = worldview.get("outline_path")
+    if outline_path:
+        return str(get_project_root() / outline_path)
+    return None
+
+
+def is_auto_sync_enabled() -> bool:
+    """检查是否启用自动同步"""
+    worldview = get_worldview_config()
+    return worldview.get("auto_sync", False)
+
+
 # 便捷函数
 def get_settings_dir() -> Path:
     return get_path("settings_dir")
@@ -287,6 +385,70 @@ def get_logs_dir() -> Path:
     return get_path("logs_dir")
 
 
+def get_cache_dir() -> Path:
+    """获取缓存目录"""
+    return get_path("cache_dir")
+
+
+def get_temp_dir() -> Path:
+    """获取临时目录（用于避免C盘空间问题）"""
+    temp_dir = get_path("temp_dir")
+    temp_dir.mkdir(parents=True, exist_ok=True)
+    return temp_dir
+
+
+def get_contracts_dir() -> Path:
+    """获取场景契约存储目录"""
+    return get_path("contracts_dir")
+
+
+def get_novel_extractor_dir() -> Path:
+    """获取小说提取器目录 (.novel-extractor)"""
+    return get_path("novel_extractor_dir")
+
+
+def get_world_configs_dir() -> Path:
+    """获取世界观配置目录 (.vectorstore/core/world_configs)"""
+    return get_path("world_configs_dir")
+
+
+def get_scene_writer_mapping_path() -> Path:
+    """获取场景作家映射文件路径"""
+    return get_path("scene_writer_mapping_file")
+
+
+def get_knowledge_graph_path() -> Path:
+    """获取知识图谱文件路径"""
+    return get_path("knowledge_graph_file")
+
+
+def get_qdrant_storage_dir() -> Path:
+    """获取Qdrant存储目录"""
+    return get_path("qdrant_storage_dir")
+
+
+def get_config_dir() -> Path:
+    """获取配置目录 (config/)"""
+    return get_path("config_dir")
+
+
+def get_world_config_path(world_name: str = None) -> Path:
+    """
+    获取指定世界观配置文件路径
+
+    Args:
+        world_name: 世界观名称，如果为 None 则使用 config.json 中的 current_world
+
+    Returns:
+        世界观配置文件的完整路径
+    """
+    if world_name is None:
+        config = get_config()
+        world_name = config.get("worldview", {}).get("current_world", "众生界")
+
+    return get_world_configs_dir() / f"{world_name}.json"
+
+
 def get_novel_sources() -> list:
     """获取小说资源目录列表"""
     config = get_config()
@@ -294,6 +456,23 @@ def get_novel_sources() -> list:
     directories = novel_sources.get("directories", [])
     # 过滤空值并转换为Path对象
     return [Path(d) for d in directories if d]
+
+
+def get_skills_base_path() -> Path:
+    """
+    获取Skills基础路径
+
+    Returns:
+        Skills目录路径
+    """
+    config = get_config()
+    skills_path = config.get("paths", {}).get("skills_base_path")
+
+    if skills_path:
+        return Path(skills_path)
+
+    # 默认位置
+    return Path.home() / ".agents" / "skills"
 
 
 def get_realm_order(power_system: str = None) -> list:
@@ -391,20 +570,13 @@ def _load_current_world_config() -> dict:
     """加载当前世界观配置"""
     try:
         import json
-        from pathlib import Path
 
         # 从 config.json 获取当前世界观名称
         config = get_config()
         world_name = config.get("worldview", {}).get("current_world", "众生界")
 
-        # 尝试加载世界观配置文件
-        world_config_path = (
-            get_project_root()
-            / ".vectorstore"
-            / "core"
-            / "world_configs"
-            / f"{world_name}.json"
-        )
+        # 使用配置路径获取世界观配置文件
+        world_config_path = get_world_config_path(world_name)
 
         if world_config_path.exists():
             with open(world_config_path, "r", encoding="utf-8") as f:
@@ -420,6 +592,63 @@ def reset_config():
     global _global_config, _project_root
     _global_config = None
     _project_root = None
+
+
+def get_quality_thresholds() -> dict:
+    """
+    获取数据清洗质量阈值配置
+
+    Returns:
+        {
+            "chinese_ratio_min": 0.6,      # 中文比例阈值
+            "novel_features_min": 10,      # 小说特征词数量阈值
+            "compression_ratio_min": 0.65, # 压缩率下限
+            "compression_ratio_max": 0.80, # 压缩率上限
+            "quality_score_min": 0.6,      # 综合质量评分阈值
+            "noise_ratio_max": 0.10        # 噪音比例上限
+        }
+    """
+    config = get_config()
+    return config.get(
+        "quality_thresholds",
+        {
+            "chinese_ratio_min": 0.6,
+            "novel_features_min": 10,
+            "compression_ratio_min": 0.65,
+            "compression_ratio_max": 0.80,
+            "quality_score_min": 0.6,
+            "noise_ratio_max": 0.10,
+        },
+    )
+
+
+def get_clean_pipeline_config() -> dict:
+    """
+    获取清洗流程配置
+
+    Returns:
+        {
+            "clean_dir": ".case-library/clean",
+            "use_gpu": True,
+            "validate_before_ingest": True
+        }
+    """
+    config = get_config()
+    return config.get(
+        "clean_pipeline",
+        {
+            "clean_dir": ".case-library/clean",
+            "use_gpu": True,
+            "validate_before_ingest": True,
+        },
+    )
+
+
+def get_clean_dir() -> Path:
+    """获取清洗后小说存储目录"""
+    pipeline_config = get_clean_pipeline_config()
+    clean_dir = pipeline_config.get("clean_dir", ".case-library/clean")
+    return get_project_root() / clean_dir
 
 
 # 初始化时打印配置信息（可选）

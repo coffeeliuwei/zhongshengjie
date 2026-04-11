@@ -34,8 +34,10 @@ from datetime import datetime
 from typing import Dict, List, Any, Optional, Set
 from dataclasses import dataclass, asdict
 
-# 添加 .vectorstore/core 到路径
+# 获取项目根目录
 _project_root = Path(__file__).resolve().parent.parent
+if str(_project_root) not in sys.path:
+    sys.path.insert(0, str(_project_root))
 if str(_project_root / ".vectorstore" / "core") not in sys.path:
     sys.path.insert(0, str(_project_root / ".vectorstore" / "core"))
 
@@ -49,6 +51,7 @@ try:
         get_collection_name,
         get_novel_sources,
         get_project_root,
+        get_scene_writer_mapping_path,
     )
 
     HAS_CONFIG_LOADER = True
@@ -1184,7 +1187,9 @@ python case_builder.py --sync
                 if high_confidence:
                     print(f"\n自动应用 {len(high_confidence)} 个高置信度场景...")
                     mapping_file = (
-                        self.case_library_dir.parent
+                        get_scene_writer_mapping_path()
+                        if HAS_CONFIG_LOADER
+                        else self.case_library_dir.parent
                         / ".vectorstore"
                         / "scene_writer_mapping.json"
                     )
@@ -1250,7 +1255,11 @@ python case_builder.py --sync
         # 应用到配置
         discoverer = SceneDiscovery(self.case_library_dir, {}, SCENE_TYPES)
         mapping_file = (
-            self.case_library_dir.parent / ".vectorstore" / "scene_writer_mapping.json"
+            get_scene_writer_mapping_path()
+            if HAS_CONFIG_LOADER
+            else self.case_library_dir.parent
+            / ".vectorstore"
+            / "scene_writer_mapping.json"
         )
 
         success = discoverer.apply_discovered_scenes(

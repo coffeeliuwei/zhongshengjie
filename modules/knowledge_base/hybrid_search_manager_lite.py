@@ -20,7 +20,13 @@ from typing import Dict, List, Any, Optional
 from collections import defaultdict
 
 # 从配置加载器导入路径获取函数
-from core.config_loader import get_project_root
+try:
+    from core.config_loader import get_project_root, get_qdrant_storage_dir
+
+    HAS_CONFIG_LOADER = True
+except ImportError:
+    HAS_CONFIG_LOADER = False
+    from pathlib import Path
 
 os.environ["HF_HUB_OFFLINE"] = "1"
 os.environ["TRANSFORMERS_OFFLINE"] = "1"
@@ -33,8 +39,12 @@ except ImportError:
     raise ImportError("请安装 qdrant-client: pip install qdrant-client")
 
 # 配置 - 从配置加载器获取项目路径
-PROJECT_DIR = get_project_root()
-QDRANT_PATH = PROJECT_DIR / ".vectorstore" / "qdrant"
+if HAS_CONFIG_LOADER:
+    PROJECT_DIR = get_project_root()
+    QDRANT_PATH = get_qdrant_storage_dir()
+else:
+    PROJECT_DIR = Path.cwd()
+    QDRANT_PATH = PROJECT_DIR / ".vectorstore" / "qdrant"
 
 # Collection 名称 (v2 = BGE-M3)
 COLLECTIONS = {

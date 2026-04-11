@@ -127,6 +127,7 @@ from core.config_loader import (
     get_qdrant_url,       # Qdrant URL str
     get_collection_name,  # Collection名称
     get_database_timeout, # 数据库超时（秒）int
+    get_qdrant_storage_dir, # Qdrant存储目录 Path
     
     # 模型配置
     get_model_path,       # 模型路径 str
@@ -142,9 +143,20 @@ from core.config_loader import (
     get_contracts_dir,    # 场景契约目录 Path
     get_skills_base_path, # Skills安装目录 Path
     get_novel_sources,    # 小说资源目录列表 [Path]
+    get_novel_extractor_dir, # 小说提取目录 Path
+    get_config_dir,       # 配置目录 Path
+    
+    # 世界观配置（新增）
+    get_world_configs_dir,      # 世界观配置目录 Path
+    get_scene_writer_mapping_path, # 场景作家映射文件 Path
+    get_knowledge_graph_path,   # 知识图谱文件 Path
+    get_world_config_path,      # 指定世界观配置文件 Path
+    get_current_world,          # 当前世界观名称 str
+    get_worldview_config,       # 世界观配置 dict
     
     # 校验配置
-    get_realm_order,      # 境界等级顺序 list
+    get_realm_order,      # 境界等级顺序 list（支持多力量体系）
+    get_all_realm_orders, # 所有力量体系的境界 dict
     get_skip_rules,       # 跳过的校验规则 list
     
     # 检索配置
@@ -154,6 +166,9 @@ from core.config_loader import (
     
     # HuggingFace配置
     get_hf_cache_dir,     # HuggingFace缓存目录 str
+    
+    # 通用路径获取
+    get_path,             # 通用路径获取函数
 )
 ```
 

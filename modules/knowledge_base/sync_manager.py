@@ -10,7 +10,56 @@ from pathlib import Path
 from typing import Dict, List, Any, Optional
 
 # 从配置加载器导入路径获取函数
-from core.config_loader import get_project_root, get_qdrant_url
+import sys
+from pathlib import Path
+
+_project_root = Path(__file__).resolve().parent.parent
+import sys as _sys  # alias to avoid shadowing
+
+if (
+    str(_project_root) not in _sys.modules
+    and str(_project_root) not in __import__("sys").path
+):
+    __import__("sys").path.insert(0, str(_project_root))
+
+try:
+    from config_loader import (
+        get_project_root,
+        get_qdrant_url,
+        get_vectorstore_dir,
+        get_qdrant_storage_dir,
+        get_knowledge_graph_path,
+        get_techniques_dir,
+        get_case_library_dir,
+    )
+
+    HAS_CONFIG_LOADER = True
+except Exception:
+    # 如果无法加载配置加载器，后续逻辑将回退到默认路径
+    HAS_CONFIG_LOADER = False
+
+    # 仍保留名称以免后续代码引用出错
+    def get_project_root():
+        raise ImportError
+
+    def get_vectorstore_dir():
+        raise ImportError
+
+    def get_qdrant_storage_dir():
+        raise ImportError
+
+    def get_qdrant_url():
+        raise ImportError
+
+    def get_knowledge_graph_path():
+        raise ImportError
+
+    def get_techniques_dir():
+        raise ImportError
+
+    def get_case_library_dir():
+        raise ImportError
+
 
 try:
     from qdrant_client import QdrantClient
@@ -90,13 +139,13 @@ class SyncManager:
             docker_url: Docker Qdrant URL（默认从配置加载）
         """
         self.project_dir = project_dir or get_project_root()
-        self.vectorstore_dir = self.project_dir / ".vectorstore"
-        self.qdrant_dir = self.vectorstore_dir / "qdrant"
+        self.vectorstore_dir = get_vectorstore_dir()
+        self.qdrant_dir = get_qdrant_storage_dir()
 
-        # 数据源路径
-        self.knowledge_graph_file = self.vectorstore_dir / "knowledge_graph.json"
-        self.techniques_dir = self.project_dir / "创作技法"
-        self.case_library_dir = self.project_dir / ".case-library"
+        # 数据源路径（从配置加载）
+        self.knowledge_graph_file = get_knowledge_graph_path()
+        self.techniques_dir = get_techniques_dir()
+        self.case_library_dir = get_case_library_dir()
 
         # Qdrant客户端
         self._client = None

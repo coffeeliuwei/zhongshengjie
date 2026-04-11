@@ -23,9 +23,33 @@
 import argparse
 import json
 import re
+import sys
 from pathlib import Path
 from datetime import datetime
 from typing import Dict, List, Any, Optional
+
+# 添加项目路径
+_project_root = Path(__file__).resolve().parent.parent
+if str(_project_root) not in sys.path:
+    sys.path.insert(0, str(_project_root))
+if str(_project_root / ".vectorstore" / "core") not in sys.path:
+    sys.path.insert(0, str(_project_root / ".vectorstore" / "core"))
+
+# 尝试导入统一配置加载器
+try:
+    from config_loader import (
+        get_config,
+        get_qdrant_url,
+        get_model_path,
+        get_collection_name,
+        get_knowledge_graph_path,
+        get_project_root,
+    )
+
+    HAS_CONFIG_LOADER = True
+except ImportError:
+    HAS_CONFIG_LOADER = False
+    print("[knowledge_builder] 警告: 未找到 config_loader，使用默认配置")
 
 
 # 设定模板
@@ -322,13 +346,21 @@ class KnowledgeBuilder:
     def __init__(self, settings_dir: Path, config: Optional[Dict] = None):
         self.settings_dir = settings_dir
         self.config = config or {}
-        self.qdrant_url = self.config.get("qdrant_url", "http://localhost:6333")
-        self.collection_name = self.config.get("collections", {}).get(
-            "novel_settings", "novel_settings_v2"
-        )
-        self.knowledge_graph_file = (
-            settings_dir.parent / ".vectorstore" / "knowledge_graph.json"
-        )
+
+        # 使用统一配置加载器
+        if HAS_CONFIG_LOADER:
+            self.qdrant_url = get_qdrant_url()
+            self.collection_name = get_collection_name("novel_settings")
+            self.knowledge_graph_file = get_knowledge_graph_path()
+        else:
+            # 回退到旧方式
+            self.qdrant_url = self.config.get("qdrant_url", "http://localhost:6333")
+            self.collection_name = self.config.get("collections", {}).get(
+                "novel_settings", "novel_settings_v2"
+            )
+            self.knowledge_graph_file = (
+                settings_dir.parent / ".vectorstore" / "knowledge_graph.json"
+            )
 
     def init_structure(self):
         """初始化知识库目录结构"""

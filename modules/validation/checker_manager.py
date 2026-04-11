@@ -25,6 +25,25 @@ import sys
 from pathlib import Path
 from typing import Dict, List, Optional, Any
 
+# 添加项目路径
+_project_root = Path(__file__).resolve().parent.parent.parent
+if str(_project_root) not in sys.path:
+    sys.path.insert(0, str(_project_root))
+if str(_project_root / ".vectorstore" / "core") not in sys.path:
+    sys.path.insert(0, str(_project_root / ".vectorstore" / "core"))
+
+# 尝试导入统一配置加载器
+try:
+    from config_loader import (
+        get_project_root,
+        get_vectorstore_dir,
+        get_knowledge_graph_path,
+    )
+
+    HAS_CONFIG_LOADER = True
+except ImportError:
+    HAS_CONFIG_LOADER = False
+
 # Windows 编码修复
 if sys.platform == "win32":
     try:
@@ -53,9 +72,14 @@ class CheckerManager:
         Args:
             project_root: 项目根目录
         """
-        self.project_root = project_root or Path.cwd()
-        self.vectorstore_dir = self.project_root / ".vectorstore"
-        self.knowledge_graph_path = self.vectorstore_dir / "knowledge_graph.json"
+        if HAS_CONFIG_LOADER:
+            self.project_root = project_root or get_project_root()
+            self.vectorstore_dir = get_vectorstore_dir()
+            self.knowledge_graph_path = get_knowledge_graph_path()
+        else:
+            self.project_root = project_root or Path.cwd()
+            self.vectorstore_dir = self.project_root / ".vectorstore"
+            self.knowledge_graph_path = self.vectorstore_dir / "knowledge_graph.json"
         self.qdrant_dir = self.vectorstore_dir / "qdrant"
 
     def _load_knowledge_graph(self) -> Optional[Dict]:

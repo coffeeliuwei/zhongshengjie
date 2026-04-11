@@ -64,7 +64,9 @@ def sample_power_types_config(temp_project_root):
         },
         "updated_at": "2025-01-01",
     }
-    config_path.write_text(json.dumps(config_data, ensure_ascii=False))
+    config_path.write_text(
+        json.dumps(config_data, ensure_ascii=False), encoding="utf-8"
+    )
     return config_path
 
 

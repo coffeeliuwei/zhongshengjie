@@ -44,6 +44,15 @@ COLLECTION_NAMES = {
     "novel_settings": "novel_settings_v2",  # 小说设定（混合版）
     "writing_techniques": "writing_techniques_v2",  # 创作技法（混合版）
     "case_library": "case_library_v2",  # 标杆案例（混合版）
+    # 扩展维度Collection
+    "worldview_element": "worldview_element_v1",  # 世界观元素
+    "power_vocabulary": "power_vocabulary_v1",  # 力量词汇
+    "character_relation": "character_relation_v1",  # 人物关系
+    "emotion_arc": "emotion_arc_v1",  # 情感弧线
+    "dialogue_style": "dialogue_style_v1",  # 对话风格
+    "foreshadow_pair": "foreshadow_pair_v1",  # 伏笔配对
+    "power_cost": "power_cost_v1",  # 力量代价
+    "author_style": "author_style_v1",  # 作者风格
 }
 
 # 旧Collection名（用于迁移时读取）

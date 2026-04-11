@@ -310,6 +310,81 @@ class BattleAPI:
 
         return all_techniques
 
+    # ============================================================
+    # 力量代价检索（新增）
+    # ============================================================
+
+    def search_power_cost_patterns(
+        self,
+        power_type: str = None,
+        cost_category: str = None,
+        limit: int = 20,
+    ) -> List[Dict[str, Any]]:
+        """
+        检索力量代价模式
+
+        从 power_cost_v1 Collection 检索代价描写模板，
+        用于战斗场景中代价描写参考。
+
+        Args:
+            power_type: 力量类型（修仙/魔法/科技等）
+            cost_category: 代价类别（体力/精神/寿命/资源等）
+            limit: 返回数量
+
+        Returns:
+            代价模式列表：
+            [
+                {
+                    "power_type": "修仙",
+                    "cost_categories": ["体力", "精神", "寿命"],
+                    "total_expressions": 156,
+                    "examples": [...]
+                },
+                ...
+            ]
+
+        Example:
+            # 获取修仙代价模式
+            patterns = api.search_power_cost_patterns(power_type="修仙")
+
+            # 获取体力代价模式
+            patterns = api.search_power_cost_patterns(cost_category="体力")
+        """
+        try:
+            from qdrant_client import QdrantClient
+            from qdrant_client.http import models
+
+            client = QdrantClient(url="http://localhost:6333")
+
+            # 构建 filter
+            filter_conditions = []
+            if power_type:
+                filter_conditions.append(
+                    models.FieldCondition(
+                        key="power_type",
+                        match=models.MatchValue(value=power_type),
+                    )
+                )
+
+            filter_obj = (
+                models.Filter(must=filter_conditions) if filter_conditions else None
+            )
+
+            # scroll 获取数据
+            results = client.scroll(
+                collection_name="power_cost_v1",
+                with_payload=True,
+                with_vectors=False,
+                limit=limit,
+                query_filter=filter_obj,
+            )[0]
+
+            return [point.payload for point in results]
+
+        except Exception as e:
+            print(f"[警告] 力量代价检索失败: {e}")
+            return []
+
 
 # 全局API实例
 _battle_api: Optional[BattleAPI] = None
