@@ -1,0 +1,104 @@
+{
+  "description": "案例提取配置文件 - 添加新资源只需修改此文件",
+  "version": "2.0",
+  
+  "resources": [
+    {
+      "id": "source_001",
+      "name": "起点爆款小说合集",
+      "path": "E:\\小说资源\\起点爆款小说合集",
+      "enabled": true
+    },
+    {
+      "id": "source_002", 
+      "name": "起点精选",
+      "path": "E:\\小说资源\\起点精选",
+      "enabled": true
+    },
+    {
+      "id": "source_003",
+      "name": "玄幻奇幻",
+      "path": "E:\\小说资源\\玄幻奇幻",
+      "enabled": true
+    },
+    {
+      "id": "source_004",
+      "name": "武侠仙侠",
+      "path": "E:\\小说资源\\武侠仙侠",
+      "enabled": true
+    },
+    {
+      "id": "source_005",
+      "name": "现代都市",
+      "path": "E:\\小说资源\\现代都市",
+      "enabled": true
+    },
+    {
+      "id": "source_006",
+      "name": "历史军事",
+      "path": "E:\\小说资源\\历史军事",
+      "enabled": true
+    },
+    {
+      "id": "source_007",
+      "name": "科幻灵异",
+      "path": "E:\\小说资源\\科幻灵异",
+      "enabled": true
+    },
+    {
+      "id": "source_008",
+      "name": "青春校园",
+      "path": "E:\\小说资源\\青春校园",
+      "enabled": true
+    },
+    {
+      "id": "source_009",
+      "name": "游戏竞技",
+      "path": "E:\\小说资源\\游戏竞技",
+      "enabled": true
+    },
+    {
+      "id": "source_010",
+      "name": "女频言情",
+      "path": "E:\\小说资源\\女频言情",
+      "enabled": true
+    },
+    {
+      "id": "source_011",
+      "name": "第二批资源",
+      "path": "E:\\小说资源\\第二批资源",
+      "enabled": true,
+      "note": "mobi格式，需要先转换"
+    }
+  ],
+  
+  "converted_directory": "D:\\动画\\众生界\\.case-library\\converted",
+  
+  "output": {
+    "cases_directory": "D:\\动画\\众生界\\.case-library\\cases",
+    "index_file": "D:\\动画\\众生界\\.case-library\\unified_index.json",
+    "stats_file": "D:\\动画\\众生界\\.case-library\\unified_stats.json"
+  },
+  
+  "extraction_settings": {
+    "chapters_to_process": 5,
+    "include_last_chapter": true,
+    "min_content_length": 300,
+    "min_quality_score": 6.0,
+    "max_cases_per_chapter": 3
+  },
+  
+  "how_to_add_new_resources": {
+    "step1": "将小说文件放入任意目录（支持txt/epub/mobi）",
+    "step2": "在此文件的resources数组中添加新条目，或",
+    "step2_alt": "直接将txt文件放入converted目录",
+    "step3": "运行: python unified_case_extractor.py --extract",
+    "note": "系统会自动跳过已处理的文件，只处理新增内容"
+  },
+  
+  "supported_formats": {
+    "txt": "直接处理",
+    "epub": "需要先运行: python convert_format.py",
+    "mobi": "需要先运行: python convert_format.py"
+  }
+}
