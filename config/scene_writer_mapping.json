@@ -1,0 +1,1299 @@
+{
+  "version": "2.0",
+  "description": "《众生界》场景-作家协作映射配置，定义每种场景的多作家协作结构",
+  "created_at": "2026-04-01",
+  "updated_at": "2026-04-01",
+  "scene_count": {
+    "active": 16,
+    "can_activate": 3,
+    "pending_activation": 9,
+    "inactive": 3,
+    "total": 31
+  },
+  
+  "scene_writer_mapping": {
+    "开篇场景": {
+      "description": "小说/章节开篇，吸引读者、设定基调、引入主角",
+      "collaboration": [
+        {
+          "writer": "苍澜",
+          "role": "世界观定调",
+          "phase": "前置",
+          "contribution": ["世界设定基调", "时代背景呈现", "核心冲突根源暗示", "力量体系影子"],
+          "weight": 0.20,
+          "technique_dimension": "世界观维度"
+        },
+        {
+          "writer": "玄一",
+          "role": "剧情编织",
+          "phase": "核心",
+          "contribution": ["开篇悬念设计", "信息差布局", "章末钩子", "浅层伏笔埋设", "开篇节奏控制"],
+          "weight": 0.35,
+          "technique_dimension": "剧情维度"
+        },
+        {
+          "writer": "墨言",
+          "role": "人物引入",
+          "phase": "核心",
+          "contribution": ["主角出场设计", "人物辨识度建立", "内在矛盾铺垫", "人物状态呈现"],
+          "weight": 0.20,
+          "technique_dimension": "人物维度"
+        },
+        {
+          "writer": "云溪",
+          "role": "氛围营造",
+          "phase": "收尾",
+          "contribution": ["开篇氛围渲染", "基调意境营造", "五感联动描写", "静默叙述"],
+          "weight": 0.25,
+          "technique_dimension": "氛围意境维度"
+        }
+      ],
+      "workflow_order": ["苍澜", "玄一", "墨言", "云溪"],
+      "primary_writer": "玄一",
+      "case_library_filter": {
+        "scene_type": "开篇场景",
+        "reference_focus": ["悬念设置", "人物出场", "氛围渲染"]
+      }
+    },
+    
+    "人物出场": {
+      "description": "主要角色首次亮相，建立人物形象",
+      "collaboration": [
+        {
+          "writer": "苍澜",
+          "role": "身份设定",
+          "phase": "前置",
+          "contribution": ["人物身份背景", "势力归属", "力量等级暗示"],
+          "weight": 0.15,
+          "technique_dimension": "世界观维度"
+        },
+        {
+          "writer": "玄一",
+          "role": "出场时机",
+          "phase": "前置",
+          "contribution": ["出场时机设计", "出场目的", "剧情关联点"],
+          "weight": 0.15,
+          "technique_dimension": "剧情维度"
+        },
+        {
+          "writer": "墨言",
+          "role": "人物刻画",
+          "phase": "核心",
+          "contribution": ["外貌描写", "言行特征", "内在矛盾展示", "三维定义", "人物辨识度"],
+          "weight": 0.50,
+          "technique_dimension": "人物维度"
+        },
+        {
+          "writer": "云溪",
+          "role": "出场氛围",
+          "phase": "收尾",
+          "contribution": ["出场氛围渲染", "出场瞬间意境", "润色出场描写"],
+          "weight": 0.20,
+          "technique_dimension": "氛围意境维度"
+        }
+      ],
+      "workflow_order": ["苍澜", "玄一", "墨言", "云溪"],
+      "primary_writer": "墨言",
+      "case_library_filter": {
+        "scene_type": "人物出场",
+        "reference_focus": ["外貌描写", "言行特征", "出场方式"]
+      }
+    },
+    
+    "战斗场景": {
+      "description": "打斗、对决、厮杀等动作密集的场面",
+      "collaboration": [
+        {
+          "writer": "苍澜",
+          "role": "世界观输入",
+          "phase": "前置",
+          "contribution": ["力量体系约束", "血脉代价设定", "势力背景", "能力边界"],
+          "weight": 0.15,
+          "technique_dimension": "世界观维度"
+        },
+        {
+          "writer": "玄一",
+          "role": "剧情框架",
+          "phase": "前置",
+          "contribution": ["战斗目的", "剧情推进点", "悬念布局", "战斗中伏笔"],
+          "weight": 0.20,
+          "technique_dimension": "剧情维度"
+        },
+        {
+          "writer": "墨言",
+          "role": "人物状态",
+          "phase": "前置",
+          "contribution": ["人物心理状态", "情感动机", "行为逻辑", "战斗中人物成长"],
+          "weight": 0.15,
+          "technique_dimension": "人物维度"
+        },
+        {
+          "writer": "剑尘",
+          "role": "战斗设计",
+          "phase": "核心",
+          "contribution": ["战斗节奏控制", "能力代价描写", "弱者胜强逻辑", "战斗后果", "三段式结构"],
+          "weight": 0.35,
+          "technique_dimension": "战斗冲突维度"
+        },
+        {
+          "writer": "云溪",
+          "role": "润色收尾",
+          "phase": "收尾",
+          "contribution": ["战斗氛围渲染", "战斗场面润色", "静默沉淀", "禁止项检测"],
+          "weight": 0.15,
+          "technique_dimension": "氛围意境维度"
+        }
+      ],
+      "workflow_order": ["苍澜", "玄一", "墨言", "剑尘", "云溪"],
+      "primary_writer": "剑尘",
+      "case_library_filter": {
+        "scene_type": "战斗场景",
+        "reference_focus": ["战斗节奏", "代价描写", "弱者胜强", "战斗后果"]
+      }
+    },
+    
+    "对话场景": {
+      "description": "角色之间的对话交流，推进剧情或展现性格",
+      "collaboration": [
+        {
+          "writer": "玄一",
+          "role": "对话目的",
+          "phase": "前置",
+          "contribution": ["对话剧情目的", "对话推进点", "对话中信息差"],
+          "weight": 0.20,
+          "technique_dimension": "剧情维度"
+        },
+        {
+          "writer": "墨言",
+          "role": "对话刻画",
+          "phase": "核心",
+          "contribution": ["对话风格差异", "言行反映性格", "对话中情感表达", "潜台词设计"],
+          "weight": 0.50,
+          "technique_dimension": "人物维度"
+        },
+        {
+          "writer": "云溪",
+          "role": "对话氛围",
+          "phase": "收尾",
+          "contribution": ["对话场景氛围", "对话节奏润色", "禁止项检测"],
+          "weight": 0.30,
+          "technique_dimension": "氛围意境维度"
+        }
+      ],
+      "workflow_order": ["玄一", "墨言", "云溪"],
+      "primary_writer": "墨言",
+      "case_library_filter": {
+        "scene_type": "对话场景",
+        "reference_focus": ["对话风格", "潜台词", "性格展现"]
+      }
+    },
+    
+    "情感场景": {
+      "description": "情感表达的关键段落，触动读者情感",
+      "collaboration": [
+        {
+          "writer": "玄一",
+          "role": "情感触发",
+          "phase": "前置",
+          "contribution": ["情感事件设计", "剧情推动", "情感悬念"],
+          "weight": 0.15,
+          "technique_dimension": "剧情维度"
+        },
+        {
+          "writer": "墨言",
+          "role": "情感刻画",
+          "phase": "核心",
+          "contribution": ["情感描写", "心理活动", "情感矛盾", "克制表达", "情感成长弧线"],
+          "weight": 0.55,
+          "technique_dimension": "人物维度"
+        },
+        {
+          "writer": "云溪",
+          "role": "意境渲染",
+          "phase": "收尾",
+          "contribution": ["情感氛围渲染", "情景交融", "物是人非感", "润色"],
+          "weight": 0.30,
+          "technique_dimension": "氛围意境维度"
+        }
+      ],
+      "workflow_order": ["玄一", "墨言", "云溪"],
+      "primary_writer": "墨言",
+      "case_library_filter": {
+        "scene_type": "情感场景",
+        "reference_focus": ["情感描写", "克制表达", "情景交融"]
+      }
+    },
+    
+    "悬念场景": {
+      "description": "设置悬念、引发好奇的片段",
+      "collaboration": [
+        {
+          "writer": "苍澜",
+          "role": "悬念根基",
+          "phase": "前置",
+          "contribution": ["悬念世界观支撑", "未知设定铺垫"],
+          "weight": 0.10,
+          "technique_dimension": "世界观维度"
+        },
+        {
+          "writer": "玄一",
+          "role": "悬念设计",
+          "phase": "核心",
+          "contribution": ["信息差设计", "三层悬念布局", "悬念揭示时机", "悬念与伏笔联动"],
+          "weight": 0.70,
+          "technique_dimension": "剧情维度"
+        },
+        {
+          "writer": "云溪",
+          "role": "悬念氛围",
+          "phase": "收尾",
+          "contribution": ["悬念氛围渲染", "悬念叙述节奏", "静默中的悬念"],
+          "weight": 0.20,
+          "technique_dimension": "氛围意境维度"
+        }
+      ],
+      "workflow_order": ["苍澜", "玄一", "云溪"],
+      "primary_writer": "玄一",
+      "case_library_filter": {
+        "scene_type": "悬念场景",
+        "reference_focus": ["信息差设计", "悬念布局", "悬念揭示"]
+      }
+    },
+    
+    "转折场景": {
+      "description": "剧情转折点，改变故事走向",
+      "collaboration": [
+        {
+          "writer": "苍澜",
+          "role": "转折根基",
+          "phase": "前置",
+          "contribution": ["转折世界观支撑", "力量格局变化"],
+          "weight": 0.15,
+          "technique_dimension": "世界观维度"
+        },
+        {
+          "writer": "玄一",
+          "role": "转折策划",
+          "phase": "核心",
+          "contribution": ["反转设计", "转折伏笔回收", "转折后果", "转折节奏控制"],
+          "weight": 0.55,
+          "technique_dimension": "剧情维度"
+        },
+        {
+          "writer": "墨言",
+          "role": "人物转折",
+          "phase": "核心",
+          "contribution": ["转折中人物反应", "人物状态变化", "情感转折"],
+          "weight": 0.20,
+          "technique_dimension": "人物维度"
+        },
+        {
+          "writer": "云溪",
+          "role": "转折氛围",
+          "phase": "收尾",
+          "contribution": ["转折氛围渲染", "转折瞬间意境", "静默沉淀"],
+          "weight": 0.10,
+          "technique_dimension": "氛围意境维度"
+        }
+      ],
+      "workflow_order": ["苍澜", "玄一", "墨言", "云溪"],
+      "primary_writer": "玄一",
+      "case_library_filter": {
+        "scene_type": "转折场景",
+        "reference_focus": ["反转设计", "伏笔回收", "转折后果"]
+      }
+    },
+    
+    "环境场景": {
+      "description": "景物、氛围描写，渲染意境",
+      "collaboration": [
+        {
+          "writer": "苍澜",
+          "role": "环境设定",
+          "phase": "前置",
+          "contribution": ["地理设定", "势力分布背景", "时代背景", "环境世界观关联"],
+          "weight": 0.25,
+          "technique_dimension": "世界观维度"
+        },
+        {
+          "writer": "云溪",
+          "role": "意境营造",
+          "phase": "核心",
+          "contribution": ["氛围描写", "五感联动", "意象组合", "情景交融", "物是人非感", "静默悲怆"],
+          "weight": 0.75,
+          "technique_dimension": "氛围意境维度"
+        }
+      ],
+      "workflow_order": ["苍澜", "云溪"],
+      "primary_writer": "云溪",
+      "case_library_filter": {
+        "scene_type": "环境场景",
+        "reference_focus": ["氛围描写", "五感联动", "意境营造"]
+      }
+    },
+    
+    "心理场景": {
+      "description": "内心独白、情感波动、心理活动",
+      "collaboration": [
+        {
+          "writer": "玄一",
+          "role": "心理触发",
+          "phase": "前置",
+          "contribution": ["心理事件触发", "心理与剧情关联"],
+          "weight": 0.15,
+          "technique_dimension": "剧情维度"
+        },
+        {
+          "writer": "墨言",
+          "role": "心理刻画",
+          "phase": "核心",
+          "contribution": ["内心独白", "心理矛盾", "心理描写深度", "心理成长", "决策心理"],
+          "weight": 0.65,
+          "technique_dimension": "人物维度"
+        },
+        {
+          "writer": "云溪",
+          "role": "心理意境",
+          "phase": "收尾",
+          "contribution": ["心理氛围渲染", "心理描写润色"],
+          "weight": 0.20,
+          "technique_dimension": "氛围意境维度"
+        }
+      ],
+      "workflow_order": ["玄一", "墨言", "云溪"],
+      "primary_writer": "墨言",
+      "case_library_filter": {
+        "scene_type": "心理场景",
+        "reference_focus": ["内心独白", "心理矛盾", "心理描写"]
+      }
+    },
+    
+    "结尾场景": {
+      "description": "章节/故事结尾，留下钩子或余韵",
+      "collaboration": [
+        {
+          "writer": "玄一",
+          "role": "结尾设计",
+          "phase": "核心",
+          "contribution": ["悬念钩子", "章末钩子设计", "伏笔暗示", "结尾悬念布局"],
+          "weight": 0.45,
+          "technique_dimension": "剧情维度"
+        },
+        {
+          "writer": "墨言",
+          "role": "情感收束",
+          "phase": "核心",
+          "contribution": ["情感结尾", "人物状态定格", "情感余韵"],
+          "weight": 0.25,
+          "technique_dimension": "人物维度"
+        },
+        {
+          "writer": "云溪",
+          "role": "结尾意境",
+          "phase": "收尾",
+          "contribution": ["结尾氛围渲染", "意犹未尽感", "静默收尾", "禁止项检测"],
+          "weight": 0.30,
+          "technique_dimension": "氛围意境维度"
+        }
+      ],
+      "workflow_order": ["玄一", "墨言", "云溪"],
+      "primary_writer": "玄一",
+      "case_library_filter": {
+        "scene_type": "结尾场景",
+        "reference_focus": ["悬念钩子", "情感收束", "结尾意境"]
+      }
+    },
+    
+    "社交场景": {
+      "description": "人际关系、社交活动、势利往来",
+      "collaboration": [
+        {
+          "writer": "苍澜",
+          "role": "社交背景",
+          "phase": "前置",
+          "contribution": ["势力关系背景", "社交等级设定", "权力格局"],
+          "weight": 0.20,
+          "technique_dimension": "世界观维度"
+        },
+        {
+          "writer": "玄一",
+          "role": "社交剧情",
+          "phase": "前置",
+          "contribution": ["社交目的", "暗流设计", "社交中信息差"],
+          "weight": 0.15,
+          "technique_dimension": "剧情维度"
+        },
+        {
+          "writer": "墨言",
+          "role": "社交刻画",
+          "phase": "核心",
+          "contribution": ["人物互动", "社交言行", "社交心理", "关系展现", "暗流涌动"],
+          "weight": 0.40,
+          "technique_dimension": "人物维度"
+        },
+        {
+          "writer": "云溪",
+          "role": "社交氛围",
+          "phase": "收尾",
+          "contribution": ["社交场景氛围", "场面描写润色"],
+          "weight": 0.25,
+          "technique_dimension": "氛围意境维度"
+        }
+      ],
+      "workflow_order": ["苍澜", "玄一", "墨言", "云溪"],
+      "primary_writer": "墨言",
+      "case_library_filter": {
+        "scene_type": "社交场景",
+        "reference_focus": ["人物互动", "暗流涌动", "关系展现"]
+      }
+    },
+    
+    "冲突升级": {
+      "description": "矛盾激化，冲突从酝酿到爆发",
+      "collaboration": [
+        {
+          "writer": "苍澜",
+          "role": "冲突根基",
+          "phase": "前置",
+          "contribution": ["力量格局冲突", "势力矛盾根源"],
+          "weight": 0.15,
+          "technique_dimension": "世界观维度"
+        },
+        {
+          "writer": "玄一",
+          "role": "冲突策划",
+          "phase": "核心",
+          "contribution": ["矛盾层层递进", "导火索设计", "情绪渲染", "不可调和设计"],
+          "weight": 0.50,
+          "technique_dimension": "剧情维度"
+        },
+        {
+          "writer": "墨言",
+          "role": "冲突心理",
+          "phase": "核心",
+          "contribution": ["冲突中人物心理", "矛盾心理描写"],
+          "weight": 0.20,
+          "technique_dimension": "人物维度"
+        },
+        {
+          "writer": "云溪",
+          "role": "冲突氛围",
+          "phase": "收尾",
+          "contribution": ["冲突氛围渲染", "紧张感营造"],
+          "weight": 0.15,
+          "technique_dimension": "氛围意境维度"
+        }
+      ],
+      "workflow_order": ["苍澜", "玄一", "墨言", "云溪"],
+      "primary_writer": "玄一",
+      "case_library_filter": {
+        "scene_type": "冲突升级",
+        "reference_focus": ["层层递进", "导火索设计", "矛盾激化"]
+      }
+    },
+    
+    "阴谋揭露": {
+      "description": "阴谋、计划的暴露",
+      "collaboration": [
+        {
+          "writer": "苍澜",
+          "role": "阴谋设定",
+          "phase": "前置",
+          "contribution": ["阴谋世界观背景", "势力博弈设定"],
+          "weight": 0.20,
+          "technique_dimension": "世界观维度"
+        },
+        {
+          "writer": "玄一",
+          "role": "揭露设计",
+          "phase": "核心",
+          "contribution": ["逐步揭示", "反转展现", "揭露时机", "后续影响"],
+          "weight": 0.50,
+          "technique_dimension": "剧情维度"
+        },
+        {
+          "writer": "墨言",
+          "role": "人物反应",
+          "phase": "核心",
+          "contribution": ["揭露时人物反应", "心理变化"],
+          "weight": 0.20,
+          "technique_dimension": "人物维度"
+        },
+        {
+          "writer": "云溪",
+          "role": "揭露氛围",
+          "phase": "收尾",
+          "contribution": ["揭露氛围渲染", "真相大白意境"],
+          "weight": 0.10,
+          "technique_dimension": "氛围意境维度"
+        }
+      ],
+      "workflow_order": ["苍澜", "玄一", "墨言", "云溪"],
+      "primary_writer": "玄一",
+      "case_library_filter": {
+        "scene_type": "阴谋揭露",
+        "reference_focus": ["逐步揭示", "反转展现", "揭露时机"]
+      }
+    },
+    
+    "团队组建": {
+      "description": "组建团队、联盟、势力",
+      "collaboration": [
+        {
+          "writer": "苍澜",
+          "role": "团队设定",
+          "phase": "前置",
+          "contribution": ["团队势力背景", "成员能力设定", "团队世界观定位"],
+          "weight": 0.25,
+          "technique_dimension": "世界观维度"
+        },
+        {
+          "writer": "玄一",
+          "role": "组队剧情",
+          "phase": "核心",
+          "contribution": ["组队目标设定", "组队时机", "磨合过程设计", "剧情推进"],
+          "weight": 0.35,
+          "technique_dimension": "剧情维度"
+        },
+        {
+          "writer": "墨言",
+          "role": "成员刻画",
+          "phase": "核心",
+          "contribution": ["成员展示", "信任建立过程", "团队关系", "成员个性"],
+          "weight": 0.30,
+          "technique_dimension": "人物维度"
+        },
+        {
+          "writer": "云溪",
+          "role": "团队氛围",
+          "phase": "收尾",
+          "contribution": ["团队氛围渲染", "团结感营造"],
+          "weight": 0.10,
+          "technique_dimension": "氛围意境维度"
+        }
+      ],
+      "workflow_order": ["苍澜", "玄一", "墨言", "云溪"],
+      "primary_writer": "玄一",
+      "case_library_filter": {
+        "scene_type": "团队组建",
+        "reference_focus": ["成员展示", "信任建立", "磨合过程"]
+      }
+    },
+    
+    "打脸场景": {
+      "description": "被看不起→证明实力，网文核心爽点",
+      "collaboration": [
+        {
+          "writer": "苍澜",
+          "role": "力量背景",
+          "phase": "前置",
+          "contribution": ["实力差距设定", "力量体系约束", "势力背景"],
+          "weight": 0.15,
+          "technique_dimension": "世界观维度"
+        },
+        {
+          "writer": "玄一",
+          "role": "打脸剧情",
+          "phase": "前置",
+          "contribution": ["被轻视铺垫", "反转时机", "打脸节奏", "后果设计"],
+          "weight": 0.25,
+          "technique_dimension": "剧情维度"
+        },
+        {
+          "writer": "剑尘",
+          "role": "实力爆发",
+          "phase": "核心",
+          "contribution": ["实力展现", "震惊描写", "碾压逻辑", "代价展现"],
+          "weight": 0.35,
+          "technique_dimension": "战斗冲突维度"
+        },
+        {
+          "writer": "墨言",
+          "role": "人物反应",
+          "phase": "核心",
+          "contribution": ["嘲讽者反应", "旁观者心理", "主角心理", "情感冲击"],
+          "weight": 0.15,
+          "technique_dimension": "人物维度"
+        },
+        {
+          "writer": "云溪",
+          "role": "打脸意境",
+          "phase": "收尾",
+          "contribution": ["打脸氛围渲染", "余韵设计", "爽感放大"],
+          "weight": 0.10,
+          "technique_dimension": "氛围意境维度"
+        }
+      ],
+      "workflow_order": ["苍澜", "玄一", "剑尘", "墨言", "云溪"],
+      "primary_writer": "剑尘",
+      "case_library_filter": {
+        "scene_type": "打脸场景",
+        "reference_focus": ["被轻视铺垫", "实力展现", "震惊反应", "打脸节奏"]
+      }
+    },
+    
+    "高潮场景": {
+      "description": "情绪爆发、故事顶点，全书最高潮",
+      "collaboration": [
+        {
+          "writer": "苍澜",
+          "role": "高潮根基",
+          "phase": "前置",
+          "contribution": ["世界观高潮支撑", "力量格局变化", "代价设定"],
+          "weight": 0.15,
+          "technique_dimension": "世界观维度"
+        },
+        {
+          "writer": "玄一",
+          "role": "高潮策划",
+          "phase": "前置",
+          "contribution": ["伏笔回收", "高潮节奏", "剧情爆发点", "悬念揭示"],
+          "weight": 0.25,
+          "technique_dimension": "剧情维度"
+        },
+        {
+          "writer": "剑尘",
+          "role": "高潮爆发",
+          "phase": "核心",
+          "contribution": ["决战描写", "生死时刻", "力量爆发", "高潮后果"],
+          "weight": 0.30,
+          "technique_dimension": "战斗冲突维度"
+        },
+        {
+          "writer": "墨言",
+          "role": "情感高潮",
+          "phase": "核心",
+          "contribution": ["情感爆发", "心理极限", "人物抉择", "成长定格"],
+          "weight": 0.20,
+          "technique_dimension": "人物维度"
+        },
+        {
+          "writer": "云溪",
+          "role": "高潮意境",
+          "phase": "收尾",
+          "contribution": ["高潮氛围渲染", "史诗意境", "余韵荡漾"],
+          "weight": 0.10,
+          "technique_dimension": "氛围意境维度"
+        }
+      ],
+      "workflow_order": ["苍澜", "玄一", "剑尘", "墨言", "云溪"],
+      "primary_writer": "剑尘",
+      "case_library_filter": {
+        "scene_type": "高潮场景",
+        "reference_focus": ["决战描写", "情感爆发", "高潮节奏", "史诗意境"]
+      }
+    },
+    
+    "修炼突破": {
+      "description": "境界提升、功法领悟、实力跃升",
+      "status": "pending_activation",
+      "collaboration": [
+        {
+          "writer": "苍澜",
+          "role": "突破设定",
+          "phase": "前置",
+          "contribution": ["境界体系约束", "突破代价设定", "力量边界"],
+          "weight": 0.30,
+          "technique_dimension": "世界观维度"
+        },
+        {
+          "writer": "玄一",
+          "role": "突破剧情",
+          "phase": "前置",
+          "contribution": ["突破时机设计", "突破剧情推进", "伏笔关联"],
+          "weight": 0.20,
+          "technique_dimension": "剧情维度"
+        },
+        {
+          "writer": "墨言",
+          "role": "突破心理",
+          "phase": "核心",
+          "contribution": ["顿悟描写", "心路历程", "成长感悟"],
+          "weight": 0.20,
+          "technique_dimension": "人物维度"
+        },
+        {
+          "writer": "剑尘",
+          "role": "力量爆发",
+          "phase": "核心",
+          "contribution": ["力量爆发描写", "境界展现", "突破后果"],
+          "weight": 0.20,
+          "technique_dimension": "战斗冲突维度"
+        },
+        {
+          "writer": "云溪",
+          "role": "突破意境",
+          "phase": "收尾",
+          "contribution": ["突破氛围渲染", "力量觉醒意境"],
+          "weight": 0.10,
+          "technique_dimension": "氛围意境维度"
+        }
+      ],
+      "workflow_order": ["苍澜", "玄一", "墨言", "剑尘", "云溪"],
+      "primary_writer": "苍澜",
+      "case_library_filter": {
+        "scene_type": "修炼突破",
+        "reference_focus": ["顿悟描写", "力量爆发", "境界展现"]
+      }
+    },
+    
+    "势力登场": {
+      "description": "组织、门派、势力首次亮相",
+      "status": "pending_activation",
+      "collaboration": [
+        {
+          "writer": "苍澜",
+          "role": "势力设定",
+          "phase": "核心",
+          "contribution": ["规模展现", "实力暗示", "势力格局定位", "势力特色"],
+          "weight": 0.50,
+          "technique_dimension": "世界观维度"
+        },
+        {
+          "writer": "玄一",
+          "role": "登场剧情",
+          "phase": "核心",
+          "contribution": ["登场目的", "登场时机", "剧情关联"],
+          "weight": 0.25,
+          "technique_dimension": "剧情维度"
+        },
+        {
+          "writer": "墨言",
+          "role": "代表人物",
+          "phase": "核心",
+          "contribution": ["代表人物展示", "势力气质刻画"],
+          "weight": 0.15,
+          "technique_dimension": "人物维度"
+        },
+        {
+          "writer": "云溪",
+          "role": "登场氛围",
+          "phase": "收尾",
+          "contribution": ["势力氛围渲染", "登场气势"],
+          "weight": 0.10,
+          "technique_dimension": "氛围意境维度"
+        }
+      ],
+      "workflow_order": ["苍澜", "玄一", "墨言", "云溪"],
+      "primary_writer": "苍澜",
+      "case_library_filter": {
+        "scene_type": "势力登场",
+        "reference_focus": ["规模展现", "实力暗示", "势力特色"]
+      }
+    },
+    
+    "成长蜕变": {
+      "description": "人物成长、蜕变、觉醒",
+      "status": "pending_activation",
+      "collaboration": [
+        {
+          "writer": "玄一",
+          "role": "成长契机",
+          "phase": "前置",
+          "contribution": ["困境铺垫", "契机设置", "成长剧情线"],
+          "weight": 0.25,
+          "technique_dimension": "剧情维度"
+        },
+        {
+          "writer": "墨言",
+          "role": "蜕变刻画",
+          "phase": "核心",
+          "contribution": ["内心挣扎", "成长弧线", "蜕变展现", "性格转变", "认知蜕变"],
+          "weight": 0.55,
+          "technique_dimension": "人物维度"
+        },
+        {
+          "writer": "云溪",
+          "role": "蜕变意境",
+          "phase": "收尾",
+          "contribution": ["蜕变氛围", "觉醒意境渲染"],
+          "weight": 0.20,
+          "technique_dimension": "氛围意境维度"
+        }
+      ],
+      "workflow_order": ["玄一", "墨言", "云溪"],
+      "primary_writer": "墨言",
+      "case_library_filter": {
+        "scene_type": "成长蜕变",
+        "reference_focus": ["内心挣扎", "成长弧线", "蜕变展现"]
+      }
+    },
+    
+    "伏笔设置": {
+      "description": "埋下伏笔，为后续剧情铺垫",
+      "status": "pending_activation",
+      "collaboration": [
+        {
+          "writer": "苍澜",
+          "role": "伏笔根基",
+          "phase": "前置",
+          "contribution": ["伏笔世界观支撑", "设定伏笔"],
+          "weight": 0.15,
+          "technique_dimension": "世界观维度"
+        },
+        {
+          "writer": "玄一",
+          "role": "伏笔设计",
+          "phase": "核心",
+          "contribution": ["细节暗示", "对话埋伏", "物品关联", "行为伏笔", "伏笔层级设计"],
+          "weight": 0.65,
+          "technique_dimension": "剧情维度"
+        },
+        {
+          "writer": "云溪",
+          "role": "伏笔氛围",
+          "phase": "收尾",
+          "contribution": ["伏笔暗示氛围", "若隐若现感"],
+          "weight": 0.20,
+          "technique_dimension": "氛围意境维度"
+        }
+      ],
+      "workflow_order": ["苍澜", "玄一", "云溪"],
+      "primary_writer": "玄一",
+      "case_library_filter": {
+        "scene_type": "伏笔设置",
+        "reference_focus": ["细节暗示", "对话埋伏", "伏笔层级"]
+      }
+    },
+    
+    "伏笔回收": {
+      "description": "揭示之前埋下的伏笔，前后呼应",
+      "status": "pending_activation",
+      "collaboration": [
+        {
+          "writer": "玄一",
+          "role": "回收设计",
+          "phase": "核心",
+          "contribution": ["前后呼应", "意外揭示", "细节串联", "恍然大悟感", "回收时机"],
+          "weight": 0.70,
+          "technique_dimension": "剧情维度"
+        },
+        {
+          "writer": "墨言",
+          "role": "回收反应",
+          "phase": "核心",
+          "contribution": ["人物反应描写", "心理变化"],
+          "weight": 0.15,
+          "technique_dimension": "人物维度"
+        },
+        {
+          "writer": "云溪",
+          "role": "回收意境",
+          "phase": "收尾",
+          "contribution": ["揭示氛围", "真相大白意境"],
+          "weight": 0.15,
+          "technique_dimension": "氛围意境维度"
+        }
+      ],
+      "workflow_order": ["玄一", "墨言", "云溪"],
+      "primary_writer": "玄一",
+      "case_library_filter": {
+        "scene_type": "伏笔回收",
+        "reference_focus": ["前后呼应", "意外揭示", "细节串联"]
+      }
+    },
+    
+    "危机降临": {
+      "description": "重大危机、灾难、威胁的到来",
+      "status": "pending_activation",
+      "collaboration": [
+        {
+          "writer": "苍澜",
+          "role": "危机设定",
+          "phase": "前置",
+          "contribution": ["危机世界观背景", "危机规模设定", "力量格局影响"],
+          "weight": 0.30,
+          "technique_dimension": "世界观维度"
+        },
+        {
+          "writer": "玄一",
+          "role": "危机剧情",
+          "phase": "核心",
+          "contribution": ["前兆铺垫", "危机爆发节奏", "应对描写", "剧情推动"],
+          "weight": 0.40,
+          "technique_dimension": "剧情维度"
+        },
+        {
+          "writer": "墨言",
+          "role": "危机心理",
+          "phase": "核心",
+          "contribution": ["危机中人物反应", "群体心理"],
+          "weight": 0.15,
+          "technique_dimension": "人物维度"
+        },
+        {
+          "writer": "云溪",
+          "role": "危机氛围",
+          "phase": "收尾",
+          "contribution": ["危机氛围渲染", "压迫感营造"],
+          "weight": 0.15,
+          "technique_dimension": "氛围意境维度"
+        }
+      ],
+      "workflow_order": ["苍澜", "玄一", "墨言", "云溪"],
+      "primary_writer": "玄一",
+      "case_library_filter": {
+        "scene_type": "危机降临",
+        "reference_focus": ["前兆铺垫", "危机爆发", "应对描写"]
+      }
+    },
+    
+    "资源获取": {
+      "description": "获得宝物、功法、资源",
+      "status": "pending_activation",
+      "collaboration": [
+        {
+          "writer": "苍澜",
+          "role": "资源设定",
+          "phase": "前置",
+          "contribution": ["资源价值设定", "资源世界观定位", "获取代价"],
+          "weight": 0.30,
+          "technique_dimension": "世界观维度"
+        },
+        {
+          "writer": "玄一",
+          "role": "获取剧情",
+          "phase": "核心",
+          "contribution": ["铺垫渲染", "获取过程", "后续影响", "剧情推动"],
+          "weight": 0.35,
+          "technique_dimension": "剧情维度"
+        },
+        {
+          "writer": "墨言",
+          "role": "获取心理",
+          "phase": "核心",
+          "contribution": ["获得时心理", "情感反应"],
+          "weight": 0.15,
+          "technique_dimension": "人物维度"
+        },
+        {
+          "writer": "云溪",
+          "role": "获取意境",
+          "phase": "收尾",
+          "contribution": ["获取氛围渲染", "宝物出场意境"],
+          "weight": 0.20,
+          "technique_dimension": "氛围意境维度"
+        }
+      ],
+      "workflow_order": ["苍澜", "玄一", "墨言", "云溪"],
+      "primary_writer": "玄一",
+      "case_library_filter": {
+        "scene_type": "资源获取",
+        "reference_focus": ["铺垫渲染", "获取过程", "价值展现"]
+      }
+    },
+    
+    "探索发现": {
+      "description": "新地点、新事物的发现",
+      "status": "pending_activation",
+      "collaboration": [
+        {
+          "writer": "苍澜",
+          "role": "发现设定",
+          "phase": "前置",
+          "contribution": ["地点/事物设定", "世界观关联", "发现价值"],
+          "weight": 0.30,
+          "technique_dimension": "世界观维度"
+        },
+        {
+          "writer": "玄一",
+          "role": "发现剧情",
+          "phase": "核心",
+          "contribution": ["悬念铺垫", "逐步揭示", "惊喜描写", "危险暗示"],
+          "weight": 0.35,
+          "technique_dimension": "剧情维度"
+        },
+        {
+          "writer": "墨言",
+          "role": "发现心理",
+          "phase": "核心",
+          "contribution": ["发现时心理", "探索动机"],
+          "weight": 0.15,
+          "technique_dimension": "人物维度"
+        },
+        {
+          "writer": "云溪",
+          "role": "发现意境",
+          "phase": "收尾",
+          "contribution": ["发现氛围渲染", "神秘感营造", "场景描写"],
+          "weight": 0.20,
+          "technique_dimension": "氛围意境维度"
+        }
+      ],
+      "workflow_order": ["苍澜", "玄一", "墨言", "云溪"],
+      "primary_writer": "玄一",
+      "case_library_filter": {
+        "scene_type": "探索发现",
+        "reference_focus": ["悬念铺垫", "逐步揭示", "惊喜描写"]
+      }
+    },
+    
+    "情报揭示": {
+      "description": "关键信息的揭露，推进剧情",
+      "status": "pending_activation",
+      "collaboration": [
+        {
+          "writer": "玄一",
+          "role": "揭示设计",
+          "phase": "核心",
+          "contribution": ["信息分层", "时机选择", "反应描写", "影响展现", "剧情推动"],
+          "weight": 0.60,
+          "technique_dimension": "剧情维度"
+        },
+        {
+          "writer": "墨言",
+          "role": "揭示心理",
+          "phase": "核心",
+          "contribution": ["得知时心理", "信息处理过程"],
+          "weight": 0.20,
+          "technique_dimension": "人物维度"
+        },
+        {
+          "writer": "云溪",
+          "role": "揭示氛围",
+          "phase": "收尾",
+          "contribution": ["揭示氛围渲染", "信息冲击感"],
+          "weight": 0.20,
+          "technique_dimension": "氛围意境维度"
+        }
+      ],
+      "workflow_order": ["玄一", "墨言", "云溪"],
+      "primary_writer": "玄一",
+      "case_library_filter": {
+        "scene_type": "情报揭示",
+        "reference_focus": ["信息分层", "时机选择", "影响展现"]
+      }
+    },
+    
+    "反派出场": {
+      "description": "反派角色首次亮相",
+      "status": "can_activate",
+      "activation_note": "人物出场特殊子类，强调威胁暗示和行为刻画",
+      "collaboration": [
+        {
+          "writer": "苍澜",
+          "role": "反派设定",
+          "phase": "前置",
+          "contribution": ["反派身份背景", "势力归属", "威胁等级暗示"],
+          "weight": 0.20,
+          "technique_dimension": "世界观维度"
+        },
+        {
+          "writer": "玄一",
+          "role": "出场目的",
+          "phase": "前置",
+          "contribution": ["反派出场目的", "与主角关联", "威胁布局"],
+          "weight": 0.20,
+          "technique_dimension": "剧情维度"
+        },
+        {
+          "writer": "墨言",
+          "role": "反派刻画",
+          "phase": "核心",
+          "contribution": ["反派气质渲染", "行为刻画", "目的揭示", "威胁暗示", "反派辨识度"],
+          "weight": 0.40,
+          "technique_dimension": "人物维度"
+        },
+        {
+          "writer": "云溪",
+          "role": "出场氛围",
+          "phase": "收尾",
+          "contribution": ["反派出场氛围", "压迫感营造", "威胁意境"],
+          "weight": 0.20,
+          "technique_dimension": "氛围意境维度"
+        }
+      ],
+      "workflow_order": ["苍澜", "玄一", "墨言", "云溪"],
+      "primary_writer": "墨言",
+      "case_library_filter": {
+        "scene_type": "反派出场",
+        "reference_focus": ["气质渲染", "威胁暗示", "行为刻画"]
+      }
+    },
+    
+    "恢复休养": {
+      "description": "疗伤、休息、战后恢复",
+      "status": "can_activate",
+      "activation_note": "节奏调节场景，玄幻常用，可埋伏笔和心路历程",
+      "collaboration": [
+        {
+          "writer": "苍澜",
+          "role": "恢复设定",
+          "phase": "前置",
+          "contribution": ["恢复代价设定", "时间设定", "世界观约束"],
+          "weight": 0.15,
+          "technique_dimension": "世界观维度"
+        },
+        {
+          "writer": "玄一",
+          "role": "恢复剧情",
+          "phase": "前置",
+          "contribution": ["伏笔埋设", "时间过渡设计", "恢复后剧情衔接"],
+          "weight": 0.20,
+          "technique_dimension": "剧情维度"
+        },
+        {
+          "writer": "墨言",
+          "role": "恢复心理",
+          "phase": "核心",
+          "contribution": ["心路历程", "恢复期心理", "成长感悟", "人物状态变化"],
+          "weight": 0.40,
+          "technique_dimension": "人物维度"
+        },
+        {
+          "writer": "云溪",
+          "role": "恢复氛围",
+          "phase": "收尾",
+          "contribution": ["节奏调节", "宁静氛围", "恢复意境"],
+          "weight": 0.25,
+          "technique_dimension": "氛围意境维度"
+        }
+      ],
+      "workflow_order": ["苍澜", "玄一", "墨言", "云溪"],
+      "primary_writer": "墨言",
+      "case_library_filter": {
+        "scene_type": "恢复休养",
+        "reference_focus": ["心路历程", "伏笔埋设", "节奏调节"]
+      }
+    },
+    
+    "回忆场景": {
+      "description": "回忆、闪回、过去重现",
+      "status": "can_activate",
+      "activation_note": "插叙技巧，补充背景信息，对比展现",
+      "collaboration": [
+        {
+          "writer": "玄一",
+          "role": "回忆设计",
+          "phase": "核心",
+          "contribution": ["插叙技巧", "回忆触发点", "信息补充设计", "对比展现", "回归时机"],
+          "weight": 0.50,
+          "technique_dimension": "剧情维度"
+        },
+        {
+          "writer": "墨言",
+          "role": "回忆情感",
+          "phase": "核心",
+          "contribution": ["回忆情感渲染", "过去心理", "情感对比"],
+          "weight": 0.30,
+          "technique_dimension": "人物维度"
+        },
+        {
+          "writer": "云溪",
+          "role": "回忆意境",
+          "phase": "收尾",
+          "contribution": ["回忆氛围", "往昔意境", "时间流逝感"],
+          "weight": 0.20,
+          "technique_dimension": "氛围意境维度"
+        }
+      ],
+      "workflow_order": ["玄一", "墨言", "云溪"],
+      "primary_writer": "玄一",
+      "case_library_filter": {
+        "scene_type": "回忆场景",
+        "reference_focus": ["插叙技巧", "情感渲染", "信息补充"]
+      }
+    }
+  },
+  
+  "inactive_scenes": {
+    "世界观构建": {
+      "status": "inactive",
+      "reason": "需特殊识别逻辑，世界观设定散布在各场景中",
+      "recommendation": "通过势力登场、修炼突破等场景间接呈现"
+    },
+    "日常场景": {
+      "status": "inactive",
+      "reason": "通用词难识别，与主线关联弱",
+      "recommendation": "可作为环境场景或社交场景的组成部分"
+    },
+    "预兆暗示": {
+      "status": "inactive",
+      "reason": "与伏笔设置重叠度高",
+      "recommendation": "合并到伏笔设置场景中"
+    }
+  },
+  
+  "phase_definitions": {
+    "前置": {
+      "description": "提供设定约束和基础输入，为核心创作提供框架",
+      "output_type": "设定输入",
+      "dependency": "无前置依赖"
+    },
+    "核心": {
+      "description": "主要内容创作输出，场景的核心内容",
+      "output_type": "创作输出",
+      "dependency": "依赖前置输入"
+    },
+    "收尾": {
+      "description": "润色、审核、最终输出，确保质量和风格统一",
+      "output_type": "最终输出",
+      "dependency": "依赖前置和核心输出"
+    }
+  },
+  
+  "writer_definitions": {
+    "苍澜": {
+      "role": "世界观架构师",
+      "specialty": ["宏大设定", "权力体系", "世界规则", "力量体系", "代价体系"],
+      "primary_dimension": "世界观维度",
+      "phase_preference": "前置"
+    },
+    "玄一": {
+      "role": "剧情编织师",
+      "specialty": ["伏笔设计", "悬念布局", "反转策划", "章末钩子", "剧情节奏"],
+      "primary_dimension": "剧情维度",
+      "phase_preference": "核心"
+    },
+    "墨言": {
+      "role": "人物刻画师",
+      "specialty": ["情感细腻", "心理描写", "人物立体度", "成长弧线", "对话风格"],
+      "primary_dimension": "人物维度",
+      "phase_preference": "核心"
+    },
+    "剑尘": {
+      "role": "战斗设计师",
+      "specialty": ["热血战斗", "功法体系", "冲突张力", "代价描写", "战斗节奏"],
+      "primary_dimension": "战斗冲突维度",
+      "phase_preference": "核心"
+    },
+    "云溪": {
+      "role": "意境营造师",
+      "specialty": ["氛围描写", "诗意语言", "美学构建", "五感联动", "静默叙述"],
+      "primary_dimension": "氛围意境维度",
+      "phase_preference": "收尾",
+      "dual_role": ["Generator", "Evaluator"]
+    }
+  },
+  
+  "collaboration_rules": {
+    "weight_sum_rule": "每种场景的协作权重总和必须为1.0",
+    "workflow_order_rule": "执行顺序必须遵循前置→核心→收尾的phase顺序",
+    "primary_writer_rule": "主责作家必须是核心phase中权重最高的作家",
+    "contribution_overlap_rule": "同一场景中不同作家的contribution不应重复",
+    "technique_match_rule": "作家technique_dimension应与技法库维度对应"
+  },
+  
+  "usage_guide": {
+    "generator_workflow": {
+      "step1": "读取场景类型的collaboration配置",
+      "step2": "按workflow_order依次调度作家",
+      "step3": "前置作家提供设定输入",
+      "step4": "核心作家创作主要内容",
+      "step5": "收尾作家润色输出",
+      "step6": "按权重整合各作家输出"
+    },
+    "evaluator_workflow": {
+      "step1": "读取场景类型的primary_writer",
+      "step2": "调用主责作家的技法标准",
+      "step3": "按权重分配各维度评分",
+      "step4": "综合评估场景质量"
+    },
+    "case_library_query": {
+      "step1": "读取case_library_filter配置",
+      "step2": "按scene_type检索案例",
+      "step3": "聚焦reference_focus中的核心要素",
+      "step4": "返回参考案例供作家借鉴"
+    }
+  }
+}

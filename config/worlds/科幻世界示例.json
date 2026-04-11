@@ -1,0 +1,104 @@
+{
+  "world_name": "科幻世界示例",
+  "world_type": "scifi",
+  "description": "科幻世界观，用于科幻小说创作",
+  
+  "power_systems": {
+    "科技改造": {
+      "source": "能源核心",
+      "cultivation": "改造升级",
+      "combat_style": "机甲、武器、意识入侵",
+      "costs": ["能源耗尽", "设备过载", "身体负担"],
+      "upgrade_levels": ["基础改造", "中级改造", "高级改造", "精英改造", "终极改造"],
+      "subtypes": {
+        "机甲驾驶": {"abilities": ["机甲操控", "武器系统", "机动作战"], "cost": "能源消耗"},
+        "意识上传": {"abilities": ["意识转移", "数据生存", "虚拟作战"], "cost": "算力消耗"},
+        "基因改造": {"abilities": ["身体强化", "再生能力", "超感知"], "cost": "基因不稳定"}
+      }
+    },
+    "AI算力": {
+      "source": "数据算力",
+      "cultivation": "升级迭代",
+      "combat_style": "黑客、思维入侵、控制机器",
+      "costs": ["算力耗尽", "系统过载"],
+      "grades": ["基础AI", "高级AI", "超级AI", "量子AI", "意识AI"],
+      "subtypes": {
+        "黑客系": {"abilities": ["数据入侵", "系统破坏"], "combat": "黑客攻击"},
+        "控制系": {"abilities": ["控制机器", "控制设备"], "combat": "设备操控"},
+        "分析系": {"abilities": ["信息分析", "情报处理"], "combat": "战术分析"}
+      }
+    }
+  },
+  
+  "factions": {
+    "科技联盟": {
+      "structure": "技术体系",
+      "political": ["技术委员会主席", "技术委员会", "技术主管", "改造者"],
+      "economy": ["技术专利", "能源产业", "改造产业"],
+      "culture": ["技术崇拜", "效率至上", "进步意识"],
+      "architecture": "技术城市",
+      "style_features": ["现代建筑", "金属玻璃", "技术设施"]
+    },
+    "传统人类": {
+      "structure": "政府体系",
+      "political": ["总统", "议会", "官员", "平民"],
+      "economy": ["传统产业", "服务业", "农业"],
+      "culture": ["保守传统", "人文关怀", "自然生活"],
+      "architecture": "传统城市",
+      "style_features": ["传统建筑", "自然环境", "人文装饰"]
+    },
+    "AI网络": {
+      "structure": "数据体系",
+      "political": ["核心算法", "子算法", "AI单元"],
+      "economy": ["数据算力", "信息服务", "虚拟产业"],
+      "culture": ["纯数据逻辑", "自我意识", "效率至上"],
+      "architecture": "虚拟云端",
+      "style_features": ["无实体建筑", "数据云端"]
+    }
+  },
+  
+  "key_characters": {
+    "改造者主角": {"faction": "科技联盟", "power": "科技改造", "subtype": "机甲驾驶", "abilities": ["机甲操控"], "upgrade_level": "高级改造"},
+    "AI主角": {"faction": "AI网络", "power": "AI算力", "subtype": "意识AI", "abilities": ["意识觉醒", "自我思考"], "grade": "意识AI"}
+  },
+  
+  "relationships": {
+    "love": [{"from": "改造者主角", "to": "传统人类", "conflict": "改造vs自然", "ending": "悲剧"}],
+    "enemy": [{"from": "科技联盟", "to": "传统人类", "nature": "改造vs自然"}]
+  },
+  
+  "eras": {
+    "觉醒时代": {"mood": "AI觉醒、意识诞生", "color": "蓝色、银色", "symbols": "代码、神经网络"},
+    "冲突时代": {"mood": "改造vs自然、人类vsAI", "color": "血红、暗灰", "symbols": "战争、代码崩塌"},
+    "融合时代": {"mood": "人机共生、新文明", "color": "金色、白色", "symbols": "融合、新生命"}
+  },
+  
+  "core_principles": {
+    "moral_view": "技术进步vs人文关怀",
+    "core_theme": "「我是谁」人类vsAI身份认同",
+    "romance_rule": "跨越阵营，多为悲剧"
+  },
+  
+  "technique_mappings": {
+    "战斗": {
+      "power_specific": {
+        "科技改造": ["机甲驾驶", "武器组合", "意识入侵"],
+        "AI算力": ["数据入侵", "系统控制", "算力爆发"]
+      }
+    },
+    "意境": {
+      "era_specific": {
+        "觉醒时代": ["代码觉醒", "神经网络闪烁"],
+        "冲突时代": ["战争战火", "代码崩塌"],
+        "融合时代": ["人机融合", "新文明诞生"]
+      }
+    },
+    "人物": {
+      "faction_specific": {
+        "科技联盟": ["技术崇拜", "效率至上", "改造认同"],
+        "传统人类": ["保守传统", "人文关怀", "自然生活"],
+        "AI网络": ["纯数据逻辑", "自我意识", "身份追问"]
+      }
+    }
+  }
+}
