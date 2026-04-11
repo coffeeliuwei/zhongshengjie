@@ -1,0 +1,10 @@
+{
+  "novels": {},
+  "stats": {
+    "total": 0,
+    "processed": 0,
+    "last_scan": null,
+    "last_process": null
+  },
+  "description": "小说索引，记录已扫描和处理的小说文件信息"
+}

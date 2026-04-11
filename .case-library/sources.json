@@ -1,0 +1,196 @@
+{
+  "sources": [
+    {
+      "id": "source_001",
+      "name": "起点爆款小说合集",
+      "path": "E:\\小说资源\\起点爆款小说合集",
+      "status": "extracted",
+      "file_count": 191,
+      "format": "txt",
+      "genres": ["玄幻奇幻", "武侠仙侠"],
+      "added_time": "2026-03-31",
+      "extracted_time": "2026-03-31",
+      "priority": 1
+    },
+    {
+      "id": "source_002",
+      "name": "起点精选",
+      "path": "E:\\小说资源\\起点精选",
+      "status": "extracted",
+      "file_count": 104,
+      "format": "txt",
+      "genres": ["玄幻奇幻", "武侠仙侠", "现代都市"],
+      "added_time": "2026-03-31",
+      "extracted_time": "2026-03-31",
+      "priority": 2
+    },
+    {
+      "id": "source_003",
+      "name": "玄幻奇幻",
+      "path": "E:\\小说资源\\玄幻奇幻",
+      "status": "extracted",
+      "file_count": 442,
+      "format": "mixed",
+      "genres": ["玄幻奇幻"],
+      "added_time": "2026-03-31",
+      "extracted_time": "2026-03-31",
+      "priority": 3
+    },
+    {
+      "id": "source_004",
+      "name": "武侠仙侠",
+      "path": "E:\\小说资源\\武侠仙侠",
+      "status": "extracted",
+      "file_count": 376,
+      "format": "mixed",
+      "genres": ["武侠仙侠"],
+      "added_time": "2026-03-31",
+      "extracted_time": "2026-03-31",
+      "priority": 3
+    },
+    {
+      "id": "source_005",
+      "name": "现代都市",
+      "path": "E:\\小说资源\\现代都市",
+      "status": "extracted",
+      "file_count": 579,
+      "format": "mixed",
+      "genres": ["现代都市"],
+      "added_time": "2026-03-31",
+      "extracted_time": "2026-03-31",
+      "priority": 4
+    },
+    {
+      "id": "source_006",
+      "name": "历史军事",
+      "path": "E:\\小说资源\\历史军事",
+      "status": "extracted",
+      "file_count": 342,
+      "format": "mixed",
+      "genres": ["历史军事"],
+      "added_time": "2026-03-31",
+      "extracted_time": "2026-03-31",
+      "priority": 4
+    },
+    {
+      "id": "source_007",
+      "name": "科幻灵异",
+      "path": "E:\\小说资源\\科幻灵异",
+      "status": "extracted",
+      "file_count": 441,
+      "format": "mixed",
+      "genres": ["科幻灵异"],
+      "added_time": "2026-03-31",
+      "extracted_time": "2026-03-31",
+      "priority": 5
+    },
+    {
+      "id": "source_008",
+      "name": "青春校园",
+      "path": "E:\\小说资源\\青春校园",
+      "status": "extracted",
+      "file_count": 926,
+      "format": "mixed",
+      "genres": ["青春校园"],
+      "added_time": "2026-03-31",
+      "extracted_time": "2026-03-31",
+      "priority": 5
+    },
+    {
+      "id": "source_009",
+      "name": "游戏竞技",
+      "path": "E:\\小说资源\\游戏竞技",
+      "status": "extracted",
+      "file_count": 246,
+      "format": "mixed",
+      "genres": ["游戏竞技"],
+      "added_time": "2026-03-31",
+      "extracted_time": "2026-03-31",
+      "priority": 6
+    },
+    {
+      "id": "source_010",
+      "name": "女频言情",
+      "path": "E:\\小说资源\\女频言情",
+      "status": "extracted",
+      "file_count": 134,
+      "format": "mixed",
+      "genres": ["女频言情"],
+      "added_time": "2026-03-31",
+      "extracted_time": "2026-03-31",
+      "priority": 6
+    },
+    {
+      "id": "source_011",
+      "name": "第二批资源",
+      "path": "E:\\小说资源\\第二批资源",
+      "status": "extracted",
+      "file_count": 2280,
+      "format": "mobi",
+      "genres": ["mixed"],
+      "added_time": "2026-04-01",
+      "extracted_time": "2026-04-01",
+      "converted_time": "2026-04-01",
+      "converted_files": 2277,
+      "failed_files": 1,
+      "novels_found": 4043,
+      "total_cases": 112871,
+      "priority": 7,
+      "notes": "混合内容（小说+非虚构），提取完成"
+    }
+  ],
+  
+  "source_template": {
+    "id": "source_XXX",
+    "name": "来源名称",
+    "path": "来源路径",
+    "status": "active|pending|extracted|inactive",
+    "file_count": 0,
+    "format": "txt|epub|mobi|mixed",
+    "genres": [],
+    "added_time": "",
+    "extracted_time": null,
+    "priority": 1
+  },
+  
+  "extraction_summary": {
+    "batch1": {
+      "total_files": 3781,
+      "extracted_novels": 2491,
+      "total_cases": 5167,
+      "extracted_time": "2026-03-31",
+      "genres_covered": ["玄幻奇幻", "武侠仙侠", "现代都市", "历史军事", "科幻灵异", "青春校园", "游戏竞技", "女频言情"]
+    },
+    "batch2": {
+      "total_files": 2280,
+      "mobi_files": 2277,
+      "novels_found": 4043,
+      "non_novels": 1379,
+      "total_cases": 112871,
+      "extracted_time": "2026-04-01",
+      "by_genre": {
+        "玄幻奇幻": 23770,
+        "青春校园": 22871,
+        "现代都市": 16793,
+        "科幻灵异": 12964,
+        "游戏竞技": 10788,
+        "历史军事": 10733,
+        "武侠仙侠": 9628,
+        "女频言情": 5324
+      },
+      "genres_covered": ["玄幻奇幻", "青春校园", "现代都市", "科幻灵异", "游戏竞技", "历史军事", "武侠仙侠", "女频言情"],
+      "notes": "混合内容（小说+非虚构），转换完成并提取案例"
+    },
+    "total": {
+      "novels": 6534,
+      "cases": 256083
+    }
+  },
+  
+  "notes": [
+    "第一批资源已全部提取完成，共5167条案例",
+    "第二批资源提取完成，共112871条案例",
+    "两批合计：256,083条案例，覆盖8种题材",
+    "mobi转换使用Python mobi库，无需Calibre"
+  ]
+}
