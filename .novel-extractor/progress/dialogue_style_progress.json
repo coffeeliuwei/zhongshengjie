@@ -1,0 +1,13 @@
+{
+  "dimension_id": "dialogue_style",
+  "status": "completed",
+  "total_novels": 6237,
+  "processed_novels": 6056,
+  "total_items": 0,
+  "extracted_items": 0,
+  "last_novel_id": "ff2074a84b1f",
+  "last_update": "2026-04-10T21:04:53.933534",
+  "errors": [],
+  "started_at": "2026-04-10T21:04:19.048549",
+  "completed_at": "2026-04-10T21:04:53.933534"
+}

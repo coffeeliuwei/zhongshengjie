@@ -1,0 +1,13 @@
+{
+  "dimension_id": "chapter_structure",
+  "status": "completed",
+  "total_novels": 6237,
+  "processed_novels": 6056,
+  "total_items": 0,
+  "extracted_items": 6056,
+  "last_novel_id": "ff2074a84b1f",
+  "last_update": "2026-04-10T21:09:43.008551",
+  "errors": [],
+  "started_at": "2026-04-10T21:07:08.653528",
+  "completed_at": "2026-04-10T21:09:43.007540"
+}
