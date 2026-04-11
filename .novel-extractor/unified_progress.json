@@ -1,0 +1,949 @@
+{
+  "started_at": "2026-04-11T01:23:23.212639",
+  "finished_at": "2026-04-11T01:23:23.675688",
+  "status": "completed",
+  "force_mode": false,
+  "dimensions": {
+    "case": {
+      "dimension_id": "case",
+      "status": "completed",
+      "start_time": "2026-04-10T00:18:15.621109",
+      "end_time": "2026-04-10T00:18:15.648639",
+      "items_extracted": 0,
+      "novels_processed": 0,
+      "error": null
+    },
+    "test": {
+      "dimension_id": "test",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 10,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim1": {
+      "dimension_id": "dim1",
+      "status": "pending",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 0,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim2": {
+      "dimension_id": "dim2",
+      "status": "pending",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 0,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_0": {
+      "dimension_id": "dim_0",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 0,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_1": {
+      "dimension_id": "dim_1",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 1,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_2": {
+      "dimension_id": "dim_2",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 2,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_3": {
+      "dimension_id": "dim_3",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 3,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_4": {
+      "dimension_id": "dim_4",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 4,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_5": {
+      "dimension_id": "dim_5",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 5,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_6": {
+      "dimension_id": "dim_6",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 6,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_7": {
+      "dimension_id": "dim_7",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 7,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_8": {
+      "dimension_id": "dim_8",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 8,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_9": {
+      "dimension_id": "dim_9",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 9,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_10": {
+      "dimension_id": "dim_10",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 10,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_11": {
+      "dimension_id": "dim_11",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 11,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_12": {
+      "dimension_id": "dim_12",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 12,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_13": {
+      "dimension_id": "dim_13",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 13,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_14": {
+      "dimension_id": "dim_14",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 14,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_15": {
+      "dimension_id": "dim_15",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 15,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_16": {
+      "dimension_id": "dim_16",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 16,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_17": {
+      "dimension_id": "dim_17",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 17,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_18": {
+      "dimension_id": "dim_18",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 18,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_19": {
+      "dimension_id": "dim_19",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 19,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_20": {
+      "dimension_id": "dim_20",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 20,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_21": {
+      "dimension_id": "dim_21",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 21,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_22": {
+      "dimension_id": "dim_22",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 22,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_23": {
+      "dimension_id": "dim_23",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 23,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_24": {
+      "dimension_id": "dim_24",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 24,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_25": {
+      "dimension_id": "dim_25",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 25,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_26": {
+      "dimension_id": "dim_26",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 26,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_27": {
+      "dimension_id": "dim_27",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 27,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_28": {
+      "dimension_id": "dim_28",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 28,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_29": {
+      "dimension_id": "dim_29",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 29,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_30": {
+      "dimension_id": "dim_30",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 30,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_31": {
+      "dimension_id": "dim_31",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 31,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_32": {
+      "dimension_id": "dim_32",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 32,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_33": {
+      "dimension_id": "dim_33",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 33,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_34": {
+      "dimension_id": "dim_34",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 34,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_35": {
+      "dimension_id": "dim_35",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 35,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_36": {
+      "dimension_id": "dim_36",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 36,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_37": {
+      "dimension_id": "dim_37",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 37,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_38": {
+      "dimension_id": "dim_38",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 38,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_39": {
+      "dimension_id": "dim_39",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 39,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_40": {
+      "dimension_id": "dim_40",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 40,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_41": {
+      "dimension_id": "dim_41",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 41,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_42": {
+      "dimension_id": "dim_42",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 42,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_43": {
+      "dimension_id": "dim_43",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 43,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_44": {
+      "dimension_id": "dim_44",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 44,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_45": {
+      "dimension_id": "dim_45",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 45,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_46": {
+      "dimension_id": "dim_46",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 46,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_47": {
+      "dimension_id": "dim_47",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 47,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_48": {
+      "dimension_id": "dim_48",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 48,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_49": {
+      "dimension_id": "dim_49",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 49,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_50": {
+      "dimension_id": "dim_50",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 50,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_51": {
+      "dimension_id": "dim_51",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 51,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_52": {
+      "dimension_id": "dim_52",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 52,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_53": {
+      "dimension_id": "dim_53",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 53,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_54": {
+      "dimension_id": "dim_54",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 54,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_55": {
+      "dimension_id": "dim_55",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 55,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_56": {
+      "dimension_id": "dim_56",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 56,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_57": {
+      "dimension_id": "dim_57",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 57,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_58": {
+      "dimension_id": "dim_58",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 58,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_59": {
+      "dimension_id": "dim_59",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 59,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_60": {
+      "dimension_id": "dim_60",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 60,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_61": {
+      "dimension_id": "dim_61",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 61,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_62": {
+      "dimension_id": "dim_62",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 62,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_63": {
+      "dimension_id": "dim_63",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 63,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_64": {
+      "dimension_id": "dim_64",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 64,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_65": {
+      "dimension_id": "dim_65",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 65,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_66": {
+      "dimension_id": "dim_66",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 66,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_67": {
+      "dimension_id": "dim_67",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 67,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_68": {
+      "dimension_id": "dim_68",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 68,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_69": {
+      "dimension_id": "dim_69",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 69,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_70": {
+      "dimension_id": "dim_70",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 70,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_71": {
+      "dimension_id": "dim_71",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 71,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_72": {
+      "dimension_id": "dim_72",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 72,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_73": {
+      "dimension_id": "dim_73",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 73,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_74": {
+      "dimension_id": "dim_74",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 74,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_75": {
+      "dimension_id": "dim_75",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 75,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_76": {
+      "dimension_id": "dim_76",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 76,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_77": {
+      "dimension_id": "dim_77",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 77,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_78": {
+      "dimension_id": "dim_78",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 78,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_79": {
+      "dimension_id": "dim_79",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 79,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_80": {
+      "dimension_id": "dim_80",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 80,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_81": {
+      "dimension_id": "dim_81",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 81,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_82": {
+      "dimension_id": "dim_82",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 82,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_83": {
+      "dimension_id": "dim_83",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 83,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_84": {
+      "dimension_id": "dim_84",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 84,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_85": {
+      "dimension_id": "dim_85",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 85,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_86": {
+      "dimension_id": "dim_86",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 86,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_87": {
+      "dimension_id": "dim_87",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 87,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_88": {
+      "dimension_id": "dim_88",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 88,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_89": {
+      "dimension_id": "dim_89",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 89,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_90": {
+      "dimension_id": "dim_90",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 90,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_91": {
+      "dimension_id": "dim_91",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 91,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_92": {
+      "dimension_id": "dim_92",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 92,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_93": {
+      "dimension_id": "dim_93",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 93,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_94": {
+      "dimension_id": "dim_94",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 94,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_95": {
+      "dimension_id": "dim_95",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 95,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_96": {
+      "dimension_id": "dim_96",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 96,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_97": {
+      "dimension_id": "dim_97",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 97,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_98": {
+      "dimension_id": "dim_98",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 98,
+      "novels_processed": 0,
+      "error": null
+    },
+    "dim_99": {
+      "dimension_id": "dim_99",
+      "status": "completed",
+      "start_time": null,
+      "end_time": null,
+      "items_extracted": 99,
+      "novels_processed": 0,
+      "error": null
+    }
+  },
+  "novels_scanned": 6237,
+  "novels_new": 0,
+  "novels_modified": 0,
+  "total_items_extracted": 0,
+  "scene_discovery_count": 0
+}

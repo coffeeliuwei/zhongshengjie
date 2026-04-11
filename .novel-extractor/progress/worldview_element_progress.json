@@ -1,0 +1,15 @@
+{
+  "dimension_id": "worldview_element",
+  "status": "completed",
+  "total_novels": 6237,
+  "processed_novels": 2727,
+  "total_items": 0,
+  "extracted_items": 0,
+  "last_novel_id": "4edf5224bbf9",
+  "last_update": "2026-04-11T11:01:49.955432",
+  "errors": [
+    "12ddfaf45e34: 'gbk' codec can't encode character '\\ue0a4' in position 36: illegal multibyte sequence"
+  ],
+  "started_at": "2026-04-11T11:01:49.477236",
+  "completed_at": "2026-04-11T11:01:49.955432"
+}

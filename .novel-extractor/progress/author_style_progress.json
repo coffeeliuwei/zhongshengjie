@@ -1,0 +1,15 @@
+{
+  "dimension_id": "author_style",
+  "status": "completed",
+  "total_novels": 6237,
+  "processed_novels": 458,
+  "total_items": 0,
+  "extracted_items": 0,
+  "last_novel_id": "b7f648ace720",
+  "last_update": "2026-04-11T05:00:11.325460",
+  "errors": [
+    "12ddfaf45e34: 'gbk' codec can't encode character '\\ue0a4' in position 36: illegal multibyte sequence"
+  ],
+  "started_at": "2026-04-11T04:56:55.885977",
+  "completed_at": "2026-04-11T05:00:11.325460"
+}
