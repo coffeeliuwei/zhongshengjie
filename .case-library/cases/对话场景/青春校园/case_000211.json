@@ -1,0 +1,31 @@
+{
+  "case_id": "case_000211",
+  "source": {
+    "source_id": "source_converted",
+    "file": "D:\\动画\\众生界\\.case-library\\converted\\不只是王子.txt",
+    "novel_name": "不只是王子",
+    "genre": "青春校园"
+  },
+  "scene": {
+    "type": "对话场景",
+    "chapter_index": 1,
+    "position_ratio": 1.0,
+    "word_count": 1000
+  },
+  "quality": {
+    "overall_score": 10,
+    "emotion_value": 5.5,
+    "confidence": 0.26,
+    "has_ai_taste": false
+  },
+  "tags": {
+    "techniques": [],
+    "keywords": [],
+    "recommended_writers": [
+      "墨言",
+      "剑尘"
+    ]
+  },
+  "content_preview": "目录\nContent 楔子 Chapter 01 公主遭遇恶魔男（1） Chapter 01 公主遭遇恶魔男（2） Chapter 01 公主遭遇恶魔男（3） Chapter 01 公主遭遇恶魔男（4） Chapter 01 公主遭遇恶魔男（5） Chapter 01 公主遭遇恶魔男（6） Chapter 01 公主遭遇恶魔男（7） Chapter 01 公主遭遇恶魔男（8） Chapter 01 公主遭遇恶魔男（9） Chapter 02 谁也不知道那家伙的恐怖（1） Chapter 02 谁也不知道那家伙的恐怖（2） Chapter 02 谁也不知道那家伙的恐怖（3） Chapter 02 谁也不知道那家伙的恐怖（4） Chapter 02 谁也不知道那家伙的恐怖（5） Chapter 02 谁也不知道那家伙的恐怖（6） Chapter 02 谁也不知道那家伙的恐怖（7） Chapter 02 谁也不知道那家伙的恐怖（8） Chapter 02 谁也不知道那家伙的恐怖（9） Chapter 03 为了联谊化身女仆（1） Chapter 03 为了联谊化身女仆（2） Chapter ",
+  "extract_time": "2026-04-01T10:30:36.405013"
+}

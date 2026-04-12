@@ -1,0 +1,32 @@
+{
+  "case_id": "case_019246",
+  "source": {
+    "source_id": "source_converted",
+    "file": "D:\\动画\\众生界\\.case-library\\converted\\在韩国.txt",
+    "novel_name": "在韩国",
+    "genre": "青春校园"
+  },
+  "scene": {
+    "type": "环境场景",
+    "chapter_index": 5,
+    "position_ratio": 0.044,
+    "word_count": 1000
+  },
+  "quality": {
+    "overall_score": 10,
+    "emotion_value": 5.6,
+    "confidence": 0.167,
+    "has_ai_taste": false
+  },
+  "tags": {
+    "techniques": [
+      "对话描写"
+    ],
+    "keywords": [],
+    "recommended_writers": [
+      "云溪"
+    ]
+  },
+  "content_preview": "第五章 女皇授勋\n更新时间2010-3-1 10:03:00 字数：2304\n门被推开，满眼的闪光灯，闪的金秀一眼睛都无法睁开。这是怎么回事？该死的记者怎么会进到病房，不征得我本人的同意胡乱拍照。想到这我刚要举起笔记本做出应有的反应。给这帮打断我意淫的狗娘养们一个难忘的回忆时。\n一个陌生而又透着亲切的声音救了他们，“亲爱的金先生，身体恢复得还好吧。没怪我现在才来看你吧。”潘家劲愣愣的看着眼前这位贵妇人。有些迷茫又有种熟悉的感觉，这是？\n看我不说话，旁边陪同的人员窜出个半秃，大声咋呼起来，“金秀一，金先生英国女皇来看你了，天！我都不敢相信你那天救下的人竟然是英国最伟大的女皇伊莉莎白二世……”赫斯的话已经让我陷入了震惊当中，我想当谁在不知不觉中与一个国家的元首发生了交集，虽然只是名义上的，但心里也不会平静得下来。\n伊莉莎白二世（ElizabethII，1926年4月21日~），全名伊莉莎白·亚历山德拉·玛丽·温莎（ElizabethAlexandraMaryWindsor），现任英国君主，是英国,英联邦（TheCommonwealth)以及15个成员国的国家元首，同时也是英国国教会的最高首",
+  "extract_time": "2026-04-01T10:31:18.047535"
+}

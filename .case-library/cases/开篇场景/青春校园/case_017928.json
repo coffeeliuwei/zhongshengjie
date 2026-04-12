@@ -1,0 +1,33 @@
+{
+  "case_id": "case_017928",
+  "source": {
+    "source_id": "source_converted",
+    "file": "D:\\动画\\众生界\\.case-library\\converted\\只道是寻常.txt",
+    "novel_name": "只道是寻常",
+    "genre": "青春校园"
+  },
+  "scene": {
+    "type": "开篇场景",
+    "chapter_index": 1,
+    "position_ratio": 0.011,
+    "word_count": 1500
+  },
+  "quality": {
+    "overall_score": 10,
+    "emotion_value": 7.0,
+    "confidence": 0.167,
+    "has_ai_taste": false
+  },
+  "tags": {
+    "techniques": [],
+    "keywords": [
+      "楔子"
+    ],
+    "recommended_writers": [
+      "云溪",
+      "苍澜"
+    ]
+  },
+  "content_preview": "第1节：楔子(1) 第2节：楔子(2) 第3节：chapter 1 栀子花开的日子(1) 第4节：chapter 1 栀子花开的日子(2) 第5节：Chapter 2 你是我生命里的一束光(1) 第6节：Chapter 2 你是我生命里的一束光(2) 第7节：Chapter 3 人生若只如初见(1) 第8节：Chapter 3 人生若只如初见(2) 第9节：Chapter 4 最初，与爱情无关(1) 第10节：Chapter 4 最初，与爱情无关(2) 第11节：Chapter 4 最初，与爱情无关(3) 第12节：Chapter 5 当时年少春衫薄(1) 第13节：Chapter 5 当时年少春衫薄(2) 第14节：Chapter 5 当时年少春衫薄(3) 第15节：Chapter 6 原来爱情这么伤(1) 第16节：Chapter 6 原来爱情这么伤(2) 第17节：Chapter 6 原来爱情这么伤(3) 第18节：Chapter 7 香车系在谁家树 (1) 第19节：Chapter 7 香车系在谁家树 (2) 第20节：Chapter 7 香车?在谁家树 (3) 第21节：Ch",
+  "extract_time": "2026-04-01T10:31:15.074841"
+}

@@ -1,0 +1,31 @@
+{
+  "case_id": "batch2_10679",
+  "source": {
+    "path": "D:\\动画\\众生界\\.case-library\\converted\\人生若只初相见.txt",
+    "novel_name": "人生若只初相见",
+    "genre": "青春校园"
+  },
+  "scene": {
+    "type": "结尾场景",
+    "chapter_index": 66,
+    "word_count": 800
+  },
+  "content_preview": "时间还是会按顺时针方向走着，不会因为你或者他而停顿一下下。\n竟然了无睡意了。下了床，在微波炉里热了杯牛奶。将电脑重新打开，一边喝牛奶一边听一些舒缓的歌曲。\n\"All the things you said to me today， \nChange my perspective in every way. \nThese things count to mean so much to me， \nInto my faith， you and your baby. \nIt\"s out there. It\"s out there. \nIt\"s out there. If you want me I\"ll be here--\" \nCranberries的《Dreaming My Dream》 有种安定人心的力量。那变幻绮丽的唱腔，仿佛离开了原本浩渺的苍穹来到人间，它带着冷漠的美艳，但又诉说着关于人的变动和永恒，就如同天地间的花草，汲取了精灵与传说的浩渺气质，沟通了人间和天空的美。\n音乐声中夹杂着奇怪的节奏，她定了定神，才发现是她的手机在响。她拿起电话，看着屏幕上的显示，是他的号码，就算是没有储存了",
+  "quality": {
+    "score": 10,
+    "confidence": 0.7,
+    "has_ai_taste": false,
+    "ai_expressions": [
+      [
+        "仿佛",
+        1
+      ],
+      [
+        "犹如",
+        1
+      ]
+    ]
+  },
+  "extract_time": "2026-04-01T09:37:59.690864",
+  "batch": "batch2"
+}

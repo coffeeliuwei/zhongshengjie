@@ -1,0 +1,16 @@
+ok.qq.com"));
+var logout_uc = NavCookie.getCookie("logout_uc");
+if (local == null && logout_uc == "1") {
+document.write("");
+NavCookie.setCookie("logout_uc"， "0");
+}
+if (local != null)
+ShowUserInfo();
+else
+document.write("");
+if (local == null)
+ShowUserInfoComplete2(logininfo);
+var searchobj = document.getElementById("searchtype");
+searchobj.value = 1;
+#CopyRight2006 {font-size:12px;color:black;background:white;clear:both;margin:0 auto;}#CopyRight2006 a.tocft:link，a.tocft:visited{font-size:12px;color:black;text-decoration: none;}#CopyRight2006 a.tocft:hover{font-size:12px;color:red;text-decoration: underline;} 关于腾讯 | About Tencent | 服务条款 | 广告服务 | 腾讯招聘 | 腾讯公益 | 客服中心 | 网站导航 Copyright &copy; 1998 - 2008 Tencent Inc. All Rights Reserved 腾讯公司 版权所有 
+var url = "http://bookapp.book.qq.com/cgi-bin/

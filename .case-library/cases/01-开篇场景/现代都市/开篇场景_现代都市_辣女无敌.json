@@ -1,0 +1,27 @@
+{
+  "case_id": "batch2_97743",
+  "source": {
+    "path": "D:\\动画\\众生界\\.case-library\\converted\\辣女无敌.txt",
+    "novel_name": "辣女无敌",
+    "genre": "现代都市"
+  },
+  "scene": {
+    "type": "开篇场景",
+    "chapter_index": 1,
+    "word_count": 1500
+  },
+  "content_preview": "目录\nContent 内容简介 作者简介 编辑推荐 楔子 失业风波 序 ONE 劲爆实习陪酒女郎（1） ONE 劲爆实习陪酒女郎（2） ONE 劲爆实习陪酒女郎（3） ONE 劲爆实习陪酒女郎（4） ONE 劲爆实习陪酒女郎（5） ONE 劲爆实习陪酒女郎（6） ONE 劲爆实习陪酒女郎（7） ONE 劲爆实习陪酒女郎（8） ONE 劲爆实习陪酒女郎（9） ONE 劲爆实习陪酒女郎（10） TWO 夜遇Or艳遇？（1） TWO 夜遇Or艳遇？（2） TWO 夜遇Or艳遇？（3） TWO 夜遇Or艳遇？（4） TWO 夜遇Or艳遇？（5） TWO 夜遇Or艳遇？（6） TWO 夜遇Or艳遇？（7） TWO 夜遇Or艳遇？（8） TWO 夜遇Or艳遇？（9） TWO 夜遇Or艳遇？（10） TWO 夜遇Or艳遇？（11） THREE前是狼，后是虎（1） THREE前是狼，后是虎（2） THREE前是狼，后是虎（3） THREE前是狼，后是虎（4） THREE前是狼，后是虎（5） THREE前是狼，后是虎（6） THREE前是狼，后是虎（7） THREE前是狼，后是虎（8） THREE前是狼",
+  "quality": {
+    "score": 9.5,
+    "confidence": 0.95,
+    "has_ai_taste": true,
+    "ai_expressions": [
+      [
+        "一种",
+        10
+      ]
+    ]
+  },
+  "extract_time": "2026-04-01T09:41:50.224428",
+  "batch": "batch2"
+}

@@ -1,0 +1,27 @@
+{
+  "case_id": "batch2_98056",
+  "source": {
+    "path": "D:\\动画\\众生界\\.case-library\\converted\\这些都是你给我的爱.txt",
+    "novel_name": "这些都是你给我的爱",
+    "genre": "游戏竞技"
+  },
+  "scene": {
+    "type": "心理场景",
+    "chapter_index": 5,
+    "word_count": 1000
+  },
+  "content_preview": "Chapter 5 \n城市生活 life in the city \n城市好像雨林 里面生活着各种各样的人 只是它不是绿色的 它由水泥和玻璃建成 \n城市里有开名车的富翁 有无家可归穿着邋遢的流浪汉 有成群结队穿着校服 \n的学生 有神经质的艺术家 有穿着西装朝九晚五的上班族 有一些人 他们不上班 \n他们在家里看孩子 看电视...... \n城市里有电视台 警察局 快餐店 医院 教堂 幼儿园 酒吧 游乐场 商店 飞机场 \n加油站 工厂 书店 游泳馆 电影院 火车站 咖啡店和超级市场...... \n城市里的人都在找东西 找工作 找住处 找恋人 找一段记忆 找一个梦 \n有一些在找另外一个人 还有一些在找自己 有一些人在找东西 但是他们也说 \n不清楚 自己在找什么 \n我搬进城市公寓 那个公寓在铁轨沿线 上面偶尔有飞机飞过 有一台 电话声 \n火车声 天上飞机的声音 同时响起 那个晚上 我开始失眠 \nEverybody is looking for something . \nLooking for a job, looking for a place to stay, \nlooking for love",
+  "quality": {
+    "score": 10,
+    "confidence": 0.52,
+    "has_ai_taste": false,
+    "ai_expressions": [
+      [
+        "好像",
+        1
+      ]
+    ]
+  },
+  "extract_time": "2026-04-01T09:41:51.333112",
+  "batch": "batch2"
+}

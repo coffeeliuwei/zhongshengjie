@@ -1,0 +1,31 @@
+{
+  "case_id": "batch2_98030",
+  "source": {
+    "path": "D:\\动画\\众生界\\.case-library\\converted\\这些都是你给我的爱.txt",
+    "novel_name": "这些都是你给我的爱",
+    "genre": "游戏竞技"
+  },
+  "scene": {
+    "type": "开篇场景",
+    "chapter_index": 1,
+    "word_count": 1500
+  },
+  "content_preview": "Chapter 1 \n很久之前 once I was \n安东尼 温柔又骄傲 懒散又认真 关于人生 他有很多疑问和感想 \n可是又不觉得要着急解答 \nIt makes me think of a period in my life when I was youny and stupid. \nMost of my pictures make me think that way. \nHi,where you been and how are you? \n曾经有人和我说 如果你爱上了一个对的人 就会觉得他为你打开了一扇门 \n你会看到之前没有见过的 另一个奇妙的世界 \nMy mind is clear. No matter what happens, I will aways walk towards you, \nunwavenring, unhurried, and unhesitant. \n地球很忙 它绕着太阳走着被称为年的轨迹的同时 也要不停自转 这解释了为 \n什么有日月轮回 我不明白的是 为什么如果倒着坐火车从A地去B地就会晕眩 \n的我 依旧清醒 \n是的 我很清醒 不论是公转还是自转 涨潮",
+  "quality": {
+    "score": 10,
+    "confidence": 0.95,
+    "has_ai_taste": false,
+    "ai_expressions": [
+      [
+        "好像",
+        1
+      ],
+      [
+        "让人",
+        1
+      ]
+    ]
+  },
+  "extract_time": "2026-04-01T09:41:51.325556",
+  "batch": "batch2"
+}

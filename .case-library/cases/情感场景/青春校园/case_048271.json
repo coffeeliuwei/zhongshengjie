@@ -1,0 +1,33 @@
+{
+  "case_id": "case_048271",
+  "source": {
+    "source_id": "source_converted",
+    "file": "D:\\动画\\众生界\\.case-library\\converted\\全世界为你唱这小情歌.txt",
+    "novel_name": "全世界为你唱这小情歌",
+    "genre": "青春校园"
+  },
+  "scene": {
+    "type": "情感场景",
+    "chapter_index": 1,
+    "position_ratio": 1.0,
+    "word_count": 1000
+  },
+  "quality": {
+    "overall_score": 10,
+    "emotion_value": 6.5,
+    "confidence": 0.267,
+    "has_ai_taste": false
+  },
+  "tags": {
+    "techniques": [],
+    "keywords": [
+      "不舍",
+      "温暖"
+    ],
+    "recommended_writers": [
+      "墨言"
+    ]
+  },
+  "content_preview": "目录\nContent 宣传语 序言：努力的人，总是最美 目录 Part One——（1） Part One——（2） Part One——（3） Part One——（4） Part One——（5） Part One——（6） Part One——（7） Part One——（8） Part One——（9） Part One——（10） Part One——（11） Part One——（12） Part One——（13） Part Two——（1） Part Two——（2） Part Two——（3） Part Two——（4） Part Two——（5） Part Two——（6） Part Two——（7） Part Two——（8） Part Two——（9） Part Two——（10） Part Two——（11） Part Two——（12） Part Two——（13） Part Two——（14） Part Two——（15） Part Two——（16） Part Two——（17） Part Two——（18） Part Two——（19） Part Tw",
+  "extract_time": "2026-04-01T10:32:25.849658"
+}

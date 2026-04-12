@@ -1,0 +1,32 @@
+{
+  "case_id": "case_019760",
+  "source": {
+    "source_id": "source_converted",
+    "file": "D:\\动画\\众生界\\.case-library\\converted\\9D挫折来栽培：活出生命的喜悦与自在.txt",
+    "novel_name": "9D挫折来栽培：活出生命的喜悦与自在",
+    "genre": "青春校园"
+  },
+  "scene": {
+    "type": "情感场景",
+    "chapter_index": 1,
+    "position_ratio": 1.0,
+    "word_count": 1000
+  },
+  "quality": {
+    "overall_score": 10,
+    "emotion_value": 6.5,
+    "confidence": 0.167,
+    "has_ai_taste": false
+  },
+  "tags": {
+    "techniques": [],
+    "keywords": [
+      "温暖"
+    ],
+    "recommended_writers": [
+      "墨言"
+    ]
+  },
+  "content_preview": "目录\nContent\n自序 挫折中，活出喜悦与自在\nPart 1 承担与勇气(1)\nPart 1 承担与勇气(2)\nPart 1 承担与勇气(3)\nPart 1 承担与勇气(4)\nPart 1 承担与勇气(5)\nPart 1 承担与勇气(6)\nPart 1 承担与勇气(7)\nPart 2 踏出第一步就会有后路(1)\nPart 2 踏出第一步就会有后路(2)\nPart 2 踏出第一步就会有后路(3)\nPart 2 踏出第一步就会有后路(4)\nPart 2 踏出第一步就会有后路(5)\nPart 2 踏出第一步就会有后路(6)\nPart 2 踏出第一步就会有后路(7)\nPart 2 踏出第一步就会有后路(8)\nPart 3 帮自己开运(1)\nPart 3 帮自己开运(2)\nPart 3 帮自己开运(3)\nPart 3 帮自己开运(4)\nPart 3 帮自己开运(5)\nPart 3 帮自己开运(6)\nPart 3 帮自己开运(7)\nPart 3 帮自己开运(8)\nPart 3 帮自己开运(9)\nPart 4 保持自己的优势(1)\nPart 4 保持自己的优势(2)\nPart 4 保持自己的优势",
+  "extract_time": "2026-04-01T10:31:19.211351"
+}

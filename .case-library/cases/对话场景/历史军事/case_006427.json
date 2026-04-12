@@ -1,0 +1,35 @@
+{
+  "case_id": "case_006427",
+  "source": {
+    "source_id": "source_converted",
+    "file": "D:\\动画\\众生界\\.case-library\\converted\\宿主.txt",
+    "novel_name": "宿主",
+    "genre": "历史军事"
+  },
+  "scene": {
+    "type": "对话场景",
+    "chapter_index": 2,
+    "position_ratio": 0.022,
+    "word_count": 1000
+  },
+  "quality": {
+    "overall_score": 10,
+    "emotion_value": 5.5,
+    "confidence": 0.2,
+    "has_ai_taste": false
+  },
+  "tags": {
+    "techniques": [
+      "情绪强化"
+    ],
+    "keywords": [
+      "说道"
+    ],
+    "recommended_writers": [
+      "墨言",
+      "剑尘"
+    ]
+  },
+  "content_preview": "第1节：序幕(1)\n献给我的母亲坎迪\n是她让我明白\n爱才是一切故事中最美好的部分\n疑　惑\n躯体，我的家\n我的骏马，我的猎犬，\n当你衰亡时，\n我该怎么办？\n我将在何处安眠？\n如何驰骋？\n怎样狩猎？\n没有了我那\n极其热切迅捷的坐骑，\n我能去向何处？\n当躯体——我聪颖听话的猎犬死去后，\n我又如何知道，\n前方那布满荆棘的道路上，\n是危险还是宝藏？\n躺在苍穹之下，\n没有屋顶，也没有门，\n亦没有瞭望的窗户\n感觉又会如何？\n变幻莫测的云，\n我该怎样藏身？\n——梅?史文森①\n① 梅?史文森（May Swenson，1913—1989），美国诗人，1913年出生于美国西部。大学毕业后她移居纽约开始自己的作家、讲师和学者生涯。梅?史文森以诗最为闻名，并为此获得许多奖项，包括1960年的“国家文艺学会奖”（The National Institute of Arts and Letters Award）以及1968年的“雪莱诗奖”（The Shelley Poetry Award）。史文森的诗作以其充满活力的乐观态度，有力的意象以及取材广泛的内容而闻名。她一贯的目标是找到一个方法来诠释人类意识还未触及的“广",
+  "extract_time": "2026-04-01T10:30:49.880264"
+}

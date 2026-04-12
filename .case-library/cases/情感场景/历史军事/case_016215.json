@@ -1,0 +1,30 @@
+{
+  "case_id": "case_016215",
+  "source": {
+    "source_id": "source_converted",
+    "file": "D:\\动画\\众生界\\.case-library\\converted\\樱夜之舞：童话城堡里唯美的浪漫爱情.txt",
+    "novel_name": "樱夜之舞：童话城堡里唯美的浪漫爱情",
+    "genre": "历史军事"
+  },
+  "scene": {
+    "type": "情感场景",
+    "chapter_index": 1,
+    "position_ratio": 1.0,
+    "word_count": 1000
+  },
+  "quality": {
+    "overall_score": 10,
+    "emotion_value": 6.5,
+    "confidence": 0.167,
+    "has_ai_taste": false
+  },
+  "tags": {
+    "techniques": [],
+    "keywords": [],
+    "recommended_writers": [
+      "墨言"
+    ]
+  },
+  "content_preview": "目录\nContent 楔 子 Chapter 1 海洋之露（1） Chapter 1 海洋之露（2） Chapter 1 海洋之露（3） Chapter 2 酷比城堡（1） Chapter 2 酷比城堡（2） Chapter 2 酷比城堡（3） Chapter 2 酷比城堡（4） Chapter 3 蝴蝶之梦（1） Chapter 3 蝴蝶之梦（2） Chapter 3 蝴蝶之梦（3） Chapter 3 蝴蝶之梦（4） Chapter 4 华丽赌约（1） Chapter 4 华丽赌约（2） Chapter 4 华丽赌约（3） Chapter 4 华丽赌约（4） Chapter 4 华丽赌约（5） Chapter 5 横渡公海（1） Chapter 5 横渡公海（2） Chapter 5 横渡公海（3） Chapter 5 横渡公海（4） Chapter 6 独身皇帝（1） Chapter 6 独身皇帝（2） Chapter 6 独身皇帝（3） Chapter 6 独身皇帝（4） Chapter 7 高木葵（1） Chapter 7 高木葵（2） Chapter 7 高木葵（3） Ch",
+  "extract_time": "2026-04-01T10:31:11.227622"
+}

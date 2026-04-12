@@ -1,0 +1,33 @@
+{
+  "case_id": "case_045022",
+  "source": {
+    "source_id": "source_converted",
+    "file": "D:\\动画\\众生界\\.case-library\\converted\\我们用青春记住谁.txt",
+    "novel_name": "我们用青春记住谁",
+    "genre": "现代都市"
+  },
+  "scene": {
+    "type": "开篇场景",
+    "chapter_index": 2,
+    "position_ratio": 0.033,
+    "word_count": 1100
+  },
+  "quality": {
+    "overall_score": 10,
+    "emotion_value": 7.0,
+    "confidence": 0.167,
+    "has_ai_taste": false
+  },
+  "tags": {
+    "techniques": [],
+    "keywords": [
+      "楔子"
+    ],
+    "recommended_writers": [
+      "云溪",
+      "苍澜"
+    ]
+  },
+  "content_preview": "第1节：楔子\nEveryone has his own secret\nThe time passes gradually\nlove is breathing hurt\nI will be here waiting for you\n《我曾经爱过你》普希金 \n我曾经爱过你； \n爱情，也许， \n在我的心灵里还没有完全消失； \n但愿它不会再去打扰你； \n我也不想再使你难过悲伤。 \n我曾经默默无语地，毫无指望的爱过你， \n我既忍着羞怯，又忍受着妒忌的折磨； \n我曾经那样真诚，那样温柔的爱过你 \n但愿上帝保佑你，另一个人也会像我一样爱你。\n楔子\n请不要否认，我们每个人都肆无忌惮地挥霍过青春，在正当最好年华之时。\n青春，青色之春。总是让人想起教室窗外郁郁的风景，我们在万物生长的季节里呼啦啦迎风拔高，却因为天空相似或者相异，最终走上了各自的道路。\n有那么一些人，她的青春被卑微与贫困囚禁，残酷的社会现实雕磨人心，逼迫出各式各样的抉择，最终她将自己迷失在了灰暗的钢铁森林之中。就像陈婕；\n有那么一些人，她的生活、事业一帆风顺，留学国外，嫁入豪门，放弃自己的兴趣和爱好，平淡且从容地与青春作别，然后就这样持续到",
+  "extract_time": "2026-04-01T10:32:18.452892"
+}

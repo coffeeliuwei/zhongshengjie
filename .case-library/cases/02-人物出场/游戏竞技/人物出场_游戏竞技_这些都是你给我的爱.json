@@ -1,0 +1,27 @@
+{
+  "case_id": "batch2_98053",
+  "source": {
+    "path": "D:\\动画\\众生界\\.case-library\\converted\\这些都是你给我的爱.txt",
+    "novel_name": "这些都是你给我的爱",
+    "genre": "游戏竞技"
+  },
+  "scene": {
+    "type": "人物出场",
+    "chapter_index": 4,
+    "word_count": 918
+  },
+  "content_preview": "Chapter 4 \n朋友 the fox \n森林很深 看不到边 我一个人走得很无助 后来 忘记了是哪一天 \n不知不觉地 出现了一只狐狸 他像一个毛绒绒的火团 \n我和狐狸并肩走 \n走了很远很远 尽管彼此都没有说话 但是我很开心 \n然后 有一天 狐狸开口和我说话 \n“觉得 好寂寞哦 你做我的朋友吧”他说 \n我想了想 然后认真地告诉他 \n“不行 我太喜欢你了 不能和你做朋友 之前当我是朋友的人 我把他们都弄丢了 \n我不想 有一天把你也弄丢” \nI thought about it, and told him honestly , \"No , I like you too much \nto be your friend . There have been so many friends that I've lost \nbefore , and I don't want to lose you either .” \n狐狸看了看我 没有说话 他只是默默地 点了点头 \n我试图安慰他 我说 “我喜欢 你看我的方式 它让我感觉到 我自己的存在” \n“那是因为 我想喜欢你” 狐狸说 \n我想我一定红了 脸",
+  "quality": {
+    "score": 10,
+    "confidence": 0.54,
+    "has_ai_taste": false,
+    "ai_expressions": [
+      [
+        "好像",
+        1
+      ]
+    ]
+  },
+  "extract_time": "2026-04-01T09:41:51.332005",
+  "batch": "batch2"
+}

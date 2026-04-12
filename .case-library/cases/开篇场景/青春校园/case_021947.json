@@ -1,0 +1,35 @@
+{
+  "case_id": "case_021947",
+  "source": {
+    "source_id": "source_converted",
+    "file": "D:\\动画\\众生界\\.case-library\\converted\\微伤爱之恋曲.txt",
+    "novel_name": "微伤爱之恋曲",
+    "genre": "青春校园"
+  },
+  "scene": {
+    "type": "开篇场景",
+    "chapter_index": 1,
+    "position_ratio": 0.032,
+    "word_count": 1500
+  },
+  "quality": {
+    "overall_score": 10,
+    "emotion_value": 7.0,
+    "confidence": 0.167,
+    "has_ai_taste": false
+  },
+  "tags": {
+    "techniques": [
+      "情绪强化"
+    ],
+    "keywords": [
+      "第一章"
+    ],
+    "recommended_writers": [
+      "云溪",
+      "苍澜"
+    ]
+  },
+  "content_preview": "第一章 生命中的两个恶魔（1） 第一章 生命中的两个恶魔（2） 第二章 丛落里遗失的记忆 第三章 藏匿在花海里的哭泣声（1） 第三章 藏匿在花海里的哭泣声（2） 第四章 梦魇重生（1） 第四章 梦魇重生（2） 第五章 寻找记忆的起点（1） 第五章 寻找记忆的起点（2） 第五章 寻找记忆的起点（3） 第五章 寻找记忆的起点（4） 第六章 过去，我手里牵着的是谁的手(1) 第六章 过去，我手里牵着的是谁的手（2） 第六章 过去，我手里牵着的是谁的手（3） 第六章 过去，我手里牵着的是谁的手（4） 第六章 过去，我手里牵着的是谁的手（5） 第六章 过去，我手里牵着的是谁的手（6） 第六章 过去，我手里牵着的是谁的手（7） 第七章 总有一天，我会离开（1） 第七章 总有一天，我会离开（2） 第七章 总有一天，我会离开（3） 第八章 　公主的霓裳 Chapter 1 Chapter 2 （1） Chapter 2 （2） Chapter 3（1） Chapter 3（2） Chapter 3（3） Chapter 3（4） Chapter 3（5） Chapter 3（6） Chapter 4（",
+  "extract_time": "2026-04-01T10:31:24.291689"
+}

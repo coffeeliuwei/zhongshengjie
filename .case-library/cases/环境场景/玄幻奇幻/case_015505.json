@@ -1,0 +1,30 @@
+{
+  "case_id": "case_015505",
+  "source": {
+    "source_id": "source_converted",
+    "file": "D:\\动画\\众生界\\.case-library\\converted\\心理学与生活.txt",
+    "novel_name": "心理学与生活",
+    "genre": "玄幻奇幻"
+  },
+  "scene": {
+    "type": "环境场景",
+    "chapter_index": 5,
+    "position_ratio": 0.278,
+    "word_count": 1000
+  },
+  "quality": {
+    "overall_score": 10,
+    "emotion_value": 5.0,
+    "confidence": 0.217,
+    "has_ai_taste": false
+  },
+  "tags": {
+    "techniques": [],
+    "keywords": [],
+    "recommended_writers": [
+      "云溪"
+    ]
+  },
+  "content_preview": "第四章 感觉\n感觉(sensation)是感受器——眼、耳等器官中的结构——所产生的表示身体内外经验的神经冲动的过程。\n一、 关于世界的感觉知识\n1、心理物理学\n心理物理学（psychophysics）研究物理刺激和刺激所产生的心理行为和体验的关系。\n（1）绝对阈限和感觉适应\n绝对阈限(absolute threshould)——产生感觉体验需要的最小的物理刺激量\n心理测量函数(psychometric function)表示每一种刺激强度下刺激被觉察到的百分数。\n绝对阈限的操作定义是：有一半次数能够觉察到感觉信号的刺激水平。\n感觉适应(sensory adaptation)是指感觉系统对持续作用的刺激输入的反应逐渐减小的现象。\n（2）反应偏差和信号检测论\n反应偏差(response bias)即由一些与刺激的感觉特性无关的因素所引起的观察者以特定方式进行反应而产生的系统趋势。\n信号检测论（signal detection theory , SDT）是针对反应偏差问题的一种系统研究方法，信号检测论并不严格地关注感觉过程，而是强调刺激事件出现与否的决策判断过程。SDT则区分出感觉觉察的两",
+  "extract_time": "2026-04-01T10:31:09.601727"
+}

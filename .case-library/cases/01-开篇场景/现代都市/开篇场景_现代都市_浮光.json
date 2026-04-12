@@ -1,0 +1,22 @@
+{
+  "case_id": "batch2_67200",
+  "source": {
+    "path": "D:\\动画\\众生界\\.case-library\\converted\\浮光.txt",
+    "novel_name": "浮光",
+    "genre": "现代都市"
+  },
+  "scene": {
+    "type": "开篇场景",
+    "chapter_index": 1,
+    "word_count": 577
+  },
+  "content_preview": "Chapter1 短暂的邂逅（1） Chapter1 短暂的邂逅（2） Chapter1 短暂的邂逅（3） Chapter1 短暂的邂逅（4） Chapter2 蜘蛛女之吻（1） Chapter2 蜘蛛女之吻（2） Chapter2 蜘蛛女之吻（3） Chapter2 蜘蛛女之吻（4） Chapter3 浮华世界（1） Chapter3 浮华世界（2） Chapter3 浮华世界（3） Chapter3 浮华世界（4） Chapter 4 一夜风流（1） Chapter 4 一夜风流（2） Chapter 4 一夜风流（3） Chapter 4 一夜风流（4） Chapter 5 灰烬与钻石（1） Chapter 5 灰烬与钻石（2） Chapter 5 灰烬与钻石（3） Chapter 5 灰烬与钻石（4） Chapter 6 天堂此时（1） Chapter 6 天堂此时（2） Chapter 6 天堂此时（3） Chapter 6 天堂此时（4） Chapter 7 似是故人来（1） Chapter 7 似是故人来（2） Chapter 7 似是故人来（3） Chapter 7 似",
+  "quality": {
+    "score": 10,
+    "confidence": 0.95,
+    "has_ai_taste": false,
+    "ai_expressions": []
+  },
+  "extract_time": "2026-04-01T09:40:19.564168",
+  "batch": "batch2"
+}

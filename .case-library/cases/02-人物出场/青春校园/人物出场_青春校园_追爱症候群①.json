@@ -1,0 +1,31 @@
+{
+  "case_id": "batch2_98401",
+  "source": {
+    "path": "D:\\动画\\众生界\\.case-library\\converted\\追爱症候群①.txt",
+    "novel_name": "追爱症候群①",
+    "genre": "青春校园"
+  },
+  "scene": {
+    "type": "人物出场",
+    "chapter_index": 4,
+    "word_count": 1000
+  },
+  "content_preview": "第3节：追爱症候群(3)\n“我说，座位那么多……”\n“……”\n那家伙一副用鼻孔也不会听我说话的表情，傲慢地看着我这个坐在窗边的可怜人……与其说这是追求的一种，不如说是摆出在终极格斗中用尽全力殴打眼前所有敌人架势的那种专业选手的目光。\n就在我惊呆的片刻间，这个家伙居然取下帽子，顶在手指尖上绕圈。这下子我看清楚了这个陌生入侵者的全貌。\n微黑的健康皮肤衬着他随不同角度看起来闪烁着各种色彩的瞳孔。微微上翘的上唇，配着一副世上万物皆无所畏惧的自以为是的表情。还有比我这个女人的眉毛还要漂亮的两道弯眉。总之是张我完全没有见过的脸。\n“请问，你曾经住在我家附近吗？”\n“……”\n“我在迈阿密住了五年，然后搬到西雅图待了五年，你呢？”\n“……”\n“哈，我明白了……”\n“……”\n“原来不懂韩文啊！！Don?t worry.Don?t worry.No problem!!!I can sticker English!!!!”\n“You had been lived overseas for ten years but you could speak a bit more that I can sticker ",
+  "quality": {
+    "score": 10,
+    "confidence": 0.5,
+    "has_ai_taste": false,
+    "ai_expressions": [
+      [
+        "一种",
+        1
+      ],
+      [
+        "好像",
+        3
+      ]
+    ]
+  },
+  "extract_time": "2026-04-01T09:41:52.362343",
+  "batch": "batch2"
+}

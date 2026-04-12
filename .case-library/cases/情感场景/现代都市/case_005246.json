@@ -1,0 +1,30 @@
+{
+  "case_id": "case_005246",
+  "source": {
+    "source_id": "source_converted",
+    "file": "D:\\动画\\众生界\\.case-library\\converted\\思科九年.txt",
+    "novel_name": "思科九年",
+    "genre": "现代都市"
+  },
+  "scene": {
+    "type": "情感场景",
+    "chapter_index": 3,
+    "position_ratio": 0.029,
+    "word_count": 1000
+  },
+  "quality": {
+    "overall_score": 10,
+    "emotion_value": 6.5,
+    "confidence": 0.217,
+    "has_ai_taste": false
+  },
+  "tags": {
+    "techniques": [],
+    "keywords": [],
+    "recommended_writers": [
+      "墨言"
+    ]
+  },
+  "content_preview": "第3节\n过了几天，Vincent又来了一个电话，说好消息，事儿快成了。\n我说，价钱谈低了。\n他大笑，说先进去再说吧。\nJessie\n过了两天，正上班的时候，接到思科的一位小姐打来的电话，说是请我到区域总部和几位老板进行面试，思科负责来回的机票。\n由于有Vincent的消息垫底，我并不是很意外。意外的是朱总，得知这个消息的她隔着几个办公桌依然是在平静地做她的事，但嘴角流露出来的兴奋只有我能感觉得到。\n当夜我就飞到目的地，住在老姐Jessie的家里。\nJessie的女儿已经一岁多了，每次见我都瞪大了惊恐的眼睛。这大概是因为原来我逗她玩的时候吓着过她的原因。\nJessie笑着说，怎么样，我说你没问题吧。别担心了，到了这一步，除非你明天扇面试你的人两耳光，否则就没问题了。\nJessie讲话向来直接而准确，我喜欢她这一点。\n在NEC出差的时候，经常转机经过这里。这里的每个角落对我都再熟悉不过。夜晚，天空的云层被地面的灯光照得隐隐有橙色光芒。家人都睡下了以后，我一个人站在阳台，点了一根烟。今夜的这个城市和以往好像有些不一样了，至少对我来说是这样。\nYong\n1998年的思科公司还在协泰，被一群五星",
+  "extract_time": "2026-04-01T10:30:47.436061"
+}

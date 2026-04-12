@@ -1,0 +1,35 @@
+{
+  "case_id": "batch2_36852",
+  "source": {
+    "path": "D:\\动画\\众生界\\.case-library\\converted\\小命运.txt",
+    "novel_name": "小命运",
+    "genre": "玄幻奇幻"
+  },
+  "scene": {
+    "type": "环境场景",
+    "chapter_index": 5,
+    "word_count": 1000
+  },
+  "content_preview": "第一章 蓝之祷\nWe and the labouring world are passing by:\nAmid men\"s souls， that waver and give place \nLike the pale waters in their wintry race，z\nUnder the passing stars， foam of the sky.\nLives on this lonely face.\n--W·B·Yeats《The rose of the world》\n1\n这是我童年时代夏城的初秋。\n天空像一块铺展开的湖蓝色巨大幕布，万里无云，比任何一个季节都要清澈高远。树叶逐渐变黄，在微凉的秋风中将自己的受光与背光面轮番展示。有的甚至从树上一跃而下，在落到地面之前跳一支静默深情的舞。\n候鸟成群结队地飞往温暖的南方过冬。\n夏城的冬天总是那么寒冷而漫长：春天似乎从未出现，炎热粗暴的夏天就突然来临了。而立秋不久，气温会随时下降。落雪之后的清晨，窗户上会结出一层冰花，只有把手掌贴在上面，才能隐约看到外面的世界。那个时候，家中没有任何取暖设备，纵然我将整个身体蜷缩在厚厚的塞着暖水",
+  "quality": {
+    "score": 10,
+    "confidence": 0.5825381047051027,
+    "has_ai_taste": false,
+    "ai_expressions": [
+      [
+        "仿佛",
+        1
+      ],
+      [
+        "似乎",
+        1
+      ],
+      [
+        "令人",
+        1
+      ]
+    ]
+  },
+  "extract_time": "2026-04-01T09:38:59.953948",
+  "batch": "batch2"
+}

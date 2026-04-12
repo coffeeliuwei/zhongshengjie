@@ -1,0 +1,22 @@
+{
+  "case_id": "batch2_108304",
+  "source": {
+    "path": "D:\\动画\\众生界\\.case-library\\converted\\难以抗拒的非理性诱惑.txt",
+    "novel_name": "难以抗拒的非理性诱惑",
+    "genre": "现代都市"
+  },
+  "scene": {
+    "type": "情感场景",
+    "chapter_index": 70,
+    "word_count": 1000
+  },
+  "content_preview": "第三部分 致谢\n爬书网 更新时间:2008-12-6 16:57:48 本章字数:2552\n当Liz hazelton转到Doubleday去工作时，我们只能希望，命运会将我们重新联到一起。Liz的献身精神、热情和乐观无与伦比，有Currency／Doubleday如此优秀的团队，我们的确别无所求了。在这里，我们对Roger Scholl的出色编辑、追求卓越的精神以及给予我们的持续指导和鼓励表示感谢；对Sarah Rainone的细心反馈、提出的新想法和在本书写作全程给予我们的坚定支持表示感谢；对Talia Krohn为本书的编辑做出的贡献表示感谢；对Michae Palgon的战略思考表示感谢；对Nicole Dewey提出的出色副标题表示感谢；对Meredith McGinnis不断提出创造性设想表示感谢；并对Louise Quayle为了我们而付出的艰苦努力表示感谢。\n没有我们出色的经纪人Jennifer Gates的持续支持，本书就不可能面市。我们要对Esmond Harmsworth和Mary Beth Chappell给予我们的宝贵建议深表谢意，同时，我们要对Rachel ",
+  "quality": {
+    "score": 10,
+    "confidence": 0.92,
+    "has_ai_taste": false,
+    "ai_expressions": []
+  },
+  "extract_time": "2026-04-01T09:42:27.268787",
+  "batch": "batch2"
+}

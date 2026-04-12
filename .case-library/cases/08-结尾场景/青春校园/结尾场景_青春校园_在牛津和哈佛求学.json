@@ -1,0 +1,22 @@
+{
+  "case_id": "batch2_26121",
+  "source": {
+    "path": "D:\\动画\\众生界\\.case-library\\converted\\在牛津和哈佛求学.txt",
+    "novel_name": "在牛津和哈佛求学",
+    "genre": "青春校园"
+  },
+  "scene": {
+    "type": "结尾场景",
+    "chapter_index": 31,
+    "word_count": 800
+  },
+  "content_preview": "定义。我们总在探寻，总是不能满足业已得到的一切。一个问题的答案的求得总是引发另一新的问题。不管是自然科学、社会科学还是人文科学，这都是求知的真谛所在。正是这求知的真谛，构成了大学的精髓。原文如下：“For many people， the four years of undergraduate life offer the only interlude permitted for unfettered exploration of such fundamental questions. But the search for meaning is a neverending quest that is always interpreting， always interrupting and redefining the status quo， always looking， never content with what is found. An answer simply yields the next question. This is in fact true of all le",
+  "quality": {
+    "score": 10,
+    "confidence": 0.7,
+    "has_ai_taste": false,
+    "ai_expressions": []
+  },
+  "extract_time": "2026-04-01T09:38:28.622953",
+  "batch": "batch2"
+}

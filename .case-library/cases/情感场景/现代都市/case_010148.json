@@ -1,0 +1,30 @@
+{
+  "case_id": "case_010148",
+  "source": {
+    "source_id": "source_converted",
+    "file": "D:\\动画\\众生界\\.case-library\\converted\\灵宠主妇1.txt",
+    "novel_name": "灵宠主妇1",
+    "genre": "现代都市"
+  },
+  "scene": {
+    "type": "情感场景",
+    "chapter_index": 1,
+    "position_ratio": 1.0,
+    "word_count": 1000
+  },
+  "quality": {
+    "overall_score": 10,
+    "emotion_value": 6.5,
+    "confidence": 0.167,
+    "has_ai_taste": false
+  },
+  "tags": {
+    "techniques": [],
+    "keywords": [],
+    "recommended_writers": [
+      "墨言"
+    ]
+  },
+  "content_preview": "Chapter_1\n======本书由一舟书库http://book.guyizhou.cn从互联网上搜集得来，仅供爱好者非商业性的研究讨论使用，阅后请及时删除，喜欢的读者请购买正版以支持作者。如作者认为本站损害了您的版权，请与我们联系，我们将及时作出处理=======\n——————————一舟书库热门图书推荐————————————————\n本站诺贝尔文学奖作品下载专区http://www.guyizhou.cn/default.asp?cateID=160\n本站鲁迅文学奖作品下载专区http://www.guyizhou.cn/default.asp?cateID=166\n本站茅盾文学奖作品下载专区http://www.guyizhou.cn/default.asp?cateID=161\n1、2012相关图书专区\n下载地址：http://www.guyizhou.cn/temp/pix/tuijian/index.html#2012\n2、历史是个什么玩意儿3：袁腾飞说世界史\n下载地址：http://www.guyizhou.cn/article/11473.htm\n3、外星人就在月",
+  "extract_time": "2026-04-01T10:30:57.824887"
+}

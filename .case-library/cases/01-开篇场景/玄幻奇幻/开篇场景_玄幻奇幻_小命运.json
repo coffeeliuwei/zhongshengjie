@@ -1,0 +1,22 @@
+{
+  "case_id": "batch2_36836",
+  "source": {
+    "path": "D:\\动画\\众生界\\.case-library\\converted\\小命运.txt",
+    "novel_name": "小命运",
+    "genre": "玄幻奇幻"
+  },
+  "scene": {
+    "type": "开篇场景",
+    "chapter_index": 1,
+    "word_count": 1324
+  },
+  "content_preview": "第1节：序幕 致徊年(1) 第2节：序幕 致徊年(2) 第3节：第一章 蓝之祷(1) 第4节：第一章 蓝之祷(2) 第5节：第一章 蓝之祷(3) 第6节：第一章 蓝之祷(4) 第7节：第一章 蓝之祷(5) 第8节：第一章 蓝之祷(6) 第9节：第一章 蓝之祷(7) 第10节：第一章 蓝之祷(8) 第11节：第一章 蓝之祷(9) 第12节：第一章 蓝之祷(10) 第13节：第二章　Good morning sunshine(1) 第14节：第二章　Good morning sunshine(2) 第15节：第二章　Good morning sunshine(3) 第16节：第二章　Good morning sunshine(4) 第17节：第二章　Good morning sunshine(5) 第18节：第二章　Good morning sunshine(6) 第19节：第二章　Good morning sunshine(7) 第20节：第二章　Good morning sunshine(8) 第21节：第二章　Good morning sunshine(9) 第22节：第二章　Goo",
+  "quality": {
+    "score": 10,
+    "confidence": 0.95,
+    "has_ai_taste": false,
+    "ai_expressions": []
+  },
+  "extract_time": "2026-04-01T09:38:59.949515",
+  "batch": "batch2"
+}

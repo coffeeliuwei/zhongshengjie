@@ -1,0 +1,22 @@
+{
+  "case_id": "batch2_78939",
+  "source": {
+    "path": "D:\\动画\\众生界\\.case-library\\converted\\秦筝缓弦歌.txt",
+    "novel_name": "秦筝缓弦歌",
+    "genre": "现代都市"
+  },
+  "scene": {
+    "type": "开篇场景",
+    "chapter_index": 1,
+    "word_count": 1301
+  },
+  "content_preview": "Chapter 01 运命惟所遇（1） Chapter 01 运命惟所遇（2） Chapter 01 运命惟所遇（3） Chapter 01 运命惟所遇（4） Chapter 01 运命惟所遇（5） Chapter 01 运命惟所遇（6） Chapter 01 运命惟所遇（7） Chapter 02 疑误有新知（1） Chapter 02 疑误有新知（2） Chapter 02 疑误有新知（3） Chapter 02 疑误有新知（4） Chapter 03 拨弦三两声（1） Chapter 03 拨弦三两声（2） Chapter 03 拨弦三两声（3） Chapter 04 泠泠七弦上（1） Chapter 04 泠泠七弦上（2） Chapter 04 泠泠七弦上（3） Chapter 04 泠泠七弦上（4） Chapter 04 泠泠七弦上（5） Chapter 04 泠泠七弦上（6） Chapter 04 泠泠七弦上（7） Chapter 05 欢笑情如旧（1） Chapter 05 欢笑情如旧（2） Chapter 05 欢笑情如旧（3） Chapter 05 欢笑情如旧（4） ",
+  "quality": {
+    "score": 10,
+    "confidence": 0.95,
+    "has_ai_taste": false,
+    "ai_expressions": []
+  },
+  "extract_time": "2026-04-01T09:40:48.916836",
+  "batch": "batch2"
+}

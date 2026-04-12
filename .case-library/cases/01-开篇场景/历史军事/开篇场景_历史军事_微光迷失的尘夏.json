@@ -1,0 +1,22 @@
+{
+  "case_id": "batch2_42081",
+  "source": {
+    "path": "D:\\动画\\众生界\\.case-library\\converted\\微光迷失的尘夏.txt",
+    "novel_name": "微光迷失的尘夏",
+    "genre": "历史军事"
+  },
+  "scene": {
+    "type": "开篇场景",
+    "chapter_index": 1,
+    "word_count": 1500
+  },
+  "content_preview": "第1节：Chapter 1 旧梦阑珊(1) 第2节：Chapter 1 旧梦阑珊(2) 第3节：Chapter 1 旧梦阑珊(3) 第4节：Chapter 1 旧梦阑珊(4) 第5节：Chapter 1 旧梦阑珊(5) 第6节：Chapter 1 旧梦阑珊(6) 第7节：Chapter 1 旧梦阑珊(7) 第8节：Chapter 1 旧梦阑珊(8) 第9节：Chapter 1 旧梦阑珊(9) 第10节：Chapter 1 旧梦阑珊(10) 第11节：Chapter 1 旧梦阑珊(11) 第12节：Chapter 1 旧梦阑珊(12) 第13节：Chapter 1 旧梦阑珊(13) 第14节：Chapter 2 夏日静默(1) 第15节：Chapter 2 夏日静默(2) 第16节：Chapter 2 夏日静默(3) 第17节：Chapter 2 夏日静默(4) 第18节：Chapter 2 夏日静默(5) 第19节：Chapter 2 夏日静默(6) 第20节：Chapter 2 夏日静默(7) 第21节：Chapter 2 夏日静默(8) 第22节：Chapter 2 夏日静默(9)",
+  "quality": {
+    "score": 10,
+    "confidence": 0.95,
+    "has_ai_taste": false,
+    "ai_expressions": []
+  },
+  "extract_time": "2026-04-01T09:39:12.717242",
+  "batch": "batch2"
+}

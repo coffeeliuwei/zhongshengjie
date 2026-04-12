@@ -1,0 +1,27 @@
+{
+  "case_id": "batch2_112319",
+  "source": {
+    "path": "D:\\动画\\众生界\\.case-library\\converted\\龙之界点 第四卷.txt",
+    "novel_name": "龙之界点 第四卷",
+    "genre": "青春校园"
+  },
+  "scene": {
+    "type": "结尾场景",
+    "chapter_index": 16,
+    "word_count": 800
+  },
+  "content_preview": "她比作者想象中的还要栩栩如生，真是个令人开心的错误估计。\n最后的地方我埋了一个伏笔，准备下次要进行一些较为严肃一点的故事，敬请期待龙司和萝丝等人的活跃！\n我也会努力赶快呈现下一部作品给大家的。\n这次责任编辑和亚方老师也都帮了我很多忙，每次都很谢谢你们。\n今年一月开始的本系列终于迈入第四集。\n我由衷感谢一直以来陪伴我们的读者。\n明年也请大家多多指教。\n二００七年十一月城崎火也\n彩页\n图片：\n小说插图\nACG.178.com../../img/253/932/001.jpg\nACG.178.com../../img/253/932/002.jpg\nACG.178.com../../img/253/932/003.jpg\n插画\n小说插图\nACG.178.com../../img/253/932/004.jpg\nACG.178.com../../img/253/932/005.jpg\nACG.178.com../../img/253/932/006.jpg\nACG.178.com../../img/253/932/007.jpg\nACG.178.com../../img/253/932/008",
+  "quality": {
+    "score": 10,
+    "confidence": 0.7,
+    "has_ai_taste": false,
+    "ai_expressions": [
+      [
+        "令人",
+        1
+      ]
+    ]
+  },
+  "extract_time": "2026-04-01T09:42:41.950201",
+  "batch": "batch2"
+}

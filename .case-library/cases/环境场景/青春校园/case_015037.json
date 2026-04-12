@@ -1,0 +1,32 @@
+{
+  "case_id": "case_015037",
+  "source": {
+    "source_id": "source_converted",
+    "file": "D:\\动画\\众生界\\.case-library\\converted\\在牛津和哈佛求学.txt",
+    "novel_name": "在牛津和哈佛求学",
+    "genre": "青春校园"
+  },
+  "scene": {
+    "type": "环境场景",
+    "chapter_index": 16,
+    "position_ratio": 0.842,
+    "word_count": 1000
+  },
+  "quality": {
+    "overall_score": 10,
+    "emotion_value": 5.0,
+    "confidence": 0.217,
+    "has_ai_taste": false
+  },
+  "tags": {
+    "techniques": [],
+    "keywords": [
+      "环境"
+    ],
+    "recommended_writers": [
+      "云溪"
+    ]
+  },
+  "content_preview": "第三章 大学和学院：学院制\n大学和学院： 学院制前面已经写到，牛津大学没有校门，也无处可找牛津大学的校名。大学坐落在牛津城，而牛津城就在大学内。城中有大学，大学之中有城市。牛津大学是一个极为松散的结构，其中心组成部分是分散在城市各处的39个学院，最早创立的是大学学院（University College，1249）和默尔登学院（Merton College，1264），最年轻的是２０世纪90年代创办的科罗格学院（Kellogg College， 1990）和坦普尔顿学院（Templeton College， 1997）。这种学院制的结构类似于“联邦制”，后来成为美国一些常春藤大学内大学和学院结构的模型。初来乍到，对这一大学结构完全陌生，必须从头开始了解，经过一段时间才逐渐明白大学和学院，学生和导师的身份和归属。抵达牛津之后的第一个月，我参加了大学的英语强化班。在提高英文听、说、读、写能力的同时，开始对牛津大学的学制有了切身的了解和体会。英文培训课在圣安东尼学院安顿下来之后，我的第一项任务是参加大学语言中心举办的开学之前的英语强化班。在英国的学生生活就这么开始了。我入住圣安学院的第一件事",
+  "extract_time": "2026-04-01T10:31:08.475338"
+}

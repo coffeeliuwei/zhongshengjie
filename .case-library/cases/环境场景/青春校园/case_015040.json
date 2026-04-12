@@ -1,0 +1,30 @@
+{
+  "case_id": "case_015040",
+  "source": {
+    "source_id": "source_converted",
+    "file": "D:\\动画\\众生界\\.case-library\\converted\\在牛津和哈佛求学.txt",
+    "novel_name": "在牛津和哈佛求学",
+    "genre": "青春校园"
+  },
+  "scene": {
+    "type": "环境场景",
+    "chapter_index": 17,
+    "position_ratio": 0.895,
+    "word_count": 1000
+  },
+  "quality": {
+    "overall_score": 10,
+    "emotion_value": 5.0,
+    "confidence": 0.167,
+    "has_ai_taste": false
+  },
+  "tags": {
+    "techniques": [],
+    "keywords": [],
+    "recommended_writers": [
+      "云溪"
+    ]
+  },
+  "content_preview": "第四章 导师制： 一对一授课\n导师制： 一对一授课牛津的学院制来自古老的传统。大学内所有的仪式和传统都回荡着历史的余音，牛津的所有一切都离不开历史。如果从学院制深入剖析，我们知道牛津大学的独特之处不仅在于学院制，还有独特的一对一的授课方式。牛津的学位牛津的学位多样，最有名望和最受欢迎的是三年本科的PPE（Philosophy，Politics and Economics）学位。我入校进的是硕士学位的项目，在这里重点介绍研究生的学位。牛津大学的研究生学位种类多样，其中有一年内即能完成的M.St.（Master of Study）硕士学位，有两年的哲学硕士M.Phil.（Master of Philosophy）学位和文学硕士M.Litt.（Master of Literature）学位，还有相当于美国Ph.D.的博士D.Phil. (Doctor of Philosophy)学位。M.St.项目历时一年，学年末通过资格考试即取得学位。而M.Phil.学生第一年攻读的课程和M.St. 的一样，通过第一年的资格考试之后，紧接着的第二年的课程包括两周一次的个人授课、学年末的大考和一篇硕士论文。",
+  "extract_time": "2026-04-01T10:31:08.479044"
+}

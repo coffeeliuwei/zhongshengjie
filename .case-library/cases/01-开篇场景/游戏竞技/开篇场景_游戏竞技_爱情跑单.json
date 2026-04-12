@@ -1,0 +1,22 @@
+{
+  "case_id": "batch2_71051",
+  "source": {
+    "path": "D:\\动画\\众生界\\.case-library\\converted\\爱情跑单.txt",
+    "novel_name": "爱情跑单",
+    "genre": "游戏竞技"
+  },
+  "scene": {
+    "type": "开篇场景",
+    "chapter_index": 1,
+    "word_count": 839
+  },
+  "content_preview": "Chapter 1 爱情跑单 Chapter 2 爱情跑单 Chapter 3 爱情跑单 Chapter 4 爱情跑单 Chapter 5 爱情跑单 Chapter 6 爱情跑单 Chapter 7 爱情跑单 Chapter 8 爱情跑单 Chapter 9 爱情跑单 Chapter 10 爱情跑单 Chapter 11 爱情跑单 Chapter 12 爱情跑单 Chapter 13 爱情跑单 Chapter 14 爱情跑单 Chapter 15 爱情跑单 Chapter 16 爱情跑单 Chapter 17 爱情跑单 Chapter 18 爱情跑单 Chapter 19 爱情跑单 Chapter 20 爱情跑单 Chapter 21 爱情跑单 Chapter 22 爱情跑单 Chapter 23 爱情跑单 Chapter 24 爱情跑单 Chapter 25 爱情跑单 Chapter 26 爱情跑单 Chapter 27 爱情跑单 Chapter 28 爱情跑单 Chapter 29 爱情跑单 Chapter 30 爱情跑单 Chapter 31 爱情跑单 Chapter 32 爱情",
+  "quality": {
+    "score": 10,
+    "confidence": 0.95,
+    "has_ai_taste": false,
+    "ai_expressions": []
+  },
+  "extract_time": "2026-04-01T09:40:28.081585",
+  "batch": "batch2"
+}

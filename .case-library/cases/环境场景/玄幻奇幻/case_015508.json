@@ -1,0 +1,32 @@
+{
+  "case_id": "case_015508",
+  "source": {
+    "source_id": "source_converted",
+    "file": "D:\\动画\\众生界\\.case-library\\converted\\心理学与生活.txt",
+    "novel_name": "心理学与生活",
+    "genre": "玄幻奇幻"
+  },
+  "scene": {
+    "type": "环境场景",
+    "chapter_index": 6,
+    "position_ratio": 0.333,
+    "word_count": 1000
+  },
+  "quality": {
+    "overall_score": 10,
+    "emotion_value": 5.0,
+    "confidence": 0.217,
+    "has_ai_taste": false
+  },
+  "tags": {
+    "techniques": [],
+    "keywords": [
+      "环境"
+    ],
+    "recommended_writers": [
+      "云溪"
+    ]
+  },
+  "content_preview": "第五章 知觉\n知觉（perception）是一系列组织并解释外界客体和事件产生的感觉信息的加工过程。\n知觉的作用是使得感觉有意义。知觉加工从连续变化、并且经常是没有秩序的感觉输入中，提取信息并把它们组织成稳定且有序的知觉。\n知觉对象是指被知觉到的东西——知觉加工的现象的或经验的结果。它不是物理的客体或它在感受器的图像，而是知觉活动的心理产物。\n一、感觉、组织、辨认与识别\n知觉是指理解环境中客体和事件的总的过程——感觉它们，理解它们，识别和标记它们，以及准备对它们做出反应。最好的理解知觉的办法是把它分成三个阶段：感觉、知觉组织，以及辨认与识别客体。\n* 感觉把物理能量转换成大脑能够识别的神经编码的过程。\n* 知觉组织(perceptual organization)在这个阶段形成了对一个客体的内部表征和对外部刺激的知觉。这种表征为观察者外部环境提供了有用的描述。知觉加工提供了对客体可能的大小、形状、运动、距离和朝向的估计。\n* 辨认与识别（identification and recognition）：辨认与识别一个物体是什么，叫什么以及如何对它做出最佳反应，要涉及更高水平的认知加工过程",
+  "extract_time": "2026-04-01T10:31:09.603727"
+}

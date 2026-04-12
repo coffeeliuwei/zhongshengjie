@@ -1,0 +1,22 @@
+{
+  "case_id": "batch2_00171",
+  "source": {
+    "path": "D:\\动画\\众生界\\.case-library\\converted\\299美金飞遍东南亚.txt",
+    "novel_name": "299美金飞遍东南亚",
+    "genre": "现代都市"
+  },
+  "scene": {
+    "type": "心理场景",
+    "chapter_index": 97,
+    "word_count": 583
+  },
+  "content_preview": "第四章 越南(17)\n第一天：飞抵胡志明市\n市区景点（圣母院、统一府、战争遗迹博物馆）、购物、品尝美食，晚上逛当地夜市或者歌剧院附近的DongKhoi自由街及PhamNguLao区逛酒吧，著名的有Saxn’antJazzClub的爵士酒吧、QBar、333啤酒摊等。\n夜宿胡志明市\n第二天：游览胡志明市郊，建议参加1天的团游览湄公河（约8美金/人）。\n早起赶湄公河三角洲，晚上返回胡志明市，夜游西贡河（可以在船上点餐）。\n夜宿胡志明市\n第三天：晨飞芽庄（50分钟）\n报团参加芽庄四岛游或者去泥浆美容乐园。\n晚上OpenBus前往会安\n第四天：晨到会安\n参观著名的会安制衣店，如TanTan平价定制服店，Yaly高级定制服店，ADongSilk丝质定制服店，CQJeansMilan牛仔裤定制店。\n下午OpenBus前往顺化，约6小时车程，欣赏沿途风景。\n傍晚抵达顺化，品尝顺化宫廷料理。\n夜宿顺化\n第五天：游览顺化皇城、皇家博物馆、大博物馆、报国塔。参观市场ChoDongBa，购物。傍晚去夜游香江，品尝顺化小吃。\n夜宿顺化\n第六天：飞抵河内\n参观还剑湖、圣约瑟大教堂、胡志明陵寝、胡志明博物馆，品尝",
+  "quality": {
+    "score": 10,
+    "confidence": 0.62,
+    "has_ai_taste": false,
+    "ai_expressions": []
+  },
+  "extract_time": "2026-04-01T09:37:22.937883",
+  "batch": "batch2"
+}

@@ -1,0 +1,27 @@
+{
+  "case_id": "batch2_70925",
+  "source": {
+    "path": "D:\\动画\\众生界\\.case-library\\converted\\爱如指间沙.txt",
+    "novel_name": "爱如指间沙",
+    "genre": "游戏竞技"
+  },
+  "scene": {
+    "type": "转折场景",
+    "chapter_index": 1,
+    "word_count": 1000
+  },
+  "content_preview": "目录\nContent Part1　浮尘(1) Part1　浮尘(2) Part1　浮尘(3) Part1　浮尘(4) Part1　浮尘(5) Part1　浮尘(6) Part1　浮尘(7) Part1　浮尘(8) Part1　浮尘(9) Part1　浮尘(10) Part1　浮尘(11) Part1　浮尘(12) Part1　浮尘(13) Part1　浮尘(14) Part1　浮尘(15) Part1　浮尘(16) Part1　浮尘(17) Part1　浮尘(18) Part1　浮尘(19) Part2　流年(1) Part2　流年(2) Part2　流年(3) Part2　流年(4) Part2　流年(5) Part2　流年(6) Part2　流年(7) Part2　流年(8) Part2　流年(9) Part2　流年(10) Part2　流年(11) Part2　流年(12) Part2　流年(13) Part2　流年(14) Part2　流年(15) Part2　流年(16) Part2　流年(17) \nPart1　浮尘(1)\n往事尘封得太久了。\n八年前，甚至还要更早。\n现在重新",
+  "quality": {
+    "score": 10,
+    "confidence": 0.56,
+    "has_ai_taste": false,
+    "ai_expressions": [
+      [
+        "仿佛",
+        1
+      ]
+    ]
+  },
+  "extract_time": "2026-04-01T09:40:27.854887",
+  "batch": "batch2"
+}

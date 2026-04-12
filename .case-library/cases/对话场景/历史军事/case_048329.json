@@ -1,0 +1,33 @@
+{
+  "case_id": "case_048329",
+  "source": {
+    "source_id": "source_converted",
+    "file": "D:\\动画\\众生界\\.case-library\\converted\\我的诺曼底.txt",
+    "novel_name": "我的诺曼底",
+    "genre": "历史军事"
+  },
+  "scene": {
+    "type": "对话场景",
+    "chapter_index": 2,
+    "position_ratio": 0.667,
+    "word_count": 1000
+  },
+  "quality": {
+    "overall_score": 10,
+    "emotion_value": 5.8,
+    "confidence": 0.2,
+    "has_ai_taste": false
+  },
+  "tags": {
+    "techniques": [],
+    "keywords": [
+      "说道"
+    ],
+    "recommended_writers": [
+      "墨言",
+      "剑尘"
+    ]
+  },
+  "content_preview": "第6卷：胜利与悲剧（Churchill ,Winston S : The Second World War, Vol.6,Triumph and Tragedy, Cassell and Co.,London,1954,p198），丘吉尔回忆道 ：\n“现在是解决问题的时候了，因此我说道，让我们来解决我们在巴尔干的问题吧。你们的军队驻在罗马尼亚和保加利亚。那里有我们的权益，有我们的使节和特工人员。我们不要纠缠在一些小的矛盾上面。就英国和俄国来说，如果让你们在罗马尼亚有90%的决定权，而我们在希腊有90%的决定权，在南斯拉夫各占一半，你觉得怎么样？当译员在翻译这句话的时候，我用半张纸把下面这些写了出来：\n罗马尼亚 俄国 90% 其他国家 10%\n希腊 英国（连同美国）90% 俄国 10%\n南斯拉夫 50-50%\n匈牙利 50-50%\n保加利亚 俄国75% 其他国家25%\n我把这半张纸推到斯大林面前，当时他已经听到了译员的翻译。然后是片刻的沉默。接着他拿起蓝铅笔划了一个大勾。随即把纸片递还给我。一切都解决了，所费时间并不比写这张纸的时间更多。”\n。）\n根据丘吉尔和斯大林一纸协议：1944年1",
+  "extract_time": "2026-04-01T10:32:25.961256"
+}

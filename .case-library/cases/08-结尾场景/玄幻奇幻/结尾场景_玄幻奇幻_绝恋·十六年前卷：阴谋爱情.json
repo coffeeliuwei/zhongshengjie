@@ -1,0 +1,22 @@
+{
+  "case_id": "batch2_83400",
+  "source": {
+    "path": "D:\\动画\\众生界\\.case-library\\converted\\绝恋·十六年前卷：阴谋爱情.txt",
+    "novel_name": "绝恋·十六年前卷：阴谋爱情",
+    "genre": "玄幻奇幻"
+  },
+  "scene": {
+    "type": "结尾场景",
+    "chapter_index": 165,
+    "word_count": 800
+  },
+  "content_preview": "ok.qq.com\"));\nvar logout_uc = NavCookie.getCookie(\"logout_uc\");\nif (local == null && logout_uc == \"1\") {\ndocument.write(\"\");\nNavCookie.setCookie(\"logout_uc\"， \"0\");\n}\nif (local != null)\nShowUserInfo();\nelse\ndocument.write(\"\");\nif (local == null)\nShowUserInfoComplete2(logininfo);\nvar searchobj = document.getElementById(\"searchtype\");\nsearchobj.value = 1;\n#CopyRight2006 {font-size:12px;color:black;background:white;clear:both;margin:0 auto;}#CopyRight2006 a.tocft:link，a.tocft:visited{font-size:12px;",
+  "quality": {
+    "score": 10,
+    "confidence": 0.7,
+    "has_ai_taste": false,
+    "ai_expressions": []
+  },
+  "extract_time": "2026-04-01T09:40:59.160450",
+  "batch": "batch2"
+}

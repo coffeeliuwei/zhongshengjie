@@ -1,0 +1,30 @@
+{
+  "case_id": "case_016687",
+  "source": {
+    "source_id": "source_converted",
+    "file": "D:\\动画\\众生界\\.case-library\\converted\\A9驭焦虑和恐惧：治疗师指南自助手册.txt",
+    "novel_name": "A9驭焦虑和恐惧：治疗师指南自助手册",
+    "genre": "青春校园"
+  },
+  "scene": {
+    "type": "环境场景",
+    "chapter_index": 33,
+    "position_ratio": 0.892,
+    "word_count": 1000
+  },
+  "quality": {
+    "overall_score": 10,
+    "emotion_value": 5.0,
+    "confidence": 0.167,
+    "has_ai_taste": false
+  },
+  "tags": {
+    "techniques": [],
+    "keywords": [],
+    "recommended_writers": [
+      "云溪"
+    ]
+  },
+  "content_preview": "第一章 导言（2）\n解构CBT治疗惊恐和广场恐惧症的过程\n人们试图分析PCT和CBT治疗广场恐惧症的不同要素。结果多少令人困惑，这种分析依赖于样本选择（如轻度和重度广场恐惧症）和所做的比较的精确度。一些研究表明，认知疗法看上去是有效的（e.g.Williams & Falbo，1996），即使完全不用暴露疗法和行为疗法时也一样（e.g.Salkovskis，Clark & Hackman，1991），而且比放松治疗更有效（e.g.Arnta & van den Hout，1996; Beck et al.，1994;Clark et al.，1994）。另外，一些研究发现，对广场恐惧症患者运用认知疗法加现场暴露疗法，治疗效果并不能得到改善（e.g.van den Hout，Arntz & Hoekstra，1994;Rijiken，Kraaimaat，De Ruiter & Garssen，1992）。同样，一些研究发现，在治疗广场恐惧症时，除了单独使用现场暴露疗法外，将呼吸技巧训练与重复的内感性暴露疗法相结合并不能改善疗效（de Beurs，Lang，van Dyck & Koele",
+  "extract_time": "2026-04-01T10:31:12.240334"
+}

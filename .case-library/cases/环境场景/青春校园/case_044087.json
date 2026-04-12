@@ -1,0 +1,34 @@
+{
+  "case_id": "case_044087",
+  "source": {
+    "source_id": "source_converted",
+    "file": "D:\\动画\\众生界\\.case-library\\converted\\学生会的二心.txt",
+    "novel_name": "学生会的二心",
+    "genre": "青春校园"
+  },
+  "scene": {
+    "type": "环境场景",
+    "chapter_index": 2,
+    "position_ratio": 0.125,
+    "word_count": 606
+  },
+  "quality": {
+    "overall_score": 10,
+    "emotion_value": 5.0,
+    "confidence": 0.167,
+    "has_ai_taste": false
+  },
+  "tags": {
+    "techniques": [
+      "对话描写"
+    ],
+    "keywords": [
+      "氛围"
+    ],
+    "recommended_writers": [
+      "云溪"
+    ]
+  },
+  "content_preview": "第1节 不存在的序章\n作者：\n<font face=\"Helvetica \">葵せきな</font>\n插画：狗神煌\n翻译：demongod\n首发：\n<a target=\"_blank\" href=\"http://www.acgtalk.com/\">http://www.acgtalk.com/</a>\n次发：轻之国度\n转载请不要去除信息\n所录入的每一本书里，扫图者有很大一部分功劳!\n○给《工作人员》的通知\n关于近期诸君的干涉成果，《企业》的上层开始发出疑问的声音了。\n在工作的性质上，并不是用明确的数字来评测诸君的功绩的。但是今期实在是没能看到你们对《企业》的贡献。\n虽然也有指摘《HumanFeedbackSystem》异变的声音，但是从活动状况来看，这种可能性是极为低下的。也就是说是无法作为借口的。\n因此我希望《工作人员》的诸君能够再次带着危机感来执行这个计划。\n该不会是被《学园》的氛围所影响而有所松懈了吧？\n抑或是因为过于依赖固定模式而忘记了柔软的应对？\n还是说过于相信自己的立场和权力了？\n不要小看小孩子。\n诸君的能力确实很高。在日本应该不存在在你们之上的擅长掌握人心之术的精锐吧。\n",
+  "extract_time": "2026-04-01T10:32:16.266508"
+}

@@ -1,0 +1,22 @@
+{
+  "case_id": "batch2_13081",
+  "source": {
+    "path": "D:\\动画\\众生界\\.case-library\\converted\\你是天使我是谁.txt",
+    "novel_name": "你是天使我是谁",
+    "genre": "游戏竞技"
+  },
+  "scene": {
+    "type": "开篇场景",
+    "chapter_index": 1,
+    "word_count": 1249
+  },
+  "content_preview": "第1节：Part 001 上天的礼物(1) 第2节：Part 001 上天的礼物(2) 第3节：Part 001 上天的礼物(3) 第4节：Part 001 上天的礼物(4) 第5节：Part 002 冰玫瑰(1) 第6节：Part 002 冰玫瑰(2) 第7节：Part 002 冰玫瑰(3) 第8节：Part 002 冰玫瑰(4) 第9节：Part 002 冰玫瑰(5) 第10节：Part 002 冰玫瑰(6) 第11节：Part 003 电影院的泪水(1) 第12节：Part 003 电影院的泪水(2) 第13节：Part 003 电影院的泪水(3) 第14节：Part 004 生日纵火犯(1) 第15节：Part 004 生日纵火犯(2) 第16节：Part 004 生日纵火犯(3) 第17节：Part 004 生日纵火犯(4) 第18节：Part 005 不许和别人打架(1) 第19节：Part 005 不许和别人打架(2) 第20节：Part 006 检讨事件(1) 第21节：Part 006 检讨事件(2) 第22节：Part 006 检讨事件(3) 第23节：Part 0",
+  "quality": {
+    "score": 10,
+    "confidence": 0.95,
+    "has_ai_taste": false,
+    "ai_expressions": []
+  },
+  "extract_time": "2026-04-01T09:38:04.472045",
+  "batch": "batch2"
+}

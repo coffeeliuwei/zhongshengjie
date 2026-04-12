@@ -1,0 +1,22 @@
+{
+  "case_id": "batch2_01567",
+  "source": {
+    "path": "D:\\动画\\众生界\\.case-library\\converted\\eat pray love.txt",
+    "novel_name": "eat pray love",
+    "genre": "青春校园"
+  },
+  "scene": {
+    "type": "结尾场景",
+    "chapter_index": 50,
+    "word_count": 800
+  },
+  "content_preview": "Susan Kittenplan、Michael and Jill Knight、Brian and Linda Knopp、Deborah Lopez、Deborah Luepnitz、Craig Marks and Rene Steinke、Adam McKay and Shira Piven、Jonny and Cat Miles、Sheryl Moller、John Morse and Ross Petersen、James and Caterine Murdock（连同Nick与Mimi的祝福）、Jos Nunes、Anne Pagliarulo、Charley Patton、Laura Platter、Peter Richmond、Toby and Beverly Robinson、Nina Bernstein Simmons、Stefania Somare、Natalie Standiford、Stacey Steers、Darcey Steinke、Thoreson姐妹（Nancy、Laura与Rebecca小姐）、Daphne Uviller、Richard Vogt",
+  "quality": {
+    "score": 10,
+    "confidence": 0.7333333333333333,
+    "has_ai_taste": false,
+    "ai_expressions": []
+  },
+  "extract_time": "2026-04-01T09:37:43.396046",
+  "batch": "batch2"
+}

@@ -1,0 +1,22 @@
+{
+  "case_id": "batch2_25048",
+  "source": {
+    "path": "D:\\动画\\众生界\\.case-library\\converted\\四九城.txt",
+    "novel_name": "四九城",
+    "genre": "科幻灵异"
+  },
+  "scene": {
+    "type": "开篇场景",
+    "chapter_index": 1,
+    "word_count": 1119
+  },
+  "content_preview": "第1节：一、活该着(1) 第2节：一、活该着(2) 第3节：一、活该着(3) 第4节：一、活该着(4) 第5节：一、活该着(5) 第6节：二、大肥肉(1) 第7节：二、大肥肉(2) 第8节：二、大肥肉(3) 第9节：三、转不过弯(1) 第10节：三、转不过弯(2) 第11节：三、转不过弯(3) 第12节：三、转不过弯(4) 第13节：四、you rock my world(1) 第14节：四、you rock my world(2) 第15节：四、you rock my world(3) 第16节：四、you rock my world(4) 第17节：四、you rock my world(5) 第18节：五、认真的(1) 第19节：五、认真的(2) 第20节：五、认真的(3) 第21节：五、认真的(4) 第22节：五、认真的(5) 第23节：五、认真的(6) 第24节：六、The bluest eyes in texts(1) 第25节：六、The bluest eyes in texts(2) 第26节：六、The bluest eyes in texts(3) 第27节：六、T",
+  "quality": {
+    "score": 10,
+    "confidence": 0.95,
+    "has_ai_taste": false,
+    "ai_expressions": []
+  },
+  "extract_time": "2026-04-01T09:38:26.638846",
+  "batch": "batch2"
+}

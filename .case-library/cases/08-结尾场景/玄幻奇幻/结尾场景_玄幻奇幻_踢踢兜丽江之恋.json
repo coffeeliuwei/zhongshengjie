@@ -1,0 +1,27 @@
+{
+  "case_id": "batch2_97578",
+  "source": {
+    "path": "D:\\动画\\众生界\\.case-library\\converted\\踢踢兜丽江之恋.txt",
+    "novel_name": "踢踢兜丽江之恋",
+    "genre": "玄幻奇幻"
+  },
+  "scene": {
+    "type": "结尾场景",
+    "chapter_index": 45,
+    "word_count": 800
+  },
+  "content_preview": "来得及哈，现在承认还不用判刑。&rsquo;\n&lsquo;我又没偷，&rsquo;我说，&lsquo;警察不会冤枉好人。&rsquo;\n&lsquo;你真的没偷？&rsquo;\n&lsquo;没偷就是没偷。&rsquo;我说。\n&lsquo;那我们回去吧，没偷就算了。&rsquo;我爸说。\n这是我在小偷与警察的较量中唯一的一次胜利。后来我也尝试过这种方法，但最后都会因为底气不足而失败，但那天我特别视死如归。我爸到现在如果还记得这件事，也还是会认为那次是冤枉我了。&rdquo;\n&ldquo;那你那天偷钱是去干什么？&rdquo;\n&ldquo;给我女朋友买发夹。&rdquo;\n&ldquo;你多大啊，那时候？&rdquo;\n&ldquo;好像是10岁，小学三四年级的样子。&rdquo;\n&ldquo;那么小就有女朋友啦？&rdquo;\n&ldquo;好几个呢。&rdquo;我说\n&ldquo;唉，那完蛋了。&rdquo;\n&ldquo;怎么啦？&rdquo;\n&ldquo;那我排第几个啊？&rdquo;\n&ldquo;你是最后一个。&rdquo;我说。\n可能是为了奖励我这句讨好的话，",
+  "quality": {
+    "score": 10,
+    "confidence": 0.7,
+    "has_ai_taste": false,
+    "ai_expressions": [
+      [
+        "好像",
+        1
+      ]
+    ]
+  },
+  "extract_time": "2026-04-01T09:41:49.606912",
+  "batch": "batch2"
+}

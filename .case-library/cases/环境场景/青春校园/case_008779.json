@@ -1,0 +1,35 @@
+{
+  "case_id": "case_008779",
+  "source": {
+    "source_id": "source_converted",
+    "file": "D:\\动画\\众生界\\.case-library\\converted\\林依晨的纽约贝果日记.txt",
+    "novel_name": "林依晨的纽约贝果日记",
+    "genre": "青春校园"
+  },
+  "scene": {
+    "type": "环境场景",
+    "chapter_index": 2,
+    "position_ratio": 0.054,
+    "word_count": 1000
+  },
+  "quality": {
+    "overall_score": 10,
+    "emotion_value": 5.0,
+    "confidence": 0.167,
+    "has_ai_taste": false
+  },
+  "tags": {
+    "techniques": [
+      "伏笔设置",
+      "对话描写"
+    ],
+    "keywords": [
+      "环境"
+    ],
+    "recommended_writers": [
+      "云溪"
+    ]
+  },
+  "content_preview": "第2节：林依晨的纽约贝果日记(2)\n依晨是个独立的女孩，这点让我由衷赞叹，她不费吹灰之力就对举凡纽约地铁或是州际的巴土路线了若指掌。回想我第一次来到美国的窘境，让我不禁对这个似乎到哪里都可生存的女孩感到敬佩，我不得不承认，她适应环境的能力比我好上一百倍。在我们短短相处几周的时间里，我看到一个不断鞭策自己进步的女孩，她不断充实自己，\nP8\n走出自己的演艺之路。她不只是个漂亮的明星，还是个有颗聪明脑袋且知识渊博的演艺工作者。我祝福她未来的旅途事事顺利，事业版图不断扩张。以她努力进取的态度，我相信在不久的将来，我们可以预见一个更发光发紫的演艺巨星。\n世芸姨妈\nP9\nI knew from the moment Ariel walked into our apartment in Times Square, New\nYork City, that we would have a great time. She had that fabulous glow & sparkle\nof a first time visitor to Manhattan -- the first thing we d",
+  "extract_time": "2026-04-01T10:30:54.826143"
+}
