@@ -553,10 +553,14 @@ class SceneDiscoverer:
         return synced
 
     def sync_all(
-        self, scenes: Optional[List[DiscoveredScene]] = None
+        self, scenes: Optional[List[DiscoveredScene]] = None, sync_qdrant: bool = False
     ) -> Dict[str, int]:
         """
         同步到所有配置文件
+
+        Args:
+            scenes: 要同步的场景列表
+            sync_qdrant: 是否同步到向量库（新增）
 
         Returns:
             各文件的同步数量
@@ -571,8 +575,56 @@ class SceneDiscoverer:
             "skill": self.sync_to_skill(scenes),
         }
 
+        # 新增：同步到向量库（可选）
+        if sync_qdrant and results["case_builder"] > 0:
+            synced_cases = self._sync_to_qdrant()
+            results["qdrant"] = synced_cases
+            if synced_cases > 0:
+                print(f"  [OK] 已同步 {synced_cases} 个场景案例到向量库")
+
         print(f"\n同步完成: {results}")
         return results
+
+    def _sync_to_qdrant(self) -> int:
+        """
+        同步场景案例到向量库
+
+        Returns:
+            成功同步的数量
+        """
+        try:
+            # 导入同步管理器
+            sys.path.insert(0, str(PROJECT_ROOT / ".vectorstore"))
+            from modules.knowledge_base.sync_manager import SyncManager
+
+            sync_manager = SyncManager()
+            # 触发案例库增量同步
+            result = sync_manager.sync_cases()
+            return result.get("synced_count", 0)
+        except ImportError:
+            # 回退：使用data_migrator
+            try:
+                import subprocess
+
+                result = subprocess.run(
+                    [
+                        "python",
+                        str(PROJECT_ROOT / "tools" / "data_migrator.py"),
+                        "--collection",
+                        "case",
+                    ],
+                    capture_output=True,
+                    text=True,
+                )
+                if result.returncode == 0:
+                    print("  [OK] 已通过data_migrator同步案例库")
+                    return 1
+            except Exception as e:
+                print(f"  [WARN] 向量库同步失败: {e}")
+                return 0
+        except Exception as e:
+            print(f"  [WARN] 向量库同步失败: {e}")
+            return 0
 
     def approve_scene(self, scene_name: str) -> bool:
         """批准一个发现的场景"""
@@ -619,6 +671,11 @@ def main():
     parser.add_argument("--status", action="store_true", help="查看状态")
     parser.add_argument("--list", action="store_true", help="列出发现的场景")
     parser.add_argument("--scan", metavar="DIR", help="扫描小说目录收集未归类片段")
+    parser.add_argument(
+        "--sync-qdrant",
+        action="store_true",
+        help="同步到向量库（与--apply-all配合使用）",
+    )
 
     args = parser.parse_args()
 
@@ -669,7 +726,7 @@ def main():
             print("没有已批准的场景需要应用")
             print("请先使用 --approve NAME 批准场景")
             return
-        discoverer.sync_all(approved)
+        discoverer.sync_all(approved, sync_qdrant=args.sync_qdrant)
         return
 
     if args.discover:

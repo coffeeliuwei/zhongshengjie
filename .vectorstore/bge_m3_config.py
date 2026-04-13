@@ -53,6 +53,8 @@ COLLECTION_NAMES = {
     "foreshadow_pair": "foreshadow_pair_v1",  # 伏笔配对
     "power_cost": "power_cost_v1",  # 力量代价
     "author_style": "author_style_v1",  # 作者风格
+    # 新增：审核维度Collection
+    "evaluation_criteria": "evaluation_criteria_v1",  # 审核维度（禁止项+技法标准+阈值）
 }
 
 # 旧Collection名（用于迁移时读取）

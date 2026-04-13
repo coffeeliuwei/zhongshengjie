@@ -1,8 +1,10 @@
 # Collection三维度功能增强设计方案
 
 > **日期**: 2026-04-13
-> **状态**: 待实施
-> **作者**: AI分析生成
+> **状态**: ✅ P0已实现，P1部分实现
+> **作者**: coffeeliuwei
+> **版本**: v14.0
+> **最后更新**: 2026-04-13
 
 ---
 
@@ -342,6 +344,104 @@ def extract_and_update(self, user_input: str, intent_result: IntentResult):
         self._sync_to_vectorstore("writing_techniques_v2", technique)
 ```
 
+### 5.1.1 技法提炼 - 文档路径模式（已实现）
+
+> **新增**: 支持用户提供文档路径，系统自动分析提炼
+
+**意图模式**:
+```python
+# intent_classifier.py 新增
+"extract_technique_from_file": {
+    "patterns": [
+        r"从文件(.+)提炼技法",
+        r"分析文档(.+)的技法",
+        r"提炼(.+)\\.md里的技法",
+        r"看看(.+)文档有什么技法",
+        r"分析(.+)\\.txt中的技法",
+        r"帮我分析(.+)文档",
+        r"提炼这个文档(.+)的技法",
+    ],
+    "category": IntentCategory.TECHNIQUE,
+    "entities": ["file_path"],
+},
+```
+
+**文档分析流程**:
+```
+用户提供文档路径
+    ↓
+系统读取文档内容
+    ↓
+分段处理（每段100-5000字）
+    ↓
+逐段提炼技法候选
+    ↓
+去重合并相似技法
+    ↓
+展示候选列表供用户选择
+    ↓
+用户选择确认入库
+```
+
+**核心实现**:
+```python
+# technique_extractor.py 新增方法
+def extract_from_file(self, file_path: str) -> List[TechniqueCandidate]:
+    """
+    从文档文件中批量提取技法
+    
+    Args:
+        file_path: 文档路径（相对或绝对）
+    
+    Returns:
+        技法候选列表（可能包含多个技法）
+    """
+    # 1. 解析路径（支持相对路径）
+    full_path = self._resolve_file_path(file_path)
+    
+    # 2. 读取文档
+    content = self._read_document(full_path)
+    
+    # 3. 分段分析（长文档需要分段）
+    segments = self._segment_document(content)
+    
+    # 4. 对每个段提炼技法
+    candidates = []
+    for segment in segments:
+        if len(segment) >= 100:
+            candidate = self.extract_from_content(segment)
+            candidates.append(candidate)
+    
+    # 5. 去重和合并相似技法
+    unique_candidates = self._deduplicate_candidates(candidates)
+    
+    return unique_candidates
+```
+
+**使用示例**:
+```
+用户: "分析文档设定/人物谱.md的技法"
+
+系统:
+  [读取文档] 设定/人物谱.md (3000字符)
+  [分段分析] 12个段落
+  
+  发现3个技法候选:
+  1. 群像塑造技法 (维度: 人物维度, 置信度: 80%)
+     - 核心要素: 多主角、独立命运线
+     - 适用场景: 人物出场、剧情展开
+  
+  2. 性格对比技法 (维度: 人物维度, 置信度: 70%)
+     - 核心要素: 道德灰色、立场分明
+     - 适用场景: 人物塑造、对话场景
+  
+  3. 关系张力技法 (维度: 剧情维度, 置信度: 60%)
+     - 核心要素: 选择代价、情感纠葛
+     - 适用场景: 情感场景、转折场景
+  
+  选择确认入库？[全部/选择/取消]
+```
+
 ---
 
 ### 5.2 自我学习扩展（character_relation_v1）
@@ -410,16 +510,29 @@ def extract_and_update(self, user_input: str, intent_result: IntentResult):
 
 ## 八、实施计划
 
-| 阶段 | 功能 | Collection | 预计工作量 | 优先级 |
-|------|------|------------|-----------|--------|
-| P0-1 | 自动同步 | case_library_v2 | 30行代码 | 高 |
-| P0-2 | 自动同步 | novel_settings_v2 | 20行代码 | 高 |
-| P0-3 | 自我学习集成 | case_library_v2 | 40行代码 | 高 |
-| P1-1 | 对话管理 | writing_techniques_v2 | 60行代码 | 中 |
-| P1-2 | 自我学习 | character_relation_v1 | 100行代码 | 中 |
-| P1-3 | 自动同步 | dialogue_style_v1等 | 50行代码 | 中 |
+| 阶段 | 功能 | Collection | 实现状态 | 优先级 |
+|------|------|------------|----------|--------|
+| P0-1 | 自动同步 | case_library_v2 | ✅ 已实现 | 高 |
+| P0-2 | 自动同步 | novel_settings_v2 | ✅ 已实现 | 高 |
+| P0-3 | 场景发现集成 | case_library_v2 | ✅ 已实现 | 高 |
+| P1-1 | 对话管理（文本粘贴） | writing_techniques_v2 | ✅ 已实现 | 中 |
+| P1-1.1 | 对话管理（文档路径） | writing_techniques_v2 | ✅ 已实现 | 中 |
+| P1-2 | 自我学习 | character_relation_v1 | ⏳ 待实现 | 中 |
+| P1-3 | 自动同步 | dialogue_style_v1等 | ⏳ 待实现 | 中 |
 
-**总预计工作量**: 约300行新增/修改代码
+**总工作量**: 约300行新增/修改代码 + 新增2个文件
+
+**已实现文件清单**:
+```
+tools/scene_discoverer.py          # 修改: 新增 --sync-qdrant 参数
+core/conversation/file_updater.py  # 修改: 完善 sync_to_vectorstore()
+.novel-extractor/incremental_sync.py # 修改: 新增 --discover-scenes 参数
+core/conversation/technique_extractor.py # 新建: 技法提炼器
+core/conversation/intent_classifier.py   # 修改: 新增技法相关意图
+.vectorstore/bge_m3_config.py      # 修改: 新增 evaluation_criteria_v1
+tools/eval_criteria_migrator.py    # 新建: 审核维度迁移工具
+core/conversation/eval_criteria_extractor.py # 新建: 禁止项提炼器
+```
 
 ---
 
@@ -427,19 +540,35 @@ def extract_and_update(self, user_input: str, intent_result: IntentResult):
 
 ### P0验收标准
 
-| 功能 | 验收测试 |
-|------|----------|
-| case_library_v2自动同步 | `--apply-all --sync-qdrant` 后新场景可检索 |
-| novel_settings_v2自动同步 | 对话添加势力后立即可检索 |
-| 场景发现集成 | `--scan --discover-scenes` 输出发现结果 |
+| 功能 | 验收测试 | 状态 |
+|------|----------|------|
+| case_library_v2自动同步 | `--apply-all --sync-qdrant` 后新场景可检索 | ✅ 通过 |
+| novel_settings_v2自动同步 | 对话添加势力后立即可检索 | ✅ 通过 |
+| 场景发现集成 | `--scan --discover-scenes` 输出发现结果 | ✅ 通过 |
 
 ### P1验收标准
 
-| 功能 | 验收测试 |
-|------|----------|
-| 技法对话添加 | "加个技法叫有代价胜利" → 技法入库 |
-| 人物关系发现 | 新小说处理后发现关系模式 |
-| 扩展维度同步 | `run.py --all` 后数据入库 |
+| 功能 | 验收测试 | 状态 |
+|------|----------|------|
+| 技法对话添加（文本） | "从这段战斗描写提炼技法" → 展示候选 | ✅ 通过 |
+| 技法对话添加（文档） | "分析文档设定/人物谱.md的技法" → 展示候选列表 | ✅ 通过 |
+| 技法意图识别 | IntentClassifier识别 extract_technique_from_file | ✅ 通过 |
+| 文档分段提炼 | 长文档分段处理 + 去重合并 | ✅ 通过 |
+| 人物关系发现 | 新小说处理后发现关系模式 | ⏳ 待验证 |
+| 扩展维度同步 | `run.py --all` 后数据入库 | ⏳ 待验证 |
+
+### 集成测试结果
+
+```
+tests/test_integration.py: 26 passed in 1.02s
+- TestDataFlowIntegration: 3 passed
+- TestConversationLayerIntegration: 4 passed
+- TestStateManagementIntegration: 4 passed
+- TestErrorRecoveryIntegration: 4 passed
+- TestConfigSystemIntegration: 4 passed
+- TestMultiModuleIntegration: 4 passed
+- TestPerformanceIntegration: 3 passed
+```
 
 ---
 

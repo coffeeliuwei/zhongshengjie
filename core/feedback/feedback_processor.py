@@ -295,27 +295,64 @@ class FeedbackProcessor:
         """
         forbidden_items = []
 
-        # 检查AI味表达
-        raw_input = feedback.get("raw_input", "")
-        original = feedback.get("original", "")
+        # 尝试使用动态加载
+        try:
+            import sys
+            from pathlib import Path
 
-        text_to_check = f"{raw_input} {original}"
+            # 添加core路径
+            core_path = Path(__file__).parent.parent
+            if str(core_path) not in sys.path:
+                sys.path.insert(0, str(core_path))
 
-        for pattern in self.AI_FLAVOR_PATTERNS:
-            if re.search(pattern, text_to_check):
-                forbidden_items.append(pattern)
+            from evaluation_criteria_loader import EvaluationCriteriaLoader
 
-        # 检查是否达到阈值
-        threshold = self.thresholds.get("forbidden_detection_count", 3)
-        confirmed_forbidden = []
+            loader = EvaluationCriteriaLoader()
+            loader.load()
 
-        for item in forbidden_items:
-            # 检查历史中是否已多次出现
-            history_count = self._count_pattern_in_history(item)
-            if history_count >= threshold:
-                confirmed_forbidden.append(item)
+            # 使用动态加载检测
+            raw_input = feedback.get("raw_input", "")
+            original = feedback.get("original", "")
+            text_to_check = f"{raw_input} {original}"
 
-        return confirmed_forbidden
+            results = loader.detect_prohibitions(text_to_check)
+
+            # 收集检测到的禁止项
+            for r in results:
+                if r.matches:
+                    forbidden_items.append(r.name)
+
+            # 使用动态阈值
+            threshold = self.thresholds.get("forbidden_detection_count", 3)
+            confirmed_forbidden = []
+
+            for item in forbidden_items:
+                history_count = self._count_pattern_in_history(item)
+                if history_count >= threshold:
+                    confirmed_forbidden.append(item)
+
+            return confirmed_forbidden
+
+        except Exception as e:
+            # 回退到硬编码
+            raw_input = feedback.get("raw_input", "")
+            original = feedback.get("original", "")
+
+            text_to_check = f"{raw_input} {original}"
+
+            for pattern in self.AI_FLAVOR_PATTERNS:
+                if re.search(pattern, text_to_check):
+                    forbidden_items.append(pattern)
+
+            threshold = self.thresholds.get("forbidden_detection_count", 3)
+            confirmed_forbidden = []
+
+            for item in forbidden_items:
+                history_count = self._count_pattern_in_history(item)
+                if history_count >= threshold:
+                    confirmed_forbidden.append(item)
+
+            return confirmed_forbidden
 
     def _is_actionable(
         self, feedback: Dict, improvement_points: List, severity: str

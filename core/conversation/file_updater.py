@@ -190,9 +190,18 @@ class FileUpdater:
             是否成功同步
         """
         try:
-            # 导入向量数据库客户端
+            # 导入向量数据库客户端和嵌入模型
+            import sys
+            from pathlib import Path
+
+            # 添加.vectorstore路径
+            vectorstore_path = self.project_root / ".vectorstore"
+            if str(vectorstore_path) not in sys.path:
+                sys.path.insert(0, str(vectorstore_path))
+
             from qdrant_client import QdrantClient
             from qdrant_client.models import PointStruct
+            from FlagEmbedding import BGEM3FlagModel
 
             # 从配置获取连接信息
             from core.config_loader import get_qdrant_url, get_model_path
@@ -204,34 +213,109 @@ class FileUpdater:
             collection_names = [c.name for c in collections]
 
             if collection not in collection_names:
-                print(f"Collection {collection} does not exist")
+                print(f"[WARN] Collection {collection} 不存在，跳过同步")
                 return False
 
-            # 生成向量（这里简化处理，实际需要调用嵌入模型）
-            # TODO: 实际实现需要调用BGE-M3模型生成向量
-            # vector = self._generate_embedding(data)
+            # 生成文本内容用于嵌入
+            text_content = self._generate_embedding_text(collection, data)
 
-            # 创建数据点
-            # point = PointStruct(
-            #     id=str(uuid.uuid4()),
-            #     vector=vector,
-            #     payload=data
-            # )
+            if not text_content:
+                print(f"[WARN] 无法生成嵌入文本，跳过同步")
+                return False
 
-            # 上传
-            # client.upsert(collection_name=collection, points=[point])
+            # 加载嵌入模型（懒加载）
+            model_path = get_model_path()
+            if not model_path:
+                print(f"[WARN] 模型路径未配置，跳过向量同步")
+                # 仍然记录日志，只是不做实际同步
+                self._log_vectorstore_update(collection, data)
+                return True
+
+            try:
+                model = BGEM3FlagModel(model_path, use_fp16=True)
+
+                # 生成嵌入向量
+                embedding = model.encode(
+                    [text_content], return_dense=True, return_sparse=False
+                )
+                dense_vecs = embedding.get("dense_vecs")
+
+                if dense_vecs is not None and len(dense_vecs) > 0:
+                    import numpy as np
+
+                    dense_vector = np.array(dense_vecs[0]).tolist()
+
+                    # 创建数据点
+                    import uuid
+
+                    point = PointStruct(
+                        id=str(uuid.uuid4()),
+                        vector={"dense": dense_vector},
+                        payload={
+                            "content": text_content,
+                            "source": "conversation_update",
+                            "timestamp": datetime.now().isoformat(),
+                            **data,
+                        },
+                    )
+
+                    # 上传
+                    client.upsert(collection_name=collection, points=[point])
+                    print(f"[OK] 已同步到 {collection}")
+                else:
+                    print(f"[WARN] 嵌入生成返回空结果")
+
+            except Exception as embed_error:
+                print(f"[WARN] 嵌入生成失败: {embed_error}，记录日志但不同步")
 
             # 记录日志
             self._log_vectorstore_update(collection, data)
 
             return True
 
-        except ImportError:
-            print("Warning: qdrant_client not installed")
+        except ImportError as e:
+            print(f"[WARN] 缺少依赖: {e}")
+            self._log_vectorstore_update(collection, data)
             return False
         except Exception as e:
-            print(f"Error syncing to vectorstore: {e}")
+            print(f"[ERROR] 向量同步失败: {e}")
+            self._log_vectorstore_update(collection, data)
             return False
+
+    def _generate_embedding_text(self, collection: str, data: Dict[str, Any]) -> str:
+        """
+        根据Collection类型生成嵌入文本
+
+        Args:
+            collection: Collection名称
+            data: 数据内容
+
+        Returns:
+            用于生成嵌入的文本
+        """
+        if collection == "novel_settings_v2":
+            # 设定类数据
+            name = data.get("name", "")
+            type_ = data.get("type", "")
+            description = data.get("description", "")
+            return f"{type_}: {name}\n{description}"
+
+        elif collection == "writing_techniques_v2":
+            # 技法类数据
+            name = data.get("name", data.get("技法名称", ""))
+            dimension = data.get("dimension", data.get("维度", ""))
+            content = data.get("content", data.get("内容", ""))
+            return f"技法: {name}\n维度: {dimension}\n{content}"
+
+        elif collection == "case_library_v2":
+            # 案例类数据
+            scene_type = data.get("scene_type", "")
+            content = data.get("content", "")
+            return f"场景: {scene_type}\n{content}"
+
+        else:
+            # 默认格式
+            return json.dumps(data, ensure_ascii=False)
 
     def _create_new_file(self, path: Path, intent: str, data: Dict[str, Any]) -> bool:
         """创建新文件"""

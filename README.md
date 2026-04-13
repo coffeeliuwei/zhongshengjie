@@ -70,6 +70,65 @@
 
 ---
 
+## 零、安装Skills（⚠️ 必须第一步）
+
+本项目使用 Skills 系统定义作家能力，**必须在配置前完成安装**。
+
+### Skills位置说明
+
+| 目录 | 用途 | Git状态 |
+|------|------|---------|
+| `skills/` | Skills源码定义 | ✅ 已推送（14个Skill.md） |
+| `~/.agents/skills/` | Skills运行目录 | ❌ 不推送（本地安装） |
+
+### 安装步骤
+
+```bash
+# 1. 创建Skills目录
+mkdir -p ~/.agents/skills          # Linux/Mac
+mkdir %USERPROFILE%\.agents\skills  # Windows PowerShell
+
+# 2. 复制Skills定义到运行目录
+cd zhongshengjie
+
+# Linux/Mac
+cp -r skills/* ~/.agents/skills/
+
+# Windows PowerShell
+Copy-Item -Recurse skills/* $env:USERPROFILE\.agents\skills\
+
+# 3. 验证安装
+ls ~/.agents/skills                # Linux/Mac
+dir $env:USERPROFILE\.agents\skills  # Windows
+
+# 应输出以下目录：
+# novelist-canglan/      (苍澜 - 世界观架构师)
+# novelist-xuanyi/       (玄一 - 剧情编织师)
+# novelist-moyan/        (墨言 - 人物刻画师)
+# novelist-jianchen/     (剑尘 - 战斗设计师)
+# novelist-yunxi/        (云溪 - 意境营造师)
+# novelist-evaluator/    (审核评估师)
+# novelist-shared/       (共享规范)
+# novelist-technique-search/  (技法检索)
+# novelist-worldview-generator/  (世界观生成)
+```
+
+### Skills清单
+
+| Skill | 专长 | 负责场景 |
+|-------|------|----------|
+| novelist-canglan | 世界观架构 | 势力登场、世界观展开 |
+| novelist-xuanyi | 剧情编织 | 悬念、伏笔、转折、阴谋揭露 |
+| novelist-moyan | 人物刻画 | 人物出场、情感、心理、成长蜕变 |
+| novelist-jianchen | 战斗设计 | 战斗、打脸、高潮、修炼突破 |
+| novelist-yunxi | 意境营造 | 开篇、结尾、环境、氛围 |
+| novelist-evaluator | 审核评估 | 质量评估（独立于创作） |
+| novelist-shared | 共享规范 | 文风要求、字数规则、禁止项 |
+| novelist-technique-search | 技法检索 | BGE-M3混合检索 |
+| novelist-worldview-generator | 世界观生成 | 从大纲自动生成配置 |
+
+---
+
 ## 快速开始
 
 ### 第一步：安装依赖
@@ -132,6 +191,34 @@ cp config.example.json config.json
 "path": "D:\动画\众生界"
 ```
 
+---
+
+## 克隆后预置内容说明
+
+克隆项目后，您将获得以下预置内容：
+
+| 内容 | 数量 | 来源 | 是否需要替换 |
+|------|------|------|-------------|
+| **案例库** `.case-library/` | 113,334 文件 | 从外部小说库提取 | ❌ 可直接使用（通用） |
+| **技法库** `创作技法/` | 120 文件 | 人类创作知识 | ❌ 可直接使用（通用） |
+| **设定** `设定/` | 25 文件 | 《众生界》小说设定 | ✅ 创作自己的小说时需替换 |
+| **总大纲** `总大纲.md` | 1 文件 | 《众生界》小说大纲 | ✅ 创作自己的小说时需替换 |
+| **向量数据** Qdrant | 890,035 条 | 提取后同步 | ❌ 可直接使用 |
+
+### 预置设定说明
+
+`设定/` 目录包含《众生界》小说的完整设定：
+- 人物谱.md：20位主角设定（林夕、血牙等）
+- 十大势力.md：10大势力设定
+- 力量体系.md：7大力量体系（修仙、魔法、兽力等）
+
+**创作自己的小说时**：
+1. 清空 `设定/` 目录（或保留作为参考）
+2. 对话方式创建自己的设定
+3. 或手动创建设定文件
+
+---
+
 ### 第三步：构建数据
 
 ```bash
@@ -142,11 +229,101 @@ python tools/build_all.py
 python tools/build_all.py --status
 ```
 
-### 第四步：开始创作
+### 第四步：创建大纲和设定（对话方式）
+
+在AI对话中通过对话方式创建项目识别的大纲和设定内容：
+
+```bash
+# 1. 创建总大纲
+对话："创建总大纲：主角林夕，修仙世界，目标是复仇"
+
+# 2. 添加角色设定
+对话："添加角色：林夕，性别男，性格坚韧，能力血脉觉醒"
+
+# 3. 添加势力设定
+对话："添加势力：血牙宗，类型宗门，立场反派"
+
+# 4. 添加力量体系
+对话："添加力量体系：修仙，境界：炼气期、筑基期、金丹期"
+
+# 5. 完善设定
+对话："完善角色林夕的过往经历"
+对话："完善势力血牙宗的社会结构"
+```
+
+**系统将自动**：
+- 创建大纲文件 → `总大纲.md`
+- 创建设定文件 → `设定/*.md`
+- 自动入库 → Qdrant向量库
+- 工作流自动发现 → 创作时检索使用
+
+### 第五步：开始创作
 
 在AI对话中说：**"写第一章"**
 
-系统将自动执行：需求澄清 → 大纲解析 → 场景创作 → 评估 → 输出
+系统将自动执行：需求澄清 → 大纲解析 → 设定检索 → 场景创作 → 评估 → 输出
+
+### 第六步：提炼外部小说库（可选）
+
+如果需要从外部小说库学习：
+
+```bash
+# 提炼案例库
+python tools/unified_extractor.py --dimensions case
+
+# 提炼技法库（素材提炼模式）
+python tools/unified_extractor.py --dimensions technique
+
+# 查看提炼状态
+python tools/unified_extractor.py --status
+```
+
+### 第七步：添加审核维度（对话方式）
+
+审核维度（禁止项）可通过对话动态添加，系统自动同步：
+
+```bash
+# 1. 添加新禁止项
+对话："我发现很多小说用'嘴角勾起一抹'这个表达，感觉很假"
+
+# 2. 系统提取候选
+系统：提取名称、模式、示例 → 展示确认
+
+# 3. 用户确认入库
+对话："确认添加"
+
+# 4. 同步向量库
+python tools/sync_eval_criteria_to_qdrant.py --sync
+```
+
+**审核维度类型**：
+| 类型 | 说明 | 对话示例 |
+|------|------|----------|
+| 禁止项 | AI味表达、模板词等 | "这个表达很假" |
+| 技法标准 | 历史纵深、群像塑造等 | （从技法库提取） |
+| 阈值配置 | 通过阈值调整 | "把历史纵深阈值改为7" |
+
+**文档扫描发现禁止项**：
+
+```bash
+# 扫描文件发现常见问题表达
+对话："扫描文件正文/第一章.md找禁止项"
+
+# 系统分析文档
+系统：检测AI味表达 → 统计高频词 → 展示候选列表
+
+# 批量确认入库
+对话："全部确认添加"
+```
+
+---
+
+## 作者信息
+
+**项目作者**：coffeeliuwei
+**GitHub**：https://github.com/coffeeliuwei/zhongshengjie
+**版本**：v14.0
+**最后更新**：2026-04-13
 
 ---
 

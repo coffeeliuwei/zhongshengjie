@@ -35,6 +35,9 @@ class IntentCategory(Enum):
     TRACKING = "tracking"  # 追踪系统
     PLOT = "plot"  # 剧情
     QUERY = "query"  # 查询
+    TECHNIQUE = "technique"  # 技法提炼（新增）
+    EVALUATION = "evaluation"  # 审核维度（新增）
+    CONFIRMATION = "confirmation"  # 确认操作（新增）
     UNKNOWN = "unknown"  # 未知
 
 
@@ -367,6 +370,104 @@ class IntentClassifier:
                 r"当前状态",
             ],
             "category": IntentCategory.QUERY,
+            "entities": [],
+        },
+        # 技法提炼（新增 - collection-enhancement-design.md 5.1节）
+        "extract_technique": {
+            "patterns": [
+                r"从(.+)提炼技法",
+                r"这段(.+)用了什么技法",
+                r"分析(.+)的写法",
+                r"学习(.+)的技巧",
+                r"(.+)有什么技法可以学习",
+                r"看看(.+)用的是什么手法",
+                r"提炼一下(.+)的技法",
+                r"这段(.+)很好，提炼技法",
+            ],
+            "category": IntentCategory.TECHNIQUE,
+            "entities": ["content_reference"],
+        },
+        "extract_technique_from_file": {
+            "patterns": [
+                r"从文件(.+)提炼技法",
+                r"分析文档(.+)的技法",
+                r"提炼(.+)\\.md里的技法",
+                r"看看(.+)文档有什么技法",
+                r"分析(.+)\\.txt中的技法",
+                r"帮我分析(.+)文档",
+                r"提炼这个文档(.+)的技法",
+            ],
+            "category": IntentCategory.TECHNIQUE,
+            "entities": ["file_path"],
+        },
+        "confirm_technique": {
+            "patterns": [
+                r"确认入库",
+                r"这个技法可以",
+                r"好的入库",
+                r"入库吧",
+                r"没问题入库",
+            ],
+            "category": IntentCategory.CONFIRMATION,
+            "entities": [],
+        },
+        "modify_technique": {
+            "patterns": [
+                r"技法名称改成(.+)",
+                r"改成(.+)技法",
+                r"名称用(.+)",
+            ],
+            "category": IntentCategory.TECHNIQUE,
+            "entities": ["new_name"],
+        },
+        # 审核维度（新增 - evaluation-criteria-extension-design.md）
+        "add_evaluation_criteria": {
+            "patterns": [
+                r"添加禁止项(.+)",
+                r"新禁止项(.+)",
+                r"加入禁止项(.+)",
+                r"添加评估标准(.+)",
+                r"新评估标准(.+)",
+                r"(.+)感觉很假，加入禁止项",
+                r"(.+)这个表达很假",
+                r"这个表达很假(.+)",
+                r"(.+)感觉很假",
+                r"(.+)是假的",
+                r"这个表达很假",
+                r"这个感觉很假",
+            ],
+            "category": IntentCategory.EVALUATION,
+            "entities": ["criteria_content"],
+        },
+        "discover_prohibitions_from_file": {
+            "patterns": [
+                r"从文档(.+)发现禁止项",
+                r"扫描文件(.+)找禁止项",
+                r"分析(.+)文档的禁止项",
+                r"发现(.+)\\.md里的假表达",
+                r"扫描(.+)文档找假表达",
+                r"帮我从(.+)文档发现常见问题表达",
+            ],
+            "category": IntentCategory.EVALUATION,
+            "entities": ["file_path"],
+        },
+        "modify_evaluation_threshold": {
+            "patterns": [
+                r"修改阈值(.+)",
+                r"调整阈值(.+)",
+                r"把(.+)阈值改成(.+)",
+                r"(.+)的阈值改为(.+)",
+            ],
+            "category": IntentCategory.EVALUATION,
+            "entities": ["threshold_name", "new_value"],
+        },
+        "confirm_evaluation_criteria": {
+            "patterns": [
+                r"确认添加",
+                r"添加这个禁止项",
+                r"好的添加",
+            ],
+            "category": IntentCategory.CONFIRMATION,
             "entities": [],
         },
     }

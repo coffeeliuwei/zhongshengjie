@@ -11,15 +11,70 @@ from pathlib import Path
 
 # 动态获取项目根目录
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(PROJECT_ROOT))
 sys.path.insert(0, str(PROJECT_ROOT / ".vectorstore"))
-from workflow import NovelWorkflow
+sys.path.insert(0, str(PROJECT_ROOT / ".vectorstore" / "core"))
+
+try:
+    from workflow import NovelWorkflow
+except ImportError:
+    try:
+        from core.workflow import NovelWorkflow
+    except ImportError:
+        NovelWorkflow = None  # 回退：不使用workflow
 
 # 第一章内容
 CHAPTER_FILE = PROJECT_ROOT / "正文" / "第一章-天裂.md"
 
 
-def detect_forbidden_items(content: str) -> dict:
-    """禁止项检测"""
+def detect_forbidden_items(content: str, use_dynamic: bool = True) -> dict:
+    """
+    禁止项检测
+
+    Args:
+        content: 待检测内容
+        use_dynamic: 是否使用动态加载（默认True）
+
+    Returns:
+        检测结果字典
+    """
+    # 优先使用动态加载
+    if use_dynamic:
+        try:
+            sys.path.insert(0, str(PROJECT_ROOT / "core"))
+            from evaluation_criteria_loader import EvaluationCriteriaLoader
+
+            loader = EvaluationCriteriaLoader()
+            loader.load()
+
+            # 使用动态加载检测
+            prohibition_results = loader.detect_prohibitions(content)
+
+            # 转换为原有格式
+            results = {}
+            for r in prohibition_results:
+                results[r.name] = {
+                    "数量": r.count,
+                    "示例": r.matches[:3] if r.matches else [],
+                    "通过": r.passed,
+                }
+
+            # 判断总体结果
+            failed = any(not r.passed for r in prohibition_results)
+            results["Result"] = "PASS" if not failed else "FAIL"
+
+            print("[INFO] 使用动态加载检测（用户添加的禁止项可检测）")
+            return results
+
+        except Exception as e:
+            print(f"[WARN] 动态加载失败，回退硬编码: {e}")
+
+    # 回退到硬编码（原有逻辑）
+    return detect_forbidden_items_hardcoded(content)
+
+
+def detect_forbidden_items_hardcoded(content: str) -> dict:
+    """禁止项检测（硬编码回退版本）"""
     results = {}
 
     # 1. AI味表达
@@ -105,7 +160,7 @@ def detect_forbidden_items(content: str) -> dict:
     if results["Markdown加粗"]["数量"] > 0:
         failed = True
 
-    results["结果"] = "通过" if not failed else "失败"
+    results["Result"] = "PASS" if not failed else "FAIL"
 
     return results
 
@@ -196,55 +251,64 @@ def main():
     word_count = len(content.replace("\n", "").replace(" ", ""))
 
     print("=" * 60)
-    print("【第一章评估报告】")
+    print("[Chapter 1 Evaluation Report]")
     print("=" * 60)
     print()
-    print(f"章节: 第一章-天裂")
-    print(f"字数: {word_count}字")
+    print(f"Chapter: Chapter-1-TianLie")
+    print(f"Words: {word_count}")
     print()
 
     # 禁止项检测
     print("=" * 60)
-    print("【禁止项检测】")
+    print("[Prohibition Detection]")
     print("=" * 60)
 
     forbidden = detect_forbidden_items(content)
 
     for key, value in forbidden.items():
-        if key == "结果":
-            print(f"\n结果: {value}")
+        if key == "Result":
+            print(f"\nResult: {value}")
         else:
-            print(f"{key}: {value['数量']}个")
+            print(f"{key}: {value['数量']} items")
             if value["示例"]:
-                print(f"  示例: {value['示例']}")
+                print(f"  Samples: {value['示例']}")
 
     print()
     print("=" * 60)
-    print("【技法评估】")
+    print("[Technique Evaluation]")
     print("=" * 60)
 
-    workflow = NovelWorkflow()
-    techniques = evaluate_techniques(content, workflow)
+    if NovelWorkflow is not None:
+        workflow = NovelWorkflow()
+        techniques = evaluate_techniques(content, workflow)
 
-    for dim, result in techniques.items():
-        status = "✓" if result["通过"] else "⚠️"
-        print(f"\n{dim}:")
-        print(f"  评分: {result['评分']}/10 {status}")
-        print(f"  技法: {result['技法']}")
-        print(f"  说明: {result['说明']}")
+        for dim, result in techniques.items():
+            status = "OK" if result["通过"] else "WARN"
+            print(f"\n{dim}:")
+            print(f"  Score: {result['评分']}/10 [{status}]")
+            print(f"  Technique: {result['技法']}")
+            print(f"  Note: {result['说明']}")
 
-    # 综合评分
-    avg_score = sum(r["评分"] for r in techniques.values()) / len(techniques)
-    print()
-    print(f"\n综合评分: {avg_score:.1f}/10")
+        # 综合评分
+        avg_score = sum(r["评分"] for r in techniques.values()) / len(techniques)
+        print()
+        print(f"\nAverage Score: {avg_score:.1f}/10")
 
-    # 结论
-    all_passed = forbidden["结果"] == "通过" and all(
-        r["通过"] for r in techniques.values()
-    )
+        # 结论
+        all_passed = forbidden["Result"] == "PASS" and all(
+            r["通过"] for r in techniques.values()
+        )
+        print()
+        print("=" * 60)
+        print(f"Conclusion: {'PASS' if all_passed else 'NEED FIX'}")
+        print("=" * 60)
+    else:
+        print("\n[INFO] Workflow module not available, skipping technique evaluation")
+        all_passed = forbidden["Result"] == "PASS"
+
     print()
     print("=" * 60)
-    print(f"结论: {'通过' if all_passed else '需优化'}")
+    print(f"Final Conclusion: {'PASS' if all_passed else 'NEED FIX'}")
     print("=" * 60)
 
 

@@ -281,6 +281,11 @@ def main():
         "--priority", choices=["high", "medium", "low"], help="按优先级处理"
     )
     parser.add_argument("--limit", type=int, help="限制处理数量")
+    parser.add_argument(
+        "--discover-scenes",
+        action="store_true",
+        help="发现新场景类型（与--scan配合使用）",
+    )
 
     args = parser.parse_args()
 
@@ -290,6 +295,13 @@ def main():
         result = manager.scan_new_novels()
         print(f"\n发现 {len(result['new'])} 本新小说")
         print(f"发现 {len(result['modified'])} 本修改的小说")
+
+        # 新增：场景发现功能
+        if args.discover_scenes and (result["new"] or result["modified"]):
+            print("\n" + "=" * 60)
+            print("场景发现")
+            print("=" * 60)
+            _run_scene_discovery(result["new"] + result["modified"])
 
     elif args.process:
         manager.process_new_novels(
@@ -319,3 +331,66 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+def _run_scene_discovery(novel_paths: List[Path]):
+    """
+    运行场景发现器
+
+    Args:
+        novel_paths: 新增/修改的小说路径列表
+    """
+    try:
+        # 导入场景发现器
+        sys.path.insert(0, str(PROJECT_DIR / "tools"))
+        from scene_discoverer import SceneDiscoverer
+
+        discoverer = SceneDiscoverer()
+
+        print(f"分析 {len(novel_paths)} 本小说...")
+
+        import re
+
+        total_unclassified = 0
+
+        for novel_path in novel_paths:
+            try:
+                content = novel_path.read_text(encoding="utf-8", errors="ignore")
+                paragraphs = re.split(r"\n\s*\n", content)
+                paragraphs = [
+                    p.strip() for p in paragraphs if 100 <= len(p.strip()) <= 5000
+                ]
+
+                unclassified = discoverer.collect_unclassified(
+                    paragraphs, novel_path.stem
+                )
+                total_unclassified += len(unclassified)
+
+                if total_unclassified % 100 == 0:
+                    print(f"  已收集 {total_unclassified} 个未归类片段")
+            except Exception as e:
+                print(f"  [WARN] 读取 {novel_path.name} 失败: {e}")
+
+        print(f"\n总计收集 {total_unclassified} 个未归类片段")
+
+        # 发现新场景
+        discovered = discoverer.discover_scenes()
+
+        if discovered:
+            discoverer.save_discovered()
+            print("\n发现的潜在新场景类型:")
+            for scene in discovered:
+                print(
+                    f"  - {scene.name} (样本: {scene.sample_count}, 置信度: {scene.confidence:.0%})"
+                )
+            print("\n使用以下命令审批和应用:")
+            print("  python tools/scene_discoverer.py --list")
+            print('  python tools/scene_discoverer.py --approve "场景名称"')
+            print("  python tools/scene_discoverer.py --apply-all --sync-qdrant")
+        else:
+            print("\n未发现新的场景类型（样本不足或置信度过低）")
+
+    except ImportError:
+        print("[WARN] scene_discoverer 模块未找到")
+    except Exception as e:
+        print(f"[ERROR] 场景发现失败: {e}")
