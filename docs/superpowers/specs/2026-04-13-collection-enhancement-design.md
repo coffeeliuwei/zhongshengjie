@@ -203,44 +203,143 @@ python incremental_sync.py --scan --discover-scenes
 
 ## 五、P1建议做功能实现方案
 
-### 5.1 对话管理扩展（writing_techniques_v2）
+### 5.1 技法提炼模式（writing_techniques_v2）
 
-**目标**: 用户可通过对话添加技法
+**目标**: 用户提供素材，系统自动提炼技法，用户确认后入库
 
-**新增意图示例**:
+**设计背景**:
+
+用户通常不知道什么是"技法"，只会提供素材让系统分析：
+
+| 用户实际表达 | 原设计假设 |
+|------------|-----------|
+| "这段战斗描写很好，提炼一下技法" | ❌ "加个技法叫有代价胜利" |
+| "从这个案例学习一下写法" | ❌ 用户知道技法概念 |
+| "分析这段文字用了什么技巧" | ❌ 手动命名添加 |
+
+**新的工作流程**:
 ```
-用户: "加个技法叫有代价胜利"
-用户: "战斗场景用节奏控制技法"
+用户提供素材 → 技法提取器分析 → 生成技法候选 → 用户确认 → 入库
+
+步骤详解：
+1. 用户: "这段战斗描写很好，提炼一下技法"
+2. 系统: 
+   - 分析文本内容
+   - 检索现有技法库进行对比学习
+   - 提取技法要素（如"节奏控制"、"力量代价"、"心理博弈"）
+   - 将技法归入合适的维度（如"战斗冲突维度"）
+3. 系统: 展示提炼结果
+   ```
+   提炼结果：
+   - 技法名称：有代价胜利
+   - 维度：战斗冲突维度
+   - 核心要素：胜利后需要付出代价（如消耗、伤势、心理创伤）
+   - 适用场景：战斗场景、高潮场景
+   - 示例片段：（用户提供的素材摘要）
+   
+   是否入库？[确认/修改/取消]
+   ```
+4. 用户确认 → 技法写入创作技法库 → 同步到向量库
 ```
 
 **实现步骤**:
 
 | 步骤 | 文件 | 修改内容 |
 |------|------|----------|
-| 1 | `core/conversation/intent_classifier.py` | 添加 `add_technique` 意图模式 |
-| 2 | `core/conversation/data_extractor.py` | 添加技法意图映射 |
-| 3 | `core/conversation/data_extractor.py` | 实现 `_build_technique_data()` |
+| 1 | `core/conversation/intent_classifier.py` | 添加 `extract_technique` 意图模式 |
+| 2 | `core/conversation/` | 创建 `technique_extractor.py` 技法提取器 |
+| 3 | `core/conversation/data_extractor.py` | 调用技法提取器，处理用户确认 |
+| 4 | `创作技法/` | 自动创建技法MD文件并同步 |
 
 **意图模式**:
 ```python
 # intent_classifier.py 新增
-"add_technique": {
+"extract_technique": {
     "patterns": [
-        r"加个技法叫(.+)",
-        r"新增技法(.+)",
-        r"加一个技法(.+)",
+        r"从(.+)提炼技法",
+        r"这段(.+)用了什么技法",
+        r"分析(.+)的写法",
+        r"学习(.+)的技巧",
+        r"(.+)有什么技法可以学习",
+        r"看看(.+)用的是什么手法",
     ],
     "category": IntentCategory.TECHNIQUE,
-    "entities": ["technique_name"],
+    "entities": ["content_reference"],
 },
-"apply_technique": {
+"confirm_technique": {
     "patterns": [
-        r"(.+?)场景用(.+?)技法",
-        r"(.+?)技法用于(.+?)场景",
+        r"确认入库",
+        r"这个技法可以",
+        r"好的入库",
     ],
-    "category": IntentCategory.TECHNIQUE,
-    "entities": ["scene_type", "technique_name"],
+    "category": IntentCategory.CONFIRMATION,
+    "entities": [],
 },
+```
+
+**技法提取器核心逻辑**:
+```python
+# technique_extractor.py 核心方法
+class TechniqueExtractor:
+    def extract_from_content(self, content: str) -> TechniqueCandidate:
+        """
+        从用户提供的素材中提取技法
+        
+        流程：
+        1. 检索现有技法库，找到相似技法和维度参考
+        2. 分析素材中的技法要素（结构、节奏、对比等）
+        3. 生成技法候选（名称、维度、要素、适用场景）
+        """
+        
+        # 1. 检索相似技法
+        similar_techniques = self.search_similar(content)
+        
+        # 2. 分析技法要素
+        elements = self.analyze_elements(content)
+        # 可能的要素：节奏控制、力量代价、心理博弈、情感层次...
+        
+        # 3. 归入维度
+        dimension = self.match_dimension(elements)
+        # 11个维度：开篇维度、人物维度、剧情维度、战斗冲突维度...
+        
+        # 4. 生成技法候选
+        return TechniqueCandidate(
+            name=self.generate_name(elements),
+            dimension=dimension,
+            elements=elements,
+            applicable_scenes=self.infer_scenes(content),
+            source_content=content[:500],  # 保留素材摘要
+        )
+```
+
+**技法入库流程**:
+```python
+# data_extractor.py 新增
+def extract_and_update(self, user_input: str, intent_result: IntentResult):
+    if intent_result.intent == "extract_technique":
+        # 1. 提取技法
+        technique = self.technique_extractor.extract_from_content(
+            user_input  # 或从上下文获取素材内容
+        )
+        
+        # 2. 展示给用户确认
+        return ExtractionResult(
+            success=True,
+            data={
+                "technique": technique,
+                "awaiting_confirmation": True
+            }
+        )
+    
+    elif intent_result.intent == "confirm_technique":
+        # 3. 用户确认后入库
+        technique = self.pending_technique  # 保存的待确认技法
+        
+        # 4. 写入技法文件
+        self._write_technique_file(technique)
+        
+        # 5. 同步到向量库
+        self._sync_to_vectorstore("writing_techniques_v2", technique)
 ```
 
 ---
