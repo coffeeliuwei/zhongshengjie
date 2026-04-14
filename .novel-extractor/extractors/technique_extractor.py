@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import List, Dict, Any, Optional
 from collections import Counter, defaultdict
 from dataclasses import dataclass
+from datetime import datetime
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from base_extractor import BaseExtractor
@@ -416,6 +417,45 @@ def extract_techniques_from_cases(limit: int = None):
     cases_data = extractor.extract_from_case_library(limit=limit)
     processed = extractor.process_extracted(cases_data)
     return processed
+
+
+class TechniqueProgressTracker:
+    """技法提取进度追踪器"""
+
+    def __init__(self, progress_file: str = "technique_progress.json"):
+        self.progress_file = Path(progress_file)
+        self.progress = self._load_progress()
+
+    def _load_progress(self) -> dict:
+        if self.progress_file.exists():
+            with open(self.progress_file, "r", encoding="utf-8") as f:
+                return json.load(f)
+        return {
+            "novels_processed": [],
+            "techniques_extracted": 0,
+            "last_run": None,
+            "status": "initialized",
+        }
+
+    def mark_novel_processed(self, novel_name: str):
+        if novel_name not in self.progress["novels_processed"]:
+            self.progress["novels_processed"].append(novel_name)
+            self.progress["last_run"] = datetime.now().isoformat()
+            self._save_progress()
+
+    def is_novel_processed(self, novel_name: str) -> bool:
+        return novel_name in self.progress["novels_processed"]
+
+    def get_unprocessed_novels(self, all_novels: list) -> list:
+        return [n for n in all_novels if not self.is_novel_processed(n)]
+
+    def _save_progress(self):
+        with open(self.progress_file, "w", encoding="utf-8") as f:
+            json.dump(self.progress, f, indent=2, ensure_ascii=False)
+
+    def update_technique_count(self, count: int):
+        self.progress["techniques_extracted"] = count
+        self._save_progress()
 
 
 if __name__ == "__main__":
