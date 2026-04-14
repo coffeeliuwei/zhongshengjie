@@ -550,79 +550,109 @@ export HF_ENDPOINT=https://hf-mirror.com
 > 展示系统模块之间的数据流动和依赖关系
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#e1f5fe', 'edgeLabelBackground':'#ffffff', 'tertiaryColor': '#fff'}}}%%
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#0277bd', 'edgeLabelBackground':'#ffffff', 'tertiaryColor': '#fff', 'fontFamily': 'tahoma', 'fontSize': '14px'}}}%%
 graph TD
-    %% 定义样式
-    classDef layer fill:#f9f9f9,stroke:#333,stroke-width:2px,rx:5,ry:5;
-    classDef unit fill:#fff,stroke:#666,stroke-width:1px,rx:2,ry:2;
-    classDef db fill:#e1f5fe,stroke:#0277bd,stroke-width:2px,rx:10,ry:10;
-    classDef config fill:#fff9c4,stroke:#fbc02d,stroke-width:2px,stroke-dasharray: 5 5;
-
+    %% ==========================================
+    %% 节点定义 (带有图标和多行文本)
+    %% ==========================================
+    
     %% 1. 对话入口层
-    subgraph Layer_Entry [1. 对话入口层 ConversationEntryLayer]
+    subgraph Layer_Entry [1. 对话入口层 - ConversationEntryLayer]
         direction TB
-        Entry_Int[意图识别] --> Entry_Clarify[意图澄清]
-        Entry_Clarify --> Entry_State[状态检查]
-        Entry_State --> Entry_Fresh[数据新鲜度检测]
-        Entry_Fresh --> Entry_Miss[缺失信息检测]
+        Entry_Start(("&nbsp;&nbsp;用户输入&nbsp;&nbsp;"))
+        Entry_Flow[意图识别 <br/> ➔ 意图澄清 <br/> ➔ 状态检查 <br/> ➔ 数据新鲜度检测 <br/> ➔ 缺失信息检测]
+        Entry_Start --> Entry_Flow
     end
 
-    %% 2. 统一提炼引擎
-    subgraph Layer_Extractor [2. 统一提炼引擎 UnifiedExtractor]
-        direction TB
-        Ext_Input(单一入口) --> Ext_Parallel[11维度并行提取]
-        Ext_Parallel --> Ext_Discover[场景发现]
-        Ext_Discover --> Ext_Storage[统一入库]
-        Ext_Storage -.-> Ext_Feedback[数据回流]
-    end
-
-    %% 3. 核心工作流
-    subgraph Layer_Workflow [3. 核心工作流 8阶段]
+    %% 2. 核心工作流
+    subgraph Layer_Workflow [2. 核心工作流 - 8阶段创作流水线]
         direction LR
-        WF1(需求澄清) --> WF2(大纲解析) --> WF3(场景识别) --> WF4(经验检索)
-        WF4 --> WF5(设定检索) --> WF6(场景契约) --> WF7(创作) --> WF8(评估)
+        WF_P1(1. 需求澄清) --> WF_P2(2. 大纲解析) --> WF_P3(3. 场景识别) --> WF_P4(4. 经验检索)
+        WF_P4 --> WF_P5(5. 设定检索) --> WF_P6(6. 场景契约) --> WF_P7(7. 逐场景创作) --> WF_P8(8. 整章评估)
     end
 
-    %% 4. 支撑系统
-    subgraph Layer_Support [4. 支撑系统]
-        direction TB
-        Sup_Detect[变更检测器]
-        Sup_Type[类型发现器]
-        Sup_Ret[统一检索API]
-        Sup_Feed[反馈系统]
-        Sup_State[状态管理]
-        Sup_Undo[错误恢复]
+    %% 3. 支撑系统
+    subgraph Layer_Support [3. 支撑系统 - 内部工具阵列]
+        Sup_Detect[🔍 变更检测器]
+        Sup_Type[🏷️ 类型发现器]
+        Sup_Feed[💬 反馈系统]
+        Sup_Undo[🔙 错误恢复]
+    end
+
+    %% 4. 统一提炼引擎
+    subgraph Layer_Extractor [4. 统一提炼引擎 - UnifiedExtractor]
+        Ext_Parallel[11维度并行提取 <br/> ➔ 场景发现 <br/> ➔ 统一入库]
     end
 
     %% 5. 数据层
-    subgraph Layer_Data [5. 数据层]
+    subgraph Layer_Data [5. 数据层 - 知识库与配置]
         direction TB
         subgraph DB_Qdrant [Qdrant 向量数据库]
-            Vector_Case[案例库 case_library_v2 38万+]
-            Vector_Tech[技法库 writing_techniques_v2 986条]
-            Vector_Set[设定库 novel_settings_v2]
-            Vector_Misc[风格/代价/情感弧线...]
+            V_Case[(38万+ 标杆案例库 <br/> case_library_v2)]
+            V_Tech[(986条 创作技法库 <br/> writing_techniques_v2)]
+            V_Set[(160+ 小说设定库 <br/> novel_settings_v2)]
+            V_Misc[(风格/代价/情感弧线)]
         end
-        subgraph DB_Config [配置文件 JSON]
-            JSON_Scene[场景类型 scene_types]
-            JSON_Power[力量体系 power_types]
-            JSON_Faction[势力 faction_types]
+        subgraph DB_Config [配置文件 - JSON]
+            direction LR
+            JSON_Scene{场景类型}
+            JSON_Power{力量体系}
+            JSON_Faction{势力设定}
         end
     end
 
-    %% 核心交互关系 (数据流)
-    User((用户对话)) --> Layer_Entry
-    Layer_Entry ==>|触发创作流| WF1
-    WF4 -.-> Sup_Ret
-    WF5 -.-> Sup_Ret
-    Sup_Ret <==>|向量检索| DB_Qdrant
-    WF3 -.-> DB_Config
-    WF6 -.-> DB_Config
-    WF8 --> Layer_Extractor
-    Layer_Extractor ==>|数据入库| DB_Qdrant
-    Sup_Detect -->|自动同步| Sup_Ret
+    %% 6. Agent 支撑 (参考最后一张图的 Skills)
+    subgraph Agents [Agent Skills 安装目录 - ~/.agents/skills/]
+        direction LR
+        Agent_A[苍澜] --- Agent_B[玄一] --- Agent_C[墨言] --- Agent_D[剑尘] --- Agent_E[云溪] --- Agent_Eval[评估师]
+    end
+
+    %% ==========================================
+    %% 核心交互关系 (粗线条表示主流程)
+    %% ==========================================
+    
+    %% 主创作流
+    User((用户对话)) ==> Layer_Entry
+    Entry_Flow ==>|激活创作流| WF_P1
+    Layer_Data -.->|提供上下文| Agents
+    Agents ==>|执行创作工作流| Layer_Workflow
+    
+    %% RAG 检索流 (双向箭头表示检索与应用)
+    WF_P4 <==>|经验检索API| DB_Qdrant
+    WF_P5 <==>|设定检索API| DB_Qdrant
+    
+    %% 类型与契约校验
+    WF_P3 -.->|校验| JSON_Scene
+    WF_P6 -.->|校验| DB_Config
+    
+    %% 评估与提炼闭环
+    WF_P8 ==>|评估结果| Layer_Extractor
+    WF_P8 ==>|用户反馈| Sup_Feed
+    Sup_Feed -.->|优化| Layer_Extractor
+    Layer_Extractor ==>|增量/全量提炼| DB_Qdrant
+
+    %% 自动同步与发现
+    Sup_Detect -->|自动同步变更| Layer_Data
     Sup_Type -->|发现新类型| DB_Config
-    Sup_Feed -.-> Ext_Feedback
+
+    %% ==========================================
+    %% 视觉样式定义
+    %% ==========================================
+    classDef layer_title fill:none,stroke:none,color:#fff,font-weight:bold,font-size:16px;
+    classDef main_box fill:#fafafa,stroke:#333,stroke-width:2px,rx:8,ry:8,color:#333;
+    classDef proc_box fill:#fff,stroke:#666,stroke-width:1px,rx:4,ry:4,color:#333;
+    classDef db_box fill:#e1f5fe,stroke:#01579b,stroke-width:2px,rx:12,ry:12,color:#01579b;
+    classDef config_box fill:#fff9c4,stroke:#fbc02d,stroke-width:2px,color:#f57f17;
+    classDef agent_box fill:#ffe0b2,stroke:#e65100,stroke-width:1px,rx:20,ry:20,color:#e65100;
+    classDef user_node fill:#d1c4e9,stroke:#512da8,stroke-width:2px,color:#311b92,font-weight:bold;
+
+    class Layer_Entry,Layer_Workflow,Layer_Support,Layer_Extractor main_box;
+    class Entry_Flow,WF_P1,WF_P2,WF_P3,WF_P4,WF_P5,WF_P6,WF_P7,WF_P8,Ext_Parallel,Sup_Detect,Sup_Type,Sup_Feed,Sup_Undo proc_box;
+    class DB_Qdrant db_box;
+    class Vector_Case,Vector_Tech,Vector_Set,Vector_Misc db_box;
+    class DB_Config,JSON_Scene,JSON_Power,JSON_Faction config_box;
+    class Agents,Agent_A,Agent_B,Agent_C,Agent_D,Agent_E,Agent_Eval agent_box;
+    class User,Entry_Start user_node;
 ```
 
 ### 四层专家架构（RAG逻辑图）
@@ -630,25 +660,36 @@ graph TD
 > 展示RAG知识层级，以及创作Agent如何利用这些层级
 
 ```mermaid
-%%{init: {'theme': 'forest'}}%%
+%%{init: {'theme': 'forest', 'themeVariables': { 'fontFamily': 'tahoma', 'fontSize': '15px'}}}%%
 graph TD
-    %% 定义样式
-    classDef layer_method fill:#d1c4e9,stroke:#512da8,stroke-width:2px,color:#fff;
-    classDef layer_api fill:#bbdefb,stroke:#1976d2,stroke-width:2px;
-    classDef layer_ret fill:#c8e6c9,stroke:#388e3c,stroke-width:2px;
-    classDef layer_config fill:#ffecb3,stroke:#ffa000,stroke-width:2px;
-    classDef agent fill:#ffab91,stroke:#d84315,stroke-width:2px,rx:15,ry:15;
+    %% ==========================================
+    %% 四层架构核心部分
+    %% ==========================================
+    
+    %% 定义层级颜色
+    classDef layer1 fill:#d1c4e9,stroke:#512da8,stroke-width:2px,color:#311b92;
+    classDef layer2 fill:#bbdefb,stroke:#1976d2,stroke-width:2px,color:#0d47a1;
+    classDef layer3 fill:#c8e6c9,stroke:#388e3c,stroke-width:2px,color:#1b5e20;
+    classDef layer4 fill:#ffecb3,stroke:#ffa000,stroke-width:2px,color:#bf360c;
+    classDef agent fill:#ffab91,stroke:#d84315,stroke-width:2px,rx:15,ry:15,color:#fff,font-weight:bold;
 
-    %% 1. 方法论层
-    subgraph L1 [1. SKILL.md 方法论层]
-        direction TB
-        Method_Standard[核心技法标准]
-        Method_Call[调用方式]
-        Method_Ban[禁止项]
+    subgraph Agents [创作 Agent 团]
+        direction LR
+        Agent_WV[苍澜-世界观架构] --- Agent_Plot[玄一-剧情编织] --- Agent_Char[墨言-人物刻画] --- Agent_Bat[剑尘-战斗设计] --- Agent_Poet[云溪-意境营造]
     end
+    class Agents agent;
 
-    %% 2. 统一API层
-    subgraph L2 [2. 统一API层 接口层]
+    Agents ==>|调用| API_Layer
+
+    subgraph Methodology_Layer [1. SKILL.md - 方法论层]
+        direction TB
+        meth_std[核心技法标准]
+        meth_call[调用方式规范]
+        meth_ban[⚠️ 禁止项清单]
+    end
+    class Methodology_Layer layer1;
+
+    subgraph API_Layer [2. 统一API层 - 标准化创作接口]
         direction LR
         API_WV[worldview_api]
         API_Char[character_api]
@@ -656,36 +697,39 @@ graph TD
         API_Bat[battle_api]
         API_Poet[poetry_api]
     end
+    class API_Layer layer2;
 
-    %% 3. 检索层
-    subgraph L3 [3. 技法/案例库层 检索层]
-        direction TB
-        Ret_Tech(writing_techniques_v2<br/>986条创作技法)
-        Ret_Case(case_library_v2<br/>38万+标杆案例)
-    end
-
-    %% 4. 适配层
-    subgraph L4 [4. 世界观适配层 配置层]
-        direction TB
-        Config_JSON(world_configs/众生界.json<br/>特定项目设定)
-    end
-
-    %% 创作 Agent (Generators)
-    subgraph Agents [创作 Agent 团]
+    subgraph Knowledge_Layer [3. 检索层 - 知识库与标杆案例库]
         direction LR
-        Agent_A[苍澜<br/>世界观]
-        Agent_B[玄一<br/>剧情]
-        Agent_C[墨言<br/>人物]
-        Agent_D[剑尘<br/>战斗]
-        Agent_E[云溪<br/>意境]
+        db_tech[(986条<br/>写作技法库)]
+        db_case[(38万+<br/>案例库)]
     end
+    class Knowledge_Layer layer3;
 
-    %% 逻辑依赖关系
-    Agents ==>|调用| L2
-    L2 ==>|受限于| L1
-    L2 ==>|从向量库检索素材| L3
-    L2 ==>|适配具体项目设定| L4
-    L4 -.->|初始化 RAG 上下文| L3
+    subgraph Config_Layer [4. 适配层 - 世界观特定配置]
+        direction TB
+        conf_zsj[world_configs/<br/>众生界.json]
+    end
+    class Config_Layer layer4;
+
+    %% ==========================================
+    %% RAG 逻辑与依赖关系
+    %% ==========================================
+    
+    %% API 受限于方法论
+    API_Layer ==>|受限于| Methodology_Layer
+    
+    %% API 检索素材
+    API_Layer <==>|RAG 检索素材| Knowledge_Layer
+    
+    %% API 适配项目
+    API_Layer <==>|适配设定| Config_Layer
+    
+    %% 数据生命周期管理关系
+    Config_Layer -.->|初始化检索上下文| Knowledge_Layer
+
+    %% 支撑系统与 RAG 的关系 (标注)
+    note_RAG[支撑系统内部逻辑:<br/>变更检测器 同步设定到 适配层;<br/>生命周期管理 追踪技法应用版本;<br/>Feedback 收集评估回流数据到 案例库.]
 ```
 
 ### 统一API使用
