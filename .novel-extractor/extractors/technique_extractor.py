@@ -124,15 +124,53 @@ class ExtractedTechnique:
 class TechniqueExtractor(BaseExtractor):
     """创作技法精炼提取器"""
 
-    def __init__(self):
+    def __init__(self, incremental: bool = False):
         super().__init__("technique")
+        self.incremental = incremental
+        progress_path = (
+            Path(__file__).resolve().parents[2] / "progress" / "technique_progress.json"
+        )
+        self.progress_tracker = TechniqueProgressTracker(str(progress_path))
         self.case_library_dir = (
             Path(__file__).parent.parent.parent / ".case-library" / "cases"
         )
         self.technique_dir = Path(__file__).parent.parent.parent / "创作技法"
         self.extracted_techniques: Dict[str, ExtractedTechnique] = {}
 
+    def get_extraction_stats(self) -> dict:
+        """获取提取统计信息（增量模式相关统计）"""
+        if not hasattr(self, "progress_tracker"):
+            return {
+                "novels_processed": 0,
+                "techniques_extracted": 0,
+                "last_run": None,
+            }
+        progress = getattr(self.progress_tracker, "progress", {}) or {}
+        novels_processed = progress.get("novels_processed", [])
+        if isinstance(novels_processed, (list, tuple)):
+            novels_count = len(novels_processed)
+        else:
+            try:
+                novels_count = int(novels_processed)
+            except Exception:
+                novels_count = 0
+        techniques_extracted = progress.get("techniques_extracted", 0)
+        last_run = progress.get("last_run", None)
+        return {
+            "novels_processed": novels_count,
+            "techniques_extracted": techniques_extracted,
+            "last_run": last_run,
+        }
+
     def extract_from_novel(self, content: str, novel_id: str, novel_path) -> List[dict]:
+        # 增量模式：若小说已处理则跳过
+        if getattr(self, "incremental", False) and novel_id:
+            try:
+                if self.progress_tracker.is_novel_processed(novel_id):
+                    logger.info(f"Skipping processed novel: {novel_id}")
+                    return []
+            except Exception:
+                pass
         """从单本小说提取技法线索"""
         techniques = []
 
@@ -165,6 +203,11 @@ class TechniqueExtractor(BaseExtractor):
                             }
                         )
 
+        if getattr(self, "incremental", False) and novel_id:
+            try:
+                self.progress_tracker.mark_novel_processed(novel_id)
+            except Exception:
+                pass
         return techniques
 
     def _detect_scene(self, content: str, scene_type: str) -> bool:
@@ -210,10 +253,17 @@ class TechniqueExtractor(BaseExtractor):
 
     def process_extracted(self, items: List[dict]) -> List[dict]:
         """处理提取结果 - 合并同类技法"""
+        # 质量过滤：加载现有技法并过滤重复项
+        existing = self._load_existing_techniques()
+        quality_filter = TechniqueQualityFilter(existing)
+        filtered_items = quality_filter.filter_techniques(items)
+        if len(items) != len(filtered_items):
+            print(f"过滤重复技法: {len(items) - len(filtered_items)} 条")
+
         # 按技法名称分组
         technique_groups = defaultdict(list)
 
-        for item in items:
+        for item in filtered_items:
             tech_name = item.get("technique_name", "")
             if tech_name:
                 technique_groups[tech_name].append(item)
@@ -404,6 +454,20 @@ class TechniqueExtractor(BaseExtractor):
 
         return saved_count
 
+    def _load_existing_techniques(self) -> List[Dict[str, Any]]:
+        """加载现有技法列表"""
+        techniques_dir = Path("创作技法")
+        existing: List[Dict[str, Any]] = []
+        if techniques_dir.exists():
+            for md_file in techniques_dir.glob("**/*.md"):
+                try:
+                    content = md_file.read_text(encoding="utf-8")
+                    title = content.split("\n")[0].replace("# ", "")
+                    existing.append({"技法名称": title, "内容": content[:500]})
+                except Exception:
+                    pass
+        return existing
+
 
 def extract_techniques_from_novels(limit: int = None):
     """从小说提取技法"""
@@ -456,6 +520,41 @@ class TechniqueProgressTracker:
     def update_technique_count(self, count: int):
         self.progress["techniques_extracted"] = count
         self._save_progress()
+
+
+class TechniqueQualityFilter:
+    """技法质量过滤器"""
+
+    SIMILARITY_THRESHOLD = 0.8  # 相似度阈值
+
+    def __init__(self, existing_techniques: list):
+        self.existing_techniques = existing_techniques
+        self.existing_contents = [t.get("内容", "") for t in existing_techniques]
+
+    def is_duplicate(self, technique: dict) -> bool:
+        """检查是否与现有技法重复"""
+        content = technique.get("内容", "")
+        if not content:
+            return False
+        for existing_content in self.existing_contents:
+            similarity = self._calculate_similarity(content, existing_content)
+            if similarity > self.SIMILARITY_THRESHOLD:
+                return True
+        return False
+
+    def _calculate_similarity(self, text1: str, text2: str) -> float:
+        """简单文本相似度计算（Jaccard）"""
+        words1 = set(text1.split())
+        words2 = set(text2.split())
+        if not words1 or not words2:
+            return 0.0
+        intersection = len(words1 & words2)
+        union = len(words1 | words2)
+        return intersection / union if union > 0 else 0.0
+
+    def filter_techniques(self, techniques: list) -> list:
+        """过滤重复技法"""
+        return [t for t in techniques if not self.is_duplicate(t)]
 
 
 if __name__ == "__main__":
