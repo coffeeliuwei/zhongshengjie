@@ -547,13 +547,7 @@ export HF_ENDPOINT=https://hf-mirror.com
 
 ### 整体架构
 
-```
-用户对话 → 对话入口层 → 核心工作流(8阶段) → 统一提炼引擎 → 数据入库
-                ↓
-            支撑系统(变更检测/类型发现/反馈/错误恢复)
-                ↓
-            数据层(Qdrant向量库 + JSON配置)
-```
+![整体架构](assets/架构.png)
 
 **架构层级**：
 
@@ -567,17 +561,7 @@ export HF_ENDPOINT=https://hf-mirror.com
 
 ### 四层专家架构
 
-```
-创作Agent团
-    ↓ 调用
-统一API层(worldview/character/plot/battle/poetry)
-    ↓ 受限于
-SKILL.md方法论层(技法标准 + 调用规范 + 禁止项)
-    ↓ 检索素材
-技法/案例库层(986技法 + 38万案例)
-    ↓ 适配设定
-世界观配置层(world_configs/*.json)
-```
+![四层专家架构](assets/四层专家.png)
 
 **RAG检索流**：
 - Agent调用统一API → API受方法论约束 → 从向量库检索技法/案例 → 适配项目世界观配置
