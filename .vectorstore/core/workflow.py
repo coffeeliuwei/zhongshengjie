@@ -53,6 +53,14 @@ from core.config_loader import (
     get_path,
 )
 
+# 导入经验写入器（用于增强检索）
+_experience_writer_available = True
+try:
+    from core.feedback.experience_writer import ExperienceWriter
+except ImportError:
+    _experience_writer_available = False
+    ExperienceWriter = None  # type: ignore
+
 try:
     from qdrant_client import QdrantClient
     from qdrant_client.http import models
@@ -1265,6 +1273,16 @@ class NovelWorkflow:
         self.graph = KnowledgeGraphReader()
         self.scene_mapping = SceneWriterMapping()
 
+        # 初始化经验写入器（增强检索功能）
+        self.experience_writer = None
+        if _experience_writer_available:
+            try:
+                self.experience_writer = ExperienceWriter(
+                    log_dir=str(PROJECT_DIR / "章节经验日志")
+                )
+            except Exception:
+                pass
+
     # ==================== 小说设定接口 ====================
 
     def search_novel(
@@ -2110,6 +2128,85 @@ class NovelWorkflow:
 
         print(f"[经验写入] 已写入: {log_file}")
         return log_file
+
+    # ==================== 增强版经验检索接口 ====================
+
+    def retrieve_scene_experience_enhanced(self, scene_type: str) -> Dict[str, Any]:
+        """
+        按场景类型检索经验（增强版）
+
+        使用ExperienceWriter的新检索API，提供更完整的经验汇总。
+
+        Args:
+            scene_type: 场景类型（如"战斗"、"情感"、"开篇"等）
+
+        Returns:
+            {
+                "what_worked": 该场景成功做法列表,
+                "what_didnt_work": 该场景失败做法列表,
+                "recommended_techniques": 推荐技法列表,
+                "forbidden_reminders": 禁止项提醒列表
+            }
+        """
+        if self.experience_writer:
+            return self.experience_writer.retrieve_scene_experience(scene_type)
+
+        # 回退：返回空结果
+        return {
+            "what_worked": [],
+            "what_didnt_work": [],
+            "recommended_techniques": [],
+            "forbidden_reminders": [],
+        }
+
+    def retrieve_technique_effectiveness(self, technique_name: str) -> Dict[str, Any]:
+        """
+        检索技法效果统计
+
+        Args:
+            technique_name: 技法名称
+
+        Returns:
+            {
+                "average_score": 平均效果评分,
+                "success_count": 成功使用次数（评分>=7）,
+                "fail_count": 失败使用次数（评分<7）,
+                "chapters_used": 使用过的章节列表,
+                "best_scenes": 最佳场景类型列表,
+                "worst_scenes": 最不适合场景列表
+            }
+        """
+        if self.experience_writer:
+            return self.experience_writer.retrieve_technique_effectiveness(
+                technique_name
+            )
+
+        # 回退：返回默认统计
+        return {
+            "average_score": 0,
+            "success_count": 0,
+            "fail_count": 0,
+            "chapters_used": [],
+            "best_scenes": [],
+            "worst_scenes": [],
+            "total_uses": 0,
+        }
+
+    def get_recent_forbidden_candidates(self, days: int = 30) -> List[Dict[str, Any]]:
+        """
+        获取最近的禁止项候选
+
+        Args:
+            days: 回溯天数（默认30天）
+
+        Returns:
+            禁止项候选列表
+        """
+        if self.experience_writer:
+            return self.experience_writer.get_recent_forbidden_candidates(days)
+
+        # 回退：返回空列表
+        return []
 
     def get_phase1_writers(self, scene_type: str) -> List[str]:
         """

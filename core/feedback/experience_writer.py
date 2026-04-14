@@ -7,7 +7,7 @@
 import json
 import re
 from typing import Dict, List, Optional, Any
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from collections import Counter
 
@@ -498,6 +498,222 @@ class ExperienceWriter:
                 continue
 
         return experiences
+
+    def _get_experience_dir(self) -> Path:
+        """
+        获取经验日志目录
+
+        Returns:
+            经验日志目录路径
+        """
+        try:
+            from core.config_loader import get_project_root
+
+            return get_project_root() / "章节经验日志"
+        except Exception:
+            # 如果无法获取项目根目录，使用默认目录
+            return Path("章节经验日志")
+
+    def retrieve_scene_experience(self, scene_type: str) -> Dict[str, Any]:
+        """
+        按场景类型检索经验
+
+        Args:
+            scene_type: 场景类型（如"战斗"、"情感"、"开篇"等）
+
+        Returns:
+            {
+                "what_worked": 该场景成功做法列表,
+                "what_didnt_work": 该场景失败做法列表,
+                "recommended_techniques": 推荐技法列表,
+                "forbidden_reminders": 禁止项提醒列表
+            }
+        """
+        experience_dir = self._get_experience_dir()
+        results = {
+            "what_worked": [],
+            "what_didnt_work": [],
+            "recommended_techniques": [],
+            "forbidden_reminders": [],
+        }
+
+        # 检索所有日志文件
+        for log_file in experience_dir.glob("*_log.json"):
+            try:
+                with open(log_file, "r", encoding="utf-8") as f:
+                    log_data = json.load(f)
+
+                # 匹配场景类型
+                if scene_type in log_data.get("scene_types", []):
+                    results["what_worked"].extend(log_data.get("what_worked", []))
+                    results["what_didnt_work"].extend(
+                        log_data.get("what_didnt_work", [])
+                    )
+
+                    # 从洞察中提取技法推荐
+                    for insight in log_data.get("insights", []):
+                        insight_text = insight.get("insight", "")
+                        if (
+                            "技法" in insight_text
+                            or "technique" in insight_text.lower()
+                        ):
+                            results["recommended_techniques"].append(
+                                {
+                                    "technique": insight_text,
+                                    "confidence": insight.get("confidence", 0.7),
+                                    "chapter": log_data.get("chapter"),
+                                }
+                            )
+
+                    # 收集禁止项候选
+                    for candidate in log_data.get("forbidden_candidates", []):
+                        results["forbidden_reminders"].append(candidate)
+
+            except Exception:
+                continue
+
+        # 去重并排序
+        results["recommended_techniques"] = sorted(
+            results["recommended_techniques"],
+            key=lambda x: x.get("confidence", 0),
+            reverse=True,
+        )[:10]
+
+        return results
+
+    def retrieve_technique_effectiveness(self, technique_name: str) -> Dict[str, Any]:
+        """
+        检索技法效果统计
+
+        Args:
+            technique_name: 技法名称
+
+        Returns:
+            {
+                "average_score": 平均效果评分,
+                "success_count": 成功使用次数（评分>=7）,
+                "fail_count": 失败使用次数（评分<7）,
+                "chapters_used": 使用过的章节列表,
+                "best_scenes": 最佳场景类型列表,
+                "worst_scenes": 最不适合场景列表
+            }
+        """
+        experience_dir = self._get_experience_dir()
+        scores = []
+        chapters_used = []
+        scene_scores = {}  # 记录各场景效果
+
+        for log_file in experience_dir.glob("*_log.json"):
+            try:
+                with open(log_file, "r", encoding="utf-8") as f:
+                    log_data = json.load(f)
+
+                # 检查技法使用
+                techniques_used = log_data.get("techniques_used", [])
+                used = False
+
+                for tech in techniques_used:
+                    tech_name = tech if isinstance(tech, str) else tech.get("name", "")
+                    if tech_name == technique_name:
+                        used = True
+                        break
+
+                if used:
+                    overall_score = log_data.get("scores", {}).get("overall", 0)
+                    scores.append(overall_score)
+                    chapters_used.append(log_data.get("chapter"))
+
+                    # 按场景记录效果
+                    for scene in log_data.get("scene_types", []):
+                        if scene not in scene_scores:
+                            scene_scores[scene] = []
+                        scene_scores[scene].append(overall_score)
+
+            except Exception:
+                continue
+
+        # 计算统计数据
+        average_score = sum(scores) / len(scores) if scores else 0
+        success_count = len([s for s in scores if s >= 7])
+        fail_count = len([s for s in scores if s < 7])
+
+        # 分析最佳/最差场景
+        best_scenes = []
+        worst_scenes = []
+
+        for scene, scene_scores_list in scene_scores.items():
+            avg = (
+                sum(scene_scores_list) / len(scene_scores_list)
+                if scene_scores_list
+                else 0
+            )
+            if avg >= 7:
+                best_scenes.append({"scene": scene, "avg_score": avg})
+            elif avg < 6:
+                worst_scenes.append({"scene": scene, "avg_score": avg})
+
+        best_scenes.sort(key=lambda x: x["avg_score"], reverse=True)
+        worst_scenes.sort(key=lambda x: x["avg_score"])
+
+        return {
+            "average_score": round(average_score, 2),
+            "success_count": success_count,
+            "fail_count": fail_count,
+            "chapters_used": chapters_used,
+            "best_scenes": best_scenes[:3],
+            "worst_scenes": worst_scenes[:3],
+            "total_uses": len(scores),
+        }
+
+    def get_recent_forbidden_candidates(self, days: int = 30) -> List[Dict[str, Any]]:
+        """
+        获取最近的禁止项候选
+
+        Args:
+            days: 回溯天数（默认30天）
+
+        Returns:
+            禁止项候选列表，每个包含：
+            {
+                "expression": 表达内容,
+                "pattern": 匹配模式,
+                "context": 出现上下文,
+                "chapter": 出现章节,
+                "timestamp": 时间戳
+            }
+        """
+        experience_dir = self._get_experience_dir()
+        cutoff_date = datetime.now() - timedelta(days=days)
+        candidates = []
+
+        for log_file in experience_dir.glob("*_log.json"):
+            try:
+                with open(log_file, "r", encoding="utf-8") as f:
+                    log_data = json.load(f)
+
+                # 检查时间
+                log_time_str = log_data.get("timestamp", "")
+                if log_time_str:
+                    try:
+                        log_time = datetime.fromisoformat(log_time_str)
+                        if log_time < cutoff_date:
+                            continue
+                    except ValueError:
+                        pass
+
+                # 收集禁止项候选
+                for candidate in log_data.get("forbidden_candidates", []):
+                    candidate["chapter"] = log_data.get("chapter")
+                    candidate["log_timestamp"] = log_time_str
+                    candidates.append(candidate)
+
+            except Exception:
+                continue
+
+        # 按时间排序（最新的在前）
+        candidates.sort(key=lambda x: x.get("log_timestamp", ""), reverse=True)
+
+        return candidates
 
     def aggregate_lessons(
         self, scene_type: str = None, limit_chapters: int = 50
