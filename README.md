@@ -545,61 +545,147 @@ export HF_ENDPOINT=https://hf-mirror.com
 
 ## 系统架构
 
-### 整体架构
+### 整体架构与数据流拓扑图
 
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                     对话入口层 (ConversationEntryLayer)                │
-│   意图识别 → 意图澄清 → 状态检查 → 数据新鲜度检测 → 缺失信息检测         │
-├─────────────────────────────────────────────────────────────────────┤
-│                     统一提炼引擎 (UnifiedExtractor)                    │
-│   单一入口 → 11维度并行提取 → 场景发现 → 统一入库 → 数据回流            │
-├─────────────────────────────────────────────────────────────────────┤
-│                           核心工作流 (8阶段)                          │
-│   需求澄清→大纲解析→场景识别→经验检索→设定检索→场景契约→创作→评估      │
-├─────────────────────────────────────────────────────────────────────┤
-│                         支撑系统                                      │
-│  ┌──────────────┬──────────────┬──────────────┬──────────────┐      │
-│  │ 变更检测器   │ 类型发现器   │ 统一检索API  │ 反馈系统     │      │
-│  │ChangeDetector│TypeDiscoverer│RetrievalAPI  │Feedback      │      │
-│  ├──────────────┼──────────────┼──────────────┼──────────────┤      │
-│  │ 状态管理     │ 错误恢复     │ 生命周期管理 │ 版本控制     │      │
-│  │StateChecker  │UndoManager   │Lifecycle     │VersionCtrl   │      │
-│  └──────────────┴──────────────┴──────────────┴──────────────┘      │
-├─────────────────────────────────────────────────────────────────────┤
-│                         数据层                                        │
-│  ┌─────────────────────────────────────────────────────────────┐    │
-│  │                    Qdrant 向量数据库                          │    │
-│  │  case_library_v2(38万+) | writing_techniques_v2(986)         │    │
-│  │  novel_settings_v2(160) | dialogue_style_v1 | power_cost_v1 │    │
-│  └─────────────────────────────────────────────────────────────┘    │
-│  ┌─────────────────────────────────────────────────────────────┐    │
-│  │                    配置文件 (JSON)                            │    │
-│  │  scene_types | power_types | faction_types | technique_types │    │
-│  └─────────────────────────────────────────────────────────────┘    │
-└─────────────────────────────────────────────────────────────────────┘
+> 展示系统模块之间的数据流动和依赖关系
+
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#e1f5fe', 'edgeLabelBackground':'#ffffff', 'tertiaryColor': '#fff'}}}%%
+graph TD
+    %% 定义样式
+    classDef layer fill:#f9f9f9,stroke:#333,stroke-width:2px,rx:5,ry:5;
+    classDef unit fill:#fff,stroke:#666,stroke-width:1px,rx:2,ry:2;
+    classDef db fill:#e1f5fe,stroke:#0277bd,stroke-width:2px,rx:10,ry:10;
+    classDef config fill:#fff9c4,stroke:#fbc02d,stroke-width:2px,stroke-dasharray: 5 5;
+
+    %% 1. 对话入口层
+    subgraph Layer_Entry [1. 对话入口层 ConversationEntryLayer]
+        direction TB
+        Entry_Int[意图识别] --> Entry_Clarify[意图澄清]
+        Entry_Clarify --> Entry_State[状态检查]
+        Entry_State --> Entry_Fresh[数据新鲜度检测]
+        Entry_Fresh --> Entry_Miss[缺失信息检测]
+    end
+
+    %% 2. 统一提炼引擎
+    subgraph Layer_Extractor [2. 统一提炼引擎 UnifiedExtractor]
+        direction TB
+        Ext_Input(单一入口) --> Ext_Parallel[11维度并行提取]
+        Ext_Parallel --> Ext_Discover[场景发现]
+        Ext_Discover --> Ext_Storage[统一入库]
+        Ext_Storage -.-> Ext_Feedback[数据回流]
+    end
+
+    %% 3. 核心工作流
+    subgraph Layer_Workflow [3. 核心工作流 8阶段]
+        direction LR
+        WF1(需求澄清) --> WF2(大纲解析) --> WF3(场景识别) --> WF4(经验检索)
+        WF4 --> WF5(设定检索) --> WF6(场景契约) --> WF7(创作) --> WF8(评估)
+    end
+
+    %% 4. 支撑系统
+    subgraph Layer_Support [4. 支撑系统]
+        direction TB
+        Sup_Detect[变更检测器]
+        Sup_Type[类型发现器]
+        Sup_Ret[统一检索API]
+        Sup_Feed[反馈系统]
+        Sup_State[状态管理]
+        Sup_Undo[错误恢复]
+    end
+
+    %% 5. 数据层
+    subgraph Layer_Data [5. 数据层]
+        direction TB
+        subgraph DB_Qdrant [Qdrant 向量数据库]
+            Vector_Case[案例库 case_library_v2 38万+]
+            Vector_Tech[技法库 writing_techniques_v2 986条]
+            Vector_Set[设定库 novel_settings_v2]
+            Vector_Misc[风格/代价/情感弧线...]
+        end
+        subgraph DB_Config [配置文件 JSON]
+            JSON_Scene[场景类型 scene_types]
+            JSON_Power[力量体系 power_types]
+            JSON_Faction[势力 faction_types]
+        end
+    end
+
+    %% 核心交互关系 (数据流)
+    User((用户对话)) --> Layer_Entry
+    Layer_Entry ==>|触发创作流| WF1
+    WF4 -.-> Sup_Ret
+    WF5 -.-> Sup_Ret
+    Sup_Ret <==>|向量检索| DB_Qdrant
+    WF3 -.-> DB_Config
+    WF6 -.-> DB_Config
+    WF8 --> Layer_Extractor
+    Layer_Extractor ==>|数据入库| DB_Qdrant
+    Sup_Detect -->|自动同步| Sup_Ret
+    Sup_Type -->|发现新类型| DB_Config
+    Sup_Feed -.-> Ext_Feedback
 ```
 
-### 四层专家架构
+### 四层专家架构（RAG逻辑图）
 
-```
-┌─────────────────────────────────────────────────────────┐
-│                    SKILL.md（方法论层）                    │
-│   核心技法标准 + 调用方式 + 禁止项                          │
-├─────────────────────────────────────────────────────────┤
-│                   统一API层（接口层）                       │
-│   worldview_api / character_api / plot_api /             │
-│   battle_api / poetry_api                                │
-├─────────────────────────────────────────────────────────┤
-│                    技法库层（检索层）                        │
-│   writing_techniques_v2（986条）                          │
-├─────────────────────────────────────────────────────────┤
-│                    案例库层（检索层）                        │
-│   case_library_v2（38万+条）                              │
-├─────────────────────────────────────────────────────────┤
-│                   世界观适配层（配置层）                     │
-│   world_configs/众生界.json                              │
-└─────────────────────────────────────────────────────────┘
+> 展示RAG知识层级，以及创作Agent如何利用这些层级
+
+```mermaid
+%%{init: {'theme': 'forest'}}%%
+graph TD
+    %% 定义样式
+    classDef layer_method fill:#d1c4e9,stroke:#512da8,stroke-width:2px,color:#fff;
+    classDef layer_api fill:#bbdefb,stroke:#1976d2,stroke-width:2px;
+    classDef layer_ret fill:#c8e6c9,stroke:#388e3c,stroke-width:2px;
+    classDef layer_config fill:#ffecb3,stroke:#ffa000,stroke-width:2px;
+    classDef agent fill:#ffab91,stroke:#d84315,stroke-width:2px,rx:15,ry:15;
+
+    %% 1. 方法论层
+    subgraph L1 [1. SKILL.md 方法论层]
+        direction TB
+        Method_Standard[核心技法标准]
+        Method_Call[调用方式]
+        Method_Ban[禁止项]
+    end
+
+    %% 2. 统一API层
+    subgraph L2 [2. 统一API层 接口层]
+        direction LR
+        API_WV[worldview_api]
+        API_Char[character_api]
+        API_Plot[plot_api]
+        API_Bat[battle_api]
+        API_Poet[poetry_api]
+    end
+
+    %% 3. 检索层
+    subgraph L3 [3. 技法/案例库层 检索层]
+        direction TB
+        Ret_Tech(writing_techniques_v2<br/>986条创作技法)
+        Ret_Case(case_library_v2<br/>38万+标杆案例)
+    end
+
+    %% 4. 适配层
+    subgraph L4 [4. 世界观适配层 配置层]
+        direction TB
+        Config_JSON(world_configs/众生界.json<br/>特定项目设定)
+    end
+
+    %% 创作 Agent (Generators)
+    subgraph Agents [创作 Agent 团]
+        direction LR
+        Agent_A[苍澜<br/>世界观]
+        Agent_B[玄一<br/>剧情]
+        Agent_C[墨言<br/>人物]
+        Agent_D[剑尘<br/>战斗]
+        Agent_E[云溪<br/>意境]
+    end
+
+    %% 逻辑依赖关系
+    Agents ==>|调用| L2
+    L2 ==>|受限于| L1
+    L2 ==>|从向量库检索素材| L3
+    L2 ==>|适配具体项目设定| L4
+    L4 -.->|初始化 RAG 上下文| L3
 ```
 
 ### 统一API使用
