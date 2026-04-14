@@ -78,7 +78,7 @@
 
 | 目录 | 用途 | Git状态 |
 |------|------|---------|
-| `skills/` | Skills源码定义 | ✅ 已推送（14个Skill.md） |
+| `skills/` | Skills源码定义 | ✅ 已推送（9个Skill.md） |
 | `~/.agents/skills/` | Skills运行目录 | ❌ 不推送（本地安装） |
 
 ### 安装步骤
@@ -200,7 +200,7 @@ cp config.example.json config.json
 | 内容 | 数量 | 状态 | 说明 |
 |------|------|------|------|
 | **项目代码** | core/、modules/、tools/ | ✅ 已推送 | 可直接使用 |
-| **Skills源码** | 14个Skill.md | ✅ 已推送 | 需手动安装到~/.agents/skills/ |
+| **Skills源码** | 9个Skill.md | ✅ 已推送 | 需手动安装到~/.agents/skills/ |
 | **案例库索引** | 38个JSON/脚本 | ✅ 已推送 | 索引和脚本，不含数据 |
 | **向量库代码** | .vectorstore/core/ | ✅ 已推送 | 检索代码，不含向量数据 |
 | **技法库结构** | 11个维度目录 | ✅ 已推送 | 目录结构，不含技法内容 |
@@ -378,7 +378,7 @@ python tools/sync_eval_criteria_to_qdrant.py --sync
 **项目作者**：coffeeliuwei
 **GitHub**：https://github.com/coffeeliuwei/zhongshengjie
 **版本**：v14.0
-**最后更新**：2026-04-13
+**最后更新**：2026-04-14
 
 ---
 
@@ -716,7 +716,15 @@ material = api.compose_poetry_scene(era="觉醒时代", mood="压抑")
 ├── docs/                     # 文档
 │   ├── AI项目掌控手册.md
 │   ├── 统一提炼引擎重构方案.md  # ✨ v13.0方案文档
-│   └── archived/
+│   ├── ADR-001-modular-monolith.md
+│   ├── ADR-002-data-feedback-loop.md
+│   ├── ADR-003-plugin-extension.md
+│   ├── ADR-004-module-communication.md
+│   ├── evolution_roadmap.md
+│   ├── 数据工程优化方案.md
+│   ├── architecture_design_report.md
+│   ├── 检索系统API手册.md
+│   └── DIRECTORY_STRUCTURE.md
 ├── config.example.json       # 配置模板
 └── README.md
 ```
