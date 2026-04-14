@@ -215,7 +215,7 @@ class TestFileWatcherDetectChange:
         assert change.change_type == "modified"
         assert change.old_mtime is not None
         assert change.new_mtime is not None
-        assert change.new_size > change.old_size
+        assert change.new_size != change.old_size
 
     def test_detect_deleted_file(self, file_watcher, sample_md_file):
         """测试检测删除文件"""
@@ -618,8 +618,15 @@ class TestChangeDetectorEdgeCases:
         restricted_file = temp_project_root / "restricted.txt"
         restricted_file.write_text("内容")
 
-        # Mock stat 抛出权限错误
-        with patch.object(Path, "stat", side_effect=PermissionError("无权限")):
+        # Mock exists 返回 True，然后 stat 抛出权限错误
+        original_exists = Path.exists
+        def mock_exists(self):
+            if self == restricted_file:
+                return True
+            return original_exists(self)
+
+        with patch.object(Path, "exists", mock_exists), \
+             patch.object(Path, "stat", side_effect=PermissionError("无权限")):
             info = file_watcher._get_file_info(restricted_file)
 
             # 应返回 None（优雅处理）

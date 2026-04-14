@@ -87,13 +87,15 @@ def sample_novel_texts():
 
 @pytest.fixture
 def power_discoverer(temp_project_root, sample_power_types_config):
-    """创建 PowerTypeDiscoverer 实例"""
-    with patch(
+    """创建 PowerTypeDiscoverer 实例（patch 在整个测试期间保持生效）"""
+    patcher = patch(
         "core.type_discovery.type_discoverer.CONFIG_DIMENSIONS_DIR",
         temp_project_root / "config" / "dimensions",
-    ):
-        discoverer = PowerTypeDiscoverer()
-        return discoverer
+    )
+    patcher.start()
+    discoverer = PowerTypeDiscoverer()
+    yield discoverer
+    patcher.stop()
 
 
 # ==================== DiscoveredType 测试 ====================
@@ -307,14 +309,14 @@ class TestTypeDiscovererCollection:
         discoverer = ConcreteDiscoverer()
 
         texts = [
-            "这是一个未匹配的片段，包含新的内容。",
-            "这是现有类型的描述，应该被匹配。",
-            "另一个未匹配的片段。",
+            "这是一个未匹配的片段，包含新的内容。" + "补充内容使其超过最低长度限制。" * 6,
+            "这是现有类型的描述，应该被匹配。" + "补充内容使其超过最低长度限制。" * 6,
+            "另一个未匹配的片段。" + "补充内容使其超过最低长度限制。" * 6,
         ]
 
         unmatched = discoverer.collect_unmatched(texts, "测试来源")
 
-        # 只有未匹配的片段
+        # 只有未匹配的片段（2个，排除了"现有类型"的那个）
         assert len(unmatched) == 2
         for item in unmatched:
             assert "内容" in item["content"] or "片段" in item["content"]
@@ -342,7 +344,7 @@ class TestTypeDiscovererCollection:
 
         texts = [
             "短",  # 太短
-            "这个片段长度正好，符合要求。这是一个合适的文本片段。",  # 合适
+            "这个片段长度正好，符合要求。这是一个合适的文本片段。" * 5,  # 合适(>100字符)
             "这个片段非常长" * 1000,  # 太长
         ]
 

@@ -6,10 +6,26 @@
 
 新用户使用此脚本从零构建完整的小说创作系统。
 
+作者：coffeeliuwei
+版本：v14.0
+日期：2026-04-13
+
 用法：
     python build_all.py                    # 完整构建
     python build_all.py --skip-cases       # 跳过案例库
     python build_all.py --quick            # 快速模式（仅初始化）
+    python build_all.py --status           # 查看状态
+
+完整使用流程：
+    0. 安装Skills：cp -r skills/* ~/.agents/skills/
+    1. 克隆项目：git clone https://github.com/coffeeliuwei/zhongshengjie.git
+    2. 安装依赖：pip install -r requirements.txt
+    3. 启动Qdrant：docker run -d --name qdrant -p 6333:6333 qdrant/qdrant
+    4. 配置系统：cp config.example.json config.json（编辑路径）
+    5. 构建数据：python tools/build_all.py
+    6. 创建大纲：对话 "创建总大纲"
+    7. 创建设定：对话 "添加角色设定"
+    8. 开始创作：对话 "写第一章"
 """
 
 import argparse
@@ -361,10 +377,17 @@ def main():
 
     if all(results):
         print("    ✓ 所有步骤完成")
-        print("\n下一步:")
-        print("    1. 编辑 设定/ 目录下的设定文件")
-        print("    2. 运行: python knowledge_builder.py --sync")
-        print("    3. 开始创作: 在对话中说 '写第一章'")
+        print("\n完整使用流程：")
+        print("    步骤0: 安装Skills（已完成）")
+        print("    步骤1-5: 构建数据系统（已完成）")
+        print("\n下一步（对话方式）：")
+        print('    6. 创建总大纲 → 对话 "创建总大纲"')
+        print('    7. 添加角色设定 → 对话 "添加角色：XXX，性格：XXX"')
+        print('    8. 添加势力设定 → 对话 "添加势力：XXX，类型：宗门"')
+        print('    9. 开始创作 → 对话 "写第一章"')
+        print("\n或使用工具命令：")
+        print("    python tools/unified_extractor.py  # 提炼外部小说库")
+        print("    python tools/unified_extractor.py --status  # 查看状态")
     else:
         print("    ⚠ 部分步骤未完成")
         print("    请检查上方输出中的错误信息")

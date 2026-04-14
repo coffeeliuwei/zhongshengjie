@@ -1,0 +1,204 @@
+{
+  "场景类型映射": {
+    "战斗冲突": {
+      "writer": "剑尘",
+      "phase": 1,
+      "poetry_required": false,
+      "description": "战斗场景，热血、功法体系、冲突张力",
+      "emotion_focus": ["热血", "战斗", "冲突", "胜利", "失败"]
+    },
+    "情感交流": {
+      "writer": "墨言",
+      "phase": 1,
+      "poetry_required": false,
+      "description": "情感场景，细腻、心理描写、人物成长",
+      "emotion_focus": ["情感", "心理", "成长", "羁绊", "理解"]
+    },
+    "剧情推进": {
+      "writer": "玄一",
+      "phase": 1,
+      "poetry_required": false,
+      "description": "剧情场景，伏笔设计、悬念布局、反转策划",
+      "emotion_focus": ["悬念", "反转", "伏笔", "推进", "揭示"]
+    },
+    "世界观展示": {
+      "writer": "苍澜",
+      "phase": 1,
+      "poetry_required": false,
+      "description": "世界观场景，宏大设定、权力体系、世界规则",
+      "emotion_focus": ["宏大", "设定", "规则", "体系", "权力"]
+    },
+    "氛围意境": {
+      "writer": "云溪",
+      "phase": 3,
+      "poetry_required": true,
+      "poetry_trigger": "润色阶段自动触发",
+      "description": "润色场景，氛围描写、诗意语言、美学构建，适合诗词创作",
+      "emotion_focus": ["氛围", "意境", "诗意", "美学", "苍凉"],
+      "poetry_config": {
+        "default_type": "律诗",
+        "suggested_imagery_count": 5,
+        "reference_examples_count": 3,
+        "world_context_integration": true
+      }
+    },
+    "死亡告别": {
+      "writer": "墨言",
+      "phase": 2,
+      "poetry_required": true,
+      "poetry_trigger": "死亡场景自动触发诗词",
+      "description": "死亡场景，情感共鸣、告别、牺牲",
+      "emotion_focus": ["死亡", "告别", "牺牲", "悲痛", "怀念"],
+      "poetry_config": {
+        "default_type": "绝句",
+        "emotion_core_override": "悲壮、牺牲",
+        "suggested_imagery": ["血旗", "枯骨", "断剑", "丹心"]
+      }
+    },
+    "战争落幕": {
+      "writer": "剑尘",
+      "phase": 2,
+      "poetry_required": true,
+      "poetry_trigger": "战争结束场景自动触发诗词",
+      "description": "战争结束场景，悲壮、代价、虚无",
+      "emotion_focus": ["战争", "落幕", "悲壮", "代价", "虚无"],
+      "poetry_config": {
+        "default_type": "律诗",
+        "emotion_core_override": "悲壮、虚无",
+        "suggested_imagery": ["空营", "残旗", "残阳", "枯骨"]
+      }
+    },
+    "怀古感慨": {
+      "writer": "云溪",
+      "phase": 2,
+      "poetry_required": true,
+      "poetry_trigger": "怀古场景自动触发诗词",
+      "description": "怀古场景，时空苍茫、英雄感慨",
+      "emotion_focus": ["怀古", "感慨", "时空", "英雄", "苍茫"],
+      "poetry_config": {
+        "default_type": "词",
+        "reference_examples": ["念奴娇·赤壁怀古", "永遇乐·京口北固亭怀古"]
+      }
+    },
+    "命运觉悟": {
+      "writer": "玄一",
+      "phase": 2,
+      "poetry_required": true,
+      "poetry_trigger": "众生界命运觉悟场景触发诗词",
+      "description": "命运觉悟场景，众生界特色，棋局意象",
+      "emotion_focus": ["命运", "觉悟", "被操控", "棋局", "虚无"],
+      "poetry_config": {
+        "default_type": "律诗",
+        "world_context_required": "众生界",
+        "suggested_imagery": ["棋", "棋盘", "棋子", "落定", "轮回"],
+        "philosophy_integration": true
+      }
+    },
+    "突破挣扎": {
+      "writer": "剑尘",
+      "phase": 2,
+      "poetry_required": true,
+      "poetry_trigger": "众生界突破挣扎场景触发诗词",
+      "description": "突破挣扎场景，众生界特色，缝隙意象",
+      "emotion_focus": ["突破", "挣扎", "希望", "缝隙", "变数"],
+      "poetry_config": {
+        "default_type": "五言律",
+        "world_context_required": "众生界",
+        "suggested_imagery": ["缝隙", "未落定的棋子", "一线光"],
+        "philosophy_integration": true
+      }
+    },
+    "孤独漂泊": {
+      "writer": "云溪",
+      "phase": 2,
+      "poetry_required": true,
+      "poetry_trigger": "孤独漂泊场景自动触发诗词",
+      "description": "孤独漂泊场景，凄凉、思念",
+      "emotion_focus": ["孤独", "漂泊", "思念", "凄凉", "离别"],
+      "poetry_config": {
+        "default_type": "绝句",
+        "suggested_imagery": ["孤雁", "孤舟", "古道", "寒月"]
+      }
+    },
+    "壮志未酬": {
+      "writer": "剑尘",
+      "phase": 2,
+      "poetry_required": true,
+      "poetry_trigger": "壮志未酬场景自动触发诗词",
+      "description": "壮志未酬场景，悲壮、遗憾",
+      "emotion_focus": ["壮志", "未酬", "遗憾", "悲壮", "不屈"],
+      "poetry_config": {
+        "default_type": "词",
+        "reference_examples": ["满江红·写怀", "永遇乐·京口北固亭怀古"]
+      }
+    }
+  },
+  
+  "诗词触发规则": {
+    "phase_3_auto": {
+      "description": "Phase 3润色阶段，云溪负责的场景自动触发诗词",
+      "trigger_condition": "writer == '云溪' && phase == 3",
+      "default_config": {
+        "poetry_type": "律诗",
+        "imagery_count": 5,
+        "examples_count": 3
+      }
+    },
+    "emotion_threshold": {
+      "description": "情感阈值触发，当场景情感强度达到阈值时触发诗词",
+      "trigger_condition": "emotion_intensity >= 0.8",
+      "threshold": 0.8,
+      "emotion_types": ["悲壮", "悲凉", "苍凉", "虚无", "哀愁"]
+    },
+    "world_context_trigger": {
+      "description": "众生界特定场景触发",
+      "trigger_condition": "world_context == '众生界' && scene_type in ['命运觉悟', '突破挣扎']",
+      "mandatory": true
+    }
+  },
+  
+  "世界观集成配置": {
+    "众生界": {
+      "description": "众生界世界观集成",
+      "imagery_pool": ["棋", "棋盘", "棋子", "落定", "缝隙", "未落定的棋子", "轮回"],
+      "philosophy_base": "众生皆棋子，被高层力量操控",
+      "special_rules": {
+        "命运觉悟": "必须使用棋局意象，体现被操控感",
+        "突破挣扎": "必须使用缝隙意象，体现变数与希望"
+      }
+    },
+    "通用": {
+      "description": "通用模式，不绑定特定世界观",
+      "imagery_pool": "全部通用意象",
+      "philosophy_base": null,
+      "special_rules": {}
+    }
+  },
+  
+  "云溪诗词能力配置": {
+    "emotion_core_method": {
+      "description": "情感内核分析法",
+      "steps": [
+        "1. 提取场景核心情感（不是表面情感）",
+        "2. 确定情感内核的哲学层面",
+        "3. 选择契合情感内核的意象",
+        "4. 构建意象之间的内在关联",
+        "5. 以情感内核统领全诗"
+      ]
+    },
+    "imagery_selection": {
+      "description": "意象选择原则",
+      "rules": [
+        "意象必须契合情感内核",
+        "意象之间要有内在关联（不是简单堆砌）",
+        "众生界场景必须使用世界观特色意象",
+        "意象要有层次感（从具体到抽象）"
+      ]
+    },
+    "structure_guidelines": {
+      "律诗": "七言或五言，起承转合完整",
+      "绝句": "四句，意象集中，情感饱满",
+      "词": "长短句，节奏灵活，情感层叠"
+    }
+  }
+}

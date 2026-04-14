@@ -52,6 +52,7 @@
 
 # Qdrant本地数据（约20G）
 .vectorstore/qdrant/
+.vectorstore/qdrant_docker/
 
 # 日志和缓存
 logs/

@@ -1,10 +1,73 @@
 # AI项目掌控手册
 
+> **作者**：coffeeliuwei
+> **版本**：v14.0
+> **最后更新**：2026-04-13
+> 
 > 本文档帮助AI快速理解项目全貌，包含流程、配置、数据、API等一切必要信息
 > 
 > **AI新环境快速启动**：阅读本文档后即可配置运行项目
-> 
-> **最后更新**：2026-04-10
+
+---
+
+## 零、Skills安装步骤（⚠️ 必须第一步）
+
+本项目使用 Skills 系统定义作家能力，**必须在配置前完成安装**。
+
+### Skills位置说明
+
+| 目录 | 用途 | Git状态 |
+|------|------|---------|
+| `skills/` | Skills源码定义 | ✅ 已推送（14个Skill.md） |
+| `~/.agents/skills/` | Skills运行目录 | ❌ 不推送（本地安装） |
+
+### 安装步骤
+
+```bash
+# 1. 创建Skills目录
+mkdir -p ~/.agents/skills          # Linux/Mac
+mkdir %USERPROFILE%\.agents\skills  # Windows PowerShell
+
+# 2. 复制Skills定义到运行目录
+cd zhongshengjie
+
+# Linux/Mac
+cp -r skills/* ~/.agents/skills/
+
+# Windows PowerShell
+Copy-Item -Recurse skills/* $env:USERPROFILE\.agents\skills\
+
+# 3. 验证安装
+ls ~/.agents/skills                # Linux/Mac
+dir $env:USERPROFILE\.agents\skills  # Windows
+
+# 应输出以下目录：
+# novelist-canglan/      (苍澜 - 世界观架构师)
+# novelist-xuanyi/       (玄一 - 剧情编织师)
+# novelist-moyan/        (墨言 - 人物刻画师)
+# novelist-jianchen/     (剑尘 - 战斗设计师)
+# novelist-yunxi/        (云溪 - 意境营造师)
+# novelist-evaluator/    (审核评估师)
+# novelist-shared/       (共享规范)
+# novelist-technique-search/  (技法检索)
+# novelist-worldview-generator/  (世界观生成)
+```
+
+### Skills清单（28种场景类型对应）
+
+| Skill | 专长 | 负责场景 |
+|-------|------|----------|
+| novelist-canglan | 世界观架构 | 势力登场、世界观展开 |
+| novelist-xuanyi | 剧情编织 | 悬念、伏笔设置/回收、转折、阴谋揭露、情报揭示 |
+| novelist-moyan | 人物刻画 | 人物出场、情感、心理、社交、成长蜕变、回忆场景 |
+| novelist-jianchen | 战斗设计 | 战斗、打脸、高潮、修炼突破、危机降临、冲突升级 |
+| novelist-yunxi | 意境营造 | 开篇、结尾、环境、氛围、探索发现、恢复休养 |
+| novelist-evaluator | 审核评估 | 质量评估（独立于创作） |
+| novelist-shared | 共享规范 | 文风要求、字数规则、禁止项 |
+| novelist-technique-search | 技法检索 | BGE-M3混合检索 |
+| novelist-worldview-generator | 世界观生成 | 从大纲自动生成配置 |
+
+**28种场景类型完整列表**：开篇、战斗、情感、悬念、转折、世界观展开、打脸、高潮、人物出场、成长蜕变、伏笔设置、伏笔回收、阴谋揭露、社交、势力登场、修炼突破、资源获取、探索发现、情报揭示、危机降临、冲突升级、团队组建、反派出场、恢复休养、回忆场景、结尾
 
 ---
 
@@ -50,6 +113,14 @@
 | 向量检索 | `.vectorstore/core/` | Qdrant检索接口 |
 | 工作流 | `.vectorstore/core/workflow.py` | 检索协调+经验检索 |
 | 数据构建 | `tools/*.py` | 构建各种数据 |
+
+### 1.4 设计方案索引
+
+| 文档 | 路径 | 说明 |
+|------|------|------|
+| Collection三维度功能增强方案 | `docs/superpowers/specs/2026-04-13-collection-enhancement-design.md` | Collection自我学习、对话管理、自动同步设计 |
+| 审核维度扩展方案 | `docs/superpowers/specs/2026-04-13-evaluation-criteria-extension-design.md` | Evaluator审核标准扩展、动态加载设计 |
+| 数据提取流水线方案 | `docs/superpowers/specs/2026-04-11-data-extraction-pipeline-design.md` | 统一提炼引擎详细设计 |
 
 ---
 
@@ -225,11 +296,45 @@ result = entry_layer.process_input("写第一章")
 **动态前置作家**：根据 `scene_writer_mapping.json` 配置决定前置作家
 
 **场景类型分配**（28种场景）：
-- 开篇/结尾 → 云溪
-- 人物/情感 → 墨言
-- 战斗/修炼 → 剑尘
-- 悬念/转折 → 玄一
-- 世界观展开 → 苍澜
+
+| 场景类型 | 负责作家 | 说明 |
+|----------|----------|------|
+| 开篇 | 云溪 | 开篇布局、引入 |
+| 结尾 | 云溪 | 收尾、余韵 |
+| 战斗 | 剑尘 | 战斗描写、冲突 |
+| 打脸 | 剑尘 | 爽点爆发、反击 |
+| 高潮 | 剑尘 | 情节顶点、爆发 |
+| 情感 | 墨言 | 情感细腻描写 |
+| 人物出场 | 墨言 | 新角色登场 |
+| 成长蜕变 | 墨言 | 角色内心转变 |
+| 回忆场景 | 墨言 | 过往回忆插叙 |
+| 社交 | 墨言 | 人物互动交往 |
+| 悬念 | 玄一 | 悬念铺设、紧张感 |
+| 伏笔设置 | 玄一 | 埋下线索 |
+| 伏笔回收 | 玄一 | 揭示前文线索 |
+| 转折 | 玄一 | 剧情反转 |
+| 阴谋揭露 | 玄一 | 揭示隐藏计划 |
+| 情报揭示 | 玄一 | 关键信息披露 |
+| 世界观展开 | 苍澜 | 世界观细节展示 |
+| 势力登场 | 苍澜 | 新势力引入 |
+| 修炼突破 | 剑尘 | 力量提升场景 |
+| 资源获取 | 剑尘 | 获得资源/宝物 |
+| 探索发现 | 云溪 | 探险、发现新事物 |
+| 危机降临 | 剑尘 | 危险到来 |
+| 冲突升级 | 剑尘 | 矛盾激化 |
+| 团队组建 | 墨言 | 队伍集结 |
+| 反派出场 | 墨言 | 反派角色登场 |
+| 恢复休养 | 云溪 | 战后休整 |
+
+**source_map检索映射**（`retrieve_for_scene`支持）：
+- `novel` → novel_settings_v2（角色/势力/设定）
+- `technique` → writing_techniques_v2（创作技法）
+- `case` → case_library_v2（标杆案例）
+- `emotion_arc` → emotion_arc_v1（情感弧线参考）
+- `foreshadow_pair` → foreshadow_pair_v1（伏笔对参考）
+- `dialogue_style` → dialogue_style_v1（对话风格）
+- `power_cost` → power_cost_v1（力量代价）
+- `power_vocabulary` → power_vocabulary_v1（力量词汇）
 
 ### 3.4 Phase执行流程
 
@@ -275,8 +380,10 @@ Phase 3: 收尾润色（云溪）
 | 位置 | `.case-library/` |
 | 向量库 | `case_library_v2` |
 | 数据量 | **387,377条** |
-| 场景类型 | **28种** |
+| 场景类型 | **28种**（见第3.3节完整列表） |
 | 接口 | `.vectorstore/core/case_search.py` |
+
+> **素材提炼模式**：案例库通过用户提供的外部小说资料自动提炼，非直接添加技法。系统从小说库提取标杆片段，用户无需理解技法概念。
 
 ### 4.4 世界观配置
 
@@ -290,12 +397,25 @@ Phase 3: 收尾润色（云溪）
 
 | 配置文件 | 位置 | 内容 |
 |----------|------|------|
-| scene_types.json | `config/dimensions/` | 28种场景类型 |
+| scene_types.json | `config/dimensions/` | **28种场景类型**（完整列表见第3.3节） |
 | power_types.json | `config/dimensions/` | 7种力量类型 |
 | faction_types.json | `config/dimensions/` | 10种势力类型 |
 | technique_types.json | `config/dimensions/` | 11种技法类型 |
 
 **配置同步器**：`config/dimension_sync.py` - 自动更新所有配置
+
+**28种场景类型完整配置**：
+```json
+{
+  "scene_types": [
+    "开篇", "结尾", "战斗", "情感", "悬念", "转折", "世界观展开",
+    "打脸", "高潮", "人物出场", "成长蜕变", "伏笔设置", "伏笔回收",
+    "阴谋揭露", "社交", "势力登场", "修炼突破", "资源获取",
+    "探索发现", "情报揭示", "危机降临", "冲突升级", "团队组建",
+    "反派出场", "恢复休养", "回忆场景"
+  ]
+}
+```
 
 ---
 
@@ -1111,3 +1231,5 @@ violations = lifecycle.check_contract_compliance("scene_001", content)
 > **配置文件**: `config.json` (用户) / `config.example.json` (模板)
 > 
 > **用户文档**: `README.md`
+> 
+> **最后更新**: 2026-04-13（场景类型统一28种、新增素材提炼模式、设计方案链接）

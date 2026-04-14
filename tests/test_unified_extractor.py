@@ -120,7 +120,8 @@ class TestUnifiedExtractorInit:
 
     def test_init_with_default_config(self, temp_project_root):
         """测试默认配置初始化"""
-        with patch("tools.unified_extractor.PROJECT_ROOT", temp_project_root):
+        with patch("tools.unified_extractor.PROJECT_ROOT", temp_project_root), \
+             patch("tools.unified_extractor.HAS_CONFIG_LOADER", False):
             from tools.unified_extractor import UnifiedExtractor
 
             extractor = UnifiedExtractor()
@@ -148,7 +149,8 @@ class TestUnifiedExtractorInit:
 
     def test_init_load_existing_progress(self, temp_project_root, mock_progress_file):
         """测试加载已有进度"""
-        with patch("tools.unified_extractor.PROJECT_ROOT", temp_project_root):
+        with patch("tools.unified_extractor.PROJECT_ROOT", temp_project_root), \
+             patch("tools.unified_extractor.HAS_CONFIG_LOADER", False):
             from tools.unified_extractor import UnifiedExtractor
 
             extractor = UnifiedExtractor()
@@ -161,7 +163,8 @@ class TestUnifiedExtractorInit:
     def test_init_without_progress_file(self, temp_project_root):
         """测试无进度文件时的初始化"""
         # 不创建进度文件
-        with patch("tools.unified_extractor.PROJECT_ROOT", temp_project_root):
+        with patch("tools.unified_extractor.PROJECT_ROOT", temp_project_root), \
+             patch("tools.unified_extractor.HAS_CONFIG_LOADER", False):
             from tools.unified_extractor import UnifiedExtractor
 
             extractor = UnifiedExtractor()
@@ -513,8 +516,12 @@ class TestUnifiedExtractorEdgeCases:
         """测试缺少时间时的时长计算"""
         from tools.unified_extractor import UnifiedExtractor
 
-        with patch("tools.unified_extractor.PROJECT_ROOT", temp_project_root):
+        with patch("tools.unified_extractor.PROJECT_ROOT", temp_project_root), \
+             patch("tools.unified_extractor.HAS_CONFIG_LOADER", False):
             extractor = UnifiedExtractor()
+            # 确保进度时间为空
+            extractor.progress.started_at = ""
+            extractor.progress.finished_at = ""
 
             # 不设置时间
             duration = extractor._calculate_duration()

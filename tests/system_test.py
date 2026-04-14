@@ -3,12 +3,19 @@
 
 注意: modules.creation 已存档到 存档/modules_creation_archived/
 现在使用 skill 层（novelist-workflow, novelist-*）作为主实现
+
+此文件为手动运行的集成测试，需要 Qdrant 等外部服务。
+pytest 会自动跳过此文件，请使用 python tests/system_test.py 手动执行。
 """
 
 import sys
 import traceback
 from pathlib import Path
 from datetime import datetime
+
+import pytest
+
+pytestmark = pytest.mark.skip(reason="集成测试需手动运行: python tests/system_test.py")
 
 # 添加项目根目录到路径
 project_root = Path(__file__).resolve().parent.parent

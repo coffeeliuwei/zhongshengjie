@@ -882,14 +882,36 @@ class HybridSearchManager:
             query = context + " " + scene_type + "场景"
 
         source_map = {
+            # 原有8种场景（保持不变）
             "战斗": ["technique", "case", "power_vocabulary"],
             "开篇": ["technique", "case", "worldview_element"],
-            "情感": ["technique", "case"],
-            "对话": ["technique", "dialogue_style"],
-            "悬念": ["technique", "case"],
+            "情感": ["technique", "case", "emotion_arc"],
+            "对话": ["technique", "case", "dialogue_style"],
+            "悬念": ["technique", "case", "foreshadow_pair"],
             "转折": ["technique", "case"],
             "心理": ["technique", "case"],
-            "环境": ["technique", "worldview_element"],
+            "环境": ["technique", "case", "worldview_element"],
+            # 新增20种场景（2026-04-13统一扩展）
+            "打脸": ["technique", "case", "power_vocabulary"],
+            "高潮": ["technique", "case", "power_vocabulary", "emotion_arc"],
+            "人物出场": ["technique", "case", "novel"],
+            "成长蜕变": ["technique", "case", "emotion_arc"],
+            "伏笔设置": ["technique", "case", "foreshadow_pair"],
+            "伏笔回收": ["technique", "case", "foreshadow_pair"],
+            "阴谋揭露": ["technique", "case", "foreshadow_pair"],
+            "社交": ["technique", "case", "dialogue_style"],
+            "势力登场": ["technique", "case", "worldview_element", "novel"],
+            "修炼突破": ["technique", "case", "power_vocabulary"],
+            "资源获取": ["technique", "case", "power_vocabulary"],
+            "探索发现": ["technique", "case", "worldview_element"],
+            "情报揭示": ["technique", "case"],
+            "危机降临": ["technique", "case"],
+            "冲突升级": ["technique", "case"],
+            "团队组建": ["technique", "case"],
+            "反派出场": ["technique", "case", "novel"],
+            "恢复休养": ["technique", "case"],
+            "回忆场景": ["technique", "case"],
+            "结尾": ["technique", "case", "worldview_element"],
         }
 
         sources = source_map.get(scene_type, ["technique", "case"])
@@ -908,6 +930,16 @@ class HybridSearchManager:
                 results["dialogue"] = self.search_extended(
                     "dialogue_style", query, top_k=top_k
                 )
+            elif source == "emotion_arc":
+                results["emotion"] = self.search_extended(
+                    "emotion_arc", query, top_k=top_k
+                )
+            elif source == "foreshadow_pair":
+                results["foreshadow"] = self.search_extended(
+                    "foreshadow_pair", query, top_k=top_k
+                )
+            elif source == "novel":
+                results["novel"] = self.search_novel(query, top_k=top_k)
 
         return results
 

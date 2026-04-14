@@ -1,5 +1,9 @@
 # 众生界 - 项目逻辑记录
 
+> **作者**：coffeeliuwei
+> **版本**：v14.0
+> **最后更新**：2026-04-13
+> 
 > 本文件记录**众生界项目**的核心逻辑，用于指导AI自动生成小说。
 > 
 > **区分**：
@@ -49,11 +53,11 @@
         ↓
 【阶段1】章节大纲解析
         ↓
-【阶段2】场景类型识别
+【阶段2】场景类型识别（28种场景类型）
         ↓
 【阶段2.5】经验检索 ← 从前章日志提取
         ↓
-【阶段3】设定自动检索 ← 从Qdrant检索
+【阶段3】设定自动检索 ← 从Qdrant检索（14个Collection）
         ↓
 【阶段3.5】场景契约 ← 12大一致性规则
         ↓
@@ -66,7 +70,7 @@
         ↓
 【阶段5】整章整合
         ↓
-【阶段6】整章评估 ← Evaluator（13维度）
+【阶段6】整章评估 ← Evaluator（13维度+动态审核标准）
         ↓
 【阶段7】用户确认
         ↓
@@ -75,7 +79,40 @@
 
 ---
 
-## 五、逐场景创作详解
+## 五、场景类型与作家分工
+
+### 28种场景类型
+
+| 场景类型 | 负责作家 | Skill | 说明 |
+|----------|----------|-------|------|
+| 开篇 | 云溪 | novelist-yunxi | 章节开头引入 |
+| 结尾 | 云溪 | novelist-yunxi | 章节收尾余韵 |
+| 战斗 | 剑尘 | novelist-jianchen | 战斗场面描写 |
+| 情感 | 墨言 | novelist-moyan | 情感细腻描写 |
+| 悬念 | 玄一 | novelist-xuanyi | 悬念铺设紧张感 |
+| 转折 | 玄一 | novelist-xuanyi | 剧情反转 |
+| 世界观展开 | 苍澜 | novelist-canglan | 世界观细节展示 |
+| **打脸** | 剑尘 | novelist-jianchen | 爽点爆发场景（新增） |
+| **高潮** | 剑尘 | novelist-jianchen | 情节顶点场景（新增） |
+| 人物出场 | 墨言 | novelist-moyan | 新角色登场 |
+| 成长蜕变 | 墨言 | novelist-moyan | 角色内心转变 |
+| 伏笔设置 | 玄一 | novelist-xuanyi | 埋下线索 |
+| 伏笔回收 | 玄一 | novelist-xuanyi | 揭示前文线索 |
+| **阴谋揭露** | 玄一 | novelist-xuanyi | 揭示隐藏计划（新增） |
+| **社交** | 墨言 | novelist-moyan | 人物互动交往（新增） |
+| 势力登场 | 苍澜 | novelist-canglan | 新势力引入 |
+| 修炼突破 | 剑尘 | novelist-jianchen | 力量提升场景 |
+| 资源获取 | 剑尘 | novelist-jianchen | 获得资源/宝物 |
+| 探索发现 | 云溪 | novelist-yunxi | 探险发现新事物 |
+| 情报揭示 | 玄一 | novelist-xuanyi | 关键信息披露 |
+| 危机降临 | 剑尘 | novelist-jianchen | 危险到来 |
+| 冲突升级 | 剑尘 | novelist-jianchen | 矛盾激化 |
+| 团队组建 | 墨言 | novelist-moyan | 队伍集结 |
+| 反派出场 | 墨言 | novelist-moyan | 反派角色登场 |
+| 恢复休养 | 云溪 | novelist-yunxi | 战后休整 |
+| 回忆场景 | 墨言 | novelist-moyan | 过往回忆插叙 |
+
+---
 
 ### Phase 1：并行生成（3人）
 
@@ -170,13 +207,79 @@
 
 ## 八、检索系统
 
-### Qdrant Collections
+### Qdrant Collections（14个，更新于2026-04-13）
 
-| Collection | 用途 | 数据量 |
-|------------|------|--------|
-| `writing_techniques_v2` | 创作技法 | 986条 |
-| `novel_settings_v2` | 小说设定 | 160条 |
-| `case_library_v2` | 标杆案例 | 38万+条 |
+| Collection | 用途 | 数据量 | 三维度功能 |
+|------------|------|--------|------------|
+| `writing_techniques_v2` | 创作技法 | 986条 | ✅自我学习 ✅对话管理 ✅自动同步 |
+| `novel_settings_v2` | 小说设定 | 160条 | ✅自我学习 ✅对话管理 ✅自动同步 |
+| `case_library_v2` | 标杆案例 | 387,377条 | ✅自我学习 ❌对话管理 ✅自动同步 |
+| `dialogue_style_v1` | 对话风格 | 405条 | ✅自我学习 ❌对话管理 ✅自动同步 |
+| `power_cost_v1` | 力量代价 | 140条 | ✅自我学习 ❌对话管理 ✅自动同步 |
+| `emotion_arc_v1` | 情感弧线 | 446条 | ✅自我学习 ❌对话管理 ✅自动同步 |
+| `power_vocabulary_v1` | 力量词汇 | 41,247条 | ✅自我学习 ❌对话管理 ✅自动同步 |
+| `foreshadow_pair_v1` | 伏笔对 | 54条 | ✅自我学习 ❌对话管理 ✅自动同步 |
+| `evaluation_criteria_v1` | 审核标准 | - | ❌自我学习 ✅对话管理 ✅自动同步 |
+| `chapter_experience_v1` | 章节经验 | - | ✅自我学习 ❌对话管理 ✅自动同步 |
+
+> **Collection三维度功能说明**：
+> - **自我学习**：Collection是否支持从用户反馈自动学习优化
+> - **对话管理**：Collection是否支持在对话中直接增删改查
+> - **自动同步**：Collection是否支持配置变更自动同步
+
+### source_map场景检索映射（28种场景）
+
+```python
+source_map = {
+    # 基础检索
+    "novel": "novel_settings_v2",           # 角色/势力/设定
+    "technique": "writing_techniques_v2",   # 创作技法
+    "case": "case_library_v2",              # 标杆案例
+    
+    # 扩展维度检索（新增）
+    "emotion_arc": "emotion_arc_v1",        # 情感弧线参考
+    "foreshadow_pair": "foreshadow_pair_v1", # 伏笔对参考
+    "dialogue_style": "dialogue_style_v1",  # 对话风格
+    "power_cost": "power_cost_v1",          # 力量代价
+    "power_vocabulary": "power_vocabulary_v1", # 力量词汇
+}
+
+# 28种场景类型检索策略
+def retrieve_for_scene(scene_type: str, query: str):
+    """根据场景类型智能选择检索源"""
+    
+    scene_sources = {
+        "开篇": ["novel", "technique", "case", "emotion_arc"],
+        "结尾": ["novel", "technique", "case", "emotion_arc", "foreshadow_pair"],
+        "战斗": ["novel", "technique", "case", "power_cost", "power_vocabulary"],
+        "打脸": ["novel", "technique", "case", "power_cost"],
+        "高潮": ["novel", "technique", "case", "emotion_arc", "foreshadow_pair"],
+        "情感": ["novel", "technique", "case", "emotion_arc", "dialogue_style"],
+        "人物出场": ["novel", "technique", "case", "dialogue_style"],
+        "成长蜕变": ["novel", "technique", "case", "emotion_arc"],
+        "回忆场景": ["novel", "technique", "case", "emotion_arc"],
+        "社交": ["novel", "technique", "case", "dialogue_style"],
+        "悬念": ["novel", "technique", "case", "foreshadow_pair"],
+        "伏笔设置": ["novel", "technique", "case", "foreshadow_pair"],
+        "伏笔回收": ["novel", "technique", "case", "foreshadow_pair"],
+        "阴谋揭露": ["novel", "technique", "case", "foreshadow_pair"],
+        "情报揭示": ["novel", "technique", "case"],
+        "转折": ["novel", "technique", "case", "foreshadow_pair"],
+        "世界观展开": ["novel", "technique", "case"],
+        "势力登场": ["novel", "technique", "case", "dialogue_style"],
+        "反派出场": ["novel", "technique", "case", "dialogue_style"],
+        "团队组建": ["novel", "technique", "case", "dialogue_style"],
+        "修炼突破": ["novel", "technique", "case", "power_cost", "power_vocabulary"],
+        "资源获取": ["novel", "technique", "case"],
+        "探索发现": ["novel", "technique", "case"],
+        "危机降临": ["novel", "technique", "case", "emotion_arc"],
+        "冲突升级": ["novel", "technique", "case", "power_cost"],
+        "恢复休养": ["novel", "technique", "case", "dialogue_style"],
+    }
+    
+    sources = scene_sources.get(scene_type, ["novel", "technique", "case"])
+    return {src: source_map[src] for src in sources}
+```
 
 ### 检索流程
 
@@ -186,15 +289,81 @@
 ├── 提取：what_worked / what_didnt_work / insights
 └── 注入：作家创作上下文
 
-阶段3：设定检索
-├── 角色设定
-├── 势力设定
-└── 力量体系
+阶段3：设定自动检索（智能选择Collection）
+├── 场景类型识别（28种之一）
+├── source_map映射 → 确定检索源
+├── 多Collection并行检索
+└── 结果融合注入
 ```
 
 ---
 
-## 九、关键文件
+## 九、审核维度扩展（新增）
+
+### 审核标准Collection
+
+| Collection | 用途 | 特性 |
+|------------|------|------|
+| `evaluation_criteria_v1` | 动态审核标准 | 可按场景类型加载不同标准 |
+
+### 审核维度配置
+
+```json
+{
+  "evaluation_criteria_v1": {
+    "通用维度": [
+      "技法运用准确度",
+      "约束遵守度",
+      "角色行为一致性",
+      "世界观设定一致性",
+      "叙事流畅度",
+      "情感张力",
+      "节奏把控",
+      "场景契约一致性",
+      "语言风格",
+      "主题表达",
+      "伏笔质量",
+      "读者体验",
+      "创新度"
+    ],
+    "场景专用维度": {
+      "战斗": ["战斗逻辑", "力量体系一致性", "代价描写"],
+      "情感": ["情感层次", "共鸣度", "克制程度"],
+      "悬念": ["紧张度", "节奏控制", "预期管理"],
+      "打脸": ["爽点爆发", "节奏把控", "读者满足感"],
+      "高潮": ["情感顶点", "多线汇聚", "节奏爆发"]
+    }
+  }
+}
+```
+
+### Evaluator动态加载
+
+```python
+class Evaluator:
+    """审核评估师（动态加载审核标准）"""
+    
+    def load_criteria(self, scene_type: str):
+        """根据场景类型加载审核标准"""
+        # 基础维度（13个）
+        base_criteria = self._load_base_criteria()
+        
+        # 场景专用维度
+        scene_specific = self._load_scene_criteria(scene_type)
+        
+        return base_criteria + scene_specific
+    
+    def evaluate(self, content: str, scene_type: str) -> dict:
+        """评估内容"""
+        criteria = self.load_criteria(scene_type)
+        # 按维度评估...
+```
+
+**说明**：排除自动发现功能（用户明确不需要），审核标准通过对话管理配置。
+
+---
+
+## 十、关键文件
 
 ### 核心文件
 

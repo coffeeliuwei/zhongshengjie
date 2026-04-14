@@ -13,5 +13,17 @@ mobi>=0.3.3
 lz4>=4.0.0
 jieba>=0.42.1
 
+# 测试依赖
+pytest>=7.0.0
+pytest-cov>=4.0.0
+pytest-timeout>=2.1.0
+pytest-xdist>=3.3.0
+
+# 测试依赖
+pytest>=7.4.0
+pytest-cov>=4.1.0
+pytest-mock>=3.11.0
+pytest-xdist>=3.3.0
+
 # 可选依赖
 # transformers>=4.30.0

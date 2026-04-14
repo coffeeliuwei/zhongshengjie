@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "updated_at": "2026-04-11",
+  "updated_at": "2026-04-13",
   "source": ".novel-extractor/power_cost_extractor.py power_keywords",
   "power_types": {
     "修仙": {
@@ -233,37 +233,6 @@
         "休养",
         "精神治疗"
       ]
-    },
-    "血脉力量": {
-      "description": "自动发现的力量体系",
-      "skills": [
-        "血脉",
-        "觉醒"
-      ],
-      "costs": {
-        "身体代价": [],
-        "精神代价": [],
-        "能量代价": [],
-        "其他代价": []
-      },
-      "recovery": [],
-      "auto_discovered": true,
-      "discovered_at": "2026-04-11T02:58:55.427737"
-    },
-    "已批准": {
-      "description": "自动发现的力量体系",
-      "skills": [
-        "批准"
-      ],
-      "costs": {
-        "身体代价": [],
-        "精神代价": [],
-        "能量代价": [],
-        "其他代价": []
-      },
-      "recovery": [],
-      "auto_discovered": true,
-      "discovered_at": "2026-04-11T02:58:55.433010"
     }
   }
 }
