@@ -1,0 +1,58 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "title": "ChapterExperienceLog",
+  "description": "章节经验日志格式规范，用于 novel-workflow 阶段8写入和阶段2.5读取",
+  "type": "object",
+  "required": ["chapter", "scene_types", "what_worked", "what_didnt_work", "for_next_chapter"],
+  "properties": {
+    "chapter": {
+      "type": "string",
+      "description": "章节标识，如\"第1章\"",
+      "pattern": "^第\\d+章$"
+    },
+    "scene_types": {
+      "type": "array",
+      "items": {"type": "string"},
+      "minItems": 1,
+      "description": "本章涉及的场景类型列表，如[\"战斗\",\"人物\"]"
+    },
+    "what_worked": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["content", "scene_type"],
+        "properties": {
+          "content": {"type": "string", "minLength": 1},
+          "scene_type": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "what_didnt_work": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["content", "scene_type"],
+        "properties": {
+          "content": {"type": "string", "minLength": 1},
+          "scene_type": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "insights": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["content", "scene_condition"],
+        "properties": {
+          "content": {"type": "string", "minLength": 1},
+          "scene_condition": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "for_next_chapter": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1}
+    }
+  },
+  "additionalProperties": true
+}

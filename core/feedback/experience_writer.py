@@ -11,6 +11,22 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from collections import Counter
 
+import jsonschema as _jsonschema
+from pathlib import Path as _Path
+
+# 懒加载 schema，避免模块导入时 IO
+_SCHEMA_PATH = (
+    _Path(__file__).parent.parent.parent / "schemas" / "experience_log_schema.json"
+)
+_EXPERIENCE_SCHEMA = None
+
+
+def _get_experience_schema():
+    global _EXPERIENCE_SCHEMA
+    if _EXPERIENCE_SCHEMA is None:
+        _EXPERIENCE_SCHEMA = json.loads(_SCHEMA_PATH.read_text(encoding="utf-8"))
+    return _EXPERIENCE_SCHEMA
+
 
 class ExperienceWriter:
     """章节经验写入器 - 让系统记住创作经验"""
@@ -60,6 +76,24 @@ class ExperienceWriter:
                 "experience_data": dict
             }
         """
+        # 0. Schema 校验（检查是否符合简化schema格式）
+        schema_fields = {
+            "chapter",
+            "scene_types",
+            "what_worked",
+            "what_didnt_work",
+            "for_next_chapter",
+        }
+        if set(experience.keys()) & schema_fields:
+            try:
+                _jsonschema.validate(
+                    instance=experience, schema=_get_experience_schema()
+                )
+            except _jsonschema.ValidationError as e:
+                raise ValueError(
+                    f"经验日志格式错误：{e.message}（路径：{list(e.path)}）"
+                ) from e
+
         # 1. 提取成功的做法
         what_worked = self._extract_what_worked(experience)
 
