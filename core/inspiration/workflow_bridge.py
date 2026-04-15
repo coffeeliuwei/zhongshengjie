@@ -168,3 +168,49 @@ def select_winner_spec(
         memory_point_count=memory_point_count,
         retrieved_references=retrieved_references,
     )
+
+
+def execute_variants(
+    specs: List[Dict[str, Any]],
+    writer_caller: Any,
+) -> List[Dict[str, Any]]:
+    """将变体规格列表执行为带文本的候选列表
+
+    Args:
+        specs: phase1_dispatch 返回的 variant_specs
+        writer_caller: 可调用对象，接收一个 spec dict，返回生成文本 str
+                       （由 workflow.py 提供，内部调用相应 novelist Skill）
+
+    Returns:
+        候选列表，每项：
+        {
+            "id": str,
+            "text": str,          # 生成文本，失败时为 "[生成失败]"
+            "used_constraint_id": str | None,
+            "writer_agent": str,
+            "error": str | None,  # 仅在失败时存在
+        }
+    """
+    candidates = []
+    for spec in specs:
+        try:
+            text = writer_caller(spec)
+            candidates.append(
+                {
+                    "id": spec["id"],
+                    "text": text,
+                    "used_constraint_id": spec.get("used_constraint_id"),
+                    "writer_agent": spec.get("writer_agent", ""),
+                }
+            )
+        except Exception as e:
+            candidates.append(
+                {
+                    "id": spec["id"],
+                    "text": "[生成失败]",
+                    "used_constraint_id": spec.get("used_constraint_id"),
+                    "writer_agent": spec.get("writer_agent", ""),
+                    "error": str(e),
+                }
+            )
+    return candidates
