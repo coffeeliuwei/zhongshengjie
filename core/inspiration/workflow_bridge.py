@@ -214,3 +214,58 @@ def execute_variants(
                 }
             )
     return candidates
+
+
+def record_winner(
+    appraisal: Any,
+    candidates: List[Dict[str, Any]],
+    scene_context: Dict[str, Any],
+    sync: Optional[Any] = None,
+) -> Optional[str]:
+    """将鉴赏师选择结果写入记忆点库
+
+    Args:
+        appraisal: AppraisalResult 实例
+        candidates: execute_variants 返回的候选列表
+        scene_context: 场景上下文
+        sync: MemoryPointSync 实例（测试可注入）
+
+    Returns:
+        写入的记忆点 ID，或 None（无赢家时）
+    """
+    from core.inspiration.appraisal_agent import AppraisalResult as AR
+    from datetime import datetime, timezone
+
+    if appraisal.selected_id is None:
+        return None  # 全部平庸，不写入
+
+    # 找到赢家候选文本
+    winner_candidate = next(
+        (c for c in candidates if c["id"] == appraisal.selected_id), None
+    )
+    if not winner_candidate:
+        return None
+
+    if sync is None:
+        sync = MemoryPointSync()
+
+    embedding = _embed_scene_context(scene_context)
+
+    payload = {
+        "segment_text": winner_candidate["text"],
+        "segment_scope": "paragraph",
+        "position_hint": None,
+        "chapter_ref": scene_context.get("chapter_ref"),
+        "resonance_type": "鉴赏师选中",
+        "polarity": "+",
+        "intensity": 2 if appraisal.confidence == "high" else 1,
+        "note": appraisal.ignition_point or "",
+        "scene_type": scene_context.get("scene_type", ""),
+        "structural_features": {},
+        "used_constraint_id": winner_candidate.get("used_constraint_id"),
+        "writer_agent": winner_candidate.get("writer_agent", ""),
+        "appraisal_reason": appraisal.reason_fragment,
+        "recorded_at": datetime.now(timezone.utc).isoformat(),
+    }
+
+    return sync.create(payload, embedding=embedding)

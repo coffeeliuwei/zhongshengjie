@@ -76,3 +76,74 @@ def test_execute_variants_handles_writer_error_gracefully():
     assert baseline["text"] == "文本_baseline"
     assert failed["text"] == "[生成失败]"
     assert failed.get("error") is not None
+
+
+def test_record_winner_writes_positive_memory_point():
+    """鉴赏师选出赢家时，写入正向记忆点"""
+    from core.inspiration.workflow_bridge import record_winner
+    from core.inspiration.appraisal_agent import AppraisalResult
+    from unittest.mock import patch, MagicMock
+
+    winner = AppraisalResult(
+        selected_id="variant_1",
+        ignition_point="那句'屋檐滴水'击中了我",
+        reason_fragment="结构感与正向参照最近",
+        confidence="high",
+    )
+    candidates = [
+        {"id": "baseline", "text": "普通文本", "used_constraint_id": None},
+        {"id": "variant_1", "text": "击中文本", "used_constraint_id": "CONSTRAINT_001"},
+    ]
+    scene_context = {"scene_type": "情感"}
+
+    mock_sync = MagicMock()
+    mock_sync.create.return_value = "mp_winner_001"
+
+    with (
+        patch(
+            "core.inspiration.workflow_bridge.MemoryPointSync", return_value=mock_sync
+        ),
+        patch(
+            "core.inspiration.workflow_bridge._embed_scene_context",
+            return_value=[0.1] * 1024,
+        ),
+    ):
+        mp_id = record_winner(
+            appraisal=winner,
+            candidates=candidates,
+            scene_context=scene_context,
+        )
+
+    assert mp_id == "mp_winner_001"
+    call_kwargs = mock_sync.create.call_args[0][0]  # payload
+    assert call_kwargs["polarity"] == "+"
+    assert call_kwargs["segment_text"] == "击中文本"
+    assert call_kwargs["resonance_type"] == "鉴赏师选中"
+
+
+def test_record_winner_skips_write_when_none_selected():
+    """鉴赏师返回 none（全部平庸）时，不写入记忆点"""
+    from core.inspiration.workflow_bridge import record_winner
+    from core.inspiration.appraisal_agent import AppraisalResult
+    from unittest.mock import patch, MagicMock
+
+    no_winner = AppraisalResult(
+        selected_id=None,
+        ignition_point=None,
+        reason_fragment=None,
+        confidence="low",
+        common_flaw="三段都是正确但平庸的写法",
+    )
+    mock_sync = MagicMock()
+
+    with patch(
+        "core.inspiration.workflow_bridge.MemoryPointSync", return_value=mock_sync
+    ):
+        mp_id = record_winner(
+            appraisal=no_winner,
+            candidates=[],
+            scene_context={"scene_type": "情感"},
+        )
+
+    assert mp_id is None
+    mock_sync.create.assert_not_called()
