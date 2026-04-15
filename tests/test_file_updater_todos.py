@@ -67,3 +67,44 @@ def test_update_hook_status_missing_hook_does_not_crash(tmp_path):
     )
     # 文件内容不变
     assert hook_file.read_text(encoding="utf-8") == HOOK_LEDGER_SAMPLE
+
+
+PAYOFF_LEDGER_SAMPLE = """# 承诺台账
+
+## 承诺001
+**描述**: 答应给主角解释真相
+**状态**: 未兑现
+**目标章节**: 第十章
+
+## 承诺002
+**描述**: 反派的最终复仇
+**状态**: 未兑现
+**目标章节**: 第二十章
+"""
+
+
+def test_update_payoff_status_to_delivered(tmp_path):
+    """测试更新承诺状态到已兑现"""
+    updater = make_updater(tmp_path)
+    payoff_file = tmp_path / "payoff_tracking.md"
+    payoff_file.write_text(PAYOFF_LEDGER_SAMPLE, encoding="utf-8")
+
+    updater._update_payoff_status(
+        file_path=payoff_file,
+        data={"payoff_id": "承诺001", "new_status": "已兑现", "chapter": "第十章"},
+    )
+
+    content = payoff_file.read_text(encoding="utf-8")
+    assert "已兑现" in content
+
+
+def test_update_payoff_status_missing_does_not_crash(tmp_path):
+    """测试不存在承诺时不崩溃"""
+    updater = make_updater(tmp_path)
+    payoff_file = tmp_path / "payoff_tracking.md"
+    payoff_file.write_text(PAYOFF_LEDGER_SAMPLE, encoding="utf-8")
+    updater._update_payoff_status(
+        file_path=payoff_file,
+        data={"payoff_id": "承诺999", "new_status": "已兑现", "chapter": "第五章"},
+    )
+    assert payoff_file.read_text(encoding="utf-8") == PAYOFF_LEDGER_SAMPLE
