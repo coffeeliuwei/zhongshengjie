@@ -27,7 +27,6 @@ import sys
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from core.config_loader import get_qdrant_url
-from qdrant_client import QdrantClient
 
 
 @dataclass
@@ -76,6 +75,8 @@ class EvaluationCriteriaLoader:
 
     def __init__(self):
         """初始化"""
+        from qdrant_client import QdrantClient
+
         self.client = QdrantClient(url=get_qdrant_url())
         self.collection_name = "evaluation_criteria_v1"
 

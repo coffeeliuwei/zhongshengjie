@@ -212,3 +212,53 @@ def test_update_power_system_new_system(tmp_path):
     content = ps_file.read_text(encoding="utf-8")
     assert "武道体系" in content
     assert "炼体境" in content
+
+
+PAYOFF_WITH_CHAPTER_SAMPLE = """# 承诺台账
+
+## payoff-001
+
+**状态**: ⏳ 待兑现
+**兑现章节**: 待填写
+
+---
+
+## payoff-002
+
+**状态**: ⏳ 待兑现
+**兑现章节**: 待填写
+
+---
+"""
+
+
+def test_update_payoff_status_updates_chapter(tmp_path):
+    """_update_payoff_status 在提供 chapter 时同步更新兑现章节字段"""
+    updater = make_updater(tmp_path)
+    payoff_file = tmp_path / "payoffs.md"
+    payoff_file.write_text(PAYOFF_WITH_CHAPTER_SAMPLE, encoding="utf-8")
+
+    updater._update_payoff_status(
+        payoff_file,
+        {"payoff_id": "payoff-001", "new_status": "✅ 已兑现", "chapter": "第18章"},
+    )
+
+    result = payoff_file.read_text(encoding="utf-8")
+    assert "**状态**: ✅ 已兑现" in result
+    assert "**兑现章节**: 第18章" in result
+
+
+def test_update_payoff_status_no_chapter_leaves_field_intact(tmp_path):
+    """_update_payoff_status 不提供 chapter 时不修改兑现章节字段"""
+    updater = make_updater(tmp_path)
+    payoff_file = tmp_path / "payoffs.md"
+    payoff_file.write_text(PAYOFF_WITH_CHAPTER_SAMPLE, encoding="utf-8")
+
+    updater._update_payoff_status(
+        payoff_file,
+        {"payoff_id": "payoff-002", "new_status": "✅ 已兑现"},
+    )
+
+    result = payoff_file.read_text(encoding="utf-8")
+    assert "**状态**: ✅ 已兑现" in result
+    assert "**兑现章节**: 待填写" in result  # 未被修改

@@ -36,7 +36,7 @@ def test_unknown_intent_returns_unhandled():
 
 
 def test_reader_moment_feedback_routed():
-    """reader_moment_feedback 调用 resonance_feedback 处理器"""
+    """reader_moment_feedback 通过 FeedbackDispatcher 路由"""
     from core.conversation.intent_router import IntentRouter
 
     mock_result = {
@@ -46,7 +46,7 @@ def test_reader_moment_feedback_routed():
     }
 
     with patch(
-        "core.conversation.intent_router.handle_reader_feedback",
+        "core.feedback.feedback_dispatcher.FeedbackDispatcher.dispatch",
         return_value=mock_result,
     ) as mock_handler:
         router = IntentRouter()
@@ -72,7 +72,7 @@ def test_reader_moment_feedback_needs_clarification():
     }
 
     with patch(
-        "core.conversation.intent_router.handle_reader_feedback",
+        "core.feedback.feedback_dispatcher.FeedbackDispatcher.dispatch",
         return_value=mock_result,
     ):
         router = IntentRouter()
@@ -86,7 +86,7 @@ def test_reader_moment_feedback_needs_clarification():
 
 
 def test_overturn_feedback_routed():
-    """overturn_feedback 调用 handle_reader_feedback 并携带 overturn=True"""
+    """overturn_feedback 通过 FeedbackDispatcher 路由并携带 overturn=True"""
     from core.conversation.intent_router import IntentRouter
 
     mock_result = {
@@ -96,7 +96,7 @@ def test_overturn_feedback_routed():
     }
 
     with patch(
-        "core.conversation.intent_router.handle_reader_feedback",
+        "core.feedback.feedback_dispatcher.FeedbackDispatcher.dispatch",
         return_value=mock_result,
     ) as mock_handler:
         router = IntentRouter()

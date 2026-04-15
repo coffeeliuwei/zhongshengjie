@@ -11,7 +11,7 @@ from dataclasses import dataclass, field
 from typing import Dict, Any, Optional
 from collections import Counter
 
-from core.inspiration.resonance_feedback import handle_reader_feedback
+from core.feedback.feedback_dispatcher import FeedbackDispatcher
 from core.inspiration.status_reporter import report_status
 from core.inspiration.constraint_library import ConstraintLibrary
 from core.conversation.technique_extractor import TechniqueExtractor
@@ -145,33 +145,37 @@ class IntentRouter:
     def _handle_reader_moment_feedback(
         self, intent: str, entities: Dict[str, Any], user_input: str
     ) -> RoutingResult:
-        """处理读者反馈类意图（正向/对比/外部注入）"""
-        result = handle_reader_feedback(
+        """处理读者反馈类意图（正向/对比/外部注入），通过 FeedbackDispatcher 路由"""
+        dispatcher = FeedbackDispatcher()
+        result = dispatcher.dispatch(
+            feedback_category="inspiration",
             user_input=user_input,
             scene_type_lookup=lambda chapter_ref: "未知",
             is_overturn=False,
         )
         return RoutingResult(
             success=True,
-            message=result["message"],
+            message=result.get("message", ""),
             data={"memory_point_ids": result.get("memory_point_ids", [])},
-            needs_clarification=(result["status"] == "needs_clarification"),
+            needs_clarification=(result.get("status") == "needs_clarification"),
         )
 
     def _handle_overturn_feedback(
         self, intent: str, entities: Dict[str, Any], user_input: str
     ) -> RoutingResult:
-        """处理推翻事件反馈"""
-        result = handle_reader_feedback(
+        """处理推翻事件反馈，通过 FeedbackDispatcher 路由"""
+        dispatcher = FeedbackDispatcher()
+        result = dispatcher.dispatch(
+            feedback_category="inspiration",
             user_input=user_input,
             scene_type_lookup=lambda chapter_ref: "未知",
             is_overturn=True,
         )
         return RoutingResult(
             success=True,
-            message=result["message"],
+            message=result.get("message", ""),
             data={"memory_point_ids": result.get("memory_point_ids", [])},
-            needs_clarification=(result["status"] == "needs_clarification"),
+            needs_clarification=(result.get("status") == "needs_clarification"),
         )
 
     def _handle_connoisseur_audit_response(
