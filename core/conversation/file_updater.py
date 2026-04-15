@@ -128,7 +128,8 @@ class FileUpdater:
         elif filename == "十大势力.md":
             updated_content = self._update_faction_profile(content, data, intent)
         elif filename == "力量体系.md":
-            updated_content = self._update_power_system(content, data, intent)
+            self._update_power_system(path, data)
+            updated_content = path.read_text(encoding="utf-8")
         elif filename == "时间线.md":
             updated_content = self._update_timeline(content, data, intent)
         else:
@@ -730,12 +731,45 @@ class FileUpdater:
             return content + entry
         return content
 
-    def _update_power_system(
-        self, content: str, data: Dict[str, Any], intent: str
-    ) -> str:
-        """更新力量体系"""
-        # TODO: 实现力量体系更新
-        return content
+    def _update_power_system(self, file_path: Path, data: Dict[str, Any]) -> None:
+        """更新力量体系条目
+
+        Args:
+            file_path: 力量体系文件路径
+            data: {"system_name": str, "field": str, "value": str}
+                  field 为子节名（如"境界列表"/"代价"），value 为追加内容
+        """
+        system_name = data.get("system_name", "")
+        field = data.get("field", "")
+        value = data.get("value", "")
+        if not system_name or not value:
+            return
+
+        content = file_path.read_text(encoding="utf-8")
+        value_line = f"- {value}"
+
+        if field:
+            # 在指定 field 小节追加
+            pattern = rf"(## {re.escape(system_name)}.*?### {re.escape(field)}\n)(.*?)(\n###|\n##|\Z)"
+
+            def replacer(m):
+                items = m.group(2).rstrip("\n")
+                return f"{m.group(1)}{items}\n{value_line}\n{m.group(3)}"
+
+            new_content = re.sub(pattern, replacer, content, flags=re.DOTALL)
+        else:
+            new_content = content
+
+        if new_content == content:
+            # 体系不存在或字段不存在，追加新体系块
+            new_section = f"\n## {system_name}\n"
+            if field:
+                new_section += f"### {field}\n{value_line}\n"
+            else:
+                new_section += f"{value_line}\n"
+            new_content = content.rstrip() + new_section
+
+        file_path.write_text(new_content, encoding="utf-8")
 
     def _update_timeline(self, content: str, data: Dict[str, Any], intent: str) -> str:
         """更新时间线"""

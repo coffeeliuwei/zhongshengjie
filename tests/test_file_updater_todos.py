@@ -166,3 +166,49 @@ def test_add_character_ability_missing_character(tmp_path):
     )
     content = profile_file.read_text(encoding="utf-8")
     assert "未知技能" in content
+
+
+POWER_SYSTEM_SAMPLE = """# 力量体系
+
+## 修仙体系
+**描述**: 通过修炼灵气提升境界
+
+### 境界列表
+- 凝气期
+- 筑基期
+- 金丹期
+
+### 代价
+- 寿命消耗
+"""
+
+
+def test_update_power_system_add_realm(tmp_path):
+    """测试添加境界到现有体系"""
+    updater = make_updater(tmp_path)
+    ps_file = tmp_path / "power_system.md"
+    ps_file.write_text(POWER_SYSTEM_SAMPLE, encoding="utf-8")
+
+    updater._update_power_system(
+        file_path=ps_file,
+        data={"system_name": "修仙体系", "field": "境界列表", "value": "元婴期"},
+    )
+
+    content = ps_file.read_text(encoding="utf-8")
+    assert "元婴期" in content
+
+
+def test_update_power_system_new_system(tmp_path):
+    """测试添加新体系"""
+    updater = make_updater(tmp_path)
+    ps_file = tmp_path / "power_system.md"
+    ps_file.write_text(POWER_SYSTEM_SAMPLE, encoding="utf-8")
+
+    updater._update_power_system(
+        file_path=ps_file,
+        data={"system_name": "武道体系", "field": "境界列表", "value": "炼体境"},
+    )
+
+    content = ps_file.read_text(encoding="utf-8")
+    assert "武道体系" in content
+    assert "炼体境" in content
