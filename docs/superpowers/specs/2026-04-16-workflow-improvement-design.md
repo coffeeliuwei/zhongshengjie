@@ -161,10 +161,7 @@ from workflow import create_scene_contract
 **修改 `novel-workflow/SKILL.md`**，将所有 `from workflow import` 示例统一替换为：
 
 ```python
-import sys
-sys.path.insert(0, "D:/动画/众生界/.vectorstore/core")
-sys.path.insert(0, "D:/动画/众生界")
-
+# 依赖 P7 定义的环境配置块（文件顶部的 PROJECT_ROOT）
 from workflow import (
     create_scene_contract,
     save_scene_contract,
@@ -175,7 +172,9 @@ from workflow import (
 )
 ```
 
-在 Skill 文件开头（四层架构调用之前）加入"环境准备"块，说明每次调用 Python 工具前需要先执行上述 path 设置。
+P2 不单独设置 sys.path，**依赖 P7 的环境配置块**（文件顶部统一设置 `PROJECT_ROOT` 并注册路径）。因此 P7 的环境配置块必须在 Skill 文件最顶部，先于所有 Python 调用示例。
+
+> ⚠️ 实施顺序调整：**P7 的环境配置块必须最先实施**，P2 才能正确工作。见下方"实施顺序"。
 
 ---
 
@@ -586,8 +585,7 @@ def clear_chapter_context(chapter: str) -> int:
 **Skill 文件中的调用模板：**
 
 ```python
-import sys
-sys.path.insert(0, "D:/动画/众生界/.vectorstore/core")
+# 依赖 P7 定义的环境配置块（PROJECT_ROOT 已注册路径）
 from creation_context_api import save_stage_output, query_context, clear_chapter_context
 
 # 存入（阶段完成时）
@@ -668,6 +666,10 @@ STATE_FILE = _project_root / "chapter_states.json"
 
 ## 实施顺序
 
-P1 → P2 → P3 → P4 → P5 → P6 → P7
+**P7（环境配置块）→ P1 → P2 → P3 → P4 → P5 → P6 → P7（剩余路径清理）**
 
-每个改进点独立提交，完成验证后再进入下一个。P6 依赖 Qdrant 服务运行，实施前确认 Docker Qdrant 已启动。
+说明：
+- **P7 分两步实施**：第一步先在 Skill 文件顶部写入 `PROJECT_ROOT` 环境配置块（P2、P5、P6 的 Skill 调用都依赖它）；第二步在最后清理文件中残余的硬编码路径字符串
+- P2 依赖 P7 第一步完成后才能正确工作
+- P6 依赖 Qdrant 服务运行，实施前确认 Docker Qdrant 已启动
+- 其余改进点（P1/P3/P4/P5）互相独立，顺序可调整
