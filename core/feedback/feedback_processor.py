@@ -505,3 +505,56 @@ class FeedbackProcessor:
         """清空处理历史"""
         self.processed_feedbacks.clear()
         self.issue_counter.clear()
+
+    def analyze_history_file(self, path) -> dict:
+        """从 feedback_history.json 读取并分析反馈模式
+
+        Args:
+            path: feedback_history.json 文件路径
+
+        Returns:
+            {
+                "total": int,
+                "most_common_type": str,
+                "negative_count": int,
+                "by_type": dict,
+                "by_scene_type": dict,
+            }
+        """
+        import json
+        from pathlib import Path
+        from collections import Counter
+
+        path = Path(path)
+        if not path.exists():
+            return {
+                "total": 0,
+                "most_common_type": None,
+                "negative_count": 0,
+                "by_type": {},
+                "by_scene_type": {},
+            }
+
+        with open(path, "r", encoding="utf-8") as f:
+            history = json.load(f)
+
+        type_counter = Counter(fb.get("feedback_type") for fb in history)
+        scene_counter = Counter(
+            fb.get("scene_type") for fb in history if fb.get("scene_type")
+        )
+        negative_count = sum(
+            1
+            for fb in history
+            if fb.get("feedback_category")
+            in ("negative", "style", "consistency", "detail", "excessive")
+        )
+
+        return {
+            "total": len(history),
+            "most_common_type": type_counter.most_common(1)[0][0]
+            if type_counter
+            else None,
+            "negative_count": negative_count,
+            "by_type": dict(type_counter),
+            "by_scene_type": dict(scene_counter),
+        }

@@ -85,3 +85,51 @@ def test_dispatcher_returns_combined_summary():
     assert "summary" in result
     assert result["summary"]["polarity"] in ("+", "-", "?")
     assert "issue" in result["summary"]
+
+
+def test_feedback_processor_can_read_history_json(tmp_path):
+    """FeedbackProcessor 能从 feedback_history.json 读取历史并分析"""
+    import json
+
+    history_file = tmp_path / "feedback_history.json"
+    history_file.write_text(
+        json.dumps(
+            [
+                {
+                    "feedback_type": "rewrite_request",
+                    "issue": "节奏太慢",
+                    "severity": "high",
+                    "feedback_category": "negative",
+                    "scene_type": "战斗",
+                    "raw_input": "重写，节奏太慢",
+                },
+                {
+                    "feedback_type": "rewrite_request",
+                    "issue": "节奏太慢",
+                    "severity": "high",
+                    "feedback_category": "negative",
+                    "scene_type": "战斗",
+                    "raw_input": "又是节奏太慢",
+                },
+                {
+                    "feedback_type": "style_feedback",
+                    "issue": "文风太正式",
+                    "severity": "medium",
+                    "feedback_category": "style",
+                    "scene_type": None,
+                    "raw_input": "风格不对",
+                },
+            ],
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+
+    from core.feedback.feedback_processor import FeedbackProcessor
+
+    fp = FeedbackProcessor()
+    summary = fp.analyze_history_file(history_file)
+
+    assert summary["total"] == 3
+    assert summary["most_common_type"] == "rewrite_request"
+    assert summary["negative_count"] >= 2

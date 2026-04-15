@@ -2271,6 +2271,96 @@ class NovelWorkflow:
             config=config,
         )
 
+    def run_stage4_inspiration(
+        self,
+        scene_type: str,
+        scene_context: dict,
+        writer_caller,
+        appraisal_raw: str,
+    ) -> dict:
+        """Stage 4 灵感引擎完整编排
+
+        Args:
+            scene_type: 场景类型
+            scene_context: 场景上下文
+            writer_caller: 可调用，接收 spec dict，返回生成文本 str
+            appraisal_raw: novelist-connoisseur Skill 返回的 JSON 字符串
+
+        Returns:
+            {
+                "mode": str,
+                "candidates": List[dict],      # 带文本的候选列表
+                "winner_spec": dict | None,    # 鉴赏师调用规格
+                "appraisal": AppraisalResult | None,
+                "memory_point_id": str | None,
+            }
+        """
+        from core.inspiration.workflow_bridge import (
+            phase1_dispatch,
+            execute_variants,
+            select_winner_spec,
+            record_winner,
+        )
+        from core.inspiration.appraisal_agent import (
+            parse_appraisal_response,
+            AppraisalParseError,
+        )
+        from core.config_loader import get_config
+
+        config = get_config()
+        original_writers = self.get_phase1_writers(scene_type)
+
+        # Phase 1：分发（original / variants）
+        dispatch = phase1_dispatch(
+            scene_type=scene_type,
+            scene_context=scene_context,
+            original_writers=original_writers,
+            config=config,
+        )
+
+        if dispatch["mode"] == "original":
+            return {
+                "mode": "original",
+                "writers": dispatch["writers"],
+                "candidates": [],
+                "winner_spec": None,
+                "appraisal": None,
+                "memory_point_id": None,
+            }
+
+        specs = dispatch["variant_specs"]
+
+        # Phase 2：执行变体生成
+        candidates = execute_variants(specs=specs, writer_caller=writer_caller)
+
+        # Phase 3：构造鉴赏师规格（供 Claude 调用 Skill）
+        winner_spec = select_winner_spec(
+            candidates=candidates,
+            scene_context=scene_context,
+        )
+
+        # Phase 4：解析鉴赏师返回（由调用方传入 raw）
+        appraisal = None
+        memory_point_id = None
+        if appraisal_raw:
+            try:
+                appraisal = parse_appraisal_response(appraisal_raw)
+                memory_point_id = record_winner(
+                    appraisal=appraisal,
+                    candidates=candidates,
+                    scene_context=scene_context,
+                )
+            except AppraisalParseError:
+                pass  # 解析失败，不写记忆点
+
+        return {
+            "mode": "variants",
+            "candidates": candidates,
+            "winner_spec": winner_spec,
+            "appraisal": appraisal,
+            "memory_point_id": memory_point_id,
+        }
+
 
 # ============================================================
 # 独立函数（可独立调用）

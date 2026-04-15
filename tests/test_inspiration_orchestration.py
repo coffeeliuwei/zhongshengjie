@@ -147,3 +147,97 @@ def test_record_winner_skips_write_when_none_selected():
 
     assert mp_id is None
     mock_sync.create.assert_not_called()
+
+
+def test_stage4_full_flow_with_mocks():
+    """Stage 4 完整流程：specs → 变体生成 → 鉴赏师 → 记录"""
+    from core.inspiration.workflow_bridge import (
+        phase1_dispatch,
+        execute_variants,
+        select_winner_spec,
+        record_winner,
+    )
+    from core.inspiration.appraisal_agent import parse_appraisal_response
+    from unittest.mock import patch, MagicMock
+
+    scene_type = "情感"
+    scene_context = {"scene_type": "情感", "chapter_ref": "第一章"}
+    config = {"inspiration_engine": {"enabled": True, "variant_count": 2}}
+
+    # Step 1: phase1_dispatch
+    with patch("core.inspiration.workflow_bridge.generate_variant_specs") as mock_gen:
+        mock_gen.return_value = [
+            {
+                "id": "baseline",
+                "writer_agent": "novelist-yunxi",
+                "used_constraint_id": None,
+                "scene_type": "情感",
+                "prompt": "写情感",
+            },
+            {
+                "id": "v1",
+                "writer_agent": "novelist-yunxi",
+                "used_constraint_id": "C001",
+                "scene_type": "情感",
+                "prompt": "写情感（约束）",
+            },
+        ]
+        dispatch = phase1_dispatch(
+            scene_type=scene_type,
+            scene_context=scene_context,
+            original_writers=["云溪"],
+            config=config,
+        )
+
+    assert dispatch["mode"] == "variants"
+    specs = dispatch["variant_specs"]
+
+    # Step 2: execute_variants（mock writer）
+    def fake_writer(spec):
+        return f"生成内容_{spec['id']}"
+
+    candidates = execute_variants(specs=specs, writer_caller=fake_writer)
+    assert len(candidates) == 2
+    assert candidates[0]["text"] == "生成内容_baseline"
+
+    # Step 3: select_winner_spec + 鉴赏师调用（mock）
+    with (
+        patch("core.inspiration.workflow_bridge.MemoryPointSync") as MockSync,
+        patch(
+            "core.inspiration.workflow_bridge._embed_scene_context",
+            return_value=[0.0] * 1024,
+        ),
+    ):
+        MockSync.return_value.count.return_value = 10  # 冷启动
+        winner_spec = select_winner_spec(
+            candidates=candidates,
+            scene_context=scene_context,
+        )
+
+    assert winner_spec["skill_name"] == "novelist-connoisseur"
+    assert winner_spec["phase"] == "cold"
+
+    # Step 4: parse_appraisal_response（mock Claude 返回）
+    fake_response = '{"selected_id": "v1", "ignition_point": "那句话击中了我", "confidence": "high"}'
+    appraisal = parse_appraisal_response(fake_response)
+    assert appraisal.selected_id == "v1"
+
+    # Step 5: record_winner
+    mock_sync = MagicMock()
+    mock_sync.create.return_value = "mp_001"
+    with (
+        patch(
+            "core.inspiration.workflow_bridge.MemoryPointSync", return_value=mock_sync
+        ),
+        patch(
+            "core.inspiration.workflow_bridge._embed_scene_context",
+            return_value=[0.1] * 1024,
+        ),
+    ):
+        mp_id = record_winner(
+            appraisal=appraisal,
+            candidates=candidates,
+            scene_context=scene_context,
+        )
+
+    assert mp_id == "mp_001"
