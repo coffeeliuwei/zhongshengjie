@@ -59,6 +59,15 @@ DEFAULT_CONFIG = {
     "novel_sources": {
         "directories": [],  # 小说资源目录列表，如 ["E:\\小说资源"]
     },
+    "inspiration_engine": {
+        "enabled": True,  # Feature Flag: True 启用意外性引擎
+        "variant_count": 3,  # 每场景生成的变体数量
+        "appraisal_cold_start_threshold": 50,  # 冷启动期：记忆点数<50
+        "appraisal_growing_threshold": 300,  # 成长期：记忆点数<300
+        "audit_interval_appraisals": 10,  # 每隔多少次鉴赏触发审计
+        "overturn_audit_threshold": 10,  # 累计多少次推翻触发审计
+        "memory_point_overturn_weight": 2.0,  # 推翻事件的检索权重
+    },
 }
 
 # 全局配置实例

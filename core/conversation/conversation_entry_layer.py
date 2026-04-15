@@ -31,6 +31,7 @@ from .undo_manager import UndoManager, OperationType
 from .missing_info_detector import MissingInfoDetector, MissingInfo
 from .data_extractor import ConversationDataExtractor, ExtractionResult
 from .intent_router import IntentRouter
+from core.feedback.feedback_collector import FeedbackCollector
 
 
 class ProcessingStatus(Enum):
@@ -88,6 +89,14 @@ class ConversationEntryLayer:
         self.missing_detector = MissingInfoDetector(str(self.project_root))
         self.data_extractor = ConversationDataExtractor(str(self.project_root))
 
+        # FeedbackCollector 初始化
+        self.feedback_collector = FeedbackCollector()
+        self._feedback_history_path = (
+            self.project_root / "data" / "feedback_history.json"
+        )
+        self.feedback_collector.load_history(self._feedback_history_path)
+        self._pending_feedback_context: Optional[Dict[str, Any]] = None
+
         # 内部状态
         self._current_workflow: Optional[WorkflowState] = None
         self._last_intent: Optional[str] = None
@@ -125,6 +134,22 @@ class ConversationEntryLayer:
 
         # 1. 意图识别
         intent_result = self.intent_classifier.classify(user_input)
+
+        # 1.5 FeedbackCollector 旁路（静默，不阻断主流程）
+        self._pending_feedback_context = None
+        if FeedbackCollector.has_feedback_signal(user_input):
+            try:
+                fb = self.feedback_collector.collect_from_explicit(user_input)
+                if fb.get("feedback_type") != "general_feedback":
+                    self._pending_feedback_context = {
+                        "feedback_type": fb["feedback_type"],
+                        "issue": fb.get("issue", ""),
+                        "severity": fb.get("severity", "medium"),
+                        "scene_type": fb.get("scene_type"),
+                    }
+                    self.feedback_collector.save_history(self._feedback_history_path)
+            except Exception:
+                pass  # 旁路失败不影响主流程
 
         # 2. 检查是否需要澄清
         if self.intent_clarifier.needs_clarification(intent_result):
@@ -316,19 +341,27 @@ class ConversationEntryLayer:
         # 根据意图类型执行不同操作
         if intent_result.category == IntentCategory.SETTING_UPDATE:
             # 设定更新意图
-            return self._execute_setting_update(intent_result, user_input)
+            return self._inject_feedback_context(
+                self._execute_setting_update(intent_result, user_input)
+            )
 
         elif intent_result.category == IntentCategory.WORKFLOW_CONTROL:
             # 工作流控制意图
-            return self._execute_workflow_control(intent_result, user_input)
+            return self._inject_feedback_context(
+                self._execute_workflow_control(intent_result, user_input)
+            )
 
         elif intent_result.category == IntentCategory.QUERY:
             # 查询意图
-            return self._execute_query(intent_result, user_input)
+            return self._inject_feedback_context(
+                self._execute_query(intent_result, user_input)
+            )
 
         elif intent_result.category == IntentCategory.TRACKING:
             # 追踪系统意图
-            return self._execute_tracking(intent_result, user_input)
+            return self._inject_feedback_context(
+                self._execute_tracking(intent_result, user_input)
+            )
 
         else:
             # 通过路由器处理未覆盖类别（FEEDBACK、MANAGEMENT、TECHNIQUE、EVALUATION 等）
@@ -337,14 +370,16 @@ class ConversationEntryLayer:
                 entities=entities,
                 user_input=user_input,
             )
-            return ProcessingResult(
-                status=ProcessingStatus.SUCCESS
-                if routing_result.success
-                else ProcessingStatus.FAILED,
-                intent=intent,
-                entities=entities,
-                message=routing_result.message,
-                data=routing_result.data,
+            return self._inject_feedback_context(
+                ProcessingResult(
+                    status=ProcessingStatus.SUCCESS
+                    if routing_result.success
+                    else ProcessingStatus.FAILED,
+                    intent=intent,
+                    entities=entities,
+                    message=routing_result.message,
+                    data=routing_result.data,
+                )
             )
 
     def _execute_setting_update(
@@ -561,6 +596,16 @@ class ConversationEntryLayer:
     def clear_context(self) -> None:
         """清空对话上下文"""
         self._conversation_context = []
+
+    def _inject_feedback_context(self, result: ProcessingResult) -> ProcessingResult:
+        """将旁路收集的反馈上下文注入 ProcessingResult.data"""
+        if self._pending_feedback_context is None:
+            return result
+        if result.data is None:
+            result.data = {}
+        result.data["feedback_context"] = self._pending_feedback_context
+        self._pending_feedback_context = None
+        return result
 
 
 # 测试代码

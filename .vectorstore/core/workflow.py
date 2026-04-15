@@ -2238,6 +2238,39 @@ class NovelWorkflow:
 
         return phase1_writers
 
+    def get_phase1_dispatch(self, scene_type: str, scene_context: dict) -> dict:
+        """
+        Stage 4 Phase 1 灵感引擎分发
+
+        根据配置决定走原流程或灵感引擎。
+        返回 dict 含 mode + 对应字段。
+
+        Args:
+            scene_type: 场景类型
+            scene_context: 场景上下文（大纲、角色、设定等）
+
+        Returns:
+            {
+                "mode": "original" | "variants",
+                "writers": List[str] (mode=original时),
+                "variant_specs": List[dict] (mode=variants时)
+            }
+
+        设计文档：docs/superpowers/specs/2026-04-14-inspiration-engine-design.md §11
+        """
+        from core.inspiration.workflow_bridge import phase1_dispatch
+        from core.config_loader import get_config
+
+        original_writers = self.get_phase1_writers(scene_type)
+        config = get_config()
+
+        return phase1_dispatch(
+            scene_type=scene_type,
+            scene_context=scene_context,
+            original_writers=original_writers,
+            config=config,
+        )
+
 
 # ============================================================
 # 独立函数（可独立调用）

@@ -37,7 +37,9 @@ class IntentCategory(Enum):
     QUERY = "query"  # 查询
     TECHNIQUE = "technique"  # 技法提炼（新增）
     EVALUATION = "evaluation"  # 审核维度（新增）
-    CONFIRMATION = "confirmation"  # 确认操作（新增）
+    CONFIRMATION = "confirmation"  # 认操作（新增）
+    FEEDBACK = "feedback"  # 灵感引擎反馈（新增）
+    MANAGEMENT = "management"  # 灵感引擎管理（新增）
     UNKNOWN = "unknown"  # 未知
 
 
@@ -468,6 +470,104 @@ class IntentClassifier:
                 r"好的添加",
             ],
             "category": IntentCategory.CONFIRMATION,
+            "entities": [],
+        },
+        # ===== 灵感引擎新增意图（11个）=====
+        # 反馈类（FEEDBACK）
+        "reader_moment_feedback": {
+            "patterns": [
+                r"(第.+章|刚才|那段|这段).*(很|太|有点).*(解气|好|漂亮|棒|震撼|感动|燃|舒服|对味)",
+                r"(第.+章|刚才|那段|这段).*(很|太|有点).*(出戏|乏味|假|别扭)",
+            ],
+            "category": IntentCategory.FEEDBACK,
+            "entities": ["chapter_ref", "resonance_type"],
+        },
+        "comparative_moment_feedback": {
+            "patterns": [
+                r"(.+)比(.+)(好|差|强|弱).+因为",
+                r"原来.+换成.+就",
+            ],
+            "category": IntentCategory.FEEDBACK,
+            "entities": ["segment_a", "segment_b", "reason"],
+        },
+        "external_moment_inject": {
+            "patterns": [
+                r"把.+这段.+记(下|一下)",
+                r"粘给你.+记",
+            ],
+            "category": IntentCategory.FEEDBACK,
+            "entities": ["segment_text"],
+        },
+        "overturn_feedback": {
+            "patterns": [
+                r"(这|那)版.*不(接受|满意)",
+                r"鉴赏师.*选错",
+                r"评估师.*漏了",
+                r"虽然(过了|定稿).*但",
+            ],
+            "category": IntentCategory.FEEDBACK,
+            "entities": [],
+        },
+        "connoisseur_audit_response": {
+            "patterns": [
+                r"第.+次.*(真|是)点火",
+                r"都是敷衍",
+                r"审计.*[1-9]",
+            ],
+            "category": IntentCategory.FEEDBACK,
+            "entities": ["audit_result"],
+        },
+        # 查询类（QUERY）
+        "inspiration_status_query": {
+            "patterns": [
+                r"你(现在|最近).*(学到|记住|倾向)",
+                r"灵感引擎.*状态",
+            ],
+            "category": IntentCategory.QUERY,
+            "entities": [],
+        },
+        "constraint_query": {
+            "patterns": [
+                r"查(一下)?.*约束",
+                r"现在有(多少|哪些)约束",
+            ],
+            "category": IntentCategory.QUERY,
+            "entities": [],
+        },
+        # 管理类（MANAGEMENT）
+        "constraint_tuning": {
+            "patterns": [
+                r"(那条|这个).*约束.*(别扭|太怪|没用|有效)",
+                r"(禁用|调整).*约束",
+            ],
+            "category": IntentCategory.MANAGEMENT,
+            "entities": ["constraint_id"],
+        },
+        "constraint_add": {
+            "patterns": [
+                r"加(一条|个)约束",
+                r"我想加约束",
+            ],
+            "category": IntentCategory.MANAGEMENT,
+            "entities": [],
+        },
+        # 工作流类（WORKFLOW）
+        "inspiration_conflict_resolution": {
+            "patterns": [
+                r"用变体.[ABC12345]",
+                r"放宽.*一次",
+                r"调整.*后重写",
+            ],
+            "category": IntentCategory.WORKFLOW,
+            "entities": ["variant_choice"],
+        },
+        "inspiration_bailout": {
+            "patterns": [
+                r"关(掉|闭).*灵感(引擎)?",
+                r"这章.*不(要)?折腾",
+                r"走原(流程)?",
+            ],
+            "category": IntentCategory.WORKFLOW,
             "entities": [],
         },
     }

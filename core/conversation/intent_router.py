@@ -16,6 +16,11 @@ from core.inspiration.status_reporter import report_status
 from core.inspiration.constraint_library import ConstraintLibrary
 from core.conversation.technique_extractor import TechniqueExtractor
 from core.conversation.eval_criteria_extractor import EvaluationCriteriaExtractor
+from core.extraction.extraction_runner import ExtractionRunner
+from core.extraction.extraction_formatter import (
+    format_start_response,
+    format_status_response,
+)
 
 
 @dataclass
@@ -127,6 +132,9 @@ class IntentRouter:
             "add_evaluation_criteria": self._handle_add_evaluation_criteria,
             "discover_prohibitions_from_file": self._handle_discover_prohibitions_from_file,
             "modify_evaluation_threshold": self._handle_modify_evaluation_threshold,
+            # DATA_EXTRACTION
+            "incremental_extraction": self._handle_incremental_extraction,
+            "full_extraction": self._handle_full_extraction,
         }
         return _table.get(intent)
 
@@ -362,4 +370,28 @@ class IntentRouter:
                 "  3. 原因？"
             ),
             needs_clarification=True,
+        )
+
+    def _handle_incremental_extraction(
+        self, intent: str, entities: Dict[str, Any], user_input: str
+    ) -> RoutingResult:
+        """启动增量提炼（已完成维度自动跳过）"""
+        runner = ExtractionRunner()
+        result = runner.start("incremental")
+        return RoutingResult(
+            success=True,
+            message=format_start_response(result, "incremental"),
+            data={"mode": "incremental", "started": result.get("started", False)},
+        )
+
+    def _handle_full_extraction(
+        self, intent: str, entities: Dict[str, Any], user_input: str
+    ) -> RoutingResult:
+        """启动全量提炼（强制重跑，忽略历史进度）"""
+        runner = ExtractionRunner()
+        result = runner.start("full")
+        return RoutingResult(
+            success=True,
+            message=format_start_response(result, "full"),
+            data={"mode": "full", "started": result.get("started", False)},
         )

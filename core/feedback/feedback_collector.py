@@ -5,6 +5,8 @@
 """
 
 import re
+import json
+from pathlib import Path
 from typing import Dict, List, Optional, Any
 from datetime import datetime
 
@@ -392,3 +394,28 @@ class FeedbackCollector:
     def clear_history(self):
         """清空反馈历史"""
         self.feedback_history.clear()
+
+    @staticmethod
+    def has_feedback_signal(user_input: str) -> bool:
+        """快速检测输入是否含有反馈关键词（用于旁路筛查）"""
+        all_triggers = [
+            kw
+            for tmpl in FEEDBACK_TEMPLATES.values()
+            for kw in tmpl.get("triggers", [])
+        ]
+        return any(t in user_input for t in all_triggers)
+
+    def save_history(self, path: Path) -> None:
+        """持久化 feedback_history 到 JSON 文件"""
+        path = Path(path)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(self.feedback_history, f, ensure_ascii=False, indent=2)
+
+    def load_history(self, path: Path) -> None:
+        """从 JSON 文件恢复 feedback_history；文件不存在时静默跳过"""
+        path = Path(path)
+        if not path.exists():
+            return
+        with open(path, "r", encoding="utf-8") as f:
+            self.feedback_history = json.load(f)
