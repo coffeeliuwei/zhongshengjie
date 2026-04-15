@@ -15,6 +15,7 @@ from typing import Dict, Any, Callable, Optional, List
 from core.inspiration.memory_point_sync import MemoryPointSync
 from core.inspiration.segment_locator import locate_segment
 from core.inspiration.structural_analyzer import analyze
+from core.inspiration.embedder import embed_text
 
 
 # 情绪类型识别词典
@@ -206,6 +207,12 @@ def handle_reader_feedback(
     scene_type = scene_type_lookup(signal["chapter_ref"])
     structural = analyze(located["segment_text"])
 
+    # 生成真实 embedding（用于记忆点相似度检索）
+    try:
+        embedding = embed_text(located["segment_text"])
+    except Exception:
+        embedding = None  # 模型不可用时降级为 None（sync.create 内部处理零向量）
+
     payload = {
         "segment_text": located["segment_text"],
         "segment_scope": located["segment_scope"],
@@ -230,7 +237,7 @@ def handle_reader_feedback(
             "conflict_type": "user_overturn",
         }
 
-    mp_ids: List[str] = [sync.create(payload)]
+    mp_ids: List[str] = [sync.create(payload, embedding=embedding)]
 
     # 若关键词独立出现，再单独入一条句子级记忆点
     if signal["keyword"] and signal["keyword"] in located["segment_text"]:
@@ -238,7 +245,11 @@ def handle_reader_feedback(
         sent_payload["segment_text"] = signal["keyword"]
         sent_payload["segment_scope"] = "sentence"
         sent_payload["structural_features"] = analyze(signal["keyword"])
-        mp_ids.append(sync.create(sent_payload))
+        try:
+            sent_embedding = embed_text(signal["keyword"])
+        except Exception:
+            sent_embedding = None
+        mp_ids.append(sync.create(sent_payload, embedding=sent_embedding))
 
     return {
         "status": "ok",

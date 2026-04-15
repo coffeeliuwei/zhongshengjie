@@ -66,3 +66,55 @@ def test_get_model_raises_on_missing_path():
 
         with pytest.raises(Exception):
             _load_model()
+
+
+# ===== Task 2 Tests: resonance_feedback.py 传入真实 embedding =====
+
+
+def test_handle_reader_feedback_uses_real_embedding(tmp_path):
+    """handle_reader_feedback 应传入真实 embedding（非全零）给 sync.create"""
+    from unittest.mock import patch, MagicMock, call
+    import re
+
+    # 准备假章节文件
+    chapter_file = tmp_path / "正文" / "第一章.md"
+    chapter_file.parent.mkdir(parents=True, exist_ok=True)
+    chapter_file.write_text(
+        "屋檐滴水，声声入耳，主角心中苦涩难言。\n战斗打响。", encoding="utf-8"
+    )
+
+    mock_sync = MagicMock()
+    mock_sync.create.return_value = "mp_001"
+
+    fake_embedding = [0.5] * 1024  # 非零
+
+    with (
+        patch(
+            "core.inspiration.resonance_feedback._resolve_chapter_path",
+            return_value=chapter_file,
+        ),
+        patch(
+            "core.inspiration.resonance_feedback.MemoryPointSync",
+            return_value=mock_sync,
+        ),
+        patch(
+            "core.inspiration.resonance_feedback.embed_text",
+            return_value=fake_embedding,
+        ) as mock_embed,
+    ):
+        from core.inspiration.resonance_feedback import handle_reader_feedback
+
+        result = handle_reader_feedback(
+            user_input="第一章开头屋檐滴水那句很震撼",
+            scene_type_lookup=lambda ch: "情感",
+        )
+
+    # embed_text 被调用
+    assert mock_embed.called
+    # sync.create 被调用时传入了 embedding 参数
+    call_kwargs = mock_sync.create.call_args
+    assert call_kwargs is not None
+    passed_embedding = call_kwargs[1].get("embedding") or (
+        call_kwargs[0][1] if len(call_kwargs[0]) > 1 else None
+    )
+    assert passed_embedding == fake_embedding
