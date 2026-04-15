@@ -441,12 +441,37 @@ class FileUpdater:
 """
         return content + entry
 
-    def _update_hook_status(
-        self, content: str, data: Dict[str, Any], intent: str
-    ) -> str:
-        """更新伏笔状态"""
-        # TODO: 实现状态更新逻辑
-        return content
+    def _update_hook_status(self, file_path: Path, data: Dict[str, Any]) -> None:
+        """更新伏笔状态（触发/解决）
+
+        Args:
+            file_path: 伏笔台账文件路径
+            data: {"hook_id": str, "new_status": str, "chapter": str}
+        """
+        hook_id = data.get("hook_id", "")
+        new_status = data.get("new_status", "")
+        chapter = data.get("chapter", "")
+        if not hook_id or not new_status:
+            return
+
+        content = file_path.read_text(encoding="utf-8")
+
+        # 找到伏笔块，替换其状态行
+        pattern = rf"(## {re.escape(hook_id)}.*?)\*\*状态\*\*: [^\n]+"
+        replacement = rf"\1**状态**: {new_status}"
+        new_content = re.sub(pattern, replacement, content, flags=re.DOTALL)
+
+        if new_content == content:
+            return  # 未找到目标，不写入
+
+        if chapter:
+            # 同时更新触发章节（若有"**触发章节**"字段）
+            pattern2 = rf"(## {re.escape(hook_id)}.*?)\*\*触发章节\*\*: [^\n]+"
+            new_content = re.sub(
+                pattern2, rf"\1**触发章节**: {chapter}", new_content, flags=re.DOTALL
+            )
+
+        file_path.write_text(new_content, encoding="utf-8")
 
     def _format_resource_entry(
         self, content: str, data: Dict[str, Any], intent: str
