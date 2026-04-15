@@ -118,3 +118,41 @@ def test_handle_reader_feedback_uses_real_embedding(tmp_path):
         call_kwargs[0][1] if len(call_kwargs[0]) > 1 else None
     )
     assert passed_embedding == fake_embedding
+
+
+# ===== Task 3 Tests: workflow_bridge._embed_scene_context 替换零向量 =====
+
+
+def test_embed_scene_context_called_in_select_winner_spec():
+    """select_winner_spec 应调用 embed_scene_context（非零向量占位）"""
+    from unittest.mock import patch, MagicMock
+
+    candidates = [{"id": "v1", "text": "候选文本", "used_constraint_id": None}]
+    scene_context = {"scene_type": "情感", "chapter": "第一章"}
+
+    fake_embedding = [0.3] * 1024
+
+    with (
+        patch(
+            "core.inspiration.workflow_bridge._embed_scene_ctx",
+            return_value=fake_embedding,
+        ) as mock_embed,
+        patch("core.inspiration.workflow_bridge.MemoryPointSync") as MockSync,
+        patch("core.inspiration.workflow_bridge.build_appraisal_spec") as mock_spec,
+    ):
+        MockSync.return_value.count.return_value = 100  # 成长期
+        MockSync.return_value.search_similar.return_value = []
+        mock_spec.return_value = {
+            "skill_name": "novelist-connoisseur",
+            "prompt": "...",
+            "phase": "growing",
+        }
+
+        from core.inspiration.workflow_bridge import select_winner_spec
+
+        select_winner_spec(
+            candidates=candidates,
+            scene_context=scene_context,
+        )
+
+    mock_embed.assert_called_once()

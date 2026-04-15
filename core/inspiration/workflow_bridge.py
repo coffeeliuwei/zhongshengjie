@@ -16,6 +16,7 @@ from core.inspiration.constraint_library import ConstraintLibrary
 from core.inspiration.variant_generator import generate_variant_specs
 from core.inspiration.memory_point_sync import MemoryPointSync
 from core.inspiration.appraisal_agent import build_appraisal_spec
+from core.inspiration.embedder import embed_scene_context as _embed_scene_ctx
 
 
 # 中文作家名 → Skill 名称映射
@@ -76,12 +77,14 @@ def phase1_dispatch(
 
 
 def _embed_scene_context(scene_context: Dict[str, Any]) -> List[float]:
-    """将场景上下文编码为向量（临时实现：返回零向量）
+    """将场景上下文编码为向量（调用 BGE-M3）
 
-    Phase 4 占位实现。实际应接入 BGE-M3 对 scene_context 的文本拼接进行编码。
-    当前返回零向量不影响功能——Qdrant 检索会返回任意结果，但整体流程可跑通。
+    降级：模型不可用时返回零向量（不影响流程跑通，只影响检索质量）。
     """
-    return [0.0] * 1024
+    try:
+        return _embed_scene_ctx(scene_context)
+    except Exception:
+        return [0.0] * 1024
 
 
 def _retrieve_references_for_appraisal(
