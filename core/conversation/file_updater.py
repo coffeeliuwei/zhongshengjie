@@ -580,12 +580,27 @@ class FileUpdater:
 """
         return content + entry
 
-    def _update_payoff_status(
-        self, content: str, data: Dict[str, Any], intent: str
-    ) -> str:
-        """更新承诺状态"""
-        # TODO: 实现状态更新逻辑
-        return content
+    def _update_payoff_status(self, file_path: Path, data: Dict[str, Any]) -> None:
+        """更新承诺状态（已兑现）
+
+        Args:
+            file_path: 承诺台账文件路径
+            data: {"payoff_id": str, "new_status": str, "chapter": str}
+        """
+        # TODO: Task 2 将实现完整逻辑
+        payoff_id = data.get("payoff_id", "")
+        new_status = data.get("new_status", "")
+        if not payoff_id or not new_status:
+            return
+
+        content = file_path.read_text(encoding="utf-8")
+
+        pattern = rf"(## {re.escape(payoff_id)}.*?)\*\*状态\*\*: [^\n]+"
+        replacement = rf"\1**状态**: {new_status}"
+        new_content = re.sub(pattern, replacement, content, flags=re.DOTALL)
+
+        if new_content != content:
+            file_path.write_text(new_content, encoding="utf-8")
 
     # ===== 设定文件更新方法 =====
 
