@@ -391,6 +391,22 @@ def clear_resolved_states(chapter: str, characters: List[str]) -> None:
 
 ### 改动
 
+**修改 `config.json`，在 `database.collections` 下新增：**
+
+```json
+"creation_context": "creation_context"
+```
+
+完整 collections 块变为：
+```json
+"collections": {
+  "novel_settings": "novel_settings_v2",
+  "writing_techniques": "writing_techniques_v2",
+  "case_library": "case_library_v2",
+  "creation_context": "creation_context"
+}
+```
+
 **新增 `.vectorstore/core/creation_context_api.py`：**
 
 ```python
@@ -409,7 +425,11 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from core.config_loader import get_qdrant_url, get_model_path
 
-COLLECTION_NAME = "creation_context"
+from core.config_loader import get_qdrant_url, get_model_path, get_config
+
+# 从 config.json 读取 collection 名，不硬编码
+_cfg = get_config()
+COLLECTION_NAME = _cfg.get("database", {}).get("collections", {}).get("creation_context", "creation_context")
 VECTOR_SIZE = 1024
 
 
