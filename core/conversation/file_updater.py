@@ -115,9 +115,7 @@ class FileUpdater:
         # 检查是否是追踪系统文件
         if intent in self.TRACKING_INTENT_MAP:
             # 追踪系统文件
-            updated_content = self._handle_tracking_file(
-                content, filename, intent, data
-            )
+            updated_content = self._handle_tracking_file(path, content, intent, data)
         elif filename == "人物谱.md":
             updated_content = self._update_character_profile(content, data, intent)
         elif filename == "十大势力.md":
@@ -387,35 +385,47 @@ class FileUpdater:
     # ===== 追踪系统文件处理 =====
 
     def _handle_tracking_file(
-        self, content: str, filename: str, intent: str, data: Dict[str, Any]
+        self, path: Path, content: str, intent: str, data: Dict[str, Any]
     ) -> Optional[str]:
         """
         处理追踪系统文件
 
         Args:
+            path: 文件路径（Path对象）
             content: 文件现有内容
-            filename: 文件名
             intent: 意图类型
             data: 数据内容
 
         Returns:
             更新后的内容，或None表示失败
         """
-        # 根据意图选择格式化方法
-        handlers = {
-            "add_hook": self._format_hook_entry,
+        # 直接文件修改的意图（修改已有条目）
+        direct_file_intents = {
             "advance_hook": self._update_hook_status,
             "resolve_hook": self._update_hook_status,
+            "deliver_payoff": self._update_payoff_status,
+        }
+
+        # 内容追加的意图（添加新条目）
+        content_handlers = {
+            "add_hook": self._format_hook_entry,
             "add_resource": self._format_resource_entry,
             "consume_resource": self._format_resource_entry,
             "add_injury": self._format_injury_entry,
             "add_character_info": self._format_info_entry,
             "share_info": self._format_share_entry,
             "add_payoff": self._format_payoff_entry,
-            "deliver_payoff": self._update_payoff_status,
         }
 
-        handler = handlers.get(intent)
+        # 处理直接文件修改
+        if intent in direct_file_intents:
+            handler = direct_file_intents[intent]
+            handler(path, data)
+            # 重新读取更新后的内容
+            return path.read_text(encoding="utf-8")
+
+        # 处理内容追加
+        handler = content_handlers.get(intent)
         if handler:
             return handler(content, data, intent)
 
