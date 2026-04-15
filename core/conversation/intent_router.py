@@ -132,6 +132,10 @@ class IntentRouter:
             "add_evaluation_criteria": self._handle_add_evaluation_criteria,
             "discover_prohibitions_from_file": self._handle_discover_prohibitions_from_file,
             "modify_evaluation_threshold": self._handle_modify_evaluation_threshold,
+            # CONFIRMATION
+            "confirm_evaluation_criteria": self._handle_confirm_evaluation_criteria,
+            # INSPIRATION WORKFLOW
+            "inspiration_conflict_resolution": self._handle_inspiration_conflict_resolution,
             # DATA_EXTRACTION
             "incremental_extraction": self._handle_incremental_extraction,
             "full_extraction": self._handle_full_extraction,
@@ -370,6 +374,37 @@ class IntentRouter:
                 "  3. 原因？"
             ),
             needs_clarification=True,
+        )
+
+    def _handle_confirm_evaluation_criteria(
+        self, intent: str, entities: Dict[str, Any], user_input: str
+    ) -> RoutingResult:
+        """确认将评估标准/禁止项添加入库"""
+        criterion_name = entities.get("criterion_name", "该禁止项")
+        return RoutingResult(
+            success=True,
+            message=f"已确认入库：{criterion_name}。\n"
+            "禁止项已添加到评估标准库，下次生成时将自动检查。",
+            data={"confirmed": True, "criterion_name": criterion_name},
+        )
+
+    def _handle_inspiration_conflict_resolution(
+        self, intent: str, entities: Dict[str, Any], user_input: str
+    ) -> RoutingResult:
+        """处理用户与鉴赏师冲突——用户表态接受或推翻"""
+        resolution = entities.get("resolution", "")
+        if "推翻" in user_input or "不接受" in user_input or resolution == "reject":
+            return RoutingResult(
+                success=True,
+                message="已记录：你推翻了鉴赏师的选择。\n"
+                "请告诉我你更倾向哪个变体，以及原因（可选）。",
+                data={"conflict_resolution": "user_overturn"},
+                needs_clarification=True,
+            )
+        return RoutingResult(
+            success=True,
+            message="已记录：接受鉴赏师的选择。此次结果将作为正向参照保留。",
+            data={"conflict_resolution": "accept_connoisseur"},
         )
 
     def _handle_incremental_extraction(

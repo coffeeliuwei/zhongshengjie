@@ -664,7 +664,11 @@ class IntentClassifier:
 
         # 检查是否有多个高置信度匹配（模糊情况）
         best_match = matches[0]
-        is_ambiguous = len(matches) > 1 and matches[1]["confidence"] > 0.7
+        is_ambiguous = (
+            len(matches) > 1
+            and matches[1]["confidence"] > 0.7
+            and (matches[0]["confidence"] - matches[1]["confidence"]) < 0.1
+        )
 
         return IntentResult(
             intent=best_match["intent"],
@@ -699,35 +703,18 @@ class IntentClassifier:
         return entities
 
     def _calculate_confidence(self, match: re.Match, text: str, is_core: bool) -> float:
-        """
-        计算置信度
+        """计算意图置信度
 
-        Args:
-            match: 正则匹配对象
-            text: 输入文本
-            is_core: 是否核心意图
-
-        Returns:
-            置信度 (0.0-1.0)
+        基于关键词是否为核心意图，不依赖输入长度，保证稳定性。
         """
-        # 基础置信度
         base_confidence = 0.9 if is_core else 0.8
 
-        # 匹配长度占比
-        match_length = match.end() - match.start()
-        text_length = len(text)
-        length_ratio = match_length / text_length if text_length > 0 else 0
+        # 匹配到的关键词在 text 中的位置越靠前（开头），置信度微增
+        match_start = match.start()
+        text_length = max(len(text), 1)
+        position_bonus = 0.05 * (1 - match_start / text_length)
 
-        # 如果匹配覆盖大部分文本，置信度更高
-        confidence = base_confidence + (length_ratio * 0.1)
-
-        # 如果匹配了多个实体，置信度更高
-        entity_count = len(match.groups())
-        if entity_count > 0:
-            filled_entities = sum(1 for g in match.groups() if g)
-            confidence += (filled_entities / entity_count) * 0.05
-
-        return min(confidence, 1.0)
+        return min(1.0, base_confidence + position_bonus)
 
     def get_intent_info(self, intent_name: str) -> Optional[Dict]:
         """获取意图详细信息"""

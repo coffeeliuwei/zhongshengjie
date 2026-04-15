@@ -182,7 +182,14 @@ class FeedbackProcessor:
             improvement_points.extend(keywords)
 
         # 去重
-        improvement_points = list(set(improvement_points))
+        # 有序去重：保留首次出现顺序
+        seen = set()
+        deduped = []
+        for point in improvement_points:
+            if point and point not in seen:
+                seen.add(point)
+                deduped.append(point)
+        improvement_points = deduped
 
         return improvement_points
 

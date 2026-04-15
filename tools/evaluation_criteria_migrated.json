@@ -1,7 +1,7 @@
 {
   "migrated_at": "2026-04-13T21:08:52.641367",
   "source": "C:\\Users\\39477\\.agents\\skills\\novelist-evaluator\\SKILL.md",
-  "count": 31,
+  "count": 38,
   "criteria": [
     {
       "id": "eval_prohibition_001",
@@ -541,7 +541,112 @@
       "created_at": "2026-04-15T11:13:31.962401",
       "updated_at": "2026-04-15T11:13:31.962401",
       "is_active": true
+    },
+    {
+      "id": "eval_prohibition_user_20260416003518",
+      "dimension_type": "prohibition",
+      "dimension_name": "禁止项检测",
+      "name": "新禁止项",
+      "pattern": "示例待填写",
+      "examples": [
+        "示例待填写"
+      ],
+      "threshold": "出现1个即失败",
+      "source": "user_dialogue",
+      "created_at": "2026-04-16T00:35:18.504546",
+      "updated_at": "2026-04-16T00:35:18.504546",
+      "is_active": true
+    },
+    {
+      "id": "eval_prohibition_user_20260416010034",
+      "dimension_type": "prohibition",
+      "dimension_name": "禁止项检测",
+      "name": "新禁止项",
+      "pattern": "示例待填写",
+      "examples": [
+        "示例待填写"
+      ],
+      "threshold": "出现1个即失败",
+      "source": "user_dialogue",
+      "created_at": "2026-04-16T01:00:34.357076",
+      "updated_at": "2026-04-16T01:00:34.357076",
+      "is_active": true
+    },
+    {
+      "id": "eval_prohibition_user_20260416010109",
+      "dimension_type": "prohibition",
+      "dimension_name": "禁止项检测",
+      "name": "新禁止项",
+      "pattern": "示例待填写",
+      "examples": [
+        "示例待填写"
+      ],
+      "threshold": "出现1个即失败",
+      "source": "user_dialogue",
+      "created_at": "2026-04-16T01:01:09.282523",
+      "updated_at": "2026-04-16T01:01:09.282523",
+      "is_active": true
+    },
+    {
+      "id": "eval_prohibition_user_20260416010126",
+      "dimension_type": "prohibition",
+      "dimension_name": "禁止项检测",
+      "name": "新禁止项",
+      "pattern": "示例待填写",
+      "examples": [
+        "示例待填写"
+      ],
+      "threshold": "出现1个即失败",
+      "source": "user_dialogue",
+      "created_at": "2026-04-16T01:01:26.805441",
+      "updated_at": "2026-04-16T01:01:26.805441",
+      "is_active": true
+    },
+    {
+      "id": "eval_prohibition_user_20260416010144",
+      "dimension_type": "prohibition",
+      "dimension_name": "禁止项检测",
+      "name": "新禁止项",
+      "pattern": "示例待填写",
+      "examples": [
+        "示例待填写"
+      ],
+      "threshold": "出现1个即失败",
+      "source": "user_dialogue",
+      "created_at": "2026-04-16T01:01:44.962584",
+      "updated_at": "2026-04-16T01:01:44.962584",
+      "is_active": true
+    },
+    {
+      "id": "eval_prohibition_user_20260416010800",
+      "dimension_type": "prohibition",
+      "dimension_name": "禁止项检测",
+      "name": "新禁止项",
+      "pattern": "示例待填写",
+      "examples": [
+        "示例待填写"
+      ],
+      "threshold": "出现1个即失败",
+      "source": "user_dialogue",
+      "created_at": "2026-04-16T01:08:00.869348",
+      "updated_at": "2026-04-16T01:08:00.869348",
+      "is_active": true
+    },
+    {
+      "id": "eval_prohibition_user_20260416010840",
+      "dimension_type": "prohibition",
+      "dimension_name": "禁止项检测",
+      "name": "新禁止项",
+      "pattern": "示例待填写",
+      "examples": [
+        "示例待填写"
+      ],
+      "threshold": "出现1个即失败",
+      "source": "user_dialogue",
+      "created_at": "2026-04-16T01:08:40.221463",
+      "updated_at": "2026-04-16T01:08:40.221463",
+      "is_active": true
     }
   ],
-  "updated_at": "2026-04-15T11:13:31.962401"
+  "updated_at": "2026-04-16T01:08:40.221463"
 }

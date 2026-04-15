@@ -1,3 +1,17 @@
+"""config_manager.py — 已废弃（Deprecated）
+
+此模块与 core.config_loader 功能重叠。
+新代码请直接使用 core.config_loader，此模块将在后续版本移除。
+"""
+
+import warnings
+
+warnings.warn(
+    "core.config_manager is deprecated. Use core.config_loader instead.",
+    DeprecationWarning,
+    stacklevel=2,
+)
+
 """
 配置管理器
 统一管理项目所有配置，支持CONFIG.md扩展和动态配置

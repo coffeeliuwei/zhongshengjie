@@ -13,8 +13,17 @@ import random
 from pathlib import Path
 from typing import List, Optional, Dict, Any
 
+from core.config_loader import get_project_root as _get_project_root
 
-DEFAULT_CONSTRAINTS_PATH = Path("config/dimensions/anti_template_constraints.json")
+
+def _default_constraints_path() -> Path:
+    """从配置获取约束文件路径（而非硬编码相对路径）"""
+    return (
+        _get_project_root() / "config" / "dimensions" / "anti_template_constraints.json"
+    )
+
+
+DEFAULT_CONSTRAINTS_PATH = _default_constraints_path()
 
 
 class ConstraintLibrary:
@@ -57,38 +66,28 @@ class ConstraintLibrary:
         n: int,
         seed: Optional[int] = None,
     ) -> List[Dict[str, Any]]:
-        """为 N 个变体抽取约束，不同类别优先
+        """为 N 个变体抽取约束，加权随机（保证类别多样性）
 
         策略：
-        1. 池中不足 N 个时，返回全部可用
-        2. 池中足够时，先从不同类别各抽 1 条，再随机补足
+        1. 从池中随机抽 n 个（加权，多条目类别有更大概率）
+        2. 若所有 n 个来自同一类别，替换 1 个为其他类别（保证最低多样性）
         """
+        import random
+
         pool = self.filter_by_scene_type(scene_type)
         if len(pool) <= n:
             return pool
 
-        rng = random.Random(seed) if seed is not None else random.Random()
+        rng = random.Random(seed)
+        picked = rng.sample(pool, n)
 
-        # 按类别分桶
-        by_category: Dict[str, List[Dict[str, Any]]] = {}
-        for c in pool:
-            by_category.setdefault(c["category"], []).append(c)
-
-        picked: List[Dict[str, Any]] = []
-        # 第一轮：每类别抽 1 条，类别顺序随机
-        categories = list(by_category.keys())
-        rng.shuffle(categories)
-        for cat in categories:
-            if len(picked) >= n:
-                break
-            choice = rng.choice(by_category[cat])
-            picked.append(choice)
-
-        # 第二轮：若仍不足 N，从剩余池中随机补
-        if len(picked) < n:
-            remaining = [c for c in pool if c not in picked]
-            rng.shuffle(remaining)
-            picked.extend(remaining[: n - len(picked)])
+        # 检查多样性：若全部来自同一类别，替换最后一个
+        categories_picked = {p.get("category") for p in picked}
+        if len(categories_picked) == 1 and len(pool) > n:
+            other_pool = [c for c in pool if c.get("category") not in categories_picked]
+            if other_pool:
+                replacement = rng.choice(other_pool)
+                picked[-1] = replacement
 
         return picked
 
