@@ -30,6 +30,7 @@ from .progress_reporter import ProgressReporter
 from .undo_manager import UndoManager, OperationType
 from .missing_info_detector import MissingInfoDetector, MissingInfo
 from .data_extractor import ConversationDataExtractor, ExtractionResult
+from .intent_router import IntentRouter
 
 
 class ProcessingStatus(Enum):
@@ -330,13 +331,20 @@ class ConversationEntryLayer:
             return self._execute_tracking(intent_result, user_input)
 
         else:
-            # 默认处理
-            return ProcessingResult(
-                status=ProcessingStatus.SUCCESS,
+            # 通过路由器处理未覆盖类别（FEEDBACK、MANAGEMENT、TECHNIQUE、EVALUATION 等）
+            routing_result = IntentRouter().route(
                 intent=intent,
                 entities=entities,
-                message=f"已识别意图：{intent}",
-                data={"intent": intent, "entities": entities},
+                user_input=user_input,
+            )
+            return ProcessingResult(
+                status=ProcessingStatus.SUCCESS
+                if routing_result.success
+                else ProcessingStatus.FAILED,
+                intent=intent,
+                entities=entities,
+                message=routing_result.message,
+                data=routing_result.data,
             )
 
     def _execute_setting_update(
