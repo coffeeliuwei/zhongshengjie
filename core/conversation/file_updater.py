@@ -117,7 +117,14 @@ class FileUpdater:
             # 追踪系统文件
             updated_content = self._handle_tracking_file(path, content, intent, data)
         elif filename == "人物谱.md":
-            updated_content = self._update_character_profile(content, data, intent)
+            if intent in ("add_character_ability", "add_character_relation"):
+                # 直接文件修改，不需要返回内容
+                self._update_character_profile(path, content, data, intent)
+                updated_content = path.read_text(encoding="utf-8")
+            else:
+                updated_content = self._update_character_profile(
+                    path, content, data, intent
+                )
         elif filename == "十大势力.md":
             updated_content = self._update_faction_profile(content, data, intent)
         elif filename == "力量体系.md":
@@ -605,15 +612,27 @@ class FileUpdater:
     # ===== 设定文件更新方法 =====
 
     def _update_character_profile(
-        self, content: str, data: Dict[str, Any], intent: str
+        self, path: Path, content: str, data: Dict[str, Any], intent: str
     ) -> str:
-        """更新人物谱"""
+        """更新人物谱
+
+        Args:
+            path: 文件路径
+            content: 文件内容
+            data: 数据
+            intent: 意图类型
+
+        Returns:
+            更新后的内容（对于直接文件修改的意图，返回None，实际文件已修改）
+        """
         if intent == "add_character":
             return self._append_new_character(content, data)
         elif intent == "add_character_ability":
-            return self._add_character_ability(content, data)
+            self._add_character_ability(path, data)
+            return None  # 文件已直接修改
         elif intent == "add_character_relation":
-            return self._add_character_relation(content, data)
+            self._add_character_relation(path, data)
+            return None  # 文件已直接修改
         return content
 
     def _append_new_character(self, content: str, data: Dict[str, Any]) -> str:
@@ -631,17 +650,67 @@ class FileUpdater:
 """
         return content + entry
 
-    def _add_character_ability(self, content: str, data: Dict[str, Any]) -> str:
-        """添加角色能力"""
-        character = data.get("character", "")
-        ability = data.get("ability", "")
-        # TODO: 实现在角色条目中添加能力
-        return content + f"\n> 新能力: {character} - {ability}\n"
+    def _add_character_ability(self, file_path: Path, data: Dict[str, Any]) -> None:
+        """在角色条目的"能力"小节追加新能力
 
-    def _add_character_relation(self, content: str, data: Dict[str, Any]) -> str:
-        """添加角色关系"""
-        # TODO: 实现关系添加
-        return content
+        Args:
+            file_path: 人物档案文件路径
+            data: {"character_name": str, "ability": str}
+        """
+        character_name = data.get("character_name", "")
+        ability = data.get("ability", "")
+        if not character_name or not ability:
+            return
+
+        content = file_path.read_text(encoding="utf-8")
+        ability_line = f"- {ability}"
+
+        # 找到角色块中的"### 能力"小节，在其后追加
+        pattern = rf"(## {re.escape(character_name)}.*?### 能力\n)(.*?)(\n###|\n##|\Z)"
+
+        def replacer(m):
+            abilities = m.group(2).rstrip("\n")
+            return f"{m.group(1)}{abilities}\n{ability_line}\n{m.group(3)}"
+
+        new_content = re.sub(pattern, replacer, content, flags=re.DOTALL)
+        if new_content == content:
+            # 角色不存在或无"能力"小节，直接追加到文件末尾
+            new_content = (
+                content.rstrip()
+                + f"\n\n## {character_name}\n### 能力\n{ability_line}\n"
+            )
+
+        file_path.write_text(new_content, encoding="utf-8")
+
+    def _add_character_relation(self, file_path: Path, data: Dict[str, Any]) -> None:
+        """在角色条目的"关系"小节追加新关系
+
+        Args:
+            file_path: 人物档案文件路径
+            data: {"character_name": str, "relation": str}
+        """
+        character_name = data.get("character_name", "")
+        relation = data.get("relation", "")
+        if not character_name or not relation:
+            return
+
+        content = file_path.read_text(encoding="utf-8")
+        relation_line = f"- {relation}"
+
+        pattern = rf"(## {re.escape(character_name)}.*?### 关系\n)(.*?)(\n###|\n##|\Z)"
+
+        def replacer(m):
+            relations = m.group(2).rstrip("\n")
+            return f"{m.group(1)}{relations}\n{relation_line}\n{m.group(3)}"
+
+        new_content = re.sub(pattern, replacer, content, flags=re.DOTALL)
+        if new_content == content:
+            new_content = (
+                content.rstrip()
+                + f"\n\n## {character_name}\n### 关系\n{relation_line}\n"
+            )
+
+        file_path.write_text(new_content, encoding="utf-8")
 
     def _update_faction_profile(
         self, content: str, data: Dict[str, Any], intent: str

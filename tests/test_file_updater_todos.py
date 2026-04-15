@@ -108,3 +108,61 @@ def test_update_payoff_status_missing_does_not_crash(tmp_path):
         data={"payoff_id": "承诺999", "new_status": "已兑现", "chapter": "第五章"},
     )
     assert payoff_file.read_text(encoding="utf-8") == PAYOFF_LEDGER_SAMPLE
+
+
+CHARACTER_PROFILE_SAMPLE = """# 人物档案
+
+## 凌云
+**势力**: 天剑宗
+**境界**: 凝气期
+
+### 能力
+- 御剑术
+
+### 关系
+- 师父：剑圣
+"""
+
+
+def test_add_character_ability(tmp_path):
+    """测试添加角色能力"""
+    updater = make_updater(tmp_path)
+    profile_file = tmp_path / "characters.md"
+    profile_file.write_text(CHARACTER_PROFILE_SAMPLE, encoding="utf-8")
+
+    updater._add_character_ability(
+        file_path=profile_file,
+        data={"character_name": "凌云", "ability": "天雷斩"},
+    )
+
+    content = profile_file.read_text(encoding="utf-8")
+    assert "天雷斩" in content
+
+
+def test_add_character_relation(tmp_path):
+    """测试添加角色关系"""
+    updater = make_updater(tmp_path)
+    profile_file = tmp_path / "characters.md"
+    profile_file.write_text(CHARACTER_PROFILE_SAMPLE, encoding="utf-8")
+
+    updater._add_character_relation(
+        file_path=profile_file,
+        data={"character_name": "凌云", "relation": "师弟：墨尘"},
+    )
+
+    content = profile_file.read_text(encoding="utf-8")
+    assert "墨尘" in content
+
+
+def test_add_character_ability_missing_character(tmp_path):
+    """测试不存在角色时追加到文件末尾"""
+    updater = make_updater(tmp_path)
+    profile_file = tmp_path / "characters.md"
+    profile_file.write_text(CHARACTER_PROFILE_SAMPLE, encoding="utf-8")
+    # 角色不存在时追加到文件末尾
+    updater._add_character_ability(
+        file_path=profile_file,
+        data={"character_name": "不存在角色", "ability": "未知技能"},
+    )
+    content = profile_file.read_text(encoding="utf-8")
+    assert "未知技能" in content
