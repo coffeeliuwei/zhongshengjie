@@ -1,0 +1,1 @@
+import pytest\n\ndef test_import_loader():\n    import core.evaluation_criteria_loader as loader\n    assert hasattr(loader, "load_criteria")\n\ndef test_feedback_processor_loads():\n    from core.feedback_processor import FeedbackProcessor\n    fp = FeedbackProcessor()\n    c = fp.get_criteria()\n    assert isinstance(c, dict)

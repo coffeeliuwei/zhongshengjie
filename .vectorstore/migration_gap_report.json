@@ -1,0 +1,91 @@
+{
+  "timestamp": "2026-04-06T15:30:34.178946",
+  "summary": {
+    "case_library_count": 342163,
+    "case_library_v2_count": 338827,
+    "gap": 3336,
+    "gap_percentage": 0.97,
+    "unmigrated_ids": 90363
+  },
+  "structure_comparison": {
+    "old_vector_size": 384,
+    "new_vector_size": 1024,
+    "new_sparse_vectors": true,
+    "old_payload_fields": [
+      "case_id",
+      "content_preview",
+      "emotion_value",
+      "genre",
+      "keywords",
+      "novel_name",
+      "quality_score",
+      "scene_type",
+      "techniques",
+      "word_count",
+      "writers"
+    ],
+    "new_payload_fields": [
+      "content",
+      "genre",
+      "novel_name",
+      "quality_score",
+      "scene_type",
+      "word_count"
+    ],
+    "added_fields": [
+      "content"
+    ],
+    "removed_fields": [
+      "case_id",
+      "content_preview",
+      "emotion_value",
+      "keywords",
+      "techniques",
+      "writers"
+    ]
+  },
+  "sample_analysis": {
+    "sample_size": 100,
+    "reasons": {
+      "未知原因": 100
+    },
+    "content_length_stats": {
+      "avg": 500.0,
+      "min": 499,
+      "max": 500,
+      "zero_length_count": 0,
+      "short_count": 0
+    },
+    "top_novels": {
+      "九转重生-六品菠萝": 2,
+      "DOTA之最强血脉-老牛十八岁(1)": 2,
+      "万古魔尊-天狼": 2,
+      "北洋枭雄-雨天下雨": 2,
+      "傲世傀儡师-永寂山河": 2,
+      "傲世无双-少年小蜗": 2,
+      "全能武神-天天方便面": 1,
+      "元首的愤怒-落爷孤独": 1,
+      "上古传人在都市-天堂羽": 1,
+      "傲天神命-凌云大少": 1
+    },
+    "top_scene_types": {
+      "打脸场景": 43,
+      "高潮场景": 33,
+      "对话场景": 6,
+      "心理场景": 5,
+      "悬念场景": 2,
+      "开篇场景": 2,
+      "结尾场景": 2,
+      "冲突升级": 1,
+      "伏笔设置": 1,
+      "情感场景": 1
+    }
+  },
+  "migration_recommendations": [
+    {
+      "issue": "未识别原因的未迁移数据",
+      "estimated_count": 90363,
+      "recommendation": "需要详细排查，可能因迁移脚本中断、网络问题等导致"
+    }
+  ]
+}

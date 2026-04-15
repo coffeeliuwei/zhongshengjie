@@ -1,0 +1,56 @@
+{
+  "version": "1.0",
+  "records": {
+    "merge": [
+      {
+        "id": "merge_20260402_140129",
+        "type": "merge",
+        "timestamp": "2026-04-02T14:01:29.565523",
+        "result": {
+          "success": true,
+          "name": "哲学设定+社会结构合并验证"
+        },
+        "metadata": {}
+      }
+    ],
+    "worldview": [
+      {
+        "id": "worldview_20260402_140129",
+        "type": "worldview",
+        "timestamp": "2026-04-02T14:01:29.565523",
+        "result": {
+          "success": true,
+          "name": "力量体系+时间线验证"
+        },
+        "metadata": {}
+      }
+    ],
+    "structures": [
+      {
+        "id": "structures_20260402_140129",
+        "type": "structures",
+        "timestamp": "2026-04-02T14:01:29.566520",
+        "result": {
+          "success": false,
+          "name": "技法入库验证"
+        },
+        "metadata": {}
+      }
+    ],
+    "verify_all": [
+      {
+        "id": "verify_all_20260402_140129",
+        "type": "verify_all",
+        "timestamp": "2026-04-02T14:01:29.567835",
+        "result": {
+          "passed": 2,
+          "failed": 1,
+          "total": 3
+        },
+        "metadata": {
+          "timestamp": "2026-04-02T14:01:29.567835"
+        }
+      }
+    ]
+  }
+}

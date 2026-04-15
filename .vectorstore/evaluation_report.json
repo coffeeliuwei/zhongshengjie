@@ -1,0 +1,1136 @@
+{
+  "summary": {
+    "total_tests": 24,
+    "avg_latency_ms": 1035.6484651565552,
+    "avg_top1_hit": 0.0,
+    "avg_top3_hit": 0.0,
+    "avg_keyword_match": 0.74
+  },
+  "by_collection": {
+    "writing_techniques_v2": {
+      "count": 8,
+      "avg_latency_ms": 339.60554003715515,
+      "avg_score": 0.55679832825,
+      "avg_hit_rate_top3": 0.0
+    },
+    "case_library_v2": {
+      "count": 6,
+      "avg_latency_ms": 2563.105662663778,
+      "avg_score": 0.585891735,
+      "avg_hit_rate_top3": 0.0
+    },
+    "character_relation_v1": {
+      "count": 3,
+      "avg_latency_ms": 883.1972281138102,
+      "avg_score": 0.6304908536666667,
+      "avg_hit_rate_top3": 0.0
+    },
+    "power_vocabulary_v1": {
+      "count": 4,
+      "avg_latency_ms": 572.4093317985535,
+      "avg_score": 0.76925995975,
+      "avg_hit_rate_top3": 0.0
+    },
+    "worldview_element_v1": {
+      "count": 2,
+      "avg_latency_ms": 796.9597578048706,
+      "avg_score": 0.736207268,
+      "avg_hit_rate_top3": 0.0
+    },
+    "novel_settings_v2": {
+      "count": 1,
+      "avg_latency_ms": 226.93634033203125,
+      "avg_score": 0.508023844,
+      "avg_hit_rate_top3": 0.0
+    }
+  },
+  "latency_stats": {
+    "p50": 639.9633884429932,
+    "p95": 2781.6271781921387,
+    "p99": 3362.504482269287,
+    "min": 151.11613273620605,
+    "max": 3362.504482269287
+  },
+  "detailed_results": [
+    {
+      "query": "主角突破境界时的心理变化",
+      "collection": "writing_techniques_v2",
+      "hit_rate_top1": 0.0,
+      "hit_rate_top3": 0.0,
+      "latency_ms": 1403.0864238739014,
+      "source": "dense",
+      "details": [
+        {
+          "rank": 1,
+          "score": 0.5803852,
+          "text": "",
+          "dense_rank": 1,
+          "colbert_rank": null
+        },
+        {
+          "rank": 2,
+          "score": 0.57788575,
+          "text": "",
+          "dense_rank": 2,
+          "colbert_rank": null
+        },
+        {
+          "rank": 3,
+          "score": 0.57218164,
+          "text": "",
+          "dense_rank": 3,
+          "colbert_rank": null
+        },
+        {
+          "rank": 4,
+          "score": 0.55895746,
+          "text": "",
+          "dense_rank": 4,
+          "colbert_rank": null
+        },
+        {
+          "rank": 5,
+          "score": 0.55851275,
+          "text": "",
+          "dense_rank": 5,
+          "colbert_rank": null
+        }
+      ]
+    },
+    {
+      "query": "主角突破境界时的心理变化",
+      "collection": "case_library_v2",
+      "hit_rate_top1": 0.0,
+      "hit_rate_top3": 0.0,
+      "latency_ms": 3362.504482269287,
+      "source": "dense",
+      "details": [
+        {
+          "rank": 1,
+          "score": 0.6391732,
+          "text": "",
+          "dense_rank": 1,
+          "colbert_rank": null
+        },
+        {
+          "rank": 2,
+          "score": 0.6391732,
+          "text": "",
+          "dense_rank": 2,
+          "colbert_rank": null
+        },
+        {
+          "rank": 3,
+          "score": 0.63283396,
+          "text": "",
+          "dense_rank": 3,
+          "colbert_rank": null
+        },
+        {
+          "rank": 4,
+          "score": 0.6249145,
+          "text": "",
+          "dense_rank": 4,
+          "colbert_rank": null
+        },
+        {
+          "rank": 5,
+          "score": 0.62072575,
+          "text": "",
+          "dense_rank": 5,
+          "colbert_rank": null
+        }
+      ]
+    },
+    {
+      "query": "师徒传承的责任与代价",
+      "collection": "writing_techniques_v2",
+      "hit_rate_top1": 0.0,
+      "hit_rate_top3": 0.0,
+      "latency_ms": 188.83538246154785,
+      "source": "dense",
+      "details": [
+        {
+          "rank": 1,
+          "score": 0.46210346,
+          "text": "",
+          "dense_rank": 1,
+          "colbert_rank": null
+        },
+        {
+          "rank": 2,
+          "score": 0.45500836,
+          "text": "",
+          "dense_rank": 2,
+          "colbert_rank": null
+        },
+        {
+          "rank": 3,
+          "score": 0.45340073,
+          "text": "",
+          "dense_rank": 3,
+          "colbert_rank": null
+        },
+        {
+          "rank": 4,
+          "score": 0.44533515,
+          "text": "",
+          "dense_rank": 4,
+          "colbert_rank": null
+        },
+        {
+          "rank": 5,
+          "score": 0.42685813,
+          "text": "",
+          "dense_rank": 5,
+          "colbert_rank": null
+        }
+      ]
+    },
+    {
+      "query": "师徒传承的责任与代价",
+      "collection": "character_relation_v1",
+      "hit_rate_top1": 0.0,
+      "hit_rate_top3": 0.0,
+      "latency_ms": 933.1486225128174,
+      "source": "dense",
+      "details": [
+        {
+          "rank": 1,
+          "score": 0.620363,
+          "text": "弟子 与 弟子们 的关系",
+          "dense_rank": 1,
+          "colbert_rank": null
+        },
+        {
+          "rank": 2,
+          "score": 0.5992545,
+          "text": "仆人 与 弟子 的关系",
+          "dense_rank": 2,
+          "colbert_rank": null
+        },
+        {
+          "rank": 3,
+          "score": 0.58592844,
+          "text": "弟子们 与 脚步声 的关系",
+          "dense_rank": 3,
+          "colbert_rank": null
+        },
+        {
+          "rank": 4,
+          "score": 0.58592844,
+          "text": "弟子们 与 脚步声 的关系",
+          "dense_rank": 4,
+          "colbert_rank": null
+        },
+        {
+          "rank": 5,
+          "score": 0.5720403,
+          "text": "弟子 与 脚步声 的关系",
+          "dense_rank": 5,
+          "colbert_rank": null
+        }
+      ]
+    },
+    {
+      "query": "战斗胜利后的反思",
+      "collection": "writing_techniques_v2",
+      "hit_rate_top1": 0.0,
+      "hit_rate_top3": 0.0,
+      "latency_ms": 154.01458740234375,
+      "source": "dense",
+      "details": [
+        {
+          "rank": 1,
+          "score": 0.592468,
+          "text": "",
+          "dense_rank": 1,
+          "colbert_rank": null
+        },
+        {
+          "rank": 2,
+          "score": 0.57679904,
+          "text": "",
+          "dense_rank": 2,
+          "colbert_rank": null
+        },
+        {
+          "rank": 3,
+          "score": 0.56006575,
+          "text": "",
+          "dense_rank": 3,
+          "colbert_rank": null
+        },
+        {
+          "rank": 4,
+          "score": 0.55339426,
+          "text": "",
+          "dense_rank": 4,
+          "colbert_rank": null
+        },
+        {
+          "rank": 5,
+          "score": 0.55188394,
+          "text": "",
+          "dense_rank": 5,
+          "colbert_rank": null
+        }
+      ]
+    },
+    {
+      "query": "战斗胜利后的反思",
+      "collection": "case_library_v2",
+      "hit_rate_top1": 0.0,
+      "hit_rate_top3": 0.0,
+      "latency_ms": 2781.6271781921387,
+      "source": "dense",
+      "details": [
+        {
+          "rank": 1,
+          "score": 0.6056359,
+          "text": "",
+          "dense_rank": 1,
+          "colbert_rank": null
+        },
+        {
+          "rank": 2,
+          "score": 0.60491645,
+          "text": "",
+          "dense_rank": 2,
+          "colbert_rank": null
+        },
+        {
+          "rank": 3,
+          "score": 0.60491645,
+          "text": "",
+          "dense_rank": 3,
+          "colbert_rank": null
+        },
+        {
+          "rank": 4,
+          "score": 0.6036688,
+          "text": "",
+          "dense_rank": 4,
+          "colbert_rank": null
+        },
+        {
+          "rank": 5,
+          "score": 0.6002042,
+          "text": "",
+          "dense_rank": 5,
+          "colbert_rank": null
+        }
+      ]
+    },
+    {
+      "query": "开篇场景如何建立世界观",
+      "collection": "writing_techniques_v2",
+      "hit_rate_top1": 0.0,
+      "hit_rate_top3": 0.0,
+      "latency_ms": 232.21683502197266,
+      "source": "dense",
+      "details": [
+        {
+          "rank": 1,
+          "score": 0.6501376,
+          "text": "",
+          "dense_rank": 1,
+          "colbert_rank": null
+        },
+        {
+          "rank": 2,
+          "score": 0.6315609,
+          "text": "",
+          "dense_rank": 2,
+          "colbert_rank": null
+        },
+        {
+          "rank": 3,
+          "score": 0.6297481,
+          "text": "",
+          "dense_rank": 3,
+          "colbert_rank": null
+        },
+        {
+          "rank": 4,
+          "score": 0.62175524,
+          "text": "",
+          "dense_rank": 4,
+          "colbert_rank": null
+        },
+        {
+          "rank": 5,
+          "score": 0.62140775,
+          "text": "",
+          "dense_rank": 5,
+          "colbert_rank": null
+        }
+      ]
+    },
+    {
+      "query": "开篇场景如何建立世界观",
+      "collection": "case_library_v2",
+      "hit_rate_top1": 0.0,
+      "hit_rate_top3": 0.0,
+      "latency_ms": 2376.8951892852783,
+      "source": "dense",
+      "details": [
+        {
+          "rank": 1,
+          "score": 0.5695888,
+          "text": "",
+          "dense_rank": 1,
+          "colbert_rank": null
+        },
+        {
+          "rank": 2,
+          "score": 0.5695888,
+          "text": "",
+          "dense_rank": 2,
+          "colbert_rank": null
+        },
+        {
+          "rank": 3,
+          "score": 0.5695888,
+          "text": "",
+          "dense_rank": 3,
+          "colbert_rank": null
+        },
+        {
+          "rank": 4,
+          "score": 0.5695888,
+          "text": "",
+          "dense_rank": 4,
+          "colbert_rank": null
+        },
+        {
+          "rank": 5,
+          "score": 0.5695888,
+          "text": "",
+          "dense_rank": 5,
+          "colbert_rank": null
+        }
+      ]
+    },
+    {
+      "query": "悬念如何吸引读者",
+      "collection": "writing_techniques_v2",
+      "hit_rate_top1": 0.0,
+      "hit_rate_top3": 0.0,
+      "latency_ms": 181.48207664489746,
+      "source": "dense",
+      "details": [
+        {
+          "rank": 1,
+          "score": 0.69535875,
+          "text": "",
+          "dense_rank": 1,
+          "colbert_rank": null
+        },
+        {
+          "rank": 2,
+          "score": 0.6925454,
+          "text": "",
+          "dense_rank": 2,
+          "colbert_rank": null
+        },
+        {
+          "rank": 3,
+          "score": 0.6812627,
+          "text": "",
+          "dense_rank": 3,
+          "colbert_rank": null
+        },
+        {
+          "rank": 4,
+          "score": 0.6775782,
+          "text": "",
+          "dense_rank": 4,
+          "colbert_rank": null
+        },
+        {
+          "rank": 5,
+          "score": 0.66814417,
+          "text": "",
+          "dense_rank": 5,
+          "colbert_rank": null
+        }
+      ]
+    },
+    {
+      "query": "剑法",
+      "collection": "power_vocabulary_v1",
+      "hit_rate_top1": 0.0,
+      "hit_rate_top3": 0.0,
+      "latency_ms": 515.4757499694824,
+      "source": "dense",
+      "details": [
+        {
+          "rank": 1,
+          "score": 0.7747527,
+          "text": "剑术法术",
+          "dense_rank": 1,
+          "colbert_rank": null
+        },
+        {
+          "rank": 2,
+          "score": 0.7747527,
+          "text": "剑术法术",
+          "dense_rank": 2,
+          "colbert_rank": null
+        },
+        {
+          "rank": 3,
+          "score": 0.75932276,
+          "text": "剑客的剑术",
+          "dense_rank": 3,
+          "colbert_rank": null
+        },
+        {
+          "rank": 4,
+          "score": 0.7562393,
+          "text": "的道法剑术",
+          "dense_rank": 4,
+          "colbert_rank": null
+        },
+        {
+          "rank": 5,
+          "score": 0.7562393,
+          "text": "的道法剑术",
+          "dense_rank": 5,
+          "colbert_rank": null
+        }
+      ]
+    },
+    {
+      "query": "剑法",
+      "collection": "worldview_element_v1",
+      "hit_rate_top1": 0.0,
+      "hit_rate_top3": 0.0,
+      "latency_ms": 1029.057502746582,
+      "source": "dense",
+      "details": [
+        {
+          "rank": 1,
+          "score": 0.6839969,
+          "text": "自身的剑道",
+          "dense_rank": 1,
+          "colbert_rank": null
+        },
+        {
+          "rank": 2,
+          "score": 0.6839334,
+          "text": "剑的道",
+          "dense_rank": 2,
+          "colbert_rank": null
+        },
+        {
+          "rank": 3,
+          "score": 0.68087375,
+          "text": "自己的剑道",
+          "dense_rank": 3,
+          "colbert_rank": null
+        },
+        {
+          "rank": 4,
+          "score": 0.68087375,
+          "text": "自己的剑道",
+          "dense_rank": 4,
+          "colbert_rank": null
+        },
+        {
+          "rank": 5,
+          "score": 0.68087375,
+          "text": "自己的剑道",
+          "dense_rank": 5,
+          "colbert_rank": null
+        }
+      ]
+    },
+    {
+      "query": "元婴期",
+      "collection": "power_vocabulary_v1",
+      "hit_rate_top1": 0.0,
+      "hit_rate_top3": 0.0,
+      "latency_ms": 517.9183483123779,
+      "source": "dense",
+      "details": [
+        {
+          "rank": 1,
+          "score": 0.84067476,
+          "text": "元婴期的境",
+          "dense_rank": 1,
+          "colbert_rank": null
+        },
+        {
+          "rank": 2,
+          "score": 0.84067476,
+          "text": "元婴期的境",
+          "dense_rank": 2,
+          "colbert_rank": null
+        },
+        {
+          "rank": 3,
+          "score": 0.84067476,
+          "text": "元婴期的境",
+          "dense_rank": 3,
+          "colbert_rank": null
+        },
+        {
+          "rank": 4,
+          "score": 0.77481985,
+          "text": "元婴境",
+          "dense_rank": 4,
+          "colbert_rank": null
+        },
+        {
+          "rank": 5,
+          "score": 0.77481985,
+          "text": "元婴境",
+          "dense_rank": 5,
+          "colbert_rank": null
+        }
+      ]
+    },
+    {
+      "query": "宗门",
+      "collection": "worldview_element_v1",
+      "hit_rate_top1": 0.0,
+      "hit_rate_top3": 0.0,
+      "latency_ms": 564.8620128631592,
+      "source": "dense",
+      "details": [
+        {
+          "rank": 1,
+          "score": 0.85346615,
+          "text": "宗掌门",
+          "dense_rank": 1,
+          "colbert_rank": null
+        },
+        {
+          "rank": 2,
+          "score": 0.8106555,
+          "text": "我宗门",
+          "dense_rank": 2,
+          "colbert_rank": null
+        },
+        {
+          "rank": 3,
+          "score": 0.8106555,
+          "text": "我宗门",
+          "dense_rank": 3,
+          "colbert_rank": null
+        },
+        {
+          "rank": 4,
+          "score": 0.8019377,
+          "text": "古宗门",
+          "dense_rank": 4,
+          "colbert_rank": null
+        },
+        {
+          "rank": 5,
+          "score": 0.78769135,
+          "text": "大宗门",
+          "dense_rank": 5,
+          "colbert_rank": null
+        }
+      ]
+    },
+    {
+      "query": "师徒关系",
+      "collection": "character_relation_v1",
+      "hit_rate_top1": 0.0,
+      "hit_rate_top3": 0.0,
+      "latency_ms": 779.8609733581543,
+      "source": "dense",
+      "details": [
+        {
+          "rank": 1,
+          "score": 0.7875663,
+          "text": "弟子 与 弟子们 的关系",
+          "dense_rank": 1,
+          "colbert_rank": null
+        },
+        {
+          "rank": 2,
+          "score": 0.7563807,
+          "text": "仆人 与 弟子 的关系",
+          "dense_rank": 2,
+          "colbert_rank": null
+        },
+        {
+          "rank": 3,
+          "score": 0.7222394,
+          "text": "\"师 与 宝贝 的关系",
+          "dense_rank": 3,
+          "colbert_rank": null
+        },
+        {
+          "rank": 4,
+          "score": 0.7005964,
+          "text": "仆从们 与 弟兄们 的关系",
+          "dense_rank": 4,
+          "colbert_rank": null
+        },
+        {
+          "rank": 5,
+          "score": 0.6970752,
+          "text": "弟子们 与 门童 的关系",
+          "dense_rank": 5,
+          "colbert_rank": null
+        }
+      ]
+    },
+    {
+      "query": "突破",
+      "collection": "power_vocabulary_v1",
+      "hit_rate_top1": 0.0,
+      "hit_rate_top3": 0.0,
+      "latency_ms": 616.2798404693604,
+      "source": "dense",
+      "details": [
+        {
+          "rank": 1,
+          "score": 0.7983083,
+          "text": "突破这个境",
+          "dense_rank": 1,
+          "colbert_rank": null
+        },
+        {
+          "rank": 2,
+          "score": 0.7983083,
+          "text": "突破这个境",
+          "dense_rank": 2,
+          "colbert_rank": null
+        },
+        {
+          "rank": 3,
+          "score": 0.7983083,
+          "text": "突破这个境",
+          "dense_rank": 3,
+          "colbert_rank": null
+        },
+        {
+          "rank": 4,
+          "score": 0.7903574,
+          "text": "到了突破阶",
+          "dense_rank": 4,
+          "colbert_rank": null
+        },
+        {
+          "rank": 5,
+          "score": 0.7881413,
+          "text": "突破境",
+          "dense_rank": 5,
+          "colbert_rank": null
+        }
+      ]
+    },
+    {
+      "query": "突破",
+      "collection": "case_library_v2",
+      "hit_rate_top1": 0.0,
+      "hit_rate_top3": 0.0,
+      "latency_ms": 2405.7419300079346,
+      "source": "dense",
+      "details": [
+        {
+          "rank": 1,
+          "score": 0.55588317,
+          "text": "",
+          "dense_rank": 1,
+          "colbert_rank": null
+        },
+        {
+          "rank": 2,
+          "score": 0.5421008,
+          "text": "",
+          "dense_rank": 2,
+          "colbert_rank": null
+        },
+        {
+          "rank": 3,
+          "score": 0.54198635,
+          "text": "",
+          "dense_rank": 3,
+          "colbert_rank": null
+        },
+        {
+          "rank": 4,
+          "score": 0.5406518,
+          "text": "",
+          "dense_rank": 4,
+          "colbert_rank": null
+        },
+        {
+          "rank": 5,
+          "score": 0.53824085,
+          "text": "",
+          "dense_rank": 5,
+          "colbert_rank": null
+        }
+      ]
+    },
+    {
+      "query": "主角突破金丹期时的战斗场景描写",
+      "collection": "writing_techniques_v2",
+      "hit_rate_top1": 0.0,
+      "hit_rate_top3": 0.0,
+      "latency_ms": 231.54616355895996,
+      "source": "dense",
+      "details": [
+        {
+          "rank": 1,
+          "score": 0.55833054,
+          "text": "",
+          "dense_rank": 1,
+          "colbert_rank": null
+        },
+        {
+          "rank": 2,
+          "score": 0.543591,
+          "text": "",
+          "dense_rank": 2,
+          "colbert_rank": null
+        },
+        {
+          "rank": 3,
+          "score": 0.53415763,
+          "text": "",
+          "dense_rank": 3,
+          "colbert_rank": null
+        },
+        {
+          "rank": 4,
+          "score": 0.5273427,
+          "text": "",
+          "dense_rank": 4,
+          "colbert_rank": null
+        },
+        {
+          "rank": 5,
+          "score": 0.5237517,
+          "text": "",
+          "dense_rank": 5,
+          "colbert_rank": null
+        }
+      ]
+    },
+    {
+      "query": "主角突破金丹期时的战斗场景描写",
+      "collection": "case_library_v2",
+      "hit_rate_top1": 0.0,
+      "hit_rate_top3": 0.0,
+      "latency_ms": 2376.0087490081787,
+      "source": "dense",
+      "details": [
+        {
+          "rank": 1,
+          "score": 0.59894466,
+          "text": "",
+          "dense_rank": 1,
+          "colbert_rank": null
+        },
+        {
+          "rank": 2,
+          "score": 0.59894466,
+          "text": "",
+          "dense_rank": 2,
+          "colbert_rank": null
+        },
+        {
+          "rank": 3,
+          "score": 0.58597434,
+          "text": "",
+          "dense_rank": 3,
+          "colbert_rank": null
+        },
+        {
+          "rank": 4,
+          "score": 0.583354,
+          "text": "",
+          "dense_rank": 4,
+          "colbert_rank": null
+        },
+        {
+          "rank": 5,
+          "score": 0.5802646,
+          "text": "",
+          "dense_rank": 5,
+          "colbert_rank": null
+        }
+      ]
+    },
+    {
+      "query": "主角突破金丹期时的战斗场景描写",
+      "collection": "power_vocabulary_v1",
+      "hit_rate_top1": 0.0,
+      "hit_rate_top3": 0.0,
+      "latency_ms": 639.9633884429932,
+      "source": "dense",
+      "details": [
+        {
+          "rank": 1,
+          "score": 0.7648668,
+          "text": "突破金丹境",
+          "dense_rank": 1,
+          "colbert_rank": null
+        },
+        {
+          "rank": 2,
+          "score": 0.7648668,
+          "text": "突破金丹境",
+          "dense_rank": 2,
+          "colbert_rank": null
+        },
+        {
+          "rank": 3,
+          "score": 0.7648668,
+          "text": "突破金丹境",
+          "dense_rank": 3,
+          "colbert_rank": null
+        },
+        {
+          "rank": 4,
+          "score": 0.7648668,
+          "text": "突破金丹境",
+          "dense_rank": 4,
+          "colbert_rank": null
+        },
+        {
+          "rank": 5,
+          "score": 0.7171895,
+          "text": "破到金丹境",
+          "dense_rank": 5,
+          "colbert_rank": null
+        }
+      ]
+    },
+    {
+      "query": "师徒传承中的情感冲突和矛盾",
+      "collection": "writing_techniques_v2",
+      "hit_rate_top1": 0.0,
+      "hit_rate_top3": 0.0,
+      "latency_ms": 174.5467185974121,
+      "source": "dense",
+      "details": [
+        {
+          "rank": 1,
+          "score": 0.558331,
+          "text": "",
+          "dense_rank": 1,
+          "colbert_rank": null
+        },
+        {
+          "rank": 2,
+          "score": 0.53961253,
+          "text": "",
+          "dense_rank": 2,
+          "colbert_rank": null
+        },
+        {
+          "rank": 3,
+          "score": 0.5169718,
+          "text": "",
+          "dense_rank": 3,
+          "colbert_rank": null
+        },
+        {
+          "rank": 4,
+          "score": 0.5153029,
+          "text": "",
+          "dense_rank": 4,
+          "colbert_rank": null
+        },
+        {
+          "rank": 5,
+          "score": 0.5101835,
+          "text": "",
+          "dense_rank": 5,
+          "colbert_rank": null
+        }
+      ]
+    },
+    {
+      "query": "师徒传承中的情感冲突和矛盾",
+      "collection": "character_relation_v1",
+      "hit_rate_top1": 0.0,
+      "hit_rate_top3": 0.0,
+      "latency_ms": 936.582088470459,
+      "source": "dense",
+      "details": [
+        {
+          "rank": 1,
+          "score": 0.65420663,
+          "text": "弟子 与 弟子们 的关系",
+          "dense_rank": 1,
+          "colbert_rank": null
+        },
+        {
+          "rank": 2,
+          "score": 0.6243776,
+          "text": "仆人 与 弟子 的关系",
+          "dense_rank": 2,
+          "colbert_rank": null
+        },
+        {
+          "rank": 3,
+          "score": 0.60874224,
+          "text": "\"师 与 宝贝 的关系",
+          "dense_rank": 3,
+          "colbert_rank": null
+        },
+        {
+          "rank": 4,
+          "score": 0.6038363,
+          "text": "弟子们 与 西北风 的关系",
+          "dense_rank": 4,
+          "colbert_rank": null
+        },
+        {
+          "rank": 5,
+          "score": 0.6021535,
+          "text": "弟子们 与 脚步声 的关系",
+          "dense_rank": 5,
+          "colbert_rank": null
+        }
+      ]
+    },
+    {
+      "query": "开篇场景中人物出场的世界观铺垫",
+      "collection": "writing_techniques_v2",
+      "hit_rate_top1": 0.0,
+      "hit_rate_top3": 0.0,
+      "latency_ms": 151.11613273620605,
+      "source": "dense",
+      "details": [
+        {
+          "rank": 1,
+          "score": 0.58747643,
+          "text": "",
+          "dense_rank": 1,
+          "colbert_rank": null
+        },
+        {
+          "rank": 2,
+          "score": 0.5843375,
+          "text": "",
+          "dense_rank": 2,
+          "colbert_rank": null
+        },
+        {
+          "rank": 3,
+          "score": 0.5778108,
+          "text": "",
+          "dense_rank": 3,
+          "colbert_rank": null
+        },
+        {
+          "rank": 4,
+          "score": 0.5743461,
+          "text": "",
+          "dense_rank": 4,
+          "colbert_rank": null
+        },
+        {
+          "rank": 5,
+          "score": 0.56645495,
+          "text": "",
+          "dense_rank": 5,
+          "colbert_rank": null
+        }
+      ]
+    },
+    {
+      "query": "开篇场景中人物出场的世界观铺垫",
+      "collection": "case_library_v2",
+      "hit_rate_top1": 0.0,
+      "hit_rate_top3": 0.0,
+      "latency_ms": 2075.8564472198486,
+      "source": "dense",
+      "details": [
+        {
+          "rank": 1,
+          "score": 0.61622846,
+          "text": "",
+          "dense_rank": 1,
+          "colbert_rank": null
+        },
+        {
+          "rank": 2,
+          "score": 0.61622846,
+          "text": "",
+          "dense_rank": 2,
+          "colbert_rank": null
+        },
+        {
+          "rank": 3,
+          "score": 0.61622846,
+          "text": "",
+          "dense_rank": 3,
+          "colbert_rank": null
+        },
+        {
+          "rank": 4,
+          "score": 0.61622846,
+          "text": "",
+          "dense_rank": 4,
+          "colbert_rank": null
+        },
+        {
+          "rank": 5,
+          "score": 0.595053,
+          "text": "",
+          "dense_rank": 5,
+          "colbert_rank": null
+        }
+      ]
+    },
+    {
+      "query": "开篇场景中人物出场的世界观铺垫",
+      "collection": "novel_settings_v2",
+      "hit_rate_top1": 0.0,
+      "hit_rate_top3": 0.0,
+      "latency_ms": 226.93634033203125,
+      "source": "dense",
+      "details": [
+        {
+          "rank": 1,
+          "score": 0.5444381,
+          "text": "",
+          "dense_rank": 1,
+          "colbert_rank": null
+        },
+        {
+          "rank": 2,
+          "score": 0.5386902,
+          "text": "",
+          "dense_rank": 2,
+          "colbert_rank": null
+        },
+        {
+          "rank": 3,
+          "score": 0.5273906,
+          "text": "",
+          "dense_rank": 3,
+          "colbert_rank": null
+        },
+        {
+          "rank": 4,
+          "score": 0.51439,
+          "text": "",
+          "dense_rank": 4,
+          "colbert_rank": null
+        },
+        {
+          "rank": 5,
+          "score": 0.5059763,
+          "text": "",
+          "dense_rank": 5,
+          "colbert_rank": null
+        }
+      ]
+    }
+  ]
+}

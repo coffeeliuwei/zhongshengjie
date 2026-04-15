@@ -1,0 +1,1 @@
+from core.evaluation_criteria_loader import load_criteria\n\nclass FeedbackProcessor:\n    def __init__(self):\n        self._criteria = None\n\n    def get_criteria(self):\n        self._criteria = load_criteria()\n        return self._criteria

@@ -1,0 +1,1136 @@
+{
+  "summary": {
+    "total_tests": 24,
+    "avg_latency_ms": 990.4331962267557,
+    "avg_top1_hit": 0.3333333333333333,
+    "avg_top3_hit": 0.3333333333333333,
+    "avg_keyword_match": 0.7833333333333333
+  },
+  "by_collection": {
+    "writing_techniques_v2": {
+      "count": 8,
+      "avg_latency_ms": 298.4338700771332,
+      "avg_score": 0.55679832825,
+      "avg_hit_rate_top3": 0.5833333333333334
+    },
+    "case_library_v2": {
+      "count": 6,
+      "avg_latency_ms": 2197.7723042170205,
+      "avg_score": 0.585891735,
+      "avg_hit_rate_top3": 0.2222222222222222
+    },
+    "character_relation_v1": {
+      "count": 3,
+      "avg_latency_ms": 1029.6663443247478,
+      "avg_score": 0.6304908536666667,
+      "avg_hit_rate_top3": 0.0
+    },
+    "power_vocabulary_v1": {
+      "count": 4,
+      "avg_latency_ms": 738.8210892677307,
+      "avg_score": 0.76925995975,
+      "avg_hit_rate_top3": 0.0
+    },
+    "worldview_element_v1": {
+      "count": 2,
+      "avg_latency_ms": 1001.794695854187,
+      "avg_score": 0.736207268,
+      "avg_hit_rate_top3": 0.0
+    },
+    "novel_settings_v2": {
+      "count": 1,
+      "avg_latency_ms": 148.41914176940918,
+      "avg_score": 0.508023844,
+      "avg_hit_rate_top3": 0.0
+    }
+  },
+  "latency_stats": {
+    "p50": 804.2595386505127,
+    "p95": 2392.5232887268066,
+    "p99": 2500.0126361846924,
+    "min": 113.24834823608398,
+    "max": 2500.0126361846924
+  },
+  "detailed_results": [
+    {
+      "query": "主角突破境界时的心理变化",
+      "collection": "writing_techniques_v2",
+      "hit_rate_top1": 1.0,
+      "hit_rate_top3": 0.6666666666666666,
+      "latency_ms": 1263.901948928833,
+      "source": "dense",
+      "details": [
+        {
+          "rank": 1,
+          "score": 0.5803852,
+          "text": "## 六、实战案例分析\n\n### 案例1：升级突破悬念\n\n**设置：** 主角卡在瓶颈期，急需突破\n\n**铺垫：**\n1. 展现瓶颈的痛苦\n2. 设置时间限制（比赛、危机）\n3. 尝试各种方法失败\n4",
+          "dense_rank": 1,
+          "colbert_rank": null
+        },
+        {
+          "rank": 2,
+          "score": 0.57788575,
+          "text": "## 二、三个层次的世界观展开\n\n### 第一层：跟主角认知走\n\n**核心**：读者的认知 = 主角的认知\n\n**案例：《凡人修仙传》**\n\n```\n韩立刚入七玄门 → 以为江湖武功最强\n      ",
+          "dense_rank": 2,
+          "colbert_rank": null
+        },
+        {
+          "rank": 3,
+          "score": 0.57218164,
+          "text": "### 结构拆解\n\n| 阶段 | 内容 | 要点 |\n|------|------|------|\n| **前期铺垫** | 男主角一直被对手打压，心中积聚怒火 | 练功有成，找机会教训 |\n| **",
+          "dense_rank": 3,
+          "colbert_rank": null
+        },
+        {
+          "rank": 4,
+          "score": 0.55895746,
+          "text": "## 一、核心认知\n\n> **两本小说可以共享同样的境界系统（练气、筑基、金丹、元婴...），但如果一个有智慧天材地宝需要智取、随机秘境、灵兽坐骑——另一个有矿石型宝物、固定布局遗迹、剑飞行——这两本",
+          "dense_rank": 4,
+          "colbert_rank": null
+        },
+        {
+          "rank": 5,
+          "score": 0.55851275,
+          "text": "### 评分：9/10\n\n**亮点**：\n- 快慢交替合理，战斗前后有铺陈和清场\n- 情绪曲线强烈：平静→紧张→愤怒→悲壮→绝望→压抑→决心\n- 时间折叠自然：十年跨度用三行完成\n\n**改进建议**：",
+          "dense_rank": 5,
+          "colbert_rank": null
+        }
+      ]
+    },
+    {
+      "query": "主角突破境界时的心理变化",
+      "collection": "case_library_v2",
+      "hit_rate_top1": 0.0,
+      "hit_rate_top3": 0.3333333333333333,
+      "latency_ms": 2500.0126361846924,
+      "source": "dense",
+      "details": [
+        {
+          "rank": 1,
+          "score": 0.6391732,
+          "text": "第四章成为炼器师\n\n时间如湍急的流水，一晃即过。\n距离林风开始锻炼身体，已经过去了十天。\n《消除》初级版，他已经通过了第七关，精神力提升了28p,加上原本的20p，总计48p，时间加速效果达到了4.8",
+          "dense_rank": 1,
+          "colbert_rank": null
+        },
+        {
+          "rank": 2,
+          "score": 0.6391732,
+          "text": "第四章成为炼器师\n\n时间如湍急的流水，一晃即过。\n距离林风开始锻炼身体，已经过去了十天。\n《消除》初级版，他已经通过了第七关，精神力提升了28p,加上原本的20p，总计48p，时间加速效果达到了4.8",
+          "dense_rank": 2,
+          "colbert_rank": null
+        },
+        {
+          "rank": 3,
+          "score": 0.63283396,
+          "text": "心境比实力境界高这是所有武者都梦寐以求的事情，如今楚林峰的心境比实力境界高了整整一个大境界，本来应该高兴的但是此刻他却高兴不起来，金仙到大罗金仙是一个坎，一个很难跨越的坎。\n看着周围的人都在不停的修习",
+          "dense_rank": 3,
+          "colbert_rank": null
+        },
+        {
+          "rank": 4,
+          "score": 0.6249145,
+          "text": "第八十六章巨大提升！\n求推荐票，大家都来投票吧，每天都有的免费票，还差一点就到1350票了，想要明天三更的书友们加把力啊！\n“心灵风暴，是一种特殊的状态，意志达到天人境，定住精神，锁定心灵，就掌控了七",
+          "dense_rank": 4,
+          "colbert_rank": null
+        },
+        {
+          "rank": 5,
+          "score": 0.62072575,
+          "text": "瞬间，逍遥身上释放出来一股从未有过的气息，那是一种天生而成的战意。\n接着，他的丹田之中发生了剧烈的变化，真气瞬间喷发出来，围绕着丹田中心急速运转。\n一盏茶过去了，逍遥丹田中的真气渐渐地转化成真元，而他",
+          "dense_rank": 5,
+          "colbert_rank": null
+        }
+      ]
+    },
+    {
+      "query": "师徒传承的责任与代价",
+      "collection": "writing_techniques_v2",
+      "hit_rate_top1": 1.0,
+      "hit_rate_top3": 1.0,
+      "latency_ms": 116.57047271728516,
+      "source": "dense",
+      "details": [
+        {
+          "rank": 1,
+          "score": 0.46210346,
+          "text": "## 九、功法代价与风险设计\n\n强大功法必须有相应代价与风险：如《混沌吞天诀》可吞噬天地各种能量转化为自身修为，但吞噬过程凶险万分，稍有不慎便会被能量反噬；《血魔噬魂功》以血为引吞噬他人血液与灵魂提升",
+          "dense_rank": 1,
+          "colbert_rank": null
+        },
+        {
+          "rank": 2,
+          "score": 0.45500836,
+          "text": "## 六、技法四：选择有代价\n\n### 定义\n\n> **选择有代价 = 每个重大选择有不可逆后果。**\n\n### 为什么至关重要\n\n| 原因 | 说明 |\n|------|------|\n| 真实感 ",
+          "dense_rank": 2,
+          "colbert_rank": null
+        },
+        {
+          "rank": 3,
+          "score": 0.45340073,
+          "text": "## 七、死亡与代价\n\n### 死亡是终极代价\n\n在故事中，代价是驱动人物成长的核心：\n\n| 代价层级 | 说明 |\n|---------|------|\n| 小代价 | 受伤、失去财物、关系破裂 |",
+          "dense_rank": 3,
+          "colbert_rank": null
+        },
+        {
+          "rank": 4,
+          "score": 0.44533515,
+          "text": "## 十一、实战应用示例\n\n```\n【冲突：天剑宗内部分裂】\n\n基础信息：\n├── 类型：价值观冲突 + 权力冲突\n├── 层级：势力层\n├── 角色：保守派长老 vs 改革派弟子\n\n三层矛盾：\n├─",
+          "dense_rank": 4,
+          "colbert_rank": null
+        },
+        {
+          "rank": 5,
+          "score": 0.42685813,
+          "text": "## 二十五、有代价胜利设计\n\n有代价的胜利更真实感人：(1)惨胜—赢了但付出重大代价（重伤、失去重要之人、消耗关键底牌）；(2)两败俱伤—双方皆受损失，斗争双方皆受到伤害；(3)胜利后遗症—伤势恢复",
+          "dense_rank": 5,
+          "colbert_rank": null
+        }
+      ]
+    },
+    {
+      "query": "师徒传承的责任与代价",
+      "collection": "character_relation_v1",
+      "hit_rate_top1": 0.0,
+      "hit_rate_top3": 0.0,
+      "latency_ms": 1028.4979343414307,
+      "source": "dense",
+      "details": [
+        {
+          "rank": 1,
+          "score": 0.620363,
+          "text": "弟子 与 弟子们 的关系",
+          "dense_rank": 1,
+          "colbert_rank": null
+        },
+        {
+          "rank": 2,
+          "score": 0.5992545,
+          "text": "仆人 与 弟子 的关系",
+          "dense_rank": 2,
+          "colbert_rank": null
+        },
+        {
+          "rank": 3,
+          "score": 0.58592844,
+          "text": "弟子们 与 脚步声 的关系",
+          "dense_rank": 3,
+          "colbert_rank": null
+        },
+        {
+          "rank": 4,
+          "score": 0.58592844,
+          "text": "弟子们 与 脚步声 的关系",
+          "dense_rank": 4,
+          "colbert_rank": null
+        },
+        {
+          "rank": 5,
+          "score": 0.5720403,
+          "text": "弟子 与 脚步声 的关系",
+          "dense_rank": 5,
+          "colbert_rank": null
+        }
+      ]
+    },
+    {
+      "query": "战斗胜利后的反思",
+      "collection": "writing_techniques_v2",
+      "hit_rate_top1": 1.0,
+      "hit_rate_top3": 1.0,
+      "latency_ms": 113.24834823608398,
+      "source": "dense",
+      "details": [
+        {
+          "rank": 1,
+          "score": 0.592468,
+          "text": "## 十一、总结\n\n### 核心公式\n\n```\n好的战斗场景 = 清晰 + 平衡 + 展示\n\n节奏 = 短句 + 断裂 + 变化\n\n角色聚焦 = 动作中的选择 + 后果 + 成长\n```\n\n### 核",
+          "dense_rank": 1,
+          "colbert_rank": null
+        },
+        {
+          "rank": 2,
+          "score": 0.57679904,
+          "text": "## 二十五、有代价胜利设计\n\n有代价的胜利更真实感人：(1)惨胜—赢了但付出重大代价（重伤、失去重要之人、消耗关键底牌）；(2)两败俱伤—双方皆受损失，斗争双方皆受到伤害；(3)胜利后遗症—伤势恢复",
+          "dense_rank": 2,
+          "colbert_rank": null
+        },
+        {
+          "rank": 3,
+          "score": 0.56006575,
+          "text": "## 一、斗争与胜利主题\n\n**适用于：主角激励、逆境翻盘、战斗宣言**\n\n| 语录 | 出处 | 小说应用场景 |\n|------|------|-------------|\n| **\"星星之火，可",
+          "dense_rank": 3,
+          "colbert_rank": null
+        },
+        {
+          "rank": 4,
+          "score": 0.55339426,
+          "text": "### 结构拆解（第二战）\n\n| 阶段 | 内容 | 要点 |\n|------|------|------|\n| **再次铺垫** | 上次败的人实际是某强者，不甘心 | 男主回去练功 |\n| **新",
+          "dense_rank": 4,
+          "colbert_rank": null
+        },
+        {
+          "rank": 5,
+          "score": 0.55188394,
+          "text": "## 十一、学习路径回顾\n\n```\n战斗学习路径：\n├── 第1步：理论学习（本笔记）\n│   ├── 有代价的胜利技法\n│   ├── 群体牺牲有姓名技法\n│   ├── 战术逻辑技法\n│   ├─",
+          "dense_rank": 5,
+          "colbert_rank": null
+        }
+      ]
+    },
+    {
+      "query": "战斗胜利后的反思",
+      "collection": "case_library_v2",
+      "hit_rate_top1": 1.0,
+      "hit_rate_top3": 1.0,
+      "latency_ms": 2253.800392150879,
+      "source": "dense",
+      "details": [
+        {
+          "rank": 1,
+          "score": 0.6056359,
+          "text": "临时新闻发布会现场。\n条件有些简陋，一间宽大的木头房子，房顶还是有枯草和泥土混合物铺盖出来的，遇到大暴雨肯定坍塌，好在雨水不多，凑活着用，但国际记者团没人嫌弃这种地方，还生怕不能进入，抢到一手新闻。\n",
+          "dense_rank": 1,
+          "colbert_rank": null
+        },
+        {
+          "rank": 2,
+          "score": 0.60491645,
+          "text": "阿伦他们看着满地的尸体，年轻的机关武者们神情有些恍惚，还夹杂着不能置信。\n这……就胜利了？这就是黄金兵团？\n他们呆呆地看着安静的战场，满地的尸体，还有那直径超过3公里、触目惊心、焦黑的巨大深坑，无不在",
+          "dense_rank": 2,
+          "colbert_rank": null
+        },
+        {
+          "rank": 3,
+          "score": 0.60491645,
+          "text": "阿伦他们看着满地的尸体，年轻的机关武者们神情有些恍惚，还夹杂着不能置信。\n这……就胜利了？这就是黄金兵团？\n他们呆呆地看着安静的战场，满地的尸体，还有那直径超过3公里、触目惊心、焦黑的巨大深坑，无不在",
+          "dense_rank": 3,
+          "colbert_rank": null
+        },
+        {
+          "rank": 4,
+          "score": 0.6036688,
+          "text": "深入敌境，处境着实危险，下令退兵。\n于是弗雷其克城不费一兵一卒，单靠钟声及吟唱圣诗令法国退兵，一时传为美谈。\n面对危机，只有保持适当的冷静，才能找到赢得胜利的机会。在战场上如此，在人生的道路上亦然。越",
+          "dense_rank": 4,
+          "colbert_rank": null
+        },
+        {
+          "rank": 5,
+          "score": 0.6002042,
+          "text": "阿伦他们看着满地的尸体，年轻的机关武者们神情有些恍惚，还夹杂着不能置信。\n这……就胜利了？这就是黄金兵团？\n他们呆呆地看着安静的战场，满地的尸体，还有那直径超过3公里、触目惊心、焦黑的巨大深坑，无不在",
+          "dense_rank": 5,
+          "colbert_rank": null
+        }
+      ]
+    },
+    {
+      "query": "开篇场景如何建立世界观",
+      "collection": "writing_techniques_v2",
+      "hit_rate_top1": 1.0,
+      "hit_rate_top3": 1.0,
+      "latency_ms": 146.18635177612305,
+      "source": "dense",
+      "details": [
+        {
+          "rank": 1,
+          "score": 0.6501376,
+          "text": "## 七、开篇设计实战应用\n\n### 7.1 SCQA框架开篇\n\n**基于金字塔原理的开篇结构**：\n\n```\nS（情境）：建立读者熟悉的世界\n\"修仙界宗门林立，强者为尊。\"\n\nC（冲突）：打破平衡\n",
+          "dense_rank": 1,
+          "colbert_rank": null
+        },
+        {
+          "rank": 2,
+          "score": 0.6315609,
+          "text": "## 二、三个层次的世界观展开\n\n### 第一层：跟主角认知走\n\n**核心**：读者的认知 = 主角的认知\n\n**案例：《凡人修仙传》**\n\n```\n韩立刚入七玄门 → 以为江湖武功最强\n      ",
+          "dense_rank": 2,
+          "colbert_rank": null
+        },
+        {
+          "rank": 3,
+          "score": 0.6297481,
+          "text": "## 二、第一阶段：构思与世界观\n\n### 2.1 核心公理确立\n\n**步骤**：\n\n```\nStep 1：确定世界观核心公理（1-3条）\n├── 公理必须不可打破\n├── 公理是世界底层规则\n└──",
+          "dense_rank": 3,
+          "colbert_rank": null
+        },
+        {
+          "rank": 4,
+          "score": 0.62175524,
+          "text": "## 六、小世界原则\n\n罗伯特·麦基强调\"迈向好故事的第一步是创作出一个小小的、可知的世界\"。一味追求宏大世界观会导致设定流于表面，优秀的世界观不在于规模而在于深度。创作者应像上帝了解自己的世界一样对",
+          "dense_rank": 4,
+          "colbert_rank": null
+        },
+        {
+          "rank": 5,
+          "score": 0.62140775,
+          "text": "## 一、时空定位法\n\n创建世界观的首要工作是确定\"何时=时间\"与\"何地=地点\"两个核心要素。时间维度包括时代切片（选取特定历史阶段作为原型）和编年史（从创世开始梳理世界演变）；空间维度包括主舞台划定",
+          "dense_rank": 5,
+          "colbert_rank": null
+        }
+      ]
+    },
+    {
+      "query": "开篇场景如何建立世界观",
+      "collection": "case_library_v2",
+      "hit_rate_top1": 0.0,
+      "hit_rate_top3": 0.0,
+      "latency_ms": 1740.1278018951416,
+      "source": "dense",
+      "details": [
+        {
+          "rank": 1,
+          "score": 0.5695888,
+          "text": "第一章：新手\n\n“哼，这么久没玩了，说不定死在二三十级呢……”夏驰宇撇了撇嘴道，喝了口水润了润嗓子后，便戴上体感头盔说：“那就开始吧。”\n按下开始键后，一股电流带来的轻微麻痹感从头顶扩散开，随即眼前的",
+          "dense_rank": 1,
+          "colbert_rank": null
+        },
+        {
+          "rank": 2,
+          "score": 0.5695888,
+          "text": "第一章：新手\n\n“哼，这么久没玩了，说不定死在二三十级呢……”夏驰宇撇了撇嘴道，喝了口水润了润嗓子后，便戴上体感头盔说：“那就开始吧。”\n按下开始键后，一股电流带来的轻微麻痹感从头顶扩散开，随即眼前的",
+          "dense_rank": 2,
+          "colbert_rank": null
+        },
+        {
+          "rank": 3,
+          "score": 0.5695888,
+          "text": "第一章：新手\n\n“哼，这么久没玩了，说不定死在二三十级呢……”夏驰宇撇了撇嘴道，喝了口水润了润嗓子后，便戴上体感头盔说：“那就开始吧。”\n按下开始键后，一股电流带来的轻微麻痹感从头顶扩散开，随即眼前的",
+          "dense_rank": 3,
+          "colbert_rank": null
+        },
+        {
+          "rank": 4,
+          "score": 0.5695888,
+          "text": "",
+          "dense_rank": 4,
+          "colbert_rank": null
+        },
+        {
+          "rank": 5,
+          "score": 0.5695888,
+          "text": "第一章：新手\n\n“哼，这么久没玩了，说不定死在二三十级呢……”夏驰宇撇了撇嘴道，喝了口水润了润嗓子后，便戴上体感头盔说：“那就开始吧。”\n按下开始键后，一股电流带来的轻微麻痹感从头顶扩散开，随即眼前的",
+          "dense_rank": 5,
+          "colbert_rank": null
+        }
+      ]
+    },
+    {
+      "query": "悬念如何吸引读者",
+      "collection": "writing_techniques_v2",
+      "hit_rate_top1": 1.0,
+      "hit_rate_top3": 1.0,
+      "latency_ms": 196.02084159851074,
+      "source": "dense",
+      "details": [
+        {
+          "rank": 1,
+          "score": 0.69535875,
+          "text": "## 一、横切悬念，倒叙事件法\n\n### 技法说明\n\n> **在小说首段设置提挈全篇、笼罩全文的悬念，故意给读者造成疑团，以激起读者兴趣读下去。**\n\n| 要素 | 说明 |\n|------|----",
+          "dense_rank": 1,
+          "colbert_rank": null
+        },
+        {
+          "rank": 2,
+          "score": 0.6925454,
+          "text": "## 三、悬念设置技巧\n\n### 1. 信息差设计\n\n**读者知道主角不知道：**\n- 制造期待感\n- 读者替主角着急\n- 增强代入感\n\n**主角知道读者不知道：**\n- 制造神秘感\n- 引发猜测\n-",
+          "dense_rank": 2,
+          "colbert_rank": null
+        },
+        {
+          "rank": 3,
+          "score": 0.6812627,
+          "text": "## 一、悬念的本质：追读动力的唯一来源\n\n### 常见误区\n\n> \"很多悬念教程在教技巧：钩子、断点、伏笔……但真正决定读者是否继续读下去的，不是技巧，而是未闭合。\"\n\n### 核心定义\n\n**悬念",
+          "dense_rank": 3,
+          "colbert_rank": null
+        },
+        {
+          "rank": 4,
+          "score": 0.6775782,
+          "text": "## 七、悬念设计技法分析\n\n### 7.1 开篇悬念\n\n```\n悬念1：为什么站在悬崖？\n├── 类型：行为悬念\n├── 揭晓：回忆结束后\n└── 效果：制造好奇\n\n悬念2：血迹从何而来？\n├── ",
+          "dense_rank": 4,
+          "colbert_rank": null
+        },
+        {
+          "rank": 5,
+          "score": 0.66814417,
+          "text": "## 三、冲突 ≠ 悬念\n\n### 核心误区\n\n> \"很多作者用'加冲突'来救追读。但真正的问题不在冲突本身，而在一个更底层的错位——你写的是事件，读者要的是未被回答的问题。\"\n\n### 冲突转化为悬",
+          "dense_rank": 5,
+          "colbert_rank": null
+        }
+      ]
+    },
+    {
+      "query": "剑法",
+      "collection": "power_vocabulary_v1",
+      "hit_rate_top1": 0.0,
+      "hit_rate_top3": 0.0,
+      "latency_ms": 784.5292091369629,
+      "source": "dense",
+      "details": [
+        {
+          "rank": 1,
+          "score": 0.7747527,
+          "text": "剑术法术",
+          "dense_rank": 1,
+          "colbert_rank": null
+        },
+        {
+          "rank": 2,
+          "score": 0.7747527,
+          "text": "剑术法术",
+          "dense_rank": 2,
+          "colbert_rank": null
+        },
+        {
+          "rank": 3,
+          "score": 0.75932276,
+          "text": "剑客的剑术",
+          "dense_rank": 3,
+          "colbert_rank": null
+        },
+        {
+          "rank": 4,
+          "score": 0.7562393,
+          "text": "的道法剑术",
+          "dense_rank": 4,
+          "colbert_rank": null
+        },
+        {
+          "rank": 5,
+          "score": 0.7562393,
+          "text": "的道法剑术",
+          "dense_rank": 5,
+          "colbert_rank": null
+        }
+      ]
+    },
+    {
+      "query": "剑法",
+      "collection": "worldview_element_v1",
+      "hit_rate_top1": 0.0,
+      "hit_rate_top3": 0.0,
+      "latency_ms": 1294.764757156372,
+      "source": "dense",
+      "details": [
+        {
+          "rank": 1,
+          "score": 0.6839969,
+          "text": "自身的剑道",
+          "dense_rank": 1,
+          "colbert_rank": null
+        },
+        {
+          "rank": 2,
+          "score": 0.6839334,
+          "text": "剑的道",
+          "dense_rank": 2,
+          "colbert_rank": null
+        },
+        {
+          "rank": 3,
+          "score": 0.68087375,
+          "text": "自己的剑道",
+          "dense_rank": 3,
+          "colbert_rank": null
+        },
+        {
+          "rank": 4,
+          "score": 0.68087375,
+          "text": "自己的剑道",
+          "dense_rank": 4,
+          "colbert_rank": null
+        },
+        {
+          "rank": 5,
+          "score": 0.68087375,
+          "text": "自己的剑道",
+          "dense_rank": 5,
+          "colbert_rank": null
+        }
+      ]
+    },
+    {
+      "query": "元婴期",
+      "collection": "power_vocabulary_v1",
+      "hit_rate_top1": 0.0,
+      "hit_rate_top3": 0.0,
+      "latency_ms": 690.662145614624,
+      "source": "dense",
+      "details": [
+        {
+          "rank": 1,
+          "score": 0.84067476,
+          "text": "元婴期的境",
+          "dense_rank": 1,
+          "colbert_rank": null
+        },
+        {
+          "rank": 2,
+          "score": 0.84067476,
+          "text": "元婴期的境",
+          "dense_rank": 2,
+          "colbert_rank": null
+        },
+        {
+          "rank": 3,
+          "score": 0.84067476,
+          "text": "元婴期的境",
+          "dense_rank": 3,
+          "colbert_rank": null
+        },
+        {
+          "rank": 4,
+          "score": 0.77481985,
+          "text": "元婴境",
+          "dense_rank": 4,
+          "colbert_rank": null
+        },
+        {
+          "rank": 5,
+          "score": 0.77481985,
+          "text": "元婴境",
+          "dense_rank": 5,
+          "colbert_rank": null
+        }
+      ]
+    },
+    {
+      "query": "宗门",
+      "collection": "worldview_element_v1",
+      "hit_rate_top1": 0.0,
+      "hit_rate_top3": 0.0,
+      "latency_ms": 708.824634552002,
+      "source": "dense",
+      "details": [
+        {
+          "rank": 1,
+          "score": 0.85346615,
+          "text": "宗掌门",
+          "dense_rank": 1,
+          "colbert_rank": null
+        },
+        {
+          "rank": 2,
+          "score": 0.8106555,
+          "text": "我宗门",
+          "dense_rank": 2,
+          "colbert_rank": null
+        },
+        {
+          "rank": 3,
+          "score": 0.8106555,
+          "text": "我宗门",
+          "dense_rank": 3,
+          "colbert_rank": null
+        },
+        {
+          "rank": 4,
+          "score": 0.8019377,
+          "text": "古宗门",
+          "dense_rank": 4,
+          "colbert_rank": null
+        },
+        {
+          "rank": 5,
+          "score": 0.78769135,
+          "text": "大宗门",
+          "dense_rank": 5,
+          "colbert_rank": null
+        }
+      ]
+    },
+    {
+      "query": "师徒关系",
+      "collection": "character_relation_v1",
+      "hit_rate_top1": 0.0,
+      "hit_rate_top3": 0.0,
+      "latency_ms": 1039.501428604126,
+      "source": "dense",
+      "details": [
+        {
+          "rank": 1,
+          "score": 0.7875663,
+          "text": "弟子 与 弟子们 的关系",
+          "dense_rank": 1,
+          "colbert_rank": null
+        },
+        {
+          "rank": 2,
+          "score": 0.7563807,
+          "text": "仆人 与 弟子 的关系",
+          "dense_rank": 2,
+          "colbert_rank": null
+        },
+        {
+          "rank": 3,
+          "score": 0.7222394,
+          "text": "\"师 与 宝贝 的关系",
+          "dense_rank": 3,
+          "colbert_rank": null
+        },
+        {
+          "rank": 4,
+          "score": 0.7005964,
+          "text": "仆从们 与 弟兄们 的关系",
+          "dense_rank": 4,
+          "colbert_rank": null
+        },
+        {
+          "rank": 5,
+          "score": 0.6970752,
+          "text": "弟子们 与 门童 的关系",
+          "dense_rank": 5,
+          "colbert_rank": null
+        }
+      ]
+    },
+    {
+      "query": "突破",
+      "collection": "power_vocabulary_v1",
+      "hit_rate_top1": 0.0,
+      "hit_rate_top3": 0.0,
+      "latency_ms": 675.8334636688232,
+      "source": "dense",
+      "details": [
+        {
+          "rank": 1,
+          "score": 0.7983083,
+          "text": "突破这个境",
+          "dense_rank": 1,
+          "colbert_rank": null
+        },
+        {
+          "rank": 2,
+          "score": 0.7983083,
+          "text": "突破这个境",
+          "dense_rank": 2,
+          "colbert_rank": null
+        },
+        {
+          "rank": 3,
+          "score": 0.7983083,
+          "text": "突破这个境",
+          "dense_rank": 3,
+          "colbert_rank": null
+        },
+        {
+          "rank": 4,
+          "score": 0.7903574,
+          "text": "到了突破阶",
+          "dense_rank": 4,
+          "colbert_rank": null
+        },
+        {
+          "rank": 5,
+          "score": 0.7881413,
+          "text": "突破境",
+          "dense_rank": 5,
+          "colbert_rank": null
+        }
+      ]
+    },
+    {
+      "query": "突破",
+      "collection": "case_library_v2",
+      "hit_rate_top1": 0.0,
+      "hit_rate_top3": 0.0,
+      "latency_ms": 2392.5232887268066,
+      "source": "dense",
+      "details": [
+        {
+          "rank": 1,
+          "score": 0.55588317,
+          "text": "一股越来越强大的气息正在从某个方向宛如飓风般席卷而来！\n谁？是谁在此地突破？\n众人面面想去，感受到这股气息，面色皆是微微一变。。。\n“竟然有人突破了？是谁呢？”\n这股气息很强大但又很是很稳定，很显然，",
+          "dense_rank": 1,
+          "colbert_rank": null
+        },
+        {
+          "rank": 2,
+          "score": 0.5421008,
+          "text": "大大小小的帐篷坐落在森林之中，微风从前方呼啸而来，吹在众人的脸上！\n古老的树木耸立在其中，还有那随风飘动的翠绿小草，那森林中所传出来的兽声回荡四周！\n便在这时，一股极为庞大的气息正在从某一个地方缓缓传",
+          "dense_rank": 2,
+          "colbert_rank": null
+        },
+        {
+          "rank": 3,
+          "score": 0.54198635,
+          "text": "一股越来越强大的气息正在从某个方向宛如飓风般席卷而来！\n谁？是谁在此地突破？\n众人面面想去，感受到这股气息，面色皆是微微一变。。。\n“竟然有人突破了？是谁呢？”\n这股气息很强大但又很是很稳定，很显然，",
+          "dense_rank": 3,
+          "colbert_rank": null
+        },
+        {
+          "rank": 4,
+          "score": 0.5406518,
+          "text": "第八百零一章临阵突破\n星力以及神识能量的运用，在方天南看来，面对着妖兽的时候，都不如空间之力来得更加的有震慑力。方天南可以凭借着空间之力的辅助，斩杀了两头穿山甲妖兽，却没有办法，纯粹的依靠着神识能量，",
+          "dense_rank": 4,
+          "colbert_rank": null
+        },
+        {
+          "rank": 5,
+          "score": 0.53824085,
+          "text": "世界寂静的思想(2)\n徐司令说：“我也不知道，也许这个突破点只是一个人的一个梦，也许只是一个人侥幸的生存了下来，也许，只是你穿过了第二通道。”\n我吓了一跳，我不相信我个人是什么所谓的突破点，我紧接着说",
+          "dense_rank": 5,
+          "colbert_rank": null
+        }
+      ]
+    },
+    {
+      "query": "主角突破金丹期时的战斗场景描写",
+      "collection": "writing_techniques_v2",
+      "hit_rate_top1": 0.0,
+      "hit_rate_top3": 0.0,
+      "latency_ms": 175.83250999450684,
+      "source": "dense",
+      "details": [
+        {
+          "rank": 1,
+          "score": 0.55833054,
+          "text": "### 评分：9/10\n\n**亮点**：\n- 快慢交替合理，战斗前后有铺陈和清场\n- 情绪曲线强烈：平静→紧张→愤怒→悲壮→绝望→压抑→决心\n- 时间折叠自然：十年跨度用三行完成\n\n**改进建议**：",
+          "dense_rank": 1,
+          "colbert_rank": null
+        },
+        {
+          "rank": 2,
+          "score": 0.543591,
+          "text": "## 十三、战斗三段式结构\n\n经典战斗结构分三段：第一段战前铺垫—交代战斗原因、介绍对手实力、营造紧张氛围、分析形势对比，如\"血煞门少主李狂，金丹中期修为，成名绝技'血煞掌'曾一掌轰杀同级别强者...",
+          "dense_rank": 2,
+          "colbert_rank": null
+        },
+        {
+          "rank": 3,
+          "score": 0.53415763,
+          "text": "### 结构拆解\n\n| 阶段 | 内容 | 要点 |\n|------|------|------|\n| **前期铺垫** | 男主名声大噪，吸引无数观众 | 翘课旷工来看比赛 |\n| **对手特点**",
+          "dense_rank": 3,
+          "colbert_rank": null
+        },
+        {
+          "rank": 4,
+          "score": 0.5273427,
+          "text": "### 结构拆解\n\n| 阶段 | 内容 | 要点 |\n|------|------|------|\n| **前期铺垫** | 男主角一直被对手打压，心中积聚怒火 | 练功有成，找机会教训 |\n| **",
+          "dense_rank": 4,
+          "colbert_rank": null
+        },
+        {
+          "rank": 5,
+          "score": 0.5237517,
+          "text": "## 二十一、宏观微观切换法\n\n大规模战争描写要主次分明、详略得当：宏观描写整体战场局势、双方阵营对比、战场全景，如\"血煞门大军压境，黑压压一片，足有十万之众，煞气冲天。天剑宗这边，不过三万弟子，但个",
+          "dense_rank": 5,
+          "colbert_rank": null
+        }
+      ]
+    },
+    {
+      "query": "主角突破金丹期时的战斗场景描写",
+      "collection": "case_library_v2",
+      "hit_rate_top1": 0.0,
+      "hit_rate_top3": 0.0,
+      "latency_ms": 2079.451322555542,
+      "source": "dense",
+      "details": [
+        {
+          "rank": 1,
+          "score": 0.59894466,
+          "text": "顺利突破金丹期，古岩实力提升了至少五成，让他对于即将到来的域界天才战充满了期待。\n突破金丹期对于古岩意义非同寻常，不仅仅只是修为和实力上的提升，凝聚五行金丹对于今后修炼《大五行诀》有着难以想象的辅助，",
+          "dense_rank": 1,
+          "colbert_rank": null
+        },
+        {
+          "rank": 2,
+          "score": 0.59894466,
+          "text": "顺利突破金丹期，古岩实力提升了至少五成，让他对于即将到来的域界天才战充满了期待。\n突破金丹期对于古岩意义非同寻常，不仅仅只是修为和实力上的提升，凝聚五行金丹对于今后修炼《大五行诀》有着难以想象的辅助，",
+          "dense_rank": 2,
+          "colbert_rank": null
+        },
+        {
+          "rank": 3,
+          "score": 0.58597434,
+          "text": "",
+          "dense_rank": 3,
+          "colbert_rank": null
+        },
+        {
+          "rank": 4,
+          "score": 0.583354,
+          "text": "第三百一十二章突破，领悟金之犀利\n其实按照这个时候欧阳博的状态来说，突破基本上是没有什么悬念了，积累已经足够深厚，之前还因为元气太过充盈而不得不释放。\n所以，此刻有了这样的契机，他不会放弃，而且是很轻",
+          "dense_rank": 4,
+          "colbert_rank": null
+        },
+        {
+          "rank": 5,
+          "score": 0.5802646,
+          "text": "顺利突破金丹期，古岩实力提升了至少五成，让他对于即将到来的域界天才战充满了期待。\n突破金丹期对于古岩意义非同寻常，不仅仅只是修为和实力上的提升，凝聚五行金丹对于今后修炼《大五行诀》有着难以想象的辅助，",
+          "dense_rank": 5,
+          "colbert_rank": null
+        }
+      ]
+    },
+    {
+      "query": "主角突破金丹期时的战斗场景描写",
+      "collection": "power_vocabulary_v1",
+      "hit_rate_top1": 0.0,
+      "hit_rate_top3": 0.0,
+      "latency_ms": 804.2595386505127,
+      "source": "dense",
+      "details": [
+        {
+          "rank": 1,
+          "score": 0.7648668,
+          "text": "突破金丹境",
+          "dense_rank": 1,
+          "colbert_rank": null
+        },
+        {
+          "rank": 2,
+          "score": 0.7648668,
+          "text": "突破金丹境",
+          "dense_rank": 2,
+          "colbert_rank": null
+        },
+        {
+          "rank": 3,
+          "score": 0.7648668,
+          "text": "突破金丹境",
+          "dense_rank": 3,
+          "colbert_rank": null
+        },
+        {
+          "rank": 4,
+          "score": 0.7648668,
+          "text": "突破金丹境",
+          "dense_rank": 4,
+          "colbert_rank": null
+        },
+        {
+          "rank": 5,
+          "score": 0.7171895,
+          "text": "破到金丹境",
+          "dense_rank": 5,
+          "colbert_rank": null
+        }
+      ]
+    },
+    {
+      "query": "师徒传承中的情感冲突和矛盾",
+      "collection": "writing_techniques_v2",
+      "hit_rate_top1": 0.0,
+      "hit_rate_top3": 0.0,
+      "latency_ms": 201.49707794189453,
+      "source": "dense",
+      "details": [
+        {
+          "rank": 1,
+          "score": 0.558331,
+          "text": "## 十一、实战应用示例\n\n```\n【冲突：天剑宗内部分裂】\n\n基础信息：\n├── 类型：价值观冲突 + 权力冲突\n├── 层级：势力层\n├── 角色：保守派长老 vs 改革派弟子\n\n三层矛盾：\n├─",
+          "dense_rank": 1,
+          "colbert_rank": null
+        },
+        {
+          "rank": 2,
+          "score": 0.53961253,
+          "text": "## 十二、内心冲突层次设计\n\n内部冲突指角色内心挣扎、矛盾或自我认知挑战，如道德困境、个人恐惧、欲望与义务冲突。例如主角在追求梦想和个人责任之间痛苦抉择。冲突需分层次：表层（当前事件触发）、中层（价",
+          "dense_rank": 2,
+          "colbert_rank": null
+        },
+        {
+          "rank": 3,
+          "score": 0.5169718,
+          "text": "## 五、冲突链：因果的串联\n\n### 常见问题\n\n> \"精心设计每一章的冲突，成品却显得零散割裂，难以让读者产生持续追更的意愿。\"\n\n### 问题根源\n\n**冲突之间仅存在时间顺序，缺乏深层的因果关",
+          "dense_rank": 3,
+          "colbert_rank": null
+        },
+        {
+          "rank": 4,
+          "score": 0.5153029,
+          "text": "## 二十九、群体冲突设计\n\n群体内部冲突增加张力、测试关系、推动发展。冲突类型：目标冲突（短期利益vs长期目标）、价值观冲突（原则不同）、方法冲突（手段差异）、情感冲突（嫉妒、误解）。冲突后需有和解",
+          "dense_rank": 4,
+          "colbert_rank": null
+        },
+        {
+          "rank": 5,
+          "score": 0.5101835,
+          "text": "## 四、三层矛盾的互相生成\n\n### 宏观 → 中观\n\n宏观矛盾为势力冲突提供了舞台和背景。\n\n**示例**：\n- 《冰与火之歌》：\"凛冬将至\"（宏观）→ 各大家族争夺铁王座以应对或利用危机（中观）",
+          "dense_rank": 5,
+          "colbert_rank": null
+        }
+      ]
+    },
+    {
+      "query": "师徒传承中的情感冲突和矛盾",
+      "collection": "character_relation_v1",
+      "hit_rate_top1": 0.0,
+      "hit_rate_top3": 0.0,
+      "latency_ms": 1020.9996700286865,
+      "source": "dense",
+      "details": [
+        {
+          "rank": 1,
+          "score": 0.65420663,
+          "text": "弟子 与 弟子们 的关系",
+          "dense_rank": 1,
+          "colbert_rank": null
+        },
+        {
+          "rank": 2,
+          "score": 0.6243776,
+          "text": "仆人 与 弟子 的关系",
+          "dense_rank": 2,
+          "colbert_rank": null
+        },
+        {
+          "rank": 3,
+          "score": 0.60874224,
+          "text": "\"师 与 宝贝 的关系",
+          "dense_rank": 3,
+          "colbert_rank": null
+        },
+        {
+          "rank": 4,
+          "score": 0.6038363,
+          "text": "弟子们 与 西北风 的关系",
+          "dense_rank": 4,
+          "colbert_rank": null
+        },
+        {
+          "rank": 5,
+          "score": 0.6021535,
+          "text": "弟子们 与 脚步声 的关系",
+          "dense_rank": 5,
+          "colbert_rank": null
+        }
+      ]
+    },
+    {
+      "query": "开篇场景中人物出场的世界观铺垫",
+      "collection": "writing_techniques_v2",
+      "hit_rate_top1": 0.0,
+      "hit_rate_top3": 0.0,
+      "latency_ms": 174.21340942382812,
+      "source": "dense",
+      "details": [
+        {
+          "rank": 1,
+          "score": 0.58747643,
+          "text": "## 二、三个层次的世界观展开\n\n### 第一层：跟主角认知走\n\n**核心**：读者的认知 = 主角的认知\n\n**案例：《凡人修仙传》**\n\n```\n韩立刚入七玄门 → 以为江湖武功最强\n      ",
+          "dense_rank": 1,
+          "colbert_rank": null
+        },
+        {
+          "rank": 2,
+          "score": 0.5843375,
+          "text": "## 七、开篇设计实战应用\n\n### 7.1 SCQA框架开篇\n\n**基于金字塔原理的开篇结构**：\n\n```\nS（情境）：建立读者熟悉的世界\n\"修仙界宗门林立，强者为尊。\"\n\nC（冲突）：打破平衡\n",
+          "dense_rank": 2,
+          "colbert_rank": null
+        },
+        {
+          "rank": 3,
+          "score": 0.5778108,
+          "text": "## 二、开篇技法分析\n\n### 2.1 黄金三章开篇技法应用\n\n**开篇设计分析**：\n\n```\n开篇第一段：\n\"夜很凉，风从深渊里涌上来，把血牙的战袍吹得猎猎作响。他站在悬崖边缘，脚下的岩石布满裂",
+          "dense_rank": 3,
+          "colbert_rank": null
+        },
+        {
+          "rank": 4,
+          "score": 0.5743461,
+          "text": "## 六、人物安排\n\n### 6.1 出场人物\n\n| 角色 | 出场目的 | 核心动作 | 人物弧光推进 |\n|------|----------|----------|--------------|",
+          "dense_rank": 4,
+          "colbert_rank": null
+        },
+        {
+          "rank": 5,
+          "score": 0.56645495,
+          "text": "## 六、人物登场标签化\n\n人物出场时用最短直切剧情展露表层标签，通过事件触发引入。例如\"骄纵任性的大小姐却有特殊隐藏特性\"。每个角色引入都需新事件发生，造成主动或被动入局，与主角团形成连接。人物行为",
+          "dense_rank": 5,
+          "colbert_rank": null
+        }
+      ]
+    },
+    {
+      "query": "开篇场景中人物出场的世界观铺垫",
+      "collection": "case_library_v2",
+      "hit_rate_top1": 0.0,
+      "hit_rate_top3": 0.0,
+      "latency_ms": 2220.7183837890625,
+      "source": "dense",
+      "details": [
+        {
+          "rank": 1,
+          "score": 0.61622846,
+          "text": "",
+          "dense_rank": 1,
+          "colbert_rank": null
+        },
+        {
+          "rank": 2,
+          "score": 0.61622846,
+          "text": "第一章故事的开端编号001\n美国，纽约。\n一栋破旧的大楼，五楼大厅里此刻正躺着一群人，有男有女，看其肤色，全是黄种人。\n晨曦第一缕阳光透过破碎的窗户照了进来，打在众人的脸上，其中一个年青人眼皮抬了抬，",
+          "dense_rank": 2,
+          "colbert_rank": null
+        },
+        {
+          "rank": 3,
+          "score": 0.61622846,
+          "text": "第一章故事的开端编号001\n美国，纽约。\n一栋破旧的大楼，五楼大厅里此刻正躺着一群人，有男有女，看其肤色，全是黄种人。\n晨曦第一缕阳光透过破碎的窗户照了进来，打在众人的脸上，其中一个年青人眼皮抬了抬，",
+          "dense_rank": 3,
+          "colbert_rank": null
+        },
+        {
+          "rank": 4,
+          "score": 0.61622846,
+          "text": "第一章故事的开端编号001\n美国，纽约。\n一栋破旧的大楼，五楼大厅里此刻正躺着一群人，有男有女，看其肤色，全是黄种人。\n晨曦第一缕阳光透过破碎的窗户照了进来，打在众人的脸上，其中一个年青人眼皮抬了抬，",
+          "dense_rank": 4,
+          "colbert_rank": null
+        },
+        {
+          "rank": 5,
+          "score": 0.595053,
+          "text": "第一章前序\n\n一场莫名其妙的‘人员’选择………\n好吧，实际上很有所谓的无限风开篇，眼前一黑，呼啦一声醒来就发现自己身处的位置变了，不过在场没有多少人认为自己是被绑架的之类的，更有恐惧的已经抱在一起躲在",
+          "dense_rank": 5,
+          "colbert_rank": null
+        }
+      ]
+    },
+    {
+      "query": "开篇场景中人物出场的世界观铺垫",
+      "collection": "novel_settings_v2",
+      "hit_rate_top1": 0.0,
+      "hit_rate_top3": 0.0,
+      "latency_ms": 148.41914176940918,
+      "source": "dense",
+      "details": [
+        {
+          "rank": 1,
+          "score": 0.5444381,
+          "text": "era_awakening",
+          "dense_rank": 1,
+          "colbert_rank": null
+        },
+        {
+          "rank": 2,
+          "score": 0.5386902,
+          "text": "char_luoying",
+          "dense_rank": 2,
+          "colbert_rank": null
+        },
+        {
+          "rank": 3,
+          "score": 0.5273906,
+          "text": "char_guiying",
+          "dense_rank": 3,
+          "colbert_rank": null
+        },
+        {
+          "rank": 4,
+          "score": 0.51439,
+          "text": "event_觉醒之夜",
+          "dense_rank": 4,
+          "colbert_rank": null
+        },
+        {
+          "rank": 5,
+          "score": 0.5059763,
+          "text": "char_linxi",
+          "dense_rank": 5,
+          "colbert_rank": null
+        }
+      ]
+    }
+  ]
+}
