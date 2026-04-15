@@ -2280,6 +2280,29 @@ class NovelWorkflow:
     ) -> dict:
         """Stage 4 灵感引擎完整编排
 
+        调用约定（两阶段）
+        ------------------
+        本方法需要外部进行两次调用，中间插入鉴赏师 Skill 执行：
+
+        阶段 A — 获取鉴赏师 prompt：
+            winner_spec = workflow.run_stage4_inspiration(
+                scene_type, scene_context, writer_caller,
+                appraisal_raw=None          # 第一次调用，不传 appraisal_raw
+            )
+            # winner_spec["skill_name"] 是鉴赏师 Skill 名
+            # winner_spec["prompt"] 是需要发给鉴赏师的完整 prompt
+
+        阶段 B — 提交鉴赏师结果，获取最终赢家：
+            final_result = workflow.run_stage4_inspiration(
+                scene_type, scene_context, writer_caller,
+                appraisal_raw=appraisal_raw  # 第二次调用，传入鉴赏师响应
+            )
+            # final_result["winner_text"] 是最终选定的段落文本
+
+        注意：两次调用之间变体列表由调用方负责缓存（candidates 字段在阶段 A
+        的返回值中）。阶段 B 的 candidates 参数应传入阶段 A 返回的 candidates。
+        详见架构文档：docs/superpowers/plans/2026-04-15-inspiration-orchestration.md
+
         Args:
             scene_type: 场景类型
             scene_context: 场景上下文

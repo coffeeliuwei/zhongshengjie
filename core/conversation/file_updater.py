@@ -595,9 +595,9 @@ class FileUpdater:
             file_path: 承诺台账文件路径
             data: {"payoff_id": str, "new_status": str, "chapter": str}
         """
-        # TODO: Task 2 将实现完整逻辑
         payoff_id = data.get("payoff_id", "")
         new_status = data.get("new_status", "")
+        chapter = data.get("chapter", "")
         if not payoff_id or not new_status:
             return
 
@@ -607,8 +607,19 @@ class FileUpdater:
         replacement = rf"\1**状态**: {new_status}"
         new_content = re.sub(pattern, replacement, content, flags=re.DOTALL)
 
-        if new_content != content:
-            file_path.write_text(new_content, encoding="utf-8")
+        if new_content == content:
+            return  # 未找到目标，不写入
+
+        if chapter:
+            pattern2 = rf"(## {re.escape(payoff_id)}.*?)\*\*兑现章节\*\*: [^\n]+"
+            new_content = re.sub(
+                pattern2,
+                rf"\1**兑现章节**: {chapter}",
+                new_content,
+                flags=re.DOTALL,
+            )
+
+        file_path.write_text(new_content, encoding="utf-8")
 
     # ===== 设定文件更新方法 =====
 

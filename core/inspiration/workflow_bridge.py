@@ -11,6 +11,7 @@ workflow 只调用 phase1_dispatch，无需知道灵感引擎内部。
 """
 
 from typing import Dict, Any, List, Optional
+from datetime import datetime, timezone
 
 from core.inspiration.constraint_library import ConstraintLibrary
 from core.inspiration.variant_generator import generate_variant_specs
@@ -233,9 +234,6 @@ def record_winner(
     Returns:
         写入的记忆点 ID，或 None（无赢家时）
     """
-    from core.inspiration.appraisal_agent import AppraisalResult as AR
-    from datetime import datetime, timezone
-
     if appraisal.selected_id is None:
         return None  # 全部平庸，不写入
 
