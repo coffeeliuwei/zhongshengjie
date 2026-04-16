@@ -49,10 +49,19 @@ class WorldviewGenerator:
                 project_root = get_project_root()
             except Exception as e:
                 logging.warning(f"无法获取项目根目录，使用默认路径: {e}")
-                project_root = Path(__file__).parent.parent
+                project_root = Path(__file__).parent.parent.parent
 
         self.project_root = Path(project_root)
-        self.configs_dir = self.project_root / ".vectorstore" / "core" / "world_configs"
+
+        # 优先从 config_loader 获取世界观配置目录（统一路径 config/worlds/）
+        try:
+            from config_loader import get_world_configs_dir
+
+            self.configs_dir = get_world_configs_dir()
+        except Exception as e:
+            logging.warning(f"无法从配置获取世界观目录，使用回退路径: {e}")
+            self.configs_dir = self.project_root / "config" / "worlds"
+
         self.configs_dir.mkdir(parents=True, exist_ok=True)
 
     # ============================================================

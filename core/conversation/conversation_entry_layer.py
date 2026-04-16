@@ -43,6 +43,7 @@ class ProcessingStatus(Enum):
     MISSING_INFO = "missing_info"
     PENDING_WORKFLOW = "pending_workflow"
     ERROR = "error"
+    FAILED = "failed"
 
 
 @dataclass

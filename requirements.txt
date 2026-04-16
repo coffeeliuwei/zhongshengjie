@@ -27,3 +27,9 @@ pytest-xdist>=3.3.0
 
 # 可选依赖
 # transformers>=4.30.0
+
+# Schema校验
+jsonschema>=4.0.0
+
+# BGE-M3向量嵌入
+FlagEmbedding>=1.2.0

@@ -57,7 +57,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Qdrant配置
-COLLECTION_NAME = "case_library"
+COLLECTION_NAME = "case_library_v2"
 VECTOR_SIZE = 384
 
 
