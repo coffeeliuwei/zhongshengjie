@@ -34,6 +34,8 @@ DEFAULT_CONFIG = {
         "novel_settings": "novel_settings_v2",
         "writing_techniques": "writing_techniques_v2",
         "case_library": "case_library_v2",
+        "novel_plot": "novel_plot_v1",  # 新增：总大纲/剧情变更 (I19)
+        "chapter_outlines": "chapter_outlines",  # 新增：章节大纲 (I18)
     },
     "vector_size": 1024,  # BGE-M3
     "model": "BAAI/bge-m3",
