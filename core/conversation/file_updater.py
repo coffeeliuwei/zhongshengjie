@@ -319,6 +319,20 @@ class FileUpdater:
             content = data.get("content", "")
             return f"场景: {scene_type}\n{content}"
 
+        elif collection == "novel_plot_v1":
+            # 总大纲 / 剧情变更 (I19)
+            content = data.get("content", "")
+            type_ = data.get("type", "plot_change")
+            return f"剧情变更 [{type_}]:\n{content}"
+
+        elif collection == "chapter_outlines":
+            # 章节大纲 (I18)
+            chapter_num = data.get("chapter_num", "")
+            chapter_title = data.get("chapter_title", "")
+            content = data.get("content", "")
+            source = data.get("source_file", "")
+            return f"第{chapter_num}章 {chapter_title}\n来源: {source}\n{content}"
+
         else:
             # 默认格式
             return json.dumps(data, ensure_ascii=False)
