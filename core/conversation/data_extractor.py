@@ -80,6 +80,8 @@ class ConversationDataExtractor:
         "add_faction_member": "novel_settings_v2",
         "add_power_type": "novel_settings_v2",
         "add_power_level": "novel_settings_v2",
+        "modify_plot": "novel_plot_v1",  # 新增：I19
+        "add_plot_point": "novel_plot_v1",  # 新增：I19
     }
 
     def __init__(self, project_root: Optional[str] = None):
