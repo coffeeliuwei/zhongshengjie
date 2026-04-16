@@ -78,6 +78,11 @@ class IntentRouter:
         # result.message 直接呈现给作者
     """
 
+    def __init__(self):
+        """初始化路由器，创建持久化提取器实例以跨调用共享 pending 状态"""
+        self._technique_extractor = TechniqueExtractor()
+        self._eval_criteria_extractor = EvaluationCriteriaExtractor()
+
     def route(
         self,
         intent: str,
@@ -246,11 +251,10 @@ class IntentRouter:
         self, intent: str, entities: Dict[str, Any], user_input: str
     ) -> RoutingResult:
         """从用户输入中提炼技法候选"""
-        extractor = TechniqueExtractor()
-        candidate = extractor.extract_from_content(user_input)
+        candidate = self._technique_extractor.extract_from_content(user_input)
         display = (
-            extractor.format_candidate_for_display(candidate)
-            if hasattr(extractor, "format_candidate_for_display")
+            self._technique_extractor.format_candidate_for_display(candidate)
+            if hasattr(self._technique_extractor, "format_candidate_for_display")
             else str(candidate)
         )
         return RoutingResult(
@@ -296,11 +300,28 @@ class IntentRouter:
     def _handle_confirm_technique(
         self, intent: str, entities: Dict[str, Any], user_input: str
     ) -> RoutingResult:
-        """确认技法入库"""
-        return RoutingResult(
-            success=True,
-            message="技法确认入库功能正在完善中。请直接告诉我技法名称和描述，我帮你记录。",
-        )
+        """确认技法候选，写入文件并同步到向量库"""
+        if not self._technique_extractor.pending_technique:
+            return RoutingResult(
+                success=True,
+                message="当前没有待确认的技法。请先提供素材，让我提炼技法候选后再确认。",
+            )
+
+        candidate_name = self._technique_extractor.pending_technique.name
+        success = self._technique_extractor.confirm_and_save()
+
+        if success:
+            return RoutingResult(
+                success=True,
+                message=f"✓ 技法「{candidate_name}」已写入文件并同步到向量库。\n"
+                f"下次创作检索技法时可自动调用。",
+                data={"confirmed_technique": candidate_name},
+            )
+        else:
+            return RoutingResult(
+                success=False,
+                message=f"技法「{candidate_name}」保存失败，请检查 创作技法/ 目录权限。",
+            )
 
     def _handle_modify_technique(
         self, intent: str, entities: Dict[str, Any], user_input: str
@@ -316,11 +337,10 @@ class IntentRouter:
         self, intent: str, entities: Dict[str, Any], user_input: str
     ) -> RoutingResult:
         """从用户描述中提炼禁止项候选"""
-        extractor = EvaluationCriteriaExtractor()
-        candidate = extractor.extract_prohibition(user_input)
+        candidate = self._eval_criteria_extractor.extract_prohibition(user_input)
         display = (
-            extractor.format_for_confirmation(candidate)
-            if hasattr(extractor, "format_for_confirmation")
+            self._eval_criteria_extractor.format_for_confirmation(candidate)
+            if hasattr(self._eval_criteria_extractor, "format_for_confirmation")
             else str(candidate)
         )
         return RoutingResult(
@@ -383,14 +403,28 @@ class IntentRouter:
     def _handle_confirm_evaluation_criteria(
         self, intent: str, entities: Dict[str, Any], user_input: str
     ) -> RoutingResult:
-        """确认将评估标准/禁止项添加入库"""
-        criterion_name = entities.get("criterion_name", "该禁止项")
-        return RoutingResult(
-            success=True,
-            message=f"已确认入库：{criterion_name}。\n"
-            "禁止项已添加到评估标准库，下次生成时将自动检查。",
-            data={"confirmed": True, "criterion_name": criterion_name},
-        )
+        """确认将评估标准/禁止项写入文件并同步到 Qdrant"""
+        if not self._eval_criteria_extractor.pending_criteria:
+            return RoutingResult(
+                success=True,
+                message="当前没有待确认的禁止项。请先描述禁止项内容，让我提炼候选后再确认。",
+            )
+
+        criterion_name = self._eval_criteria_extractor.pending_criteria.name
+        success = self._eval_criteria_extractor.confirm_and_save()
+
+        if success:
+            return RoutingResult(
+                success=True,
+                message=f"✓ 禁止项「{criterion_name}」已写入评估标准库并同步到向量库。\n"
+                f"下次生成章节时将自动检查此禁止项。",
+                data={"confirmed_criterion": criterion_name},
+            )
+        else:
+            return RoutingResult(
+                success=False,
+                message=f"禁止项「{criterion_name}」保存失败，请检查文件权限。",
+            )
 
     def _handle_inspiration_conflict_resolution(
         self, intent: str, entities: Dict[str, Any], user_input: str
