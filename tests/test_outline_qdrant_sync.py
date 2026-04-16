@@ -189,3 +189,59 @@ def test_sync_chapter_outline_file_parses_and_returns_result(tmp_path):
     assert mock_updater.sync_to_vectorstore.called
     call_args = mock_updater.sync_to_vectorstore.call_args
     assert call_args[0][0] == "chapter_outlines"
+
+
+# === Task 5 测试 ===
+
+
+def test_change_detector_watches_chapter_outlines_dir():
+    """ChangeDetector DEFAULT_WATCH_LIST 应包含章节大纲目录"""
+    from core.change_detector.change_detector import ChangeDetector
+
+    watch_list = ChangeDetector.DEFAULT_WATCH_LIST
+    values = list(watch_list.values())
+    assert any("章节大纲" in v for v in values), (
+        f"DEFAULT_WATCH_LIST 中无章节大纲监控项，当前: {values}"
+    )
+
+
+def test_change_detector_sync_mapping_includes_chapter_outlines():
+    """ChangeDetector SYNC_MAPPING 应包含 chapter_outlines 目标"""
+    from core.change_detector.change_detector import ChangeDetector
+
+    sync_mapping = ChangeDetector.SYNC_MAPPING
+    assert "chapter_outlines" in sync_mapping.values(), (
+        f"SYNC_MAPPING 中无 chapter_outlines 目标，当前: {sync_mapping}"
+    )
+
+
+def test_change_detector_sync_changes_calls_chapter_outline_sync(tmp_path):
+    """sync_changes 检测到章节大纲变更时应调用 sync_chapter_outline_file"""
+    from unittest.mock import patch, MagicMock
+    from core.change_detector.change_detector import ChangeDetector
+    from core.change_detector.file_watcher import FileChange
+    from core.change_detector.sync_manager_adapter import SyncResult
+
+    # 创建章节大纲目录和文件
+    outline_dir = tmp_path / "章节大纲"
+    outline_dir.mkdir()
+    outline_file = outline_dir / "第一章-天裂大纲.md"
+    outline_file.write_text("# 第一章大纲\n", encoding="utf-8")
+
+    detector = ChangeDetector(project_root=tmp_path, auto_sync=False)
+
+    fake_change = FileChange(
+        path=str(outline_file),
+        change_type="modified",
+    )
+    changes = {"chapter_outlines": [fake_change]}
+
+    mock_result = SyncResult(target="chapter_outlines", status="success", count=1)
+
+    with patch.object(
+        detector.sync_adapter, "sync_chapter_outline_file", return_value=mock_result
+    ) as mock_sync:
+        results = detector.sync_changes(changes)
+
+    mock_sync.assert_called_once()
+    assert "chapter_outlines" in results

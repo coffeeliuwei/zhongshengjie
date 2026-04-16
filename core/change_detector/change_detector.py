@@ -72,6 +72,7 @@ class ChangeDetector:
     # 默认监控配置
     DEFAULT_WATCH_LIST = {
         "outline": "总大纲.md",
+        "chapter_outlines": "章节大纲/*.md",  # 新增：I18/P3-#25
         "settings": "设定/*.md",
         "techniques": "创作技法/**/*.md",
         "tracking": "设定/hook_ledger.md",
@@ -80,6 +81,7 @@ class ChangeDetector:
     # 变更到同步的映射
     SYNC_MAPPING = {
         "outline": "worldview",
+        "chapter_outlines": "chapter_outlines",  # 新增：I18/P3-#25
         "settings": "graph",
         "techniques": "techniques",
         "tracking": None,  # tracking文件不需要同步到向量库
@@ -187,6 +189,27 @@ class ChangeDetector:
         # 大纲变更 → 世界观配置
         if changes.get("outline"):
             sync_results["worldview"] = self._sync_outline_to_worldview()
+
+        # 章节大纲变更 → Qdrant chapter_outlines (I18/P3-#25)
+        if changes.get("chapter_outlines"):
+            outline_results = []
+            for change in changes["chapter_outlines"]:
+                file_path = Path(change.path)
+                if change.change_type != "deleted" and file_path.exists():
+                    result = self.sync_adapter.sync_chapter_outline_file(file_path)
+                    outline_results.append(result)
+
+            # 聚合结果
+            success_count = sum(
+                r.count for r in outline_results if r.status == "success"
+            )
+            failed = any(r.status == "failed" for r in outline_results)
+            sync_results["chapter_outlines"] = SyncResult(
+                target="chapter_outlines",
+                status="failed" if failed else "success",
+                count=success_count,
+                message=f"已同步 {success_count}/{len(outline_results)} 个章节大纲",
+            )
 
         # 设定变更 → 知识图谱
         if changes.get("settings"):
