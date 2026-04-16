@@ -256,6 +256,131 @@ class SyncManagerAdapter:
                 message=f"案例库同步失败: {e}",
             )
 
+    def sync_chapter_outline_file(self, file_path: Path) -> SyncResult:
+        """
+        将单个章节大纲文件同步到 Qdrant chapter_outlines collection。
+
+        Args:
+            file_path: 章节大纲 .md 文件的绝对路径
+
+        Returns:
+            SyncResult
+        """
+        if not file_path.exists():
+            return SyncResult(
+                target="chapter_outlines",
+                status="skipped",
+                message=f"大纲文件不存在: {file_path}",
+            )
+
+        try:
+            from core.parsing.chapter_outline_parser import ChapterOutlineParser
+            from core.conversation.file_updater import FileUpdater
+
+            parser = ChapterOutlineParser()
+            outline_data = parser.parse_file(file_path)
+
+            if not outline_data:
+                return SyncResult(
+                    target="chapter_outlines",
+                    status="partial",
+                    count=0,
+                    message=f"解析大纲文件失败: {file_path.name}",
+                )
+
+            # 提取章节号
+            chapter_num = outline_data.get("chapter_info", {}).get("章节序号", "")
+            if not chapter_num:
+                # 尝试从 chapter_title 提取数字
+                import re
+
+                title = outline_data.get("chapter_title", "")
+                m = re.search(r"第(\d+)章", title)
+                chapter_num = m.group(1) if m else "?"
+
+            chapter_title = outline_data.get("chapter_info", {}).get(
+                "章节名", outline_data.get("chapter_title", file_path.stem)
+            )
+
+            data = {
+                "chapter_num": chapter_num,
+                "chapter_title": chapter_title,
+                "content": outline_data.get("summary", ""),
+                "source_file": str(file_path.relative_to(self.project_root))
+                if file_path.is_relative_to(self.project_root)
+                else str(file_path.name),
+            }
+
+            updater = FileUpdater(str(self.project_root))
+            success = updater.sync_to_vectorstore("chapter_outlines", data)
+
+            return SyncResult(
+                target="chapter_outlines",
+                status="success" if success else "partial",
+                count=1 if success else 0,
+                message=f"已同步章节大纲: {file_path.name}"
+                if success
+                else f"同步失败（可能无 Qdrant 连接）: {file_path.name}",
+            )
+
+        except Exception as e:
+            return SyncResult(
+                target="chapter_outlines",
+                status="failed",
+                message=f"同步章节大纲时出错: {e}",
+            )
+
+    def sync_total_outline_to_qdrant(
+        self, outline_file: Optional[Path] = None
+    ) -> SyncResult:
+        """
+        将总大纲文件同步到 Qdrant novel_plot_v1 collection。
+
+        Args:
+            outline_file: 总大纲文件路径（默认 project_root/总大纲.md）
+
+        Returns:
+            SyncResult
+        """
+        if outline_file is None:
+            outline_file = self.project_root / "总大纲.md"
+
+        if not outline_file.exists():
+            return SyncResult(
+                target="novel_plot_v1",
+                status="skipped",
+                message=f"总大纲文件不存在: {outline_file}",
+            )
+
+        try:
+            from core.conversation.file_updater import FileUpdater
+
+            content = outline_file.read_text(encoding="utf-8")
+            data = {
+                "type": "plot_change",
+                "content": content[:4000],  # 截断避免超长嵌入
+                "source_file": "总大纲.md",
+            }
+
+            updater = FileUpdater(str(self.project_root))
+            success = updater.sync_to_vectorstore("novel_plot_v1", data)
+
+            return SyncResult(
+                target="novel_plot_v1",
+                status="success" if success else "partial",
+                count=1 if success else 0,
+                message="已同步总大纲到 novel_plot_v1"
+                if success
+                else "同步失败（可能无 Qdrant 连接）",
+            )
+
+        except Exception as e:
+            return SyncResult(
+                target="novel_plot_v1",
+                status="failed",
+                message=f"同步总大纲时出错: {e}",
+            )
+
     def sync_all(
         self,
         rebuild: bool = False,

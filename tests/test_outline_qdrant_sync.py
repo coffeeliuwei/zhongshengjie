@@ -110,3 +110,82 @@ def test_process_total_outline_is_deprecated(capsys):
         assert "DEPRECATED" in captured.out or "废弃" in captured.out, (
             f"应打印废弃警告，实际输出: {captured.out}"
         )
+
+
+# === Task 4 测试 ===
+
+
+def test_sync_manager_adapter_has_sync_chapter_outline_file():
+    """SyncManagerAdapter 必须有 sync_chapter_outline_file 方法"""
+    from core.change_detector.sync_manager_adapter import SyncManagerAdapter
+
+    adapter = SyncManagerAdapter()
+    assert hasattr(adapter, "sync_chapter_outline_file"), (
+        "SyncManagerAdapter 缺少 sync_chapter_outline_file 方法"
+    )
+    assert callable(adapter.sync_chapter_outline_file)
+
+
+def test_sync_manager_adapter_has_sync_total_outline_to_qdrant():
+    """SyncManagerAdapter 必须有 sync_total_outline_to_qdrant 方法"""
+    from core.change_detector.sync_manager_adapter import SyncManagerAdapter
+
+    adapter = SyncManagerAdapter()
+    assert hasattr(adapter, "sync_total_outline_to_qdrant"), (
+        "SyncManagerAdapter 缺少 sync_total_outline_to_qdrant 方法"
+    )
+    assert callable(adapter.sync_total_outline_to_qdrant)
+
+
+def test_sync_chapter_outline_file_returns_sync_result_for_missing_file():
+    """不存在的大纲文件应返回 status=skipped 的 SyncResult"""
+    from pathlib import Path
+    from core.change_detector.sync_manager_adapter import SyncManagerAdapter
+
+    adapter = SyncManagerAdapter()
+    result = adapter.sync_chapter_outline_file(Path("/nonexistent/第一章大纲.md"))
+    assert result.status == "skipped", (
+        f"文件不存在时应返回 skipped，实际: {result.status}"
+    )
+
+
+def test_sync_total_outline_to_qdrant_returns_sync_result_for_missing_file(tmp_path):
+    """不存在的总大纲文件应返回 status=skipped 的 SyncResult"""
+    from core.change_detector.sync_manager_adapter import SyncManagerAdapter
+
+    adapter = SyncManagerAdapter(project_root=tmp_path)
+    result = adapter.sync_total_outline_to_qdrant()
+    assert result.status == "skipped", (
+        f"文件不存在时应返回 skipped，实际: {result.status}"
+    )
+
+
+def test_sync_chapter_outline_file_parses_and_returns_result(tmp_path):
+    """存在的大纲文件应成功解析并返回非失败的 SyncResult"""
+    from pathlib import Path
+    from unittest.mock import patch, MagicMock
+    from core.change_detector.sync_manager_adapter import SyncManagerAdapter
+
+    # 创建最小大纲文件
+    outline_file = tmp_path / "第一章-天裂大纲.md"
+    outline_file.write_text(
+        "# 《众生界》第1章：天裂\n\n## 章节信息\n\n| 项目 | 内容 |\n|------|------|\n| 章节名 | 天裂 |\n",
+        encoding="utf-8",
+    )
+
+    adapter = SyncManagerAdapter(project_root=tmp_path)
+
+    # mock file_updater 的 sync_to_vectorstore
+    with patch("core.conversation.file_updater.FileUpdater") as MockFileUpdater:
+        mock_updater = MagicMock()
+        mock_updater.sync_to_vectorstore.return_value = True
+        MockFileUpdater.return_value = mock_updater
+
+        result = adapter.sync_chapter_outline_file(outline_file)
+
+    assert result.status in ("success", "partial"), (
+        f"文件存在时应返回 success 或 partial，实际: {result.status}"
+    )
+    assert mock_updater.sync_to_vectorstore.called
+    call_args = mock_updater.sync_to_vectorstore.call_args
+    assert call_args[0][0] == "chapter_outlines"
