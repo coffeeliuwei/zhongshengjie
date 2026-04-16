@@ -302,16 +302,19 @@ class VectorizerManager:
             print(f"    -> 生成 {len(units)} 个知识单元")
 
     def _process_total_outline(self, collection):
-        """处理总大纲"""
-        if not self.total_outline_file.exists():
-            print("总大纲文件不存在")
-            return
+        """处理总大纲
 
-        print("\n[处理总大纲]")
-        print(f"  解析: {self.total_outline_file.name}")
-        units = self._parse_setting(self.total_outline_file)
-        self._add_units(collection, units)
-        print(f"    -> 生成 {len(units)} 个知识单元")
+        .. deprecated::
+            此方法使用已废弃的 chromadb 路径。
+            请使用 core.change_detector.sync_manager_adapter.SyncManagerAdapter
+            的 sync_total_outline_to_qdrant() 方法将总大纲同步到 Qdrant。
+        """
+        print(
+            "[DEPRECATED] _process_total_outline: chromadb 路径已废弃，"
+            "总大纲 Qdrant 同步请使用 SyncManagerAdapter.sync_total_outline_to_qdrant()"
+        )
+        # 跳过，不向 chromadb collection 写入任何内容
+        return
 
     def _process_technique_files(self) -> List[TechniqueChunk]:
         """处理技法文件"""

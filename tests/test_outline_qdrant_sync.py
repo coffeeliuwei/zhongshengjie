@@ -79,3 +79,34 @@ def test_chapter_outlines_embedding_text_generated():
     text = updater._generate_embedding_text("chapter_outlines", data)
     assert text, "chapter_outlines 的嵌入文本不应为空"
     assert "天裂" in text or "第1章" in text, f"嵌入文本应包含章节信息，实际: {text}"
+
+
+# === Task 3 测试 ===
+
+
+def test_process_total_outline_is_deprecated(capsys):
+    """_process_total_outline 应打印废弃警告并跳过"""
+    import tempfile
+    from pathlib import Path
+    from unittest.mock import MagicMock
+    from modules.knowledge_base.vectorizer_manager import VectorizerManager
+
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp_path = Path(tmp)
+        # 创建最小文件结构
+        (tmp_path / "总大纲.md").write_text("# 总大纲\n内容", encoding="utf-8")
+
+        manager = VectorizerManager(project_dir=tmp_path)
+        mock_collection = MagicMock()
+
+        manager._process_total_outline(mock_collection)
+
+        # 不应调用 collection 的任何写入方法
+        mock_collection.add.assert_not_called()
+        mock_collection.upsert.assert_not_called()
+
+        # 应打印废弃警告
+        captured = capsys.readouterr()
+        assert "DEPRECATED" in captured.out or "废弃" in captured.out, (
+            f"应打印废弃警告，实际输出: {captured.out}"
+        )
