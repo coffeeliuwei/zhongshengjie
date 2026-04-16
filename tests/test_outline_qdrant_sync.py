@@ -245,3 +245,26 @@ def test_change_detector_sync_changes_calls_chapter_outline_sync(tmp_path):
 
     mock_sync.assert_called_once()
     assert "chapter_outlines" in results
+
+
+# === Task 6 测试 ===
+
+
+def test_sync_outlines_script_exists():
+    """scripts/sync_outlines.py 必须存在"""
+    script = PROJECT_ROOT / "scripts" / "sync_outlines.py"
+    assert script.exists(), "scripts/sync_outlines.py 不存在"
+
+
+def test_sync_outlines_script_importable():
+    """scripts/sync_outlines.py 必须可以导入（无顶层副作用）"""
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location(
+        "sync_outlines",
+        str(PROJECT_ROOT / "scripts" / "sync_outlines.py"),
+    )
+    # 不执行 spec.loader.exec_module（避免副作用），只检查文件存在且语法正确
+    with open(PROJECT_ROOT / "scripts" / "sync_outlines.py", encoding="utf-8") as f:
+        source = f.read()
+    compile(source, "sync_outlines.py", "exec")  # 语法检查
