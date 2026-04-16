@@ -32,6 +32,7 @@ from .missing_info_detector import MissingInfoDetector, MissingInfo
 from .data_extractor import ConversationDataExtractor, ExtractionResult
 from .intent_router import IntentRouter
 from core.feedback.feedback_collector import FeedbackCollector
+from core.parsing.chapter_outline_parser import ChapterOutlineParser
 
 
 class ProcessingStatus(Enum):
@@ -437,10 +438,25 @@ class ConversationEntryLayer:
             chapter = intent_result.entities.get("chapter", "1")
             chapter_num = self._parse_chapter_number(chapter)
 
+            # ---- 大纲注入（I17）----
+            outline_context = ""
+            outline_dir = self.project_root / "章节大纲"
+            if outline_dir.exists():
+                parser = ChapterOutlineParser()
+                outline_file = parser.find_outline_file(chapter_num, outline_dir)
+                if outline_file is not None:
+                    outline_data = parser.parse_file(outline_file)
+                    if outline_data:
+                        outline_context = outline_data.get("summary", "")
+            # ---- 大纲注入结束 ----
+
             workflow = self.workflow_checker.create_workflow(
                 session_id=self.session_id,
                 workflow_type="chapter_creation",
                 chapter=chapter_num,
+                metadata={"chapter_outline": outline_context}
+                if outline_context
+                else None,
             )
 
             self._current_workflow = workflow
