@@ -4,22 +4,29 @@
 # 
 # master分支推送内容：
 # - 项目代码（core/、modules/、tools/、tests/）
-# - Skills源码（skills/）
 # - 案例库索引和脚本（.case-library/*.json、scripts/）
 # - 配置模板（config.example.json）
 # - 向量库代码（.vectorstore/core/）
-# - 文档（docs/、README.md）
+# - 核心文档（README.md、docs/核心文档）
 # 
 # 不推送（需用户自行构建）：
+# - Skills源码（skills/）→ 安装到 ~/.agents/skills/
 # - 技法库数据（创作技法/*.md）
 # - 小说设定（设定/*.md）
 # - 案例数据（.case-library/cases/*.json/*.txt）
 # - 向量数据（Qdrant本地数据，约20G）
 # - 用户创作内容（正文/、章节大纲/、总大纲.md）
+# - 提炼临时数据（.novel-extractor/extracted/）
+# 
+# 不推送（开发环境特定）：
+# - .claude/（Claude Code配置）
+# - .obsidian/（Obsidian编辑器）
+# - .workbuddy/（WorkBuddy工具）
+# - docs/superpowers/（本地开发计划）
 # 
 # 作者：coffeeliuwei
-# 版本：v15.0
-# 最后更新：2026-04-14
+# 版本：v16.0
+# 最后更新：2026-04-16
 # ========================================
 
 # ========================================
@@ -28,6 +35,8 @@
 
 创作技法/**/*.md
 创作技法/**/*.txt
+创作技法/**/*.json
+创作技法/99-从小说提取/
 设定/
 正文/
 章节大纲/
@@ -38,6 +47,41 @@
 
 # 案例库数据（太大，仅推送索引和脚本）
 .case-library/cases/
+
+# ========================================
+# Skills源码 - 安装到 ~/.agents/skills/
+# ========================================
+
+skills/
+
+# ========================================
+# 小说提炼系统 - 运行时数据
+# ========================================
+
+# 提炼临时数据和进度标记
+.novel-extractor/extracted/
+.novel-extractor/*.json
+.novel-extractor/unified_progress.json
+
+# 提炼脚本保留，但数据不推送
+# .novel-extractor/*.py 可推送（代码）
+# .novel-extractor/extracted/ 不推送（数据）
+
+# ========================================
+# 开发环境特定 - 本地私有
+# ========================================
+
+# Claude Code
+.claude/
+
+# Obsidian编辑器
+.obsidian/
+
+# WorkBuddy工具
+.workbuddy/
+
+# 项目审核报告（本地文档）
+项目审核报告_AI工程评估.md
 
 # ========================================
 # 文档目录 - 仅推送核心文档
@@ -63,6 +107,10 @@ docs/*设计方案*.md
 .seren/
 .agents/
 .project_memory/
+
+# 迁移临时文件
+tools/evaluation_criteria_migrated.json
+tools/*_migrated.json
 
 # Qdrant本地数据（约20G）
 .vectorstore/qdrant/
