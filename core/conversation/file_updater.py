@@ -333,6 +333,15 @@ class FileUpdater:
             source = data.get("source_file", "")
             return f"第{chapter_num}章 {chapter_title}\n来源: {source}\n{content}"
 
+        elif collection == "evaluation_criteria_v1":
+            # 评审标准/禁止项 (M1修复)
+            name = data.get("name", "")
+            pattern = data.get("pattern", "")
+            examples = data.get("examples", [])
+            threshold = data.get("threshold", "")
+            examples_text = "\n示例: ".join(examples) if examples else ""
+            return f"禁止项: {name}\n模式: {pattern}\n阈值: {threshold}{examples_text}"
+
         else:
             # 默认格式
             return json.dumps(data, ensure_ascii=False)

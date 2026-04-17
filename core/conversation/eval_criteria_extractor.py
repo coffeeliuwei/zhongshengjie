@@ -22,6 +22,9 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from datetime import datetime
 
+# M1修复：导入FileUpdater用于向量库同步
+from core.conversation.file_updater import FileUpdater
+
 
 @dataclass
 class ProhibitionCandidate:
@@ -517,7 +520,7 @@ class EvaluationCriteriaExtractor:
 
     def _sync_to_vectorstore(self, candidate: ProhibitionCandidate) -> bool:
         """
-        同步到向量库
+        同步到向量库 (M1修复：调用FileUpdater真实同步)
 
         Args:
             candidate: 禁止项候选
@@ -525,22 +528,37 @@ class EvaluationCriteriaExtractor:
         Returns:
             是否成功
         """
-        # TODO: 实际向量同步需要调用嵌入模型
-        # 这里仅记录日志
-        log_path = self.project_root / "logs" / "evaluation_criteria_sync.jsonl"
-        log_path.parent.mkdir(parents=True, exist_ok=True)
-
-        entry = {
-            "timestamp": datetime.now().isoformat(),
-            "action": "add_prohibition",
+        # 构建数据结构
+        data = {
             "name": candidate.name,
             "pattern": candidate.pattern,
+            "examples": candidate.examples,
+            "threshold": candidate.threshold,
+            "type": "prohibition",
+            "created_at": candidate.created_at,
         }
 
-        with open(log_path, "a", encoding="utf-8") as f:
-            f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+        # 调用FileUpdater同步到evaluation_criteria_v1 Collection
+        file_updater = FileUpdater(project_root=str(self.project_root))
+        result = file_updater.sync_to_vectorstore("evaluation_criteria_v1", data)
 
-        return True
+        if result:
+            print(f"[OK] 已同步禁止项到向量库: {candidate.name}")
+        else:
+            print(f"[WARN] 禁止项同步失败，已记录日志")
+            # 备用：记录到日志文件
+            log_path = self.project_root / "logs" / "evaluation_criteria_sync.jsonl"
+            log_path.parent.mkdir(parents=True, exist_ok=True)
+            entry = {
+                "timestamp": datetime.now().isoformat(),
+                "action": "add_prohibition_failed",
+                "name": candidate.name,
+                "pattern": candidate.pattern,
+            }
+            with open(log_path, "a", encoding="utf-8") as f:
+                f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+
+        return result
 
 
 # 测试代码
