@@ -84,7 +84,7 @@ class SyncManager:
     CASE_COLLECTION = "case_library"
 
     # 向量维度
-    VECTOR_SIZE = 384
+    VECTOR_SIZE = 1024  # BGE-M3 dense 向量维度
 
     # 维度映射
     DIMENSION_MAP = {

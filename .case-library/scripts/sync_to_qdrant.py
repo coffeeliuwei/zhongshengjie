@@ -58,7 +58,7 @@ logger = logging.getLogger(__name__)
 
 # Qdrant配置
 COLLECTION_NAME = "case_library_v2"
-VECTOR_SIZE = 384
+VECTOR_SIZE = 1024  # BGE-M3 dense 向量维度
 
 
 @dataclass

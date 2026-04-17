@@ -43,7 +43,7 @@ class SearchManager:
     CASE_COLLECTION = "case_library"
 
     # 向量维度
-    VECTOR_SIZE = 384
+    VECTOR_SIZE = 1024  # BGE-M3 dense 向量维度
 
     # 实体类型列表
     ENTITY_TYPES = ["势力", "派系", "角色", "力量体系", "力量派别", "时代", "事件"]
