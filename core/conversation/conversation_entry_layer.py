@@ -104,6 +104,9 @@ class ConversationEntryLayer:
         self._last_intent: Optional[str] = None
         self._conversation_context: List[Dict[str, Any]] = []
 
+        # 复用同一 IntentRouter 实例以保持多轮对话状态
+        self._intent_router = IntentRouter()
+
     def _detect_project_root(self) -> Path:
         """自动检测项目根目录"""
         current = Path(__file__).resolve()
@@ -367,7 +370,7 @@ class ConversationEntryLayer:
 
         else:
             # 通过路由器处理未覆盖类别（FEEDBACK、MANAGEMENT、TECHNIQUE、EVALUATION 等）
-            routing_result = IntentRouter().route(
+            routing_result = self._intent_router.route(
                 intent=intent,
                 entities=entities,
                 user_input=user_input,

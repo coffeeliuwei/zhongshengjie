@@ -241,3 +241,17 @@ def test_discover_prohibitions_from_file_routed():
     )
 
     assert result.success is True
+
+
+def test_intent_router_instance_is_reused():
+    """ConversationEntryLayer 应复用同一个 IntentRouter 实例"""
+    from core.conversation.conversation_entry_layer import ConversationEntryLayer
+
+    layer = ConversationEntryLayer()
+    # 两次访问应是同一对象
+    assert hasattr(layer, "_intent_router"), (
+        "ConversationEntryLayer 缺少 _intent_router 实例属性"
+    )
+    router1 = layer._intent_router
+    router2 = layer._intent_router
+    assert router1 is router2, "IntentRouter 不是复用实例"
