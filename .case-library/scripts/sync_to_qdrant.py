@@ -183,22 +183,36 @@ class QdrantSyncer:
         return True
 
     def _init_model(self):
-        """初始化嵌入模型"""
+        """初始化嵌入模型（BGE-M3，1024 维 dense vector）"""
         if self.model is None:
             try:
-                from sentence_transformers import SentenceTransformer
-
-                logger.info("加载嵌入模型...")
-                self.model = SentenceTransformer(
-                    "paraphrase-multilingual-MiniLM-L12-v2"
-                )
-                logger.info("嵌入模型加载完成")
-                return True
+                from FlagEmbedding import BGEM3FlagModel
             except ImportError:
-                logger.error(
-                    "请安装 sentence-transformers: pip install sentence-transformers"
-                )
+                logger.error("请安装 FlagEmbedding: pip install -U FlagEmbedding")
                 return False
+
+            try:
+                # 从 core/config_loader 读取模型路径（与 sync_manager.py 一致）
+                import sys
+                from pathlib import Path
+
+                _project_root = Path(__file__).resolve().parents[2]
+                if str(_project_root) not in sys.path:
+                    sys.path.insert(0, str(_project_root))
+                from core.config_loader import get_model_path
+
+                model_path = get_model_path()
+                if not model_path:
+                    logger.error(
+                        "BGE-M3 模型路径未配置，请检查 config.json 或 "
+                        "环境变量 BGE_M3_MODEL_PATH"
+                    )
+                    return False
+
+                logger.info("加载 BGE-M3 模型...")
+                self.model = BGEM3FlagModel(model_path, use_fp16=True)
+                logger.info("BGE-M3 模型加载完成")
+                return True
             except Exception as e:
                 logger.error(f"模型加载失败: {e}")
                 return False
@@ -331,8 +345,16 @@ class QdrantSyncer:
             texts = [c.content[:2000] for c in batch]  # 限制长度
 
             try:
-                # 生成嵌入
-                embeddings = self.model.encode(texts, show_progress_bar=True)
+                # 生成嵌入（BGE-M3）
+                _output = self.model.encode(
+                    texts,
+                    batch_size=batch_size,
+                    max_length=512,
+                    return_dense=True,
+                    return_sparse=False,
+                    return_colbert_vecs=False,
+                )
+                embeddings = _output["dense_vecs"]
 
                 # 创建点
                 for case, embedding in zip(batch, embeddings):
