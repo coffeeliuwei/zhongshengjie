@@ -31,11 +31,20 @@ from typing import Dict, List, Any, Optional
 DEFAULT_CONFIG = {
     "qdrant_url": "http://localhost:6333",
     "collections": {
+        # 核心 Collections (v2 - BGE-M3混合检索)
         "novel_settings": "novel_settings_v2",
         "writing_techniques": "writing_techniques_v2",
         "case_library": "case_library_v2",
-        "novel_plot": "novel_plot_v1",  # 新增：总大纲/剧情变更 (I19)
-        "chapter_outlines": "chapter_outlines",  # 新增：章节大纲 (I18)
+        # 剧情/大纲 Collections
+        "novel_plot": "novel_plot_v1",  # 总大纲/剧情变更 (I19)
+        "chapter_outlines": "chapter_outlines",  # 章节大纲 (I18)
+        # 扩展维度 Collections (v1 - M3修复)
+        "worldview_element": "worldview_element_v1",  # 世界观元素检索
+        "character_relation": "character_relation_v1",  # 角色关系检索
+        "author_style": "author_style_v1",  # 风格检索
+        "foreshadow_pair": "foreshadow_pair_v1",  # 伏笔检索
+        "power_cost": "power_cost_v1",  # 功法/力量代价检索
+        "evaluation_criteria": "evaluation_criteria_v1",  # 评审标准检索
     },
     "vector_size": 1024,  # BGE-M3
     "model": "BAAI/bge-m3",

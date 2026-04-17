@@ -89,7 +89,51 @@ class DataMigrator:
             "vector_size": 1024,
             "description": "小说设定检索库，包含角色/势力/力量体系等",
         },
-        # 扩展维度Collection (v1 - 单向量检索)
+        # 大纲/剧情Collection (M3修复)
+        "novel_plot_v1": {
+            "name": "剧情大纲",
+            "source": "总大纲.md",
+            "vector_size": 1024,
+            "description": "总大纲剧情检索库",
+            "optional": True,
+        },
+        "chapter_outlines": {
+            "name": "章节大纲",
+            "source": "章节大纲/",
+            "vector_size": 1024,
+            "description": "章节大纲检索库",
+            "optional": True,
+        },
+        # 扩展维度Collection (v1 - 单向量检索) - M3修复新增
+        "worldview_element_v1": {
+            "name": "世界观元素",
+            "source": ".vectorstore/data/worldview_element.json",
+            "vector_size": 1024,
+            "description": "世界观元素检索库",
+            "optional": True,
+        },
+        "character_relation_v1": {
+            "name": "角色关系",
+            "source": ".vectorstore/data/character_relation.json",
+            "vector_size": 1024,
+            "description": "角色关系检索库",
+            "optional": True,
+        },
+        "author_style_v1": {
+            "name": "作者风格",
+            "source": ".vectorstore/data/author_style.json",
+            "vector_size": 1024,
+            "description": "风格检索库",
+            "optional": True,
+        },
+        "evaluation_criteria_v1": {
+            "name": "评审标准",
+            "source": ".vectorstore/data/evaluation_criteria.json",
+            "vector_size": 1024,
+            "description": "评审标准检索库",
+            "optional": True,
+        },
+        # 原有扩展维度Collection
         "dialogue_style_v1": {
             "name": "对话风格",
             "source": ".vectorstore/data/dialogue_style.json",
