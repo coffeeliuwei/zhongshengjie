@@ -24,7 +24,7 @@ def test_conflict_format_contains_warning_and_violation():
             {"id": "var_003", "summary": "基准写法，评估通过，鉴赏师评平淡"},
         ],
     )
-    assert "WARNING" in result
+    assert "警告" in result  # N6修复：改为中文
     assert "var_002" in result
     assert "R006" in result
     assert "var_001" in result
@@ -75,7 +75,7 @@ def test_appraisal_audit_format_contains_action_request():
     result = format_appraisal_audit(
         appraisal_count=10, vague_count=3, baseline_win_count=2
     )
-    assert "calibrate" in result.lower() or "Calibrate" in result
+    assert "标定" in result  # N6修复：改为中文
 
 
 def test_overturn_audit_format_contains_count():
@@ -91,4 +91,9 @@ def test_overturn_audit_format_contains_options():
     from core.inspiration.escalation_dialogue import format_overturn_audit
 
     result = format_overturn_audit(overturn_count=10)
-    assert "deviation" in result.lower() or "偏差" in result or "Options" in result or "A" in result
+    assert (
+        "deviation" in result.lower()
+        or "偏差" in result
+        or "Options" in result
+        or "A" in result
+    )
