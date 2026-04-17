@@ -620,13 +620,16 @@ class TestChangeDetectorEdgeCases:
 
         # Mock exists 返回 True，然后 stat 抛出权限错误
         original_exists = Path.exists
+
         def mock_exists(self):
             if self == restricted_file:
                 return True
             return original_exists(self)
 
-        with patch.object(Path, "exists", mock_exists), \
-             patch.object(Path, "stat", side_effect=PermissionError("无权限")):
+        with (
+            patch.object(Path, "exists", mock_exists),
+            patch.object(Path, "stat", side_effect=PermissionError("无权限")),
+        ):
             info = file_watcher._get_file_info(restricted_file)
 
             # 应返回 None（优雅处理）
@@ -694,3 +697,37 @@ class TestChangeDetectorPerformance:
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--tb=short"])
+
+
+# ==================== M2 novel_plot_v1 同步测试 ====================
+
+
+def test_outline_change_triggers_novel_plot_sync():
+    """总大纲变更应同时同步到 worldview 和 novel_plot_v1"""
+    from core.change_detector.change_detector import ChangeDetector
+    from unittest.mock import MagicMock, patch
+
+    detector = ChangeDetector()
+
+    # Mock 掉实际同步，只验证调用链
+    with (
+        patch.object(
+            detector.sync_adapter, "sync_outline_to_worldview"
+        ) as mock_worldview,
+        patch.object(
+            detector.sync_adapter, "sync_total_outline_to_qdrant"
+        ) as mock_plot,
+    ):
+        mock_worldview.return_value = MagicMock(status="success", count=1)
+        mock_plot.return_value = MagicMock(status="success", count=1)
+
+        from core.change_detector.file_watcher import FileChange
+
+        changes = {"outline": [FileChange(path="总大纲.md", change_type="modified")]}
+        detector.sync_changes(changes)
+
+        mock_worldview.assert_called_once()
+        (
+            mock_plot.assert_called_once(),
+            "outline 变更应调用 sync_total_outline_to_qdrant()，但未调用",
+        )

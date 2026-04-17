@@ -186,9 +186,12 @@ class ChangeDetector:
         """
         sync_results = {}
 
-        # 大纲变更 → 世界观配置
+        # 大纲变更 → 世界观配置 + novel_plot_v1 (M2-修复)
         if changes.get("outline"):
             sync_results["worldview"] = self._sync_outline_to_worldview()
+            sync_results["novel_plot_v1"] = (
+                self.sync_adapter.sync_total_outline_to_qdrant()
+            )
 
         # 章节大纲变更 → Qdrant chapter_outlines (I18/P3-#25)
         if changes.get("chapter_outlines"):
