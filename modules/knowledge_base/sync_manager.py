@@ -168,18 +168,22 @@ class SyncManager:
         return self._client
 
     def _load_model(self):
-        """加载嵌入模型"""
+        """加载嵌入模型（BGE-M3，1024 维 dense vector）"""
         if self._model is None:
             try:
-                from sentence_transformers import SentenceTransformer
-
-                self._model = SentenceTransformer(
-                    "paraphrase-multilingual-MiniLM-L12-v2"
-                )
+                from FlagEmbedding import BGEM3FlagModel
             except ImportError:
-                raise ImportError(
-                    "请安装 sentence-transformers: pip install sentence-transformers"
+                raise ImportError("请安装 FlagEmbedding: pip install -U FlagEmbedding")
+
+            # 复用 core/inspiration/embedder.py 的路径配置
+            from core.config_loader import get_model_path
+
+            model_path = get_model_path()
+            if not model_path:
+                raise RuntimeError(
+                    "BGE-M3 模型路径未配置，请检查 config.json 或环境变量 BGE_M3_MODEL_PATH"
                 )
+            self._model = BGEM3FlagModel(model_path, use_fp16=True)
         return self._model
 
     def sync(self, target: str = "all", rebuild: bool = False) -> Dict[str, Any]:
@@ -291,9 +295,17 @@ class SyncManager:
             text = "\n".join(content_parts)
             texts.append(text)
 
-        # 批量生成嵌入
+        # 批量生成嵌入（BGE-M3）
         print("  [生成] 正在生成嵌入向量...")
-        vectors = model.encode(texts, show_progress_bar=True, batch_size=32)
+        _output = model.encode(
+            texts,
+            batch_size=32,
+            max_length=512,
+            return_dense=True,
+            return_sparse=False,
+            return_colbert_vecs=False,
+        )
+        vectors = _output["dense_vecs"]
 
         # 创建点
         for i, ((name, props), vector) in enumerate(zip(entity_list, vectors)):
@@ -415,10 +427,18 @@ class SyncManager:
 
         print(f"  提取技法条目: {len(techniques)} 条")
 
-        # 批量生成嵌入
+        # 批量生成嵌入（BGE-M3）
         texts = [t["content"] for t in techniques]
         print("  [生成] 正在生成嵌入向量...")
-        vectors = model.encode(texts, show_progress_bar=True, batch_size=32)
+        _output = model.encode(
+            texts,
+            batch_size=32,
+            max_length=512,
+            return_dense=True,
+            return_sparse=False,
+            return_colbert_vecs=False,
+        )
+        vectors = _output["dense_vecs"]
 
         # 创建点
         points = []
@@ -522,10 +542,18 @@ class SyncManager:
         if not valid_cases:
             return 0
 
-        # 批量提取文本和嵌入
+        # 批量提取文本和嵌入（BGE-M3）
         texts = [c.get("content", "")[:1000] for c in valid_cases]
         print("  [生成] 正在批量生成嵌入向量...")
-        vectors = model.encode(texts, show_progress_bar=True, batch_size=32)
+        _output = model.encode(
+            texts,
+            batch_size=32,
+            max_length=512,
+            return_dense=True,
+            return_sparse=False,
+            return_colbert_vecs=False,
+        )
+        vectors = _output["dense_vecs"]
 
         # 创建点并上传
         points = []
