@@ -255,3 +255,51 @@ def test_intent_router_instance_is_reused():
     router1 = layer._intent_router
     router2 = layer._intent_router
     assert router1 is router2, "IntentRouter 不是复用实例"
+
+
+import pytest
+from core.conversation.intent_classifier import IntentClassifier, IntentCategory
+
+SETTING_UPDATE_INTENTS = [
+    "add_character",
+    "add_character_ability",
+    "add_character_relation",
+    "modify_character",
+    "add_faction",
+    "add_faction_member",
+    "modify_plot",
+    "add_plot_point",
+    "add_power_type",
+    "add_power_level",
+    "add_power_cost",
+    "add_era",
+    "add_era_event",
+]
+
+WORKFLOW_CONTROL_INTENTS = [
+    "start_chapter",
+]
+
+
+@pytest.mark.parametrize("intent_name", SETTING_UPDATE_INTENTS)
+def test_setting_intent_has_setting_update_category(intent_name):
+    """设定写入类 Intent 必须使用 SETTING_UPDATE category"""
+    classifier = IntentClassifier()
+    all_intents = classifier._all_intents
+    assert intent_name in all_intents, f"Intent {intent_name} 未注册"
+    actual = all_intents[intent_name]["category"]
+    assert actual == IntentCategory.SETTING_UPDATE, (
+        f"{intent_name}: 期望 SETTING_UPDATE，实际 {actual}"
+    )
+
+
+@pytest.mark.parametrize("intent_name", WORKFLOW_CONTROL_INTENTS)
+def test_workflow_intent_has_workflow_control_category(intent_name):
+    """章节创作类 Intent 必须使用 WORKFLOW_CONTROL category"""
+    classifier = IntentClassifier()
+    all_intents = classifier._all_intents
+    assert intent_name in all_intents, f"Intent {intent_name} 未注册"
+    actual = all_intents[intent_name]["category"]
+    assert actual == IntentCategory.WORKFLOW_CONTROL, (
+        f"{intent_name}: 期望 WORKFLOW_CONTROL，实际 {actual}"
+    )

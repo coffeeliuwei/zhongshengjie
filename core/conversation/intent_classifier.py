@@ -69,7 +69,7 @@ class IntentClassifier:
                 r"帮我写第(.+?)章",
                 r"创作第(.+?)章",
             ],
-            "category": IntentCategory.WORKFLOW,
+            "category": IntentCategory.WORKFLOW_CONTROL,
             "entities": ["chapter"],
         },
         "continue_workflow": {
@@ -135,7 +135,7 @@ class IntentClassifier:
                 r"有个新角色(.+)",
                 r"加一个角色(.+)",
             ],
-            "category": IntentCategory.CHARACTER,
+            "category": IntentCategory.SETTING_UPDATE,
             "entities": ["character_name"],
         },
         "add_character_ability": {
@@ -146,7 +146,7 @@ class IntentClassifier:
                 r"(.+?)学会了(.+)",
                 r"(.+?)觉醒了(.+)能力",
             ],
-            "category": IntentCategory.CHARACTER,
+            "category": IntentCategory.SETTING_UPDATE,
             "entities": ["character", "ability"],
         },
         "add_character_relation": {
@@ -155,7 +155,7 @@ class IntentClassifier:
                 r"(.+?)和(.+?)的关系是(.+)",
                 r"(.+?)是(.+?)的(.+)",
             ],
-            "category": IntentCategory.CHARACTER,
+            "category": IntentCategory.SETTING_UPDATE,
             "entities": ["character1", "character2", "relation"],
         },
         "modify_character": {
@@ -164,7 +164,7 @@ class IntentClassifier:
                 r"(.+?)的设定改成(.+)",
                 r"修改(.+?)的(.+)",
             ],
-            "category": IntentCategory.CHARACTER,
+            "category": IntentCategory.SETTING_UPDATE,
             "entities": ["character", "attribute", "value"],
         },
         # 势力设定
@@ -175,7 +175,7 @@ class IntentClassifier:
                 r"新增势力(.+)",
                 r"加一个势力(.+)",
             ],
-            "category": IntentCategory.FACTION,
+            "category": IntentCategory.SETTING_UPDATE,
             "entities": ["faction_name"],
         },
         "add_faction_member": {
@@ -184,7 +184,7 @@ class IntentClassifier:
                 r"(.+?)归属于(.+)",
                 r"(.+?)属于(.+)",
             ],
-            "category": IntentCategory.FACTION,
+            "category": IntentCategory.SETTING_UPDATE,
             "entities": ["character", "faction"],
         },
         # 剧情修改
@@ -195,7 +195,7 @@ class IntentClassifier:
                 r"修改剧情(.+)",
                 r"剧情变成(.+)",
             ],
-            "category": IntentCategory.PLOT,
+            "category": IntentCategory.SETTING_UPDATE,
             "entities": ["plot_change"],
         },
         "add_plot_point": {
@@ -204,7 +204,7 @@ class IntentClassifier:
                 r"新增剧情(.+)",
                 r"加一个情节(.+)",
             ],
-            "category": IntentCategory.PLOT,
+            "category": IntentCategory.SETTING_UPDATE,
             "entities": ["plot_point"],
         },
     }
@@ -313,7 +313,7 @@ class IntentClassifier:
                 r"新增力量体系(.+)",
                 r"加一个力量类型(.+)",
             ],
-            "category": IntentCategory.POWER,
+            "category": IntentCategory.SETTING_UPDATE,
             "entities": ["power_type"],
         },
         "add_power_level": {
@@ -322,7 +322,7 @@ class IntentClassifier:
                 r"(.+?)的力量境界是(.+)",
                 r"加一个境界(.+)",
             ],
-            "category": IntentCategory.POWER,
+            "category": IntentCategory.SETTING_UPDATE,
             "entities": ["power_system", "level"],
         },
         "add_power_cost": {
@@ -331,7 +331,7 @@ class IntentClassifier:
                 r"使用(.+?)代价(.+)",
                 r"(.+?)代价(.+)",
             ],
-            "category": IntentCategory.POWER,
+            "category": IntentCategory.SETTING_UPDATE,
             "entities": ["power", "cost"],
         },
         # 时间线
@@ -341,7 +341,7 @@ class IntentClassifier:
                 r"新增时代(.+)",
                 r"加一个时代(.+)",
             ],
-            "category": IntentCategory.TIMELINE,
+            "category": IntentCategory.SETTING_UPDATE,
             "entities": ["era_name"],
         },
         "add_era_event": {
@@ -350,7 +350,7 @@ class IntentClassifier:
                 r"(.+?)时代发生(.+)",
                 r"(.+?)时代事件(.+)",
             ],
-            "category": IntentCategory.TIMELINE,
+            "category": IntentCategory.SETTING_UPDATE,
             "entities": ["era", "event"],
         },
         # 查询
