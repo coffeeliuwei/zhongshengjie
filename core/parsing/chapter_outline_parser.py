@@ -149,7 +149,8 @@ class ChapterOutlineParser:
         for pattern in patterns:
             matches = list(outline_dir.glob(pattern))
             if matches:
-                return matches[0]  # 取第一个匹配
+                # N3修复：返回最新修改的文件，而非第一个匹配
+                return max(matches, key=lambda p: p.stat().st_mtime)
 
         return None
 
