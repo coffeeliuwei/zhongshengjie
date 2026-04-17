@@ -671,7 +671,7 @@ class UnifiedRetrievalAPI:
             from qdrant_client import QdrantClient
             from qdrant_client.http import models
 
-            client = QdrantClient(url="http://localhost:6333")
+            client = QdrantClient(url=get_qdrant_url())
 
             # 构建filter
             filter_conditions = []
@@ -732,7 +732,7 @@ class UnifiedRetrievalAPI:
         try:
             from qdrant_client import QdrantClient
 
-            client = QdrantClient(url="http://localhost:6333")
+            client = QdrantClient(url=get_qdrant_url())
 
             results = client.scroll(
                 collection_name="character_relation_v1",
@@ -775,7 +775,7 @@ class UnifiedRetrievalAPI:
         try:
             from qdrant_client import QdrantClient
 
-            client = QdrantClient(url="http://localhost:6333")
+            client = QdrantClient(url=get_qdrant_url())
 
             results = client.scroll(
                 collection_name="author_style_v1",
@@ -810,7 +810,7 @@ class UnifiedRetrievalAPI:
         try:
             from qdrant_client import QdrantClient
 
-            client = QdrantClient(url="http://localhost:6333")
+            client = QdrantClient(url=get_qdrant_url())
 
             results = client.scroll(
                 collection_name="foreshadow_pair_v1",
@@ -848,7 +848,7 @@ class UnifiedRetrievalAPI:
             from qdrant_client import QdrantClient
             from qdrant_client.http import models
 
-            client = QdrantClient(url="http://localhost:6333")
+            client = QdrantClient(url=get_qdrant_url())
 
             filter_conditions = []
             if power_type:

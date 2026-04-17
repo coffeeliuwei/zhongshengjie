@@ -268,3 +268,37 @@ def test_sync_outlines_script_importable():
     with open(PROJECT_ROOT / "scripts" / "sync_outlines.py", encoding="utf-8") as f:
         source = f.read()
     compile(source, "sync_outlines.py", "exec")  # 语法检查
+
+
+# === M6 硬编码 URL 测试 ===
+
+
+def test_unified_retrieval_api_no_hardcoded_url():
+    """unified_retrieval_api.py 不应包含硬编码 localhost:6333"""
+    from pathlib import Path
+
+    file_path = Path("D:/动画/众生界/core/retrieval/unified_retrieval_api.py")
+    content = file_path.read_text(encoding="utf-8")
+
+    count = content.count("localhost:6333")
+    assert count == 0, f"发现 {count} 处硬编码URL，应替换为 get_qdrant_url()"
+
+
+def test_memory_point_sync_no_hardcoded_url():
+    """memory_point_sync.py 不应包含硬编码 localhost:6333（除 fallback 函数外）"""
+    from pathlib import Path
+
+    file_path = Path("D:/动画/众生界/core/inspiration/memory_point_sync.py")
+    content = file_path.read_text(encoding="utf-8")
+
+    # 排除 fallback 函数定义中的默认值（允许）
+    lines_with_hardcoded = [
+        line
+        for line in content.splitlines()
+        if "localhost:6333" in line
+        and "def get_qdrant_url" not in line
+        and "return" not in line
+    ]
+    assert len(lines_with_hardcoded) == 0, (
+        f"发现 {len(lines_with_hardcoded)} 处硬编码URL"
+    )

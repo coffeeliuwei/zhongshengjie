@@ -18,6 +18,13 @@ from qdrant_client.http.models import (
     MatchValue,
 )
 
+try:
+    from core.config_loader import get_qdrant_url
+except ImportError:
+
+    def get_qdrant_url():
+        return "http://localhost:6333"
+
 
 COLLECTION_NAME = "memory_points_v1"
 
@@ -33,7 +40,7 @@ class MemoryPointSync:
         elif qdrant_path:
             self.client = QdrantClient(path=qdrant_path)
         else:
-            self.client = QdrantClient(url="http://localhost:6333")
+            self.client = QdrantClient(url=get_qdrant_url())
 
     def create(
         self, payload: Dict[str, Any], embedding: Optional[List[float]] = None
