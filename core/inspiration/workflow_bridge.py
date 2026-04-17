@@ -19,6 +19,9 @@ from core.inspiration.memory_point_sync import MemoryPointSync
 from core.inspiration.appraisal_agent import build_appraisal_spec
 from core.inspiration.embedder import embed_scene_context as _embed_scene_ctx
 
+# N5修复：导入配置读取
+from core.config_loader import get_config
+
 
 # 中文作家名 → Skill 名称映射
 WRITER_NAME_TO_SKILL = {
@@ -151,9 +154,15 @@ def select_winner_spec(
             memory_point_count = 0
 
     if retrieved_references is None:
-        if memory_point_count >= 50:
+        # N5修复：从配置读取阈值，而非硬编码
+        cfg = get_config()
+        inspiration_cfg = cfg.get("inspiration_engine", {})
+        cold_threshold = inspiration_cfg.get("appraisal_cold_start_threshold", 50)
+        growing_threshold = inspiration_cfg.get("appraisal_growing_threshold", 300)
+
+        if memory_point_count >= cold_threshold:
             embedding = _embed_scene_context(scene_context)
-            top_k = 3 if memory_point_count < 300 else 5
+            top_k = 3 if memory_point_count < growing_threshold else 5
             retrieved_references = _retrieve_references_for_appraisal(
                 sync=sync,
                 embedding=embedding,

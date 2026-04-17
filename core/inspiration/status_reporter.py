@@ -10,8 +10,18 @@ from typing import Optional
 
 from core.inspiration.memory_point_sync import MemoryPointSync
 
-_COLD_THRESHOLD = 50
-_GROWING_THRESHOLD = 300
+# N5修复：导入配置读取
+from core.config_loader import get_config
+
+
+def _get_thresholds():
+    """从配置获取阈值"""
+    cfg = get_config()
+    inspiration_cfg = cfg.get("inspiration_engine", {})
+    return (
+        inspiration_cfg.get("appraisal_cold_start_threshold", 50),
+        inspiration_cfg.get("appraisal_growing_threshold", 300),
+    )
 
 
 def report_status(sync: Optional[MemoryPointSync] = None) -> str:
@@ -26,6 +36,9 @@ def report_status(sync: Optional[MemoryPointSync] = None) -> str:
     if sync is None:
         sync = MemoryPointSync()
 
+    # N5修复：从配置读取阈值
+    cold_threshold, growing_threshold = _get_thresholds()
+
     try:
         total = sync.count()
     except Exception:
@@ -36,10 +49,10 @@ def report_status(sync: Optional[MemoryPointSync] = None) -> str:
     except Exception:
         overturn_count = 0
 
-    if total < _COLD_THRESHOLD:
+    if total < cold_threshold:
         phase = "冷启动"
         phase_desc = "鉴赏师纯靠 LLM 直感判断，未注入参照样本"
-    elif total < _GROWING_THRESHOLD:
+    elif total < growing_threshold:
         phase = "成长期"
         phase_desc = "鉴赏师注入 top 3 相关记忆点作为参照"
     else:
