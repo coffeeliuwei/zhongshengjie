@@ -89,7 +89,7 @@ class IntentClassifier:
                 r"先停",
                 r"休息一下",
             ],
-            "category": IntentCategory.WORKFLOW,
+            "category": IntentCategory.WORKFLOW_CONTROL,
             "entities": [],
         },
         "undo_last": {
