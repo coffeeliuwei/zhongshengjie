@@ -1,0 +1,134 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Chapter Outline Schema",
+  "description": "章节大纲数据结构定义，用于 jsonschema 验证",
+  "type": "object",
+  "required": ["chapter_title"],
+  "properties": {
+    "chapter_title": {
+      "type": "string",
+      "description": "章节标题，如 '第一章 天裂'",
+      "examples": ["第一章 天裂", "第二章 觉醒"]
+    },
+    "chapter_info": {
+      "type": "object",
+      "description": "章节信息表格",
+      "properties": {
+        "章节序号": {
+          "type": "string",
+          "description": "章节编号"
+        },
+        "章节名": {
+          "type": "string",
+          "description": "章节名称"
+        },
+        "视角": {
+          "type": "string",
+          "description": "视角角色"
+        },
+        "身份": {
+          "type": "string",
+          "description": "角色身份"
+        },
+        "核心情感": {
+          "type": "string",
+          "description": "章节核心情感"
+        },
+        "核心冲突": {
+          "type": "string",
+          "description": "章节核心冲突"
+        },
+        "场景数量": {
+          "type": "string",
+          "description": "场景数量"
+        }
+      },
+      "additionalProperties": true
+    },
+    "key_settings": {
+      "type": "object",
+      "description": "关键设定表格",
+      "additionalProperties": true
+    },
+    "scenes": {
+      "type": "array",
+      "description": "详细场景设计列表",
+      "items": {
+        "type": "object",
+        "properties": {
+          "scene_id": {
+            "type": "string",
+            "description": "场景标识"
+          },
+          "scene_type": {
+            "type": "string",
+            "description": "场景类型，如 '开篇'、'战斗'、'情感'"
+          },
+          "scene_title": {
+            "type": "string",
+            "description": "场景标题"
+          },
+          "characters": {
+            "type": "array",
+            "description": "出场角色列表",
+            "items": {
+              "type": "string"
+            }
+          },
+          "setting": {
+            "type": "string",
+            "description": "场景设定"
+          },
+          "action": {
+            "type": "string",
+            "description": "场景动作/剧情"
+          },
+          "emotion": {
+            "type": "string",
+            "description": "场景情感"
+          },
+          "notes": {
+            "type": "string",
+            "description": "写作要点"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "writing_notes": {
+      "type": "object",
+      "description": "写作要点表格",
+      "additionalProperties": true
+    },
+    "chapter_structure": {
+      "type": "array",
+      "description": "章节结构列表",
+      "items": {
+        "type": "object",
+        "properties": {
+          "phase": {
+            "type": "string",
+            "description": "结构阶段，如 '起'、'承'、'转'、'合'"
+          },
+          "content": {
+            "type": "string",
+            "description": "阶段内容概述"
+          },
+          "scene_ids": {
+            "type": "array",
+            "description": "关联场景ID列表",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "summary": {
+      "type": "string",
+      "description": "章节摘要，用于注入创作上下文"
+    }
+  },
+  "additionalProperties": true
+}
