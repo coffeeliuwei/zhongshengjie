@@ -34,17 +34,17 @@ def format_rater_vs_evaluator_conflict(
         others_text += f"\n  - {c['id']}: {c.get('summary', '(无摘要)')}"
 
     return (
-        f"WARNING: Rater vs Evaluator Conflict\n\n"
-        f"  Rater selected: {rater_selected_id}\n"
-        f"  Ignition point: {ignition_point}\n"
-        f"  Evaluator rejected: {evaluator_violation}\n"
-        f"\nOther candidates: {others_text if others_text else '(none)'}\n"
-        f"\nOptions:\n"
-        f"  A. Accept {rater_selected_id}, relax rule constraints for this case\n"
-        f"  B. Choose other candidates that passed evaluation\n"
-        f"  C. Adjust constraints and regenerate\n"
-        f"  D. Rewrite this scene\n"
-        f"  E. Other ideas\n"
+        f"⚠️ 警告：鉴赏师与评估师冲突\n\n"
+        f"  鉴赏师选中: {rater_selected_id}\n"
+        f"  点火句: {ignition_point}\n"
+        f"  评估师打回: {evaluator_violation}\n"
+        f"\n其他候选: {others_text if others_text else '(无)'}\n"
+        f"\n可选操作:\n"
+        f"  A. 接受 {rater_selected_id}，放宽此场景的规则约束\n"
+        f"  B. 选择通过评估的其他候选\n"
+        f"  C. 调整约束条件后重新生成\n"
+        f"  D. 重写此场景\n"
+        f"  E. 其他想法\n"
     )
 
 
@@ -61,15 +61,15 @@ def format_all_variants_failed(
     Returns:
         结构化对话文本
     """
-    ids_text = ", ".join(candidate_ids) if candidate_ids else "(none)"
+    ids_text = ", ".join(candidate_ids) if candidate_ids else "(无)"
     return (
-        f"WARNING: All variants failed evaluation\n\n"
-        f"  Generated: {ids_text}\n"
-        f"  Common flaw: {common_flaw}\n"
-        f"\nSuggested actions:\n"
-        f"  A. Modify scene context (power settings,契约 rules) and regenerate\n"
-        f"  B. Temporarily disable inspiration engine, use original flow\n"
-        f"  C. Manually provide writing direction for this scene\n"
+        f"⚠️ 警告：所有变体未通过评估\n\n"
+        f"  生成的变体: {ids_text}\n"
+        f"  共性问题: {common_flaw}\n"
+        f"\n建议操作:\n"
+        f"  A. 修改场景上下文（力量设定、契约规则）后重新生成\n"
+        f"  B. 暂时关闭灵感引擎，使用原流程\n"
+        f"  C. 手动提供此场景的写作方向\n"
     )
 
 
@@ -96,23 +96,21 @@ def format_appraisal_audit(
     warnings = []
     if vague_ratio >= 0.4:
         warnings.append(
-            f"Vague ignition points ({vague_count}/{appraisal_count} contain vague words), may be random selection"
+            f"点火点笼统 ({vague_count}/{appraisal_count} 次包含笼统词)，可能为随机选择"
         )
     if baseline_ratio >= 0.6:
         warnings.append(
-            f"Repeated baseline selection ({baseline_win_count}/{appraisal_count} times), constraints may not be effective"
+            f"反复选择基准变体 ({baseline_win_count}/{appraisal_count} 次)，约束可能失效"
         )
 
-    warning_text = (
-        "\n  - ".join(warnings) if warnings else "No obvious degradation signs"
-    )
+    warning_text = "\n  - ".join(warnings) if warnings else "无明显退化迹象"
 
     return (
-        f"Appraisal Degradation Audit (last {appraisal_count} appraisals)\n\n"
+        f"鉴赏师退化审计（最近 {appraisal_count} 次鉴赏）\n\n"
         f"  - {warning_text}\n\n"
-        f"Please calibrate: which of these {appraisal_count} appraisals did you actually resonate with?\n"
-        f"(Example: 'Appraisals 2, 5, 8 were genuine ignition, others were敷衍')\n"
-        f"Your calibration will be written directly to memory point store, used to calibrate rater judgment.\n"
+        f"请标定：这 {appraisal_count} 次鉴赏中，哪些是你真正共鸣的？\n"
+        f"（示例：'第 2、5、8 次是真点火，其他是敷衍'）\n"
+        f"你的标定将直接写入记忆点库，用于校准鉴赏师判断。\n"
     )
 
 
@@ -124,17 +122,17 @@ def format_overturn_audit(
     累计推翻事件达阈值时触发，提示作者两位 Agent 的系统性偏差。
 
     Args:
-        overturn_count: 累计推翻事件数量
+        overturn_count: 紧计推翻事件数量
 
     Returns:
         结构化审计报告，提供偏差校正选项
     """
     return (
-        f"Overturn Event Audit\n\n"
-        f"  You have overturned {overturn_count} times the joint judgment of rater + evaluator.\n"
-        f"  This indicates systematic deviation between both Agents' judgment and your aesthetic.\n\n"
-        f"How do you want to handle this?\n"
-        f"  A. I will summarize deviation direction, inject into rater prompt as 'known deviation calibration'\n"
-        f"  B. Adjust relevant dimension weights of evaluator\n"
-        f"  C. Continue accumulating, revisit next time\n"
+        f"推翻事件审计\n\n"
+        f"  你已累计 {overturn_count} 次推翻鉴赏师+评估师的联合判断。\n"
+        f"  这表明两位 Agent 的判断与你的审美存在系统性偏差。\n\n"
+        f"如何处理？\n"
+        f"  A. 我将总结偏差方向，注入鉴赏师 Prompt 作为'已知偏差校准'\n"
+        f"  B. 调整评估师相关维度的权重\n"
+        f"  C. 继续积累，下次再处理\n"
     )
