@@ -97,6 +97,27 @@ docs/archived/
 docs/专家级能力体系设计方案.md
 docs/*设计方案*.md
 
+# 内部开发文档（不对外公开）
+docs/计划_*.md
+docs/审核报告_*.md
+docs/SESSION_HANDOFF_*.md
+docs/opencode_dev_protocol_*.md
+docs/ADR-*.md
+docs/architecture_design_report.md
+docs/ROADMAP_*.md
+docs/evolution_roadmap.md
+docs/AI项目掌控手册.md
+docs/DIRECTORY_STRUCTURE.md
+docs/数据工程优化方案.md
+docs/整库拆解报告.md
+docs/统一提炼引擎重构方案.md
+docs/audit/
+docs/m5_evidence/
+docs/m6_artifacts/
+docs/m7_artifacts/
+docs/workflows/
+docs/写手工作流启动手册_*.md
+
 # ========================================
 # 运行时状态 - 本地私有
 # ========================================
