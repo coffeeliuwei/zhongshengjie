@@ -27,6 +27,32 @@ from core.inspiration.appraisal_agent import (
     AppraisalParseError,
 )
 from core.inspiration.workflow_bridge import phase1_dispatch, _resolve_writer_skill
+from core.inspiration.creative_contract import (
+    Scope,
+    Aspects,
+    ExemptDimension,
+    PreserveItem,
+    RejectedItem,
+    NegotiationTurn,
+    WriterAssignment,
+    CreativeContract,
+    generate_contract_id,
+    ContractValidationError,
+)
+from core.inspiration.dispatcher import (
+    DispatchPackage,
+    dispatch,
+    DispatcherError,
+)
+
+# ===================== P1-7 追加:评估师豁免 =====================
+from core.inspiration.evaluator_exemption import (
+    ExemptionBuildError,
+    ExemptionMap,
+    build_exemption_map,
+    is_exempt,
+    format_exemption_report,
+)
 
 __all__ = [
     "ConstraintLibrary",
@@ -44,4 +70,23 @@ __all__ = [
     "AppraisalParseError",
     "phase1_dispatch",
     "_resolve_writer_skill",
+    "Scope",
+    "Aspects",
+    "ExemptDimension",
+    "PreserveItem",
+    "RejectedItem",
+    "NegotiationTurn",
+    "WriterAssignment",
+    "CreativeContract",
+    "generate_contract_id",
+    "ContractValidationError",
+    "DispatchPackage",
+    "dispatch",
+    "DispatcherError",
+    # P1-7 追加
+    "ExemptionBuildError",
+    "ExemptionMap",
+    "build_exemption_map",
+    "is_exempt",
+    "format_exemption_report",
 ]

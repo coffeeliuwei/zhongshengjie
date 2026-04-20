@@ -97,3 +97,154 @@ def test_overturn_audit_format_contains_options():
         or "Options" in result
         or "A" in result
     )
+
+
+# ===================== P1-6 追加:阶段 6 三选升级 =====================
+
+
+def test_stage6_three_choice_contains_warning_header():
+    """三选格式化:包含警告头"""
+    from core.inspiration.escalation_dialogue import format_stage6_three_choice
+
+    result = format_stage6_three_choice(
+        item_summaries=[
+            {"item_id": "#1", "summary": "红裙少女的侧脸近景"},
+            {"item_id": "#3", "summary": "冰镜倒映回廊"},
+        ],
+        failed_dimensions=["人物动机连贯性", "情绪一致性"],
+        consecutive_fail_count=3,
+    )
+    assert "警告" in result
+    assert "阶段 6" in result or "整章评估" in result
+
+
+def test_stage6_three_choice_lists_all_items():
+    """三选格式化:列出所有 preserve_item 供作者选择撤销"""
+    from core.inspiration.escalation_dialogue import format_stage6_three_choice
+
+    result = format_stage6_three_choice(
+        item_summaries=[
+            {"item_id": "#1", "summary": "A 摘要"},
+            {"item_id": "#2", "summary": "B 摘要"},
+            {"item_id": "#7", "summary": "C 摘要"},
+        ],
+        failed_dimensions=["维度X"],
+        consecutive_fail_count=3,
+    )
+    for iid in ("#1", "#2", "#7"):
+        assert iid in result
+    assert "A 摘要" in result and "B 摘要" in result and "C 摘要" in result
+
+
+def test_stage6_three_choice_lists_failed_dimensions():
+    """三选格式化:列出持续失败维度"""
+    from core.inspiration.escalation_dialogue import format_stage6_three_choice
+
+    result = format_stage6_three_choice(
+        item_summaries=[{"item_id": "#1", "summary": "x"}],
+        failed_dimensions=["节奏", "情绪"],
+        consecutive_fail_count=3,
+    )
+    assert "节奏" in result
+    assert "情绪" in result
+
+
+def test_stage6_three_choice_contains_three_options():
+    """三选格式化:三个选项 a/b/c 都在"""
+    from core.inspiration.escalation_dialogue import format_stage6_three_choice
+
+    result = format_stage6_three_choice(
+        item_summaries=[{"item_id": "#1", "summary": "x"}],
+        failed_dimensions=["X"],
+        consecutive_fail_count=3,
+    )
+    assert "[a]" in result and "[b]" in result and "[c]" in result
+    assert "撤销" in result
+    assert "强制通过" in result
+    assert "重协商" in result or "回 5.5" in result
+
+
+def test_stage6_three_choice_mentions_force_pass_consequence():
+    """三选格式化:[b] 强制通过必须提醒'推翻事件回流'"""
+    from core.inspiration.escalation_dialogue import format_stage6_three_choice
+
+    result = format_stage6_three_choice(
+        item_summaries=[{"item_id": "#1", "summary": "x"}],
+        failed_dimensions=["X"],
+        consecutive_fail_count=3,
+    )
+    assert "author_force_pass" in result or "推翻事件" in result
+
+
+def test_stage6_three_choice_shows_fail_count():
+    """三选格式化:显示连续失败次数"""
+    from core.inspiration.escalation_dialogue import format_stage6_three_choice
+
+    result = format_stage6_three_choice(
+        item_summaries=[{"item_id": "#1", "summary": "x"}],
+        failed_dimensions=["X"],
+        consecutive_fail_count=3,
+    )
+    assert "3" in result
+
+
+def test_stage6_three_choice_empty_items_renders_placeholder():
+    """三选格式化:preserve_list 为空时不崩,显示占位"""
+    from core.inspiration.escalation_dialogue import format_stage6_three_choice
+
+    result = format_stage6_three_choice(
+        item_summaries=[],
+        failed_dimensions=["X"],
+        consecutive_fail_count=3,
+    )
+    assert "(无)" in result or "无采纳建议" in result
+    assert "[a]" in result and "[b]" in result and "[c]" in result
+
+
+def test_parse_revoke_with_item_id():
+    """解析:'a #2' -> ('revoke', '#2')"""
+    from core.inspiration.escalation_dialogue import parse_stage6_choice
+    assert parse_stage6_choice("a #2") == ("revoke", "#2")
+    assert parse_stage6_choice("A #10") == ("revoke", "#10")
+    assert parse_stage6_choice("  a   #7  ") == ("revoke", "#7")
+
+
+def test_parse_force_pass():
+    """解析:'b' / 'B' -> ('force_pass', None)"""
+    from core.inspiration.escalation_dialogue import parse_stage6_choice
+    assert parse_stage6_choice("b") == ("force_pass", None)
+    assert parse_stage6_choice("B") == ("force_pass", None)
+    assert parse_stage6_choice("  b\n") == ("force_pass", None)
+
+
+def test_parse_renegotiate():
+    """解析:'c' -> ('renegotiate', None)"""
+    from core.inspiration.escalation_dialogue import parse_stage6_choice
+    assert parse_stage6_choice("c") == ("renegotiate", None)
+    assert parse_stage6_choice("C") == ("renegotiate", None)
+
+
+def test_parse_revoke_missing_item_id_raises():
+    """解析:'a' 缺 #N -> ValueError"""
+    import pytest
+    from core.inspiration.escalation_dialogue import parse_stage6_choice
+    with pytest.raises(ValueError, match="revoke"):
+        parse_stage6_choice("a")
+
+
+def test_parse_revoke_bad_item_id_raises():
+    """解析:'a abc' / 'a #' -> ValueError"""
+    import pytest
+    from core.inspiration.escalation_dialogue import parse_stage6_choice
+    for bad in ("a abc", "a #", "a #abc", "a 1", "a ##1"):
+        with pytest.raises(ValueError):
+            parse_stage6_choice(bad)
+
+
+def test_parse_unknown_choice_raises():
+    """解析:不在 a/b/c -> ValueError"""
+    import pytest
+    from core.inspiration.escalation_dialogue import parse_stage6_choice
+    for bad in ("", "   ", "d", "x y z", "撤销", "abc"):
+        with pytest.raises(ValueError):
+            parse_stage6_choice(bad)

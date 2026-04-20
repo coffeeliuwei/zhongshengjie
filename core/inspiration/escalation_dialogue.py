@@ -7,7 +7,8 @@
 设计文档：docs/superpowers/specs/2026-04-14-inspiration-engine-design.md §9
 """
 
-from typing import List, Dict, Any
+import re
+from typing import List, Dict, Any, Tuple, Optional
 
 
 def format_rater_vs_evaluator_conflict(
@@ -135,4 +136,91 @@ def format_overturn_audit(
         f"  A. 我将总结偏差方向，注入鉴赏师 Prompt 作为'已知偏差校准'\n"
         f"  B. 调整评估师相关维度的权重\n"
         f"  C. 继续积累，下次再处理\n"
+    )
+
+
+# ===================== P1-6 追加:阶段 6 三选升级 =====================
+
+
+def format_stage6_three_choice(
+    item_summaries: List[Dict[str, str]],
+    failed_dimensions: List[str],
+    consecutive_fail_count: int,
+) -> str:
+    """格式化阶段 6 整章评估连续失败触发的三选升级对话。
+
+    v2 设计 §1 阶段 6 `<0.8 第 3 次 → 触发对话升级`:
+      [a] 撤销某条采纳建议(进 rejected_list)
+      [b] 强制通过(标 author_force_pass,推翻事件回流)
+      [c] 整章重协商(回 5.5)
+
+    Args:
+        item_summaries: preserve_list 摘要,每项 {"item_id": "#N", "summary": "..."}
+        failed_dimensions: 持续 <0.8 的评估维度名
+        consecutive_fail_count: 连续失败次数(触发时通常为 3)
+
+    Returns:
+        可直接呈现给作者的结构化三选文本
+    """
+    if item_summaries:
+        items_text = "\n".join(
+            f"  - {it['item_id']}: {it.get('summary', '(无摘要)')}"
+            for it in item_summaries
+        )
+    else:
+        items_text = "  (无采纳建议)"
+
+    dims_text = "、".join(failed_dimensions) if failed_dimensions else "(未列出)"
+
+    return (
+        f"⚠️ 警告:阶段 6 整章评估连续 {consecutive_fail_count} 次 <0.8\n\n"
+        f"  持续不过的维度:{dims_text}\n\n"
+        f"  当前采纳建议(preserve_list):\n"
+        f"{items_text}\n\n"
+        f"请选择处理方式:\n"
+        f"  [a] 撤销某条采纳建议(进 rejected_list,回 5.6 再改写)\n"
+        f"      用法示例:`a #1`\n"
+        f"  [b] 强制通过(标 author_force_pass,推翻事件回流,触发审计)\n"
+        f"      用法示例:`b`\n"
+        f"  [c] 整章重协商(丢弃本次契约,回阶段 5.5 重来)\n"
+        f"      用法示例:`c`\n"
+    )
+
+
+_STAGE6_REVOKE_RE = re.compile(r"^a\s+(#\d+)$", re.IGNORECASE)
+
+
+def parse_stage6_choice(user_input: str) -> Tuple[str, Optional[str]]:
+    """解析作者对 format_stage6_three_choice 的回复。
+
+    语法:
+      'a #N'  -> ('revoke', '#N')         撤销第 N 条采纳建议
+      'b'     -> ('force_pass', None)     强制通过
+      'c'     -> ('renegotiate', None)    整章重协商
+
+    允许前后空白、字母大小写不敏感。其余一律 ValueError。
+    """
+    if user_input is None:
+        raise ValueError("user_input 不得为 None")
+    stripped = user_input.strip()
+    if not stripped:
+        raise ValueError("user_input 不得为空白")
+
+    lower = stripped.lower()
+    if lower == "b":
+        return ("force_pass", None)
+    if lower == "c":
+        return ("renegotiate", None)
+
+    # revoke 必须形如 "a #N"
+    if lower == "a" or lower.startswith("a ") or lower.startswith("a\t"):
+        m = _STAGE6_REVOKE_RE.match(lower)
+        if not m:
+            raise ValueError(
+                f"revoke 格式错误,须 'a #N'(N 为正整数),实得 {user_input!r}"
+            )
+        return ("revoke", m.group(1))
+
+    raise ValueError(
+        f"无法识别的选择 {user_input!r};合法:'a #N' / 'b' / 'c'"
     )
