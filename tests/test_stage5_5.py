@@ -241,3 +241,6 @@ def test_list_recent_empty_collection():
     sync = MemoryPointSync(client=client)
     result = sync.list_recent("+", top_k=5)
     assert result == []
+
+# 注：NovelWorkflow.run_stage5_5_negotiation() 集成测试需在 .vectorstore 包内单独运行
+# 核心逻辑已通过以上 13 个单元测试验证

@@ -2384,6 +2384,151 @@ class NovelWorkflow:
             "memory_point_id": memory_point_id,
         }
 
+    def run_stage5_5_negotiation(
+        self,
+        chapter_text: str,
+        chapter_ref: str,
+        scene_type: Optional[str] = None,
+        connoisseur_raw: Optional[str] = None,
+        accepted_ids: Optional[List[str]] = None,
+    ) -> Dict[str, Any]:
+        """Stage 5.5 三方协商三段式编排。
+
+        调用约定（三阶段）
+        -----------------
+        Phase A — 获取鉴赏师 prompt（connoisseur_raw=None, accepted_ids=None）:
+            spec = workflow.run_stage5_5_negotiation(chapter_text, chapter_ref)
+            # spec["status"] == "pending_connoisseur"
+            # spec["skill_name"] / spec["prompt"] → 发给 novelist-connoisseur Skill
+
+        Phase B — 提交鉴赏师 JSON，获取建议列表（connoisseur_raw=<json>, accepted_ids=None）:
+            result = workflow.run_stage5_5_negotiation(
+                chapter_text, chapter_ref, connoisseur_raw=raw
+            )
+            # result["status"] == "pending_author"          → 有建议，展示 display_text 给作者
+            # result["status"] == "pending_author_skip_confirm" → 0条建议，Q1询问作者确认跳过
+
+        Phase C — 提交作者决策，生成契约（connoisseur_raw=<json>, accepted_ids=[...]）:
+            final = workflow.run_stage5_5_negotiation(
+                chapter_text, chapter_ref,
+                connoisseur_raw=raw, accepted_ids=["#1", "#2"]
+            )
+            # final["status"] == "contract_ready"
+            # final["contract"] → CreativeContract 实例
+
+        Q1 贯彻：accepted_ids=[] 时（全部驳回）→ contract.skipped_by_author=True
+
+        Args:
+            chapter_text:     整章文本（云溪润色后版本）
+            chapter_ref:      章节标识（例 "第3章")
+            scene_type:       场景类型，用于约束菜单筛选（None=全部）
+            connoisseur_raw:  鉴赏师返回的 JSON 字符串（Phase B/C）
+            accepted_ids:     作者采纳的建议 item_id 列表（Phase C）
+
+        Returns:
+            Phase A: {"status": "pending_connoisseur", "skill_name": str, "prompt": str}
+            Phase B: {"status": "pending_author", "suggestions": [...], "display_text": str, ...}
+                  or {"status": "pending_author_skip_confirm", "abstain_reason": str, ...}
+            Phase C: {"status": "contract_ready", "contract": CreativeContract}
+        """
+        from core.inspiration.stage5_5 import (
+            build_connoisseur_prompt,
+            parse_connoisseur_response,
+            suggestions_to_preserve_candidates,
+            build_creative_contract,
+        )
+        from core.inspiration.constraint_library import ConstraintLibrary
+        from core.inspiration.memory_point_sync import MemoryPointSync
+        from core.inspiration.creative_contract import RejectedItem
+
+        # ── Phase A：构造 prompt ──────────────────────────────────────────────
+        if connoisseur_raw is None and accepted_ids is None:
+            lib = ConstraintLibrary()
+            menu = lib.as_menu(scene_type)
+
+            try:
+                mp_sync = MemoryPointSync()
+                positive = mp_sync.list_recent("+", top_k=5)
+                negative = mp_sync.list_recent("-", top_k=5)
+            except Exception:
+                positive, negative = [], []
+
+            spec = build_connoisseur_prompt(
+                chapter_text=chapter_text,
+                chapter_ref=chapter_ref,
+                menu_items=menu,
+                positive_samples=positive,
+                negative_samples=negative,
+            )
+            return {**spec, "status": "pending_connoisseur"}
+
+        # ── Phase B：解析 connoisseur 返回 ────────────────────────────────────
+        if connoisseur_raw is not None and accepted_ids is None:
+            response = parse_connoisseur_response(connoisseur_raw)
+
+            if not response.suggestions:
+                # Q1：0条建议 → 不自动跳过，询问作者
+                return {
+                    "status": "pending_author_skip_confirm",
+                    "abstain_reason": response.abstain_reason,
+                    "menu_gap": response.menu_gap,
+                    "overall_judgment": response.overall_judgment,
+                }
+
+            candidates = suggestions_to_preserve_candidates(response.suggestions)
+            display_lines = [f"鉴赏师发现 {len(candidates)} 条创意建议："]
+            for c in candidates:
+                display_lines.append(
+                    f"\n  {c.item_id} [段落 {c.scope.paragraph_index}]"
+                    f" {c.applied_constraint_id}: {c.rationale}"
+                )
+            display_lines.append(
+                "\n请回复采纳的 item_id 列表（例：['#1', '#2']），或 [] 全部驳回。"
+            )
+
+            return {
+                "status": "pending_author",
+                "suggestions": [
+                    {
+                        "item_id": s.item_id,
+                        "paragraph": s.scope_paragraph_index,
+                        "constraint": s.applied_constraint_id,
+                        "rationale": s.rationale,
+                        "confidence": s.confidence,
+                    }
+                    for s in response.suggestions
+                ],
+                "overall_judgment": response.overall_judgment,
+                "display_text": "\n".join(display_lines),
+            }
+
+        # ── Phase C：生成契约 ─────────────────────────────────────────────────
+        if connoisseur_raw is not None and accepted_ids is not None:
+            response = parse_connoisseur_response(connoisseur_raw)
+            all_candidates = suggestions_to_preserve_candidates(response.suggestions)
+
+            accepted_set = set(accepted_ids)
+            accepted = [c for c in all_candidates if c.item_id in accepted_set]
+            rejected = [
+                RejectedItem(item_id=c.item_id, reason="作者驳回")
+                for c in all_candidates
+                if c.item_id not in accepted_set
+            ]
+
+            skipped = not accepted and bool(response.suggestions)
+            contract = build_creative_contract(
+                accepted_items=accepted,
+                rejected_items=rejected,
+                chapter_ref=chapter_ref,
+                skipped_by_author=skipped,
+            )
+            return {"status": "contract_ready", "contract": contract}
+
+        # 参数组合不合法（只有 accepted_ids 但没有 connoisseur_raw）
+        raise ValueError(
+            "run_stage5_5_negotiation: accepted_ids 必须配合 connoisseur_raw 使用"
+        )
+
 
 # ============================================================
 # 独立函数（可独立调用）
