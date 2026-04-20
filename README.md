@@ -187,6 +187,9 @@ dir $env:USERPROFILE\.agents\skills  # Windows
 | novelist-shared | 共享规范 | 文风要求、字数规则、禁止项 |
 | novelist-technique-search | 技法检索 | BGE-M3混合检索 |
 | novelist-worldview-generator | 世界观生成 | 从大纲自动生成配置 |
+| novelist-connoisseur | 鉴赏师（v2 创意注入器 + 派单监工） | 三方协商、创意合同生成 |
+| novelist-inspiration-ingest | 灵感摄取 | 外部灵感解析与入库 |
+| novelist-connoisseur-shared | 鉴赏师共享规范 | 鉴赏师内部共享约定 |
 
 ---
 
@@ -261,7 +264,7 @@ cp config.example.json config.json
 | 内容 | 数量 | 状态 | 说明 |
 |------|------|------|------|
 | **项目代码** | core/、modules/、tools/ | ✅ 已推送 | 可直接使用 |
-| **Skills源码** | 9个Skill.md | ❌ 未推送 | 作者线下分发 `novelist-skills.zip`,解压到 `~/.agents/skills/` |
+| **Skills源码** | 12个Skill.md | ❌ 未推送 | 作者线下分发 `novelist-skills.zip`,解压到 `~/.agents/skills/` |
 | **案例库索引** | 38个JSON/脚本 | ✅ 已推送 | 索引和脚本，不含数据 |
 | **向量库代码** | .vectorstore/core/ | ✅ 已推送 | 检索代码，不含向量数据 |
 | **技法库结构** | 11个维度目录 | ✅ 已推送 | 目录结构，不含技法内容 |
@@ -438,8 +441,8 @@ python tools/sync_eval_criteria_to_qdrant.py --sync
 
 **项目作者**：coffeeliuwei
 **GitHub**：https://github.com/coffeeliuwei/zhongshengjie
-**版本**：v14.0
-**最后更新**：2026-04-14
+**版本**：v0.1.0-preview
+**最后更新**：2026-04-20
 
 ---
 
@@ -642,10 +645,10 @@ api = get_poetry_api()
 material = api.compose_poetry_scene(era="觉醒时代", mood="压抑")
 ```
 
-### 创作流程（8阶段）
+### 创作流程（8阶段 + v2 三方协商）
 
 ```
-需求澄清 → 大纲解析 → 场景识别 → 经验检索 → 设定检索 → 场景契约 → 逐场景创作 → 整章评估 → 经验写入
+需求澄清 → 大纲解析 → 场景识别 → 经验检索 → 设定检索 → 场景契约 → 阶段5.5 三方协商（鉴赏师+评估师+作者）→ 阶段5.6 派单执行 → 逐场景创作 → 整章评估 → 经验写入
 ```
 
 ### 作家分工
@@ -885,7 +888,11 @@ experience = retrieve_chapter_experience(
 | **反馈系统** | ✅ 完成 | 评估回流+经验沉淀 |
 | **生命周期管理** | ✅ 完成 | 技法追踪+版本控制+契约管理 |
 | 数据构建工具 | ✅ 完成 | 统一入口 |
-| 测试覆盖 | ✅ 完成 | 226个测试用例 |
+| 测试覆盖 | ✅ 完成 | 629 passed 基线 |
+| **创意契约系统** | ✅ 完成 | creative_contract.py（v2 灵感引擎） |
+| **派单器** | ✅ 完成 | dispatcher.py（v2 灵感引擎） |
+| **鉴赏师 v2** | ✅ 完成 | 三方协商 + 派单监工 |
+| **Evaluator 豁免逻辑** | ✅ 完成 | evaluator_exemption.py（v2 灵感引擎） |
 
 ### 融合度指标
 
@@ -903,20 +910,7 @@ experience = retrieve_chapter_experience(
 
 ## 测试结果
 
-| 测试模块 | 测试用例数 | 通过率 |
-|----------|-----------|--------|
-| 配置系统测试 | 20 | 100% |
-| 向量数据库测试 | 15 | 100% |
-| API接口测试 | 25 | 100% |
-| 工作流逻辑测试 | 30 | 100% |
-| **集成测试** (新增) | **26** | **100%** |
-| **端到端测试** (新增) | **16** | **100%** |
-| 变更检测器测试 | 31 | 90%+ |
-| 类型发现器测试 | 30 | 85%+ |
-| 统一检索测试 | 50 | 80%+ |
-| **总计** | **226** | **75%** |
-
-> 注：核心功能测试（集成测试、端到端测试）100%通过。部分旧有测试因依赖外部服务或fixture配置问题未通过。
+实际基线（v2-dev，2026-04-20）：**629 passed, 3 failed（预存在缺陷，非 v2 引入）, 1 skipped**
 
 ---
 
@@ -1036,6 +1030,23 @@ if changes:
 ---
 
 ## 更新日志
+
+### v0.1.0-preview (2026-04-20) - 首个预览版发布
+
+**发布**：
+- 🚀 面向学生开放首个预览版（master 分支可下载）
+- 📖 傻瓜版快速开始文档（5步跑起来）
+
+**v2 灵感引擎核心组件（P1-1 ~ P1-7，未集成 workflow，待 P2）**：
+- ✨ 创意契约系统（creative_contract.py）
+- ✨ 派单器（dispatcher.py）
+- ✨ 鉴赏师 v2（三方协商 + 派单监工）
+- ✨ Evaluator 豁免逻辑（evaluator_exemption.py）
+- ✨ escalation 三方协商机制
+
+**测试**：pytest 629 passed 基线（3 failed 为预存在缺陷）
+
+---
 
 ### v14.0 (2026-04-14) - 审核维度对话添加与项目清理
 
