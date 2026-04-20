@@ -70,38 +70,97 @@
 
 ---
 
-## 零、安装Skills（⚠️ 必须第一步）
+## 🧭 傻瓜版快速开始（新手必读）
 
-本项目使用 Skills 系统定义作家能力，**必须在配置前完成安装**。
+> 如果你是第一次拿到这个项目,按本章顺序往下做,完成 5 步即可跑起来。其余章节是给已经熟手的人看的参考。
+
+### 前置软件(都要装,只装一次)
+
+| 软件 | 用途 | 下载地址 | 验证命令 |
+|------|------|----------|----------|
+| **Python 3.11** | 项目运行环境 | https://www.python.org/downloads/release/python-3119/ | `python --version` 应显示 `3.11.x` |
+| **Docker Desktop** | 跑向量数据库 Qdrant(**必须**) | https://www.docker.com/products/docker-desktop/ | `docker --version` 能显示版本号 |
+| **Git** | 拉代码 | https://git-scm.com/downloads | `git --version` 能显示版本号 |
+| **Claude Code 或 OpenCode** | AI 操作入口 | 见各自官网 | - |
+
+> 装完 Docker Desktop 后,**先打开它一次**(桌面图标双击),让它在后台跑起来。没启动 Docker,后面 `docker run` 会报 "Cannot connect to Docker daemon"。
+
+### Skills 包(作者线下分发)
+
+本项目的作家 Skills(苍澜、剑尘、墨砚等)**不在 GitHub 仓库里**,作者会通过**微信/网盘单独发你一个 `novelist-skills.zip`**。
+
+拿到压缩包后:
+
+```bash
+# Windows:解压到这个路径
+C:\Users\你的用户名\.agents\skills\
+
+# 解压后应该能看到这些文件夹:
+# novelist-canglan/  novelist-jianchen/  novelist-moyan/ ...
+
+# 验证(PowerShell):
+dir $env:USERPROFILE\.agents\skills
+```
+
+> ⚠️ **没拿到 zip 包就来问作者**,不要自己瞎造。GitHub 的 `skills/` 目录被 `.gitignore` 排除了,仓库里根本没有。
+
+### 5 步跑起来
+
+```bash
+# 第 1 步:克隆项目
+git clone https://github.com/coffeeliuwei/zhongshengjie.git
+cd zhongshengjie
+
+# 第 2 步:装 Python 依赖
+pip install -r requirements.txt
+
+# 第 3 步:启动 Qdrant 向量库(Docker 要先打开)
+docker run -d --name qdrant -p 6333:6333 qdrant/qdrant
+
+# 第 4 步:解压作者发的 skills zip 到 ~/.agents/skills/(见上节)
+
+# 第 5 步:复制并修改配置
+cp config.example.json config.json
+# 然后用记事本打开 config.json,改里面的 project_root 和 skills_base_path
+# (详见下面「第二步:配置系统」章节)
+```
+
+### 新手最常踩的 3 个坑
+
+| 报错 | 原因 | 解法 |
+|------|------|------|
+| `Cannot connect to Docker daemon` | Docker Desktop 没打开 | 双击桌面 Docker 图标,等托盘图标变绿再跑 `docker run` |
+| `ls ~/.agents/skills` 是空的 | 还没解压作者发的 zip | 向作者要 `novelist-skills.zip`,解压到该目录 |
+| config.json 里路径报错 | Windows 单反斜杠被转义 | 用正斜杠 `D:/项目/众生界` 或双反斜杠 `D:\\项目\\众生界` |
+
+---
+
+## 零、安装Skills(⚠️ 必须第一步)
+
+本项目使用 Skills 系统定义作家能力,**必须在配置前完成安装**。
 
 ### Skills位置说明
 
 | 目录 | 用途 | Git状态 |
 |------|------|---------|
-| `skills/` | Skills源码定义 | ✅ 已推送（9个Skill.md） |
-| `~/.agents/skills/` | Skills运行目录 | ❌ 不推送（本地安装） |
+| `skills/` | Skills 源码定义 | ❌ 不推送(作者线下分发 `novelist-skills.zip`) |
+| `~/.agents/skills/` | Skills 运行目录 | ❌ 不推送(本地解压) |
 
 ### 安装步骤
 
 ```bash
-# 1. 创建Skills目录
+# 1. 创建 Skills 目录
 mkdir -p ~/.agents/skills          # Linux/Mac
 mkdir %USERPROFILE%\.agents\skills  # Windows PowerShell
 
-# 2. 复制Skills定义到运行目录
-cd zhongshengjie
-
-# Linux/Mac
-cp -r skills/* ~/.agents/skills/
-
-# Windows PowerShell
-Copy-Item -Recurse skills/* $env:USERPROFILE\.agents\skills\
+# 2. 解压作者发的 novelist-skills.zip 到上面创建的目录
+# (Windows 用资源管理器右键解压即可,目标路径 C:\Users\你的用户名\.agents\skills\)
 
 # 3. 验证安装
 ls ~/.agents/skills                # Linux/Mac
 dir $env:USERPROFILE\.agents\skills  # Windows
 
-# 应输出以下目录：
+# 应输出以下目录:
 # novelist-canglan/      (苍澜 - 世界观架构师)
 # novelist-xuanyi/       (玄一 - 剧情编织师)
 # novelist-moyan/        (墨言 - 人物刻画师)
@@ -112,6 +171,8 @@ dir $env:USERPROFILE\.agents\skills  # Windows
 # novelist-technique-search/  (技法检索)
 # novelist-worldview-generator/  (世界观生成)
 ```
+
+> 📦 **拿不到 zip 包?** 联系作者(微信/邮件)索取。仓库里的 `skills/` 被 `.gitignore` 排除了,`git clone` 不会拉到。
 
 ### Skills清单
 
@@ -200,7 +261,7 @@ cp config.example.json config.json
 | 内容 | 数量 | 状态 | 说明 |
 |------|------|------|------|
 | **项目代码** | core/、modules/、tools/ | ✅ 已推送 | 可直接使用 |
-| **Skills源码** | 9个Skill.md | ✅ 已推送 | 需手动安装到~/.agents/skills/ |
+| **Skills源码** | 9个Skill.md | ❌ 未推送 | 作者线下分发 `novelist-skills.zip`,解压到 `~/.agents/skills/` |
 | **案例库索引** | 38个JSON/脚本 | ✅ 已推送 | 索引和脚本，不含数据 |
 | **向量库代码** | .vectorstore/core/ | ✅ 已推送 | 检索代码，不含向量数据 |
 | **技法库结构** | 11个维度目录 | ✅ 已推送 | 目录结构，不含技法内容 |
