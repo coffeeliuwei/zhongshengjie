@@ -25,25 +25,6 @@ def test_phase1_dispatch_disabled_returns_original():
     assert result["writers"] == ["剑尘", "云溪"]
 
 
-def test_phase1_dispatch_enabled_returns_variants():
-    """enabled=True 时返回变体规格"""
-    from core.inspiration.workflow_bridge import phase1_dispatch
-
-    result = phase1_dispatch(
-        scene_type="战斗",
-        scene_context={"outline": "主角反击"},
-        original_writers=["剑尘"],
-        config={"inspiration_engine": {"enabled": True, "variant_count": 3}},
-        seed=42,
-    )
-
-    assert result["mode"] == "variants"
-    assert "variant_specs" in result
-    assert len(result["variant_specs"]) == 3
-    # 每个规格应有正确的作家 Skill 名
-    for spec in result["variant_specs"]:
-        assert spec["writer_agent"] == "novelist-jianchen"
-
 
 def test_resolve_writer_skill():
     """中文作家名正确映射到 Skill 名"""
@@ -58,33 +39,17 @@ def test_resolve_writer_skill():
     assert _resolve_writer_skill("未知作家") == "未知作家"
 
 
-def test_phase1_dispatch_default_writer():
-    """无作家列表时默认使用云溪"""
+def test_phase1_dispatch_enabled_still_returns_original():
+    """P1-5 后 enabled=True 也返回 original 模式（variant 逻辑已移除）"""
     from core.inspiration.workflow_bridge import phase1_dispatch
 
     result = phase1_dispatch(
         scene_type="战斗",
-        scene_context={"outline": "X"},
-        original_writers=[],  # 空
-        config={"inspiration_engine": {"enabled": True, "variant_count": 2}},
-        seed=42,
-    )
-
-    assert result["mode"] == "variants"
-    for spec in result["variant_specs"]:
-        assert spec["writer_agent"] == "novelist-yunxi"
-
-
-def test_phase1_dispatch_variant_count_from_config():
-    """变体数量从配置读取"""
-    from core.inspiration.workflow_bridge import phase1_dispatch
-
-    result = phase1_dispatch(
-        scene_type="战斗",
-        scene_context={"outline": "X"},
+        scene_context={"outline": "主角反击"},
         original_writers=["剑尘"],
-        config={"inspiration_engine": {"enabled": True, "variant_count": 5}},
+        config={"inspiration_engine": {"enabled": True, "variant_count": 3}},
         seed=42,
     )
 
-    assert len(result["variant_specs"]) == 5
+    assert result["mode"] == "original"
+    assert result["writers"] == ["剑尘"]
