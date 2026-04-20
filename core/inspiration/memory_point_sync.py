@@ -149,6 +149,36 @@ class MemoryPointSync:
         )
         return [{"id": r.id, "score": r.score, "payload": r.payload} for r in results]
 
+    def list_recent(
+        self,
+        polarity: str,
+        top_k: int = 5,
+    ) -> List[Dict[str, Any]]:
+        """按极性列出最近的记忆点（按 created_at 降序，不需要 embedding）。
+
+        Args:
+            polarity: "+" 为正样本（击中过），"-" 为负样本（标过乏味）
+            top_k:    返回条数上限
+
+        Returns:
+            List of {"id": str, "payload": dict}，按 created_at 降序
+        """
+        flt = Filter(
+            must=[FieldCondition(key="polarity", match=MatchValue(value=polarity))]
+        )
+        results, _ = self.client.scroll(
+            collection_name=COLLECTION_NAME,
+            scroll_filter=flt,
+            limit=top_k * 3,  # 取多一些再在内存中排序
+            with_payload=True,
+        )
+        points = [{"id": str(p.id), "payload": p.payload} for p in results]
+        points.sort(
+            key=lambda x: x["payload"].get("created_at", ""),
+            reverse=True,
+        )
+        return points[:top_k]
+
     def get_stats(self) -> Dict[str, Any]:
         """获取记忆点库统计"""
         total = self.count()
