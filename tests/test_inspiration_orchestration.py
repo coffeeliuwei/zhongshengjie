@@ -149,6 +149,7 @@ def test_record_winner_skips_write_when_none_selected():
     mock_sync.create.assert_not_called()
 
 
+@pytest.mark.skip(reason="v2 P1-5: variant flow 已移除；v2 Stage 4 全流程待 P2 集成后重写")
 def test_stage4_full_flow_with_mocks():
     """Stage 4 完整流程：specs → 变体生成 → 鉴赏师 → 记录"""
     from core.inspiration.workflow_bridge import (

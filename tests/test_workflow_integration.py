@@ -31,14 +31,14 @@ def test_phase1_dispatch_signature():
     assert "config" in params
 
 
+@pytest.mark.skip(
+    reason="[M4] .vectorstore/core/workflow.py 已在 M2-β 归档；"
+    "本测试只验证文档字符串存在，目标文件不再维护。"
+    "新框架的等价测试由 test_workflow_inspiration_branch.py 等覆盖。"
+)
 def test_workflow_method_documentation():
-    """验证 workflow.py 中方法文档"""
-    workflow_path = project_root / ".vectorstore" / "core" / "workflow.py"
-    content = workflow_path.read_text(encoding="utf-8")
-
-    assert "def get_phase1_dispatch" in content
-    assert "Stage 4 Phase 1 灵感引擎分发" in content
-    assert "from core.inspiration.workflow_bridge import phase1_dispatch" in content
+    """[已废弃] 原验证 .vectorstore/core/workflow.py 中方法文档"""
+    pass
 
 
 def test_integration_chain():
@@ -49,20 +49,7 @@ def test_integration_chain():
     lib = ConstraintLibrary()
     assert lib.count_active() >= 40
 
-    # 2. variant_generator
-    from core.inspiration.variant_generator import generate_variant_specs
-
-    specs = generate_variant_specs(
-        scene_type="战斗",
-        scene_context={"outline": "X"},
-        writer_agent="novelist-jianchen",
-        n=3,
-        constraint_library=lib,
-        seed=42,
-    )
-    assert len(specs) == 3
-
-    # 3. workflow_bridge
+    # 2. workflow_bridge（v2：phase1_dispatch 始终返回 original 模式）
     from core.inspiration.workflow_bridge import phase1_dispatch
     from core.config_loader import DEFAULT_CONFIG
 
@@ -73,5 +60,5 @@ def test_integration_chain():
         config=DEFAULT_CONFIG,
         seed=42,
     )
-    assert result["mode"] == "variants"
-    assert len(result["variant_specs"]) == 3
+    assert result["mode"] == "original"
+    assert result["writers"] == ["剑尘"]

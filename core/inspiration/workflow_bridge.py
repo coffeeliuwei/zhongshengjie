@@ -13,8 +13,6 @@ workflow 只调用 phase1_dispatch，无需知道灵感引擎内部。
 from typing import Dict, Any, List, Optional
 from datetime import datetime, timezone
 
-from core.inspiration.constraint_library import ConstraintLibrary
-from core.inspiration.variant_generator import generate_variant_specs
 from core.inspiration.memory_point_sync import MemoryPointSync
 from core.inspiration.appraisal_agent import build_appraisal_spec
 from core.inspiration.embedder import embed_scene_context as _embed_scene_ctx
@@ -45,39 +43,22 @@ def phase1_dispatch(
     config: Dict[str, Any],
     seed: Optional[int] = None,
 ) -> Dict[str, Any]:
-    """Stage 4 Phase 1 分发器
+    """Stage 4 Phase 1 分发器（v2：变体模式已移除，始终返回原始写手列表）
+
+    v1 多变体生成逻辑已由 P1-5 删除（variant_generator.py 已归档至 .archived/）。
+    v2 创意注入由阶段 5.5 三方协商完成（P2-1 接入）。
+
+    Args:
+        scene_type: 场景类型（保留参数兼容旧调用方，暂未使用）
+        scene_context: 场景上下文（保留参数兼容旧调用方，暂未使用）
+        original_writers: 原始写手列表（中文名）
+        config: 配置字典（保留参数兼容旧调用方，暂未使用）
+        seed: 随机种子（保留参数兼容旧调用方，暂未使用）
 
     Returns:
-        {
-            "mode": "original" | "variants",
-            # mode=original 时：
-            "writers": List[str],          # 中文作家名列表
-            # mode=variants 时：
-            "variant_specs": List[dict],   # 变体任务规格
-        }
+        {"mode": "original", "writers": original_writers}
     """
-    inspiration_cfg = config.get("inspiration_engine", {})
-    enabled = inspiration_cfg.get("enabled", True)
-
-    if not enabled:
-        return {"mode": "original", "writers": original_writers}
-
-    # 灵感引擎模式：选第一个原作家作为本场主作家
-    primary_writer_cn = original_writers[0] if original_writers else "云溪"
-    writer_skill = _resolve_writer_skill(primary_writer_cn)
-
-    n = inspiration_cfg.get("variant_count", 3)
-    lib = ConstraintLibrary()
-    specs = generate_variant_specs(
-        scene_type=scene_type,
-        scene_context=scene_context,
-        writer_agent=writer_skill,
-        n=n,
-        constraint_library=lib,
-        seed=seed,
-    )
-
-    return {"mode": "variants", "variant_specs": specs}
+    return {"mode": "original", "writers": original_writers}
 
 
 def _embed_scene_context(scene_context: Dict[str, Any]) -> List[float]:
