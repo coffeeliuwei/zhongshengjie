@@ -168,7 +168,8 @@ def execute_variants(
     """将变体规格列表执行为带文本的候选列表
 
     Args:
-        specs: phase1_dispatch 返回的 variant_specs
+        specs: 变体规格列表，每项含 id / writer_agent / used_constraint_id 等字段
+               （由 workflow.py Stage 4 构造并传入，与 phase1_dispatch 无关）
         writer_caller: 可调用对象，接收一个 spec dict，返回生成文本 str
                        （由 workflow.py 提供，内部调用相应 novelist Skill）
 
