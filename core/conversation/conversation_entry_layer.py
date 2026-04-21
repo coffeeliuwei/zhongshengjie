@@ -104,6 +104,9 @@ class ConversationEntryLayer:
         self._last_intent: Optional[str] = None
         self._conversation_context: List[Dict[str, Any]] = []
 
+        # [M3-α] 检索 API 懒加载，避免启动时加载 BGE-M3 模型（数百 MB）
+        self._retrieval_api = None
+
         # 复用同一 IntentRouter 实例以保持多轮对话状态
         self._intent_router = IntentRouter()
 
@@ -514,17 +517,132 @@ class ConversationEntryLayer:
             message=f"工作流控制：{intent}",
         )
 
+    def _get_retrieval_api(self):
+        """[M3-α] 懒加载 UnifiedRetrievalAPI（首次调用时初始化 BGE-M3）"""
+        if self._retrieval_api is None:
+            from core.retrieval.unified_retrieval_api import UnifiedRetrievalAPI
+
+            self._retrieval_api = UnifiedRetrievalAPI()
+        return self._retrieval_api
+
     def _execute_query(
         self, intent_result: IntentResult, user_input: str
     ) -> ProcessingResult:
-        """执行查询"""
-        # 这里简化实现，实际需要调用检索系统
+        """[M3-α] 按意图分支接入真实检索 / 状态查询"""
+        intent = intent_result.intent
+        entities = intent_result.entities
+
+        # 分支 1：角色设定查询 → 走向量检索
+        if intent == "query_character":
+            character_name = entities.get("character_name", "").strip()
+            if not character_name:
+                return ProcessingResult(
+                    status=ProcessingStatus.MISSING_INFO,
+                    intent=intent,
+                    entities=entities,
+                    message="请告诉我要查询哪个角色（例如：查一下赵恒的设定）",
+                )
+            try:
+                api = self._get_retrieval_api()
+                hits = api.search_novel(
+                    query=character_name, entity_type="角色", top_k=5
+                )
+            except Exception as e:
+                return ProcessingResult(
+                    status=ProcessingStatus.ERROR,
+                    intent=intent,
+                    entities=entities,
+                    message=f"检索系统暂时不可用：{e}",
+                )
+            if not hits:
+                return ProcessingResult(
+                    status=ProcessingStatus.SUCCESS,
+                    intent=intent,
+                    entities=entities,
+                    message=f"未找到「{character_name}」的设定记录。",
+                    data={"query": character_name, "hits": []},
+                )
+            lines = [f"找到 {len(hits)} 条与「{character_name}」相关的设定："]
+            for i, h in enumerate(hits, 1):
+                name = h.get("name", h.get("payload", {}).get("name", "未命名"))
+                desc = h.get("description", h.get("payload", {}).get("description", ""))
+                score = h.get("score", 0)
+                lines.append(f"{i}. {name}（相似度 {score:.2f}）：{desc[:80]}")
+            return ProcessingResult(
+                status=ProcessingStatus.SUCCESS,
+                intent=intent,
+                entities=entities,
+                message="\n".join(lines),
+                data={"query": character_name, "hits": hits},
+            )
+
+        # 分支 2：进度查询 →  WorkflowStateChecker
+        if intent == "query_progress":
+            try:
+                state = self.workflow_checker.check_state()
+            except Exception as e:
+                return ProcessingResult(
+                    status=ProcessingStatus.ERROR,
+                    intent=intent,
+                    entities=entities,
+                    message=f"无法读取工作流状态：{e}",
+                )
+            return ProcessingResult(
+                status=ProcessingStatus.SUCCESS,
+                intent=intent,
+                entities=entities,
+                message=f"当前工作流状态：{state}",
+                data={"workflow_state": state},
+            )
+
+        # 分支 3：灵感引擎状态查询 → 暂未接入（M5 后实现）
+        if intent == "inspiration_status_query":
+            return ProcessingResult(
+                status=ProcessingStatus.SUCCESS,
+                intent=intent,
+                entities=entities,
+                message=(
+                    "灵感引擎状态查询接口尚未接入（计划 M5 端到端验证后实现）。"
+                    "目前可手动查看 data/inspiration_state.json。"
+                ),
+                data={"not_implemented": True},
+            )
+
+        # 分支 4：约束查询 → 暂未接入（待 constraint_store 暴露读 API）
+        if intent == "constraint_query":
+            return ProcessingResult(
+                status=ProcessingStatus.SUCCESS,
+                intent=intent,
+                entities=entities,
+                message=(
+                    "约束查询接口尚未接入（待 constraint_store 暴露读 API）。"
+                    "目前可手动查看 data/constraint_store.json。"
+                ),
+                data={"not_implemented": True},
+            )
+
+        # 分支 5：未知 QUERY 意图 → 多源 fallback 检索
+        try:
+            api = self._get_retrieval_api()
+            results = api.retrieve(
+                query=user_input,
+                sources=["novel", "technique", "case"],
+                top_k=3,
+            )
+        except Exception as e:
+            return ProcessingResult(
+                status=ProcessingStatus.ERROR,
+                intent=intent,
+                entities=entities,
+                message=f"通用检索失败：{e}",
+            )
+        total = sum(len(v) for v in results.values())
         return ProcessingResult(
             status=ProcessingStatus.SUCCESS,
-            intent=intent_result.intent,
-            entities=intent_result.entities,
-            message=f"查询意图：{intent_result.intent}\n实体：{intent_result.entities}",
-            data={"query": intent_result.entities},
+            intent=intent,
+            entities=entities,
+            message=f"通用检索命中 {total} 条结果（设定/技法/案例 各前 3）",
+            data={"query": user_input, "results": results},
         )
 
     def _execute_tracking(

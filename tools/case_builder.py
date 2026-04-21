@@ -38,12 +38,11 @@ from dataclasses import dataclass, asdict
 _project_root = Path(__file__).resolve().parent.parent
 if str(_project_root) not in sys.path:
     sys.path.insert(0, str(_project_root))
-if str(_project_root / ".vectorstore" / "core") not in sys.path:
-    sys.path.insert(0, str(_project_root / ".vectorstore" / "core"))
+# [N15 2026-04-18] 删除 .vectorstore/core sys.path 注入（已归档）
 
 # 尝试导入统一配置加载器
 try:
-    from config_loader import (
+    from core.config_loader import (
         get_config,
         get_qdrant_url,
         get_model_path,

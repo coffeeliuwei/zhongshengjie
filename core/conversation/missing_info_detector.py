@@ -68,7 +68,9 @@ class MissingInfoDetector:
                 "auto_fix": True,
             },
             "character_settings": {
-                "check": lambda project_root: (
+                # [N16 2026-04-18] start_chapter 调用方总传 (project_root, chapter)，
+                # 这里不需要 chapter 但必须接受第二个参数避免 TypeError
+                "check": lambda project_root, _chapter: (
                     Path(project_root) / "设定/人物谱.md"
                 ).exists(),
                 "message": "角色设定文件不存在",
@@ -77,7 +79,8 @@ class MissingInfoDetector:
                 "auto_fix": False,
             },
             "worldview_config": {
-                "check": lambda project_root: (
+                # [N16 2026-04-18] 同上
+                "check": lambda project_root, _chapter: (
                     Path(project_root) / "config" / "worlds"
                 ).exists(),
                 "message": "世界观配置目录不存在",

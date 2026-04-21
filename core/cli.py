@@ -93,6 +93,11 @@ class CLI:
         )
         viz_parser.add_argument("--stats", action="store_true", help="生成统计可视化")
 
+        # ==================== 世界观切换模块 (M8 新增) ====================
+        world_parser = subparsers.add_parser("switch-world", help="切换当前世界观")
+        world_parser.add_argument("world_name", nargs="?", help="目标世界观名称")
+        world_parser.add_argument("--list", action="store_true", help="列出所有可用世界观")
+
         return parser
 
     def run(self, args: Optional[list] = None) -> int:
@@ -119,6 +124,7 @@ class CLI:
             "create": self._handle_creation,
             "migrate": self._handle_migration,
             "visualize": self._handle_visualization,
+            "switch-world": self._handle_switch_world,
         }
 
         handler = module_handlers.get(parsed.module)
@@ -283,169 +289,35 @@ class CLI:
             return 1
 
     def _handle_creation(self, args: argparse.Namespace) -> int:
-        """处理创作模块"""
-        try:
-            from modules.creation import create_creation_api
+        """
+        处理创作模块（M2-β 后该模块已归档，转为引导用户走 skill 入口）
 
-            # 创建 API 实例
-            api = create_creation_api(project_root=self.project_root)
-
-            # 执行完整工作流
-            if args.workflow:
-                print("\n" + "=" * 60)
-                print("🚀 作家工作流启动")
-                print("=" * 60)
-
-                # 显示统计
-                stats = api.get_stats()
-                print(f"\n可用场景: {stats.active_scenes}/{stats.available_scenes}")
-                print(f"作家数量: {stats.writers}")
-                print(f"最大迭代: {stats.max_iterations} 次")
-
-                # 显示可用场景
-                scenes = api.get_available_scenes()
-                print(f"\n活跃场景列表:")
-                for i, scene in enumerate(scenes[:10], 1):
-                    info = api.get_scene_info(scene)
-                    primary = info.get("primary_writer", "未知")
-                    print(f"  {i}. {scene} (主责: {primary})")
-
-                if len(scenes) > 10:
-                    print(f"  ... 还有 {len(scenes) - 10} 个场景")
-
-                print("\n" + "=" * 60)
-                print("💡 使用方式:")
-                print("  python -m core create --scene <场景类型> --chapter <章节名>")
-                print("  python -m core create --workflow")
-                print("=" * 60)
-
-                api.shutdown()
-                return 0
-
-            # 创作指定场景
-            if args.scene:
-                chapter = args.chapter or "未命名章节"
-
-                print(f"\n" + "=" * 60)
-                print(f"📝 场景创作: {args.scene}")
-                print(f"   章节: {chapter}")
-                print("=" * 60)
-
-                # 获取场景信息
-                info = api.get_scene_info(args.scene)
-                if not info:
-                    print(f"\n❌ 场景类型 '{args.scene}' 未找到")
-                    print("\n可用场景:")
-                    scenes = api.get_available_scenes()
-                    for scene in scenes[:20]:
-                        print(f"  - {scene}")
-                    api.shutdown()
-                    return 1
-
-                print(f"\n场景描述: {info.get('description', '无')}")
-                print(f"主责作家: {info.get('primary_writer', '未知')}")
-                print(f"执行顺序: {' → '.join(info.get('writers', []))}")
-
-                # 执行创作
-                print(f"\n⏳ 正在创作...")
-                result = api.create_scene(
-                    scene_type=args.scene,
-                    chapter=chapter,
-                    outline="",  # 可扩展：从大纲文件读取
-                )
-
-                # 显示结果
-                print(f"\n" + "=" * 60)
-                if result.success:
-                    print(f"✅ 创作成功")
-                else:
-                    print(f"⚠️ 创作完成（未完全达标）")
-
-                print(f"\n迭代次数: {result.iterations}")
-                print(f"会话ID: {result.session_id}")
-                print(f"内容长度: {len(result.content)} 字符")
-
-                if result.scores:
-                    print(f"\n评估分数:")
-                    for dim, score in result.scores.items():
-                        print(f"  - {dim}: {score}/10")
-
-                print(f"\n预览内容:")
-                preview = result.content[:500]
-                print(preview + ("..." if len(result.content) > 500 else ""))
-
-                print(f"\n" + "=" * 60)
-
-                api.shutdown()
-                return 0
-
-            # 评估章节内容
-            if args.evaluate:
-                file_path = Path(args.evaluate)
-                if not file_path.exists():
-                    print(f"❌ 文件不存在: {file_path}")
-                    return 1
-
-                print(f"\n评估文件: {file_path}")
-
-                # 读取内容
-                with open(file_path, "r", encoding="utf-8") as f:
-                    content = f.read()
-
-                # 执行评估
-                print(f"⏳ 正在评估...")
-                result = api.evaluate_content(
-                    content=content,
-                    scene_type="综合场景",  # 可扩展：自动检测场景类型
-                )
-
-                # 显示结果
-                print(f"\n" + "=" * 60)
-                print(f"📊 评估结果")
-                print(f"=" * 60)
-
-                print(f"\n总分: {result.get('total_score', 0):.1f}/10")
-                print(f"结论: {result.get('conclusion', '未知')}")
-
-                if result.get("scores"):
-                    print(f"\n分项评分:")
-                    for dim, score in result["scores"].items():
-                        print(f"  - {dim}: {score}/10")
-
-                print(f"\n反馈:")
-                print(result.get("feedback", "无"))
-
-                print(f"\n" + "=" * 60)
-
-                api.shutdown()
-                return 0
-
-            # 无操作时显示帮助
-            print("创作模块 - 作家工作流系统")
-            print("\n使用方式:")
-            print("  python -m core create --workflow              显示工作流信息")
-            print("  python -m core create --scene <场景> --chapter <章节>  创作场景")
-            print("  python -m core create --evaluate <文件>       评估内容")
-            print("\n场景类型示例:")
-            scenes = api.get_available_scenes()
-            for scene in scenes[:10]:
-                print(f"  - {scene}")
-            if len(scenes) > 10:
-                print(f"  ... 共 {len(scenes)} 个场景")
-
-            api.shutdown()
-            return 0
-
-        except ImportError as e:
-            print(f"创作模块导入失败: {e}")
-            print("请确保 modules/creation/ 模块已正确安装")
-            return 1
-        except Exception as e:
-            print(f"创作模块错误: {e}")
-            import traceback
-
-            traceback.print_exc()
-            return 1
+        [N13 2026-04-18] 旧 modules.creation 已归档至 .archived/modules_creation_archived/
+        创作工作流现在通过 Claude Code skill (novel-workflow) 启动，不再走 CLI。
+        """
+        print()
+        print("=" * 60)
+        print("[INFO] 创作工作流已迁移至 Claude Code skill 入口")
+        print("=" * 60)
+        print()
+        print("旧的 `python -m core create` CLI 入口在 M2-β 重构后已停用。")
+        print("现在请通过以下方式启动小说创作工作流：")
+        print()
+        print("  方式 1（推荐）: 在 Claude Code 中使用 skill")
+        print("    > /novel-workflow")
+        print()
+        print("  方式 2: 直接在对话中描述需求，Claude 会自动调用相应 skill")
+        print("    > 请帮我写第3章的战斗场景")
+        print()
+        print("  方式 3: 使用单个写手 skill")
+        print("    > /novelist-canglan      # 苍澜（玄幻）")
+        print("    > /novelist-xuanyi       # 玄一（古风）")
+        print("    > /novelist-moyan        # 墨言（言情）")
+        print("    > /novelist-jianchen     # 剑尘（武侠）")
+        print("    > /novelist-yunxi        # 云溪（治愈）")
+        print()
+        print("=" * 60)
+        return 2  # exit code 2 = 命令存在但未实现/已迁移
 
     def _handle_migration(self, args: argparse.Namespace) -> int:
         """处理移植模块"""
@@ -499,6 +371,35 @@ class CLI:
         except ImportError as e:
             print(f"可视化模块导入失败: {e}")
             print("请确保 modules/visualization/ 模块已正确安装")
+            return 1
+
+    def _handle_switch_world(self, args: argparse.Namespace) -> int:
+        """处理世界观切换模块 (M8 新增)"""
+        from .world_loader import switch_world, list_available_worlds, get_current_world_name
+
+        if args.list:
+            worlds = list_available_worlds(self.project_root)
+            current = get_current_world_name(self.project_root)
+            print(f"当前世界观: {current}")
+            print("可用世界观:")
+            for w in worlds:
+                marker = " ← 当前" if w == current else ""
+                print(f"  {w}{marker}")
+            return 0
+
+        if not args.world_name:
+            print("用法: python -m core switch-world <世界观名称>")
+            print("     python -m core switch-world --list")
+            return 1
+
+        try:
+            switch_world(args.world_name, self.project_root)
+            return 0
+        except FileNotFoundError as e:
+            print(f"❌ {e}")
+            return 1
+        except ValueError as e:
+            print(f"❌ {e}")
             return 1
 
 

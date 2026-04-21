@@ -11,18 +11,17 @@ from typing import Dict, List, Any, Optional
 from dataclasses import dataclass, asdict
 from datetime import datetime
 
-# 从配置加载器导入路径获取函数
+# [N14 2026-04-18] M2-β 后 config_loader 已迁移至 core/，
+# 删除对 .archived/vectorstore_core_20260418/ 的 sys.path 注入
 import sys
 from pathlib import Path
 
 _project_root = Path(__file__).resolve().parent.parent.parent
 if str(_project_root) not in sys.path:
     sys.path.insert(0, str(_project_root))
-if str(_project_root / ".vectorstore" / "core") not in sys.path:
-    sys.path.insert(0, str(_project_root / ".vectorstore" / "core"))
 
 try:
-    from config_loader import get_project_root, get_vectorstore_dir
+    from core.config_loader import get_project_root, get_vectorstore_dir
 
     HAS_CONFIG_LOADER = True
 except ImportError:

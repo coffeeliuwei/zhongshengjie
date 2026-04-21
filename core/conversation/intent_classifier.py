@@ -15,7 +15,9 @@
 参考：统一提炼引擎重构方案.md 第9.11节
 """
 
+import json
 import re
+from pathlib import Path
 from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass
 from enum import Enum
@@ -57,7 +59,43 @@ class IntentResult:
 
 
 class IntentClassifier:
-    """意图分类器"""
+    """意图分类器（M4 后 patterns 从 config/intent_patterns.json 加载）"""
+
+    # [M4] 类 B 字符串外化：patterns 从 JSON 读取，类属性 CORE_INTENTS/EXTENDED_INTENTS 已废弃
+    _PATTERNS_JSON_PATH = (
+        Path(__file__).resolve().parents[2] / "config" / "intent_patterns.json"
+    )
+
+    @classmethod
+    def _load_patterns_from_json(cls) -> Tuple[Dict, Dict]:
+        """从 config/intent_patterns.json 加载 core+extended，把 category 字符串映回 IntentCategory enum"""
+        if not cls._PATTERNS_JSON_PATH.exists():
+            raise FileNotFoundError(
+                f"intent_patterns.json 不存在: {cls._PATTERNS_JSON_PATH}\n"
+                "请先运行 python tools/extract_intent_patterns_to_json.py"
+            )
+        with open(cls._PATTERNS_JSON_PATH, "r", encoding="utf-8") as f:
+            data = json.load(f)
+
+        def _restore(intents: dict) -> dict:
+            out = {}
+            for name, cfg in intents.items():
+                cat_name = cfg["category"]
+                try:
+                    cat_enum = IntentCategory[cat_name]
+                except KeyError:
+                    raise ValueError(
+                        f"intent_patterns.json 中 {name} 的 category={cat_name!r} "
+                        f"不在 IntentCategory 枚举中"
+                    )
+                out[name] = {
+                    "patterns": list(cfg["patterns"]),
+                    "category": cat_enum,
+                    "entities": list(cfg.get("entities", [])),
+                }
+            return out
+
+        return _restore(data["core_intents"]), _restore(data["extended_intents"])
 
     # 核心意图（高优先级）
     CORE_INTENTS = {
@@ -573,9 +611,10 @@ class IntentClassifier:
     }
 
     def __init__(self):
-        """初始化意图分类器"""
-        # 合并所有意图
-        self._all_intents = {**self.CORE_INTENTS, **self.EXTENDED_INTENTS}
+        """初始化意图分类器（[M4] 从 config/intent_patterns.json 加载 patterns）"""
+        core, extended = self._load_patterns_from_json()
+        self._all_intents = {**core, **extended}
+        # 类属性 CORE_INTENTS/EXTENDED_INTENTS 暂保留供向后兼容（如有外部代码读取）
         # 预编译正则表达式
         self._compiled_patterns: Dict[str, List[Tuple[re.Pattern, List[str]]]] = {}
         self._compile_patterns()

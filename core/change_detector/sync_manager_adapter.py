@@ -74,31 +74,9 @@ class SyncManagerAdapter:
         return self._sync_manager
 
     def _get_worldview_generator(self):
-        """获取世界观生成器实例"""
+        """获取世界观生成器实例（M2-β 后永久使用 Mock，旧实现已归档至 .archived/vectorstore_core_20260418/）"""
         if self._worldview_generator is None:
-            try:
-                # 尝试导入世界观生成器
-                worldview_path = self.project_root / ".vectorstore" / "core"
-                if worldview_path.exists():
-                    import sys
-
-                    if str(worldview_path) not in sys.path:
-                        sys.path.insert(0, str(worldview_path))
-
-                    try:
-                        from worldview_generator import WorldviewGenerator
-
-                        self._worldview_generator = WorldviewGenerator(
-                            project_root=str(self.project_root)
-                        )
-                    except ImportError:
-                        self._worldview_generator = _MockWorldviewGenerator()
-                else:
-                    self._worldview_generator = _MockWorldviewGenerator()
-            except Exception as e:
-                print(f"[SyncManagerAdapter] 初始化世界观生成器失败: {e}")
-                self._worldview_generator = _MockWorldviewGenerator()
-
+            self._worldview_generator = _MockWorldviewGenerator()
         return self._worldview_generator
 
     def sync_outline_to_worldview(
@@ -454,7 +432,9 @@ class _MockSyncManager:
 class _MockWorldviewGenerator:
     """模拟世界观生成器（用于导入失败时）"""
 
-    def sync_from_outline(self, outline_path: str) -> Dict[str, Any]:
+    def sync_from_outline(self, outline_path: str = "总大纲.md") -> Dict[str, Any]:
+        # [N9 2026-04-18] outline_path 改为可选，默认 '总大纲.md'，
+        # 防御 M5 链路 C 那种裸调；生产路径 :107 仍显式传参，行为不变。
         print(f"[MockWorldviewGenerator] sync_from_outline 调用: {outline_path}")
         return {"synced": 0, "message": "模拟同步"}
 

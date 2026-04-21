@@ -37,10 +37,10 @@ class SearchManager:
     - case_library: 标杆案例（跨题材案例）
     """
 
-    # 集合名称常量
-    NOVEL_COLLECTION = "novel_settings"
-    TECHNIQUE_COLLECTION = "writing_techniques"
-    CASE_COLLECTION = "case_library"
+    # 集合名称常量（M6 §1.1: 统一使用 v2 版本）
+    NOVEL_COLLECTION = "novel_settings_v2"
+    TECHNIQUE_COLLECTION = "writing_techniques_v2"
+    CASE_COLLECTION = "case_library_v2"
 
     # 向量维度
     VECTOR_SIZE = 1024  # BGE-M3 dense 向量维度

@@ -1,0 +1,211 @@
+================================================================================
+ n18_test_log.txt — N18 skill 层验证日志(补建)
+================================================================================
+补建时间 : 2026-04-19 (Asia/Shanghai)
+补建执行 : opencode (GLM5),按 docs/计划_N18b_测试日志补建_20260419.md §3
+补建依据 : docs/计划_M7_项目重构收口_20260418.md §9.1 第 7 节 + §6.7 验收清单
+覆盖范围 : [N18-A] / [N18-B] / [N18-C] / [N18-D],共 4 项
+延后范围 : [N18-E] / [N18-F] 由 P0-3 N18c 补核
+           未覆盖 4 skill(inspiration-ingest / connoisseur / shared /
+           technique-search) 由 P0-4 N18d 处理
+数据基线 : m7_summary.md (诚实版,2026-04-19)
+================================================================================
+
+
+################################################################################
+# [N18-A] 备份目录结构(P0-1 N18a 已修复,预期 8 子目录)
+################################################################################
+
+--- 顶层条目 ---
+novel-workflow
+novelist-canglan
+novelist-evaluator
+novelist-jianchen
+novelist-moyan
+novelist-worldview-generator
+novelist-xuanyi
+novelist-yunxi
+
+--- 顶层计数(预期 = 8)---
+8
+
+--- novel-workflow 子目录内容(预期 5 条目:4 .md + 1 templates/)---
+templates
+REFACTOR.md
+SKILL.md
+SKILL.md.bak
+SPEC.md
+
+--- 顶层散文件数(预期 = 0)---
+0
+
+[N18-A] 判定:PASS(N18a 已于 2026-04-19 由 Claude 核验,本次记录留痕)
+
+
+################################################################################
+# [N18-B] novel-workflow/SKILL.md 保留 4 处 from modules.creation(try 包裹)
+################################################################################
+
+--- grep -n "from modules.creation" ---
+Line 2103: from modules.creation import IterationPredictor, IterationRisk
+Line 2147: from modules.creation import QuickFailChecker
+Line 2179: from modules.creation import DynamicIterationAdjuster, SceneComplexity
+Line 2220: from modules.creation import fuse_and_polish, FusionPolishMode
+
+--- grep -c (预期 = 4)---
+4
+
+[N18-B] 判定:PASS (grep -c == 4)
+
+
+################################################################################
+# [N18-C] .vectorstore/core 死引用(novel-workflow + evaluator)
+# 预期:0 行(严格)/ m7_summary 诚实版注明:novel-workflow 有 1 处在注释中,实质通过
+################################################################################
+
+--- grep -rn .vectorstore/core ---
+novel-workflow: 1 处
+  Line 15: # [N18 2026-04-18] M2-β 后 .vectorstore/core 已归档,改用 core 包
+novelist-evaluator: 0 处
+
+--- 按 m7_summary §3.1 说明:novel-workflow 第 15 行是 [N18 2026-04-18] 注释说明,非活引用 ---
+# [N18 2026-04-18] M2-β 后 .vectorstore/core 已归档,改用 core 包
+
+[N18-C] 判定:字面 1 处(注释) / 实质 PASS(无活死引用)
+
+
+################################################################################
+# [N18-D] 8 个已处理 skill 均含 [N18 2026-04-18] 标记
+################################################################################
+
+--- novel-workflow ---
+命中行数:4
+首次行:15
+[novel-workflow] PASS
+
+--- novelist-evaluator ---
+命中行数:1
+首次行:1087
+[novelist-evaluator] PASS
+
+--- novelist-canglan ---
+命中行数:1
+首次行:18
+[novelist-canglan] PASS
+
+--- novelist-jianchen ---
+命中行数:1
+首次行:18
+[novelist-jianchen] PASS
+
+--- novelist-moyan ---
+命中行数:1
+首次行:18
+[novelist-moyan] PASS
+
+--- novelist-xuanyi ---
+命中行数:1
+首次行:18
+[novelist-xuanyi] PASS
+
+--- novelist-yunxi ---
+命中行数:1
+首次行:20
+[novelist-yunxi] PASS
+
+--- novelist-worldview-generator ---
+命中行数:1
+首次行:8
+[novelist-worldview-generator] PASS
+
+[N18-D] 判定:PASS (全部 8 个均 PASS)
+
+
+################################################################################
+# 附录 A:8 个 SKILL.md 当前文件大小快照(为 P0-3 N18c [N18-F] 留基线)
+# 本步骤只采集数据,不做判定——判定由 P0-3 执行
+################################################################################
+
+SKILL                                    bytes     lines
+--------------------------------------------------------------------------
+novel-workflow                                95233      2759
+novelist-evaluator                            47589      1535
+novelist-canglan                               6112       234
+novelist-jianchen                              5377       191
+novelist-moyan                                 5470       201
+novelist-xuanyi                                5705       214
+novelist-yunxi                                 6898       243
+novelist-worldview-generator                   9550       434
+
+(备份侧基线见 docs/m7_artifacts/skill_backup_20260418/<skill>/SKILL.md;对比由 P0-3 做)
+
+
+################################################################################
+# 附录 B:后续待办(本计划不执行,仅登记)
+################################################################################
+
+[TODO-N18c / P0-3] [N18-E] worldview-generator 头部 ⚠️ DEPRECATED 横幅核验
+[TODO-N18c / P0-3] [N18-F] 8 个 SKILL.md 相对备份的大小变化 < 30%
+[TODO-N18d / P0-4] 4 个未覆盖 skill 清理:
+                   - novel-inspiration-ingest
+                   - novelist-connoisseur      (v2 核心,P1-3 将大改)
+                   - novelist-shared
+                   - novelist-technique-search
+
+################################################################################
+# 日志结束
+################################################################################
+生成完成时间(本机时间,参考):2026-04-19 13:45:00 Asia/Shanghai
+
+################################################################################
+# 附录 C:N18cd 补核与 4 skill 清理(2026-04-19 执行)
+################################################################################
+
+--- [N18-E] worldview-generator 头部核验 ---
+含 DEPRECATED: True
+含 N18 2026-04-18: True
+[N18-E] 判定: PASS
+
+--- [N18-F] 8 SKILL.md 文件大小变化审计 ---
+SKILL                                    当前bytes    备份bytes   delta%  判定
+novel-workflow                                97991       97544     0.5%  PASS
+novelist-evaluator                            49123       49057     0.1%  PASS
+novelist-canglan                               6345        6167     2.9%  PASS
+novelist-jianchen                              5567        5380     3.5%  PASS
+novelist-moyan                                 5670        5489     3.3%  PASS
+novelist-xuanyi                                5918        5731     3.3%  PASS
+novelist-yunxi                                 7140        6947     2.8%  PASS
+novelist-worldview-generator                   9983        9256     7.9%  PASS
+
+最大 |delta| = 7.9% (novelist-worldview-generator),远低于 30% 阈值
+[N18-F] 判定: PASS (全部 < 30%)
+
+--- [N18d] 4 未覆盖 skill 清理 ---
+扫描死引用: 全部 0 处 (.vectorstore/core / modules.creation)
+注入标记: 已注入 [N18d 2026-04-19] 到所有 4 个 SKILL.md
+novel-inspiration-ingest: PASS (已注入)
+novelist-connoisseur: PASS (已注入 + P1-3 大改备注)
+novelist-shared: PASS (已注入)
+novelist-technique-search: PASS (已注入)
+
+[N18d] 判定: PASS (4 个全清理)
+
+################################################################################
+# N18 扩展验收总判定
+################################################################################
+[N18-A] 备份结构: PASS (P0-1 已修复)
+[N18-B] modules.creation: PASS (4 处 try 包裹)
+[N18-C] 死引用清除: PASS (实质通过)
+[N18-D] 8 skill 标记: PASS (8/8 全含 N18 标记)
+[N18-E] DEPRECATED横幅: PASS
+[N18-F] 文件大小变化: PASS (全部 <30%)
+[N18d] 4 skill清理: PASS (全部注入 N18d 标记)
+
+**N18 整体验收: PASS**
+项目 12 个 skill 全部纳入 N18 范围,可推进至 P1 门禁 Q1-Q4。
+
+################################################################################
+# 日志结束 (N18cd 补建完成)
+################################################################################
+完成时间: 2026-04-19 (Asia/Shanghai)
+执行者: opencode (GLM5)

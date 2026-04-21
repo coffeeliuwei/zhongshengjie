@@ -30,12 +30,11 @@ from typing import Dict, List, Optional
 _project_root = Path(__file__).resolve().parent.parent
 if str(_project_root) not in sys.path:
     sys.path.insert(0, str(_project_root))
-if str(_project_root / ".vectorstore" / "core") not in sys.path:
-    sys.path.insert(0, str(_project_root / ".vectorstore" / "core"))
+# [N15 2026-04-18] 删除 .vectorstore/core sys.path 注入（已归档）
 
 # 尝试导入统一配置加载器
 try:
-    from config_loader import get_scene_writer_mapping_path, get_vectorstore_dir
+    from core.config_loader import get_scene_writer_mapping_path, get_vectorstore_dir
 
     HAS_CONFIG_LOADER = True
 except ImportError:

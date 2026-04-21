@@ -1,0 +1,10 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.7, pytest-9.0.2, pluggy-1.6.0
+rootdir: D:\动画\众生界
+configfile: pytest.ini
+plugins: anyio-4.12.1, langsmith-0.7.22
+collected 0 items
+
+============================ no tests ran in 0.00s ============================
+ERROR: file or directory not found: tests/test_config.py
+

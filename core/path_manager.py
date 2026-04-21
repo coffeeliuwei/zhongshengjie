@@ -139,10 +139,10 @@ class PathManager:
         """向量数据库目录"""
         return self.config.dir_config.vectorstore_dir
 
-    @property
-    def workflow_script(self) -> Path:
-        """工作流脚本"""
-        return self.config.dir_config.vectorstore_dir / "workflow.py"
+    # [N19 2026-04-18] 已删除 4 个返回 .vectorstore/*.py 死路径的 property:
+    # workflow_script / verify_all_script / checklist_scorer_script / verification_history_script
+    # 原因: M2-β 后对应 .py 文件已归档至 .archived/vectorstore_core_20260418/
+    # scene_writer_mapping 保留（JSON 数据文件可能仍在 .vectorstore/）
 
     @property
     def scene_writer_mapping(self) -> Path:
@@ -223,20 +223,8 @@ class PathManager:
 
     # ==================== 验证文件路径 ====================
 
-    @property
-    def verify_all_script(self) -> Path:
-        """统一验证脚本"""
-        return self.config.dir_config.vectorstore_dir / "verify_all.py"
-
-    @property
-    def checklist_scorer_script(self) -> Path:
-        """检查清单评分脚本"""
-        return self.config.dir_config.vectorstore_dir / "checklist_scorer.py"
-
-    @property
-    def verification_history_script(self) -> Path:
-        """验证历史脚本"""
-        return self.config.dir_config.vectorstore_dir / "verification_history.py"
+    # [N19 2026-04-18] 注释占位：原 verify_all_script / checklist_scorer_script / verification_history_script
+    # 三个 property 已删除，因为对应 .py 文件在 M2-β 后归档到 .archived/vectorstore_core_20260418/
 
     # ==================== 工具方法 ====================
 

@@ -36,12 +36,11 @@ from dataclasses import dataclass, asdict, field
 PROJECT_ROOT = Path(__file__).parent.parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
-if str(PROJECT_ROOT / ".vectorstore" / "core") not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT / ".vectorstore" / "core"))
+# [N15 2026-04-18] 删除 .vectorstore/core sys.path 注入（已归档）
 
 # 尝试导入统一配置加载器
 try:
-    from config_loader import (
+    from core.config_loader import (
         get_project_root,
         get_scene_writer_mapping_path,
         get_case_library_dir,

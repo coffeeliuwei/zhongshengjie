@@ -200,11 +200,6 @@ class FileUpdater:
             import sys
             from pathlib import Path
 
-            # 添加.vectorstore路径
-            vectorstore_path = self.project_root / ".vectorstore"
-            if str(vectorstore_path) not in sys.path:
-                sys.path.insert(0, str(vectorstore_path))
-
             from qdrant_client import QdrantClient
             from qdrant_client.models import PointStruct
             from FlagEmbedding import BGEM3FlagModel
