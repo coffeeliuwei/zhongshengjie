@@ -77,6 +77,19 @@
 
 ## 更新日志
 
+### v0.2.1 (2026-04-21) - 多小说解耦完整实施（M8）
+
+**多小说解耦（M8）**：
+- ✨ 新增 `core/world_loader.py`：`get_world_config` / `switch_world` / `list_available_worlds`
+- ✨ CLI 新增 `switch-world` 子命令（`python -m core switch-world 星海纪元`）
+- 🔧 skill 文件 B/C 类路径修复（4 处绝对路径 → config 动态读取）
+- 🔧 skill 文件 A 类世界观名词批量替换（~200 处，血牙/林夕/村庄广场/血脉-天裂等 → 占位符）
+- ✨ 新增 5 个示例世界观配置（`config/worlds/`：修仙世界示例/星海纪元/科幻世界示例/西方奇幻示例）
+
+**测试**：pytest 666 passed, 2 skipped, 0 failed（+21 vs v0.2.0 基线）
+
+---
+
 ### v0.2.0 (2026-04-21) - v2 灵感引擎完整集成
 
 **灵感引擎核心组件（P1）**：
