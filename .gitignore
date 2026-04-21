@@ -246,3 +246,6 @@ archived/
 
 # skill 备份目录（大型快照，不入库）
 docs/m7_artifacts/skill_backup_*/
+
+# 用户素材库（含 PDF/原始资料，不入库）
+素材库/
