@@ -93,6 +93,11 @@ class CLI:
         )
         viz_parser.add_argument("--stats", action="store_true", help="生成统计可视化")
 
+        # ==================== 世界观切换模块 (M8 新增) ====================
+        world_parser = subparsers.add_parser("switch-world", help="切换当前世界观")
+        world_parser.add_argument("world_name", nargs="?", help="目标世界观名称")
+        world_parser.add_argument("--list", action="store_true", help="列出所有可用世界观")
+
         return parser
 
     def run(self, args: Optional[list] = None) -> int:
@@ -119,6 +124,7 @@ class CLI:
             "create": self._handle_creation,
             "migrate": self._handle_migration,
             "visualize": self._handle_visualization,
+            "switch-world": self._handle_switch_world,
         }
 
         handler = module_handlers.get(parsed.module)
@@ -365,6 +371,35 @@ class CLI:
         except ImportError as e:
             print(f"可视化模块导入失败: {e}")
             print("请确保 modules/visualization/ 模块已正确安装")
+            return 1
+
+    def _handle_switch_world(self, args: argparse.Namespace) -> int:
+        """处理世界观切换模块 (M8 新增)"""
+        from .world_loader import switch_world, list_available_worlds, get_current_world_name
+
+        if args.list:
+            worlds = list_available_worlds(self.project_root)
+            current = get_current_world_name(self.project_root)
+            print(f"当前世界观: {current}")
+            print("可用世界观:")
+            for w in worlds:
+                marker = " ← 当前" if w == current else ""
+                print(f"  {w}{marker}")
+            return 0
+
+        if not args.world_name:
+            print("用法: python -m core switch-world <世界观名称>")
+            print("     python -m core switch-world --list")
+            return 1
+
+        try:
+            switch_world(args.world_name, self.project_root)
+            return 0
+        except FileNotFoundError as e:
+            print(f"❌ {e}")
+            return 1
+        except ValueError as e:
+            print(f"❌ {e}")
             return 1
 
 
