@@ -1,4 +1,4 @@
-﻿# 众生界
+# 众生界
 
 <p align="center">
   <img src="assets/unnamed.png" alt="众生界" width="600">
@@ -233,7 +233,20 @@ Qdrant向量库       # 需运行构建脚本同步数据
 
 ### 第三步：构建数据系统
 
-克隆后需要构建完整的数据系统：
+克隆后需要构建完整的数据系统。**需按以下顺序执行**：
+
+#### 3.1 初始化向量库（必须先执行）
+
+`build_all.py` 不创建 Qdrant Collections，需先用 `data_builder.py` 初始化：
+
+```bash
+# 初始化所有 Qdrant collections（必须先做，只做一次）
+python tools/data_builder.py --init
+```
+
+看到 `初始化完成` 或 `collections created` → 成功。
+
+#### 3.2 构建目录结构和同步数据
 
 ```bash
 # 一键构建（初始化目录结构 + 同步向量库）
@@ -241,19 +254,23 @@ python tools/build_all.py
 
 # 快速模式（仅初始化目录，跳过向量同步）
 python tools/build_all.py --quick
-
-# 查看构建状态
-python tools/build_all.py --status
 ```
 
-**build_all.py 执行内容**：
+#### 3.3 查看构建状态
 
-| 步骤 | 操作 | 结果 |
-|------|------|------|
-| 1. 初始化目录 | 创建创作技法、设定等目录结构 | 空目录就绪 |
-| 2. 构建技法库 | 创建11维度子目录 + README模板 | 技法目录结构 |
-| 3. 同步向量库 | 连接Qdrant，同步技法库索引 | 向量库可用 |
-| 4. 初始化案例库 | 创建案例目录结构 | 案例目录就绪 |
+```bash
+# 查看向量库状态（用 data_builder，build_all 无 --status 参数）
+python tools/data_builder.py --status
+```
+
+**两个脚本分工**：
+
+| 脚本 | 功能 | 使用场景 |
+|------|------|----------|
+| `data_builder.py --init` | 创建 Qdrant Collections | **必须先执行**，只做一次 |
+| `build_all.py` | 初始化目录 + 同步数据 | data_builder --init 之后执行 |
+| `data_builder.py --status` | 查看向量库状态 | 任何时候查看状态 |
+| `build_all.py --quick` | 仅初始化目录，跳过向量同步 | 快速搭建空项目结构 |
 
 ---
 
