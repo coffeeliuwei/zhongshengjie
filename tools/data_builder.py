@@ -45,6 +45,9 @@ DEFAULT_CONFIG = {
         "foreshadow_pair": "foreshadow_pair_v1",  # 伏笔检索
         "power_cost": "power_cost_v1",  # 功法/力量代价检索
         "evaluation_criteria": "evaluation_criteria_v1",  # 评审标准检索
+        "dialogue_style": "dialogue_style_v1",  # 对话风格检索
+        "emotion_arc": "emotion_arc_v1",  # 情感弧线检索
+        "power_vocabulary": "power_vocabulary_v1",  # 力量词汇检索
     },
     "vector_size": 1024,  # BGE-M3
     "model": "BAAI/bge-m3",

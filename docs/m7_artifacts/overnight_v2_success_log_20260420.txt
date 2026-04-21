@@ -1,0 +1,59 @@
+overnight batch v2 成功日志
+===========================
+日期: 2026-04-20
+执行: Sisyphus (OpenCode)
+
+## Step 0 前置门禁 - PASS
+- HEAD: 8365fe21a ✅
+- 4 关键文件存在 ✅
+- escalation 7 tests passed ✅
+- P1-1 types 可导入 ✅
+
+## P1-6 escalation_dialogue 阶段6对话 - PASS
+- 追加 format_stage6_three_choice() ✅
+- 追加 parse_stage6_choice() ✅
+- tests/test_escalation_dialogue.py 追加 13 测试 ✅
+- pytest 结果: 20 passed ✅
+
+## P1-7 evaluator_exemption 评估师豁免 - PASS
+- evaluator_exemption.py 创建 (92行) ✅
+  - ExemptionBuildError ✅
+  - ExemptionMap 类型别名 ✅
+  - build_exemption_map() ✅
+  - is_exempt() ✅
+  - format_exemption_report() ✅
+- tests/test_evaluator_exemption.py 创建 (282行) ✅
+- pytest 结果: 17 passed ✅
+- __init__.py 导出追加 (5符号) ✅
+  - ExemptionBuildError
+  - ExemptionMap
+  - build_exemption_map
+  - is_exempt
+  - format_exemption_report
+
+## 关键模块测试汇总
+- test_escalation_dialogue.py: 20 passed ✅
+- test_evaluator_exemption.py: 17 passed ✅
+- test_creative_contract.py: 39 passed ✅
+- 合计: 76 passed in 0.70s ✅
+
+## 文件变更清单
+1. core/inspiration/escalation_dialogue.py - 追加 2 函数
+2. tests/test_escalation_dialogue.py - 追加 13 测试
+3. core/inspiration/evaluator_exemption.py - 新建
+4. tests/test_evaluator_exemption.py - 新建
+5. core/inspiration/__init__.py - 追加导出
+
+## 约束遵守
+- stdlib-only ✅
+- 未改 creative_contract.py ✅
+- 未 git commit ✅
+
+## Step Final 核验 (§5)
+1. HEAD 未变: 8365fe21a ✅
+2. P1-7 导出可用: ExemptionBuildError, ExemptionMap, build_exemption_map, is_exempt, format_exemption_report ✅
+3. P1-6 新函数可用: format_stage6_three_choice, parse_stage6_choice ✅
+4. 端到端烟雾测试: 2 passed in 0.72s ✅
+
+## 结论
+P1-6 + P1-7 实现完成，关键测试全部通过。overnight batch v2 执行成功。
