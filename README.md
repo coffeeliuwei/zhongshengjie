@@ -70,68 +70,41 @@
 
 ---
 
-## 🧭 傻瓜版快速开始（新手必读）
+## 📖 学生用户请看这里
 
-> 如果你是第一次拿到这个项目,按本章顺序往下做,完成 5 步即可跑起来。其余章节是给已经熟手的人看的参考。
+> 如果你是老师课堂上的学生，请直接阅读专门为你准备的指导书，里面有从零开始的完整步骤。
 
-### 前置软件(都要装,只装一次)
+**👉 [实训指导书（学生版）](docs/实训指导书_学生版.md)**
 
-| 软件 | 用途 | 下载地址 | 验证命令 |
-|------|------|----------|----------|
-| **Python 3.11** | 项目运行环境 | https://www.python.org/downloads/release/python-3119/ | `python --version` 应显示 `3.11.x` |
-| **Docker Desktop** | 跑向量数据库 Qdrant(**必须**) | https://www.docker.com/products/docker-desktop/ | `docker --version` 能显示版本号 |
-| **Git** | 拉代码 | https://git-scm.com/downloads | `git --version` 能显示版本号 |
-| **Claude Code 或 OpenCode** | AI 操作入口 | 见各自官网 | - |
+涵盖内容：Python / Docker / BGE-M3 / Qdrant / Claude Code / opencode 安装，数据库初始化，小说创建，章节写作，大纲/设定/技法/评估维度的对话补全方式，以及常见问题解答。
 
-> 装完 Docker Desktop 后,**先打开它一次**(桌面图标双击),让它在后台跑起来。没启动 Docker,后面 `docker run` 会报 "Cannot connect to Docker daemon"。
+---
 
-### Skills 包(作者线下分发)
+## 🧭 开发者快速开始
 
-本项目的作家 Skills(苍澜、剑尘、墨砚等)**不在 GitHub 仓库里**,作者会通过**微信/网盘单独发你一个 `novelist-skills.zip`**。
-
-拿到压缩包后:
+> 已有开发经验的用户参考本节。
 
 ```bash
-# Windows:解压到这个路径
-C:\Users\你的用户名\.agents\skills\
-
-# 解压后应该能看到这些文件夹:
-# novelist-canglan/  novelist-jianchen/  novelist-moyan/ ...
-
-# 验证(PowerShell):
-dir $env:USERPROFILE\.agents\skills
-```
-
-> ⚠️ **没拿到 zip 包就来问作者**,不要自己瞎造。GitHub 的 `skills/` 目录被 `.gitignore` 排除了,仓库里根本没有。
-
-### 5 步跑起来
-
-```bash
-# 第 1 步:克隆项目
+# 克隆项目
 git clone https://github.com/coffeeliuwei/zhongshengjie.git
 cd zhongshengjie
 
-# 第 2 步:装 Python 依赖
-pip install -r requirements.txt
+# 安装依赖
+pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 
-# 第 3 步:启动 Qdrant 向量库(Docker 要先打开)
-docker run -d --name qdrant -p 6333:6333 qdrant/qdrant
+# 启动 Qdrant（Docker 须先运行）
+docker run -d --name qdrant --restart unless-stopped -p 6333:6333 -p 6334:6334 -v D:\qdrant_data:/qdrant/storage qdrant/qdrant
 
-# 第 4 步:解压作者发的 skills zip 到 ~/.agents/skills/(见上节)
+# 复制并修改配置（只需改 current_world 和 realm_order）
+copy config.example.json config.json
 
-# 第 5 步:复制并修改配置
-cp config.example.json config.json
-# 然后用记事本打开 config.json,改里面的 project_root 和 skills_base_path
-# (详见下面「第二步:配置系统」章节)
+# 初始化全部 Qdrant 集合（必须在 Qdrant 运行后执行）
+python tools/data_builder.py --init
+
+# 解压作者提供的 Skills 包到 ~/.agents/skills/
+# 启动 Claude Code
+claude
 ```
-
-### 新手最常踩的 3 个坑
-
-| 报错 | 原因 | 解法 |
-|------|------|------|
-| `Cannot connect to Docker daemon` | Docker Desktop 没打开 | 双击桌面 Docker 图标,等托盘图标变绿再跑 `docker run` |
-| `ls ~/.agents/skills` 是空的 | 还没解压作者发的 zip | 向作者要 `novelist-skills.zip`,解压到该目录 |
-| config.json 里路径报错 | Windows 单反斜杠被转义 | 用正斜杠 `D:/项目/众生界` 或双反斜杠 `D:\\项目\\众生界` |
 
 ---
 
