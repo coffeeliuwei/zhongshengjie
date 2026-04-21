@@ -431,8 +431,8 @@ python tools/sync_eval_criteria_to_qdrant.py --sync
 
 **项目作者**：coffeeliuwei
 **GitHub**：https://github.com/coffeeliuwei/zhongshengjie
-**版本**：v0.1.0-preview
-**最后更新**：2026-04-20
+**版本**：v0.2.0
+**最后更新**：2026-04-21
 
 ---
 
@@ -878,7 +878,7 @@ experience = retrieve_chapter_experience(
 | **反馈系统** | ✅ 完成 | 评估回流+经验沉淀 |
 | **生命周期管理** | ✅ 完成 | 技法追踪+版本控制+契约管理 |
 | 数据构建工具 | ✅ 完成 | 统一入口 |
-| 测试覆盖 | ✅ 完成 | 629 passed 基线 |
+| 测试覆盖 | ✅ 完成 | 645 passed, 0 failed 基线 |
 | **创意契约系统** | ✅ 完成 | creative_contract.py（v2 灵感引擎） |
 | **派单器** | ✅ 完成 | dispatcher.py（v2 灵感引擎） |
 | **鉴赏师 v2** | ✅ 完成 | 三方协商 + 派单监工 |
@@ -900,7 +900,7 @@ experience = retrieve_chapter_experience(
 
 ## 测试结果
 
-实际基线（v2-dev，2026-04-20）：**629 passed, 3 failed（预存在缺陷，非 v2 引入）, 1 skipped**
+实际基线（master，2026-04-21）：**645 passed, 0 failed, 2 skipped**
 
 ---
 
@@ -1021,6 +1021,33 @@ if changes:
 
 ## 更新日志
 
+### v0.2.0 (2026-04-21) - v2 灵感引擎完整集成
+
+**灵感引擎核心组件（P1）**：
+- ✨ 创意契约系统（creative_contract.py）— 三方协商产出意向书，含 preserve_list / rejected_list / negotiation_log
+- ✨ 派单器（dispatcher.py）— 按契约 item 分发给各写手
+- ✨ 鉴赏师 v2 SKILL（novelist-connoisseur，404 行）— 查约束库菜单 + 查记忆点 → 建议 + 派单监工
+- ✨ 评估师豁免逻辑（evaluator_exemption.py）— 读契约 preserve_list 豁免对应维度（子项级别）
+- ✨ 三方协商升级（escalation_dialogue.py）— 鉴赏师 + 评估师 + 作者，支持撤销/强制通过/重协商
+- 🗑️ 多变体生成器（variant_generator.py）删除 — v2 改为 original-only 模式
+
+**工作流集成（P2）**：
+- ✨ 阶段 5.5：三方协商接入 — 整章润色后进入协商，产出创意契约
+- ✨ 阶段 5.6：派单执行 — 契约下发给剑尘/云溪改写，MUST_PRESERVE 标记生效
+- ✨ 阶段 6：带豁免评估 — 读 preserve_list 豁免维度，3 次 <0.8 触发对话升级
+- ✨ 阶段 7：推翻事件回流 — author_force_pass → memory_points_v1 (retrieval_weight=2.0)
+- ✨ 阶段 8：经验写入 — 每章 log.json 含 techniques_used / what_worked / what_didnt_work
+
+**多小说解耦（P5）**：
+- 🔧 novel-workflow SKILL 路径硬编码修复（PROJECT_ROOT → 环境变量自动检测）
+- 🔧 novelist-canglan SKILL switch_world 硬编码修复（→ 从 config 自动加载）
+- ✨ init_novel.py 新增 --template 模式（世界观配置模板生成）
+- 🔧 data_builder.py DEFAULT_CONFIG 补齐 5 个缺失 v1 collection
+
+**测试**：pytest 645 passed, 0 failed（修复了 3 个预存在缺陷，2 skipped）
+
+---
+
 ### v0.1.0-preview (2026-04-20) - 首个预览版发布
 
 **发布**：
@@ -1034,7 +1061,7 @@ if changes:
 - ✨ Evaluator 豁免逻辑（evaluator_exemption.py）
 - ✨ escalation 三方协商机制
 
-**测试**：pytest 629 passed 基线（3 failed 为预存在缺陷）
+**测试**：pytest 629 passed 基线（3 failed 为预存在缺陷，v0.2.0 已修复，645 passed, 0 failed）
 
 ---
 
