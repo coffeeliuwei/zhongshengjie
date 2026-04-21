@@ -264,17 +264,12 @@ class TechniqueExtractor:
         return unique
 
     def _search_similar_techniques(self, content: str) -> List[Dict]:
-        """检索相似技法"""
+        """检索相似技法（使用统一检索 API）"""
         try:
-            import sys
+            from core.retrieval.unified_retrieval_api import UnifiedRetrievalAPI
 
-            vectorstore_path = self.project_root / ".vectorstore"
-            if str(vectorstore_path) not in sys.path:
-                sys.path.insert(0, str(vectorstore_path))
-
-            from workflow import search_techniques
-
-            results = search_techniques(content, top_k=3)
+            api = UnifiedRetrievalAPI()
+            results = api.search_techniques(content, top_k=3)
             return results
         except Exception:
             return []

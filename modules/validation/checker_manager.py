@@ -25,16 +25,13 @@ import sys
 from pathlib import Path
 from typing import Dict, List, Optional, Any
 
-# 添加项目路径
+# [N14 2026-04-18] 改为 core 包内的 config_loader
 _project_root = Path(__file__).resolve().parent.parent.parent
 if str(_project_root) not in sys.path:
     sys.path.insert(0, str(_project_root))
-if str(_project_root / ".vectorstore" / "core") not in sys.path:
-    sys.path.insert(0, str(_project_root / ".vectorstore" / "core"))
 
-# 尝试导入统一配置加载器
 try:
-    from config_loader import (
+    from core.config_loader import (
         get_project_root,
         get_vectorstore_dir,
         get_knowledge_graph_path,

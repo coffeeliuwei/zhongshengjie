@@ -2530,6 +2530,240 @@ class NovelWorkflow:
         )
 
 
+    # ==================== P2-2 ~ P2-5 阶段接口 ====================
+
+    def run_stage5_6_dispatch(
+        self,
+        contract: "CreativeContract",
+    ) -> Dict[str, Any]:
+        """Stage 5.6 派单执行 — 把 CreativeContract 拆解为各写手的 DispatchPackage。
+
+        调用约定
+        --------
+        result = workflow.run_stage5_6_dispatch(contract)
+        # result["status"] == "dispatched"
+        # result["packages"]  → List[DispatchPackage]，每项含 writer / item_ids / prompt_increment
+        # result["skipped"]   → True 当 contract.skipped_by_author=True（packages 为空）
+
+        Args:
+            contract: P2-1 产出的 CreativeContract（已校验）
+
+        Returns:
+            {
+                "status": "dispatched",
+                "packages": List[DispatchPackage],
+                "skipped": bool,
+            }
+        """
+        from core.inspiration.dispatcher import dispatch
+
+        packages = dispatch(contract)
+        return {
+            "status": "dispatched",
+            "packages": packages,
+            "skipped": contract.skipped_by_author,
+        }
+
+    def run_stage6_evaluation(
+        self,
+        contract: "CreativeContract",
+        evaluation_result: Dict[str, Any],
+        consecutive_fail_count: int = 0,
+    ) -> Dict[str, Any]:
+        """Stage 6 整章评估（带契约豁免 + 三选升级）。
+
+        调用约定（无状态，调用方维护 consecutive_fail_count）
+        -------------------------------------------------------
+        result = workflow.run_stage6_evaluation(contract, eval_result, consecutive_fail_count)
+
+        result["status"] 取值：
+          "pass"       — overall_score >= 0.8，重置失败计数
+          "fail"       — overall_score < 0.8 但未满 3 次，继续重写
+          "escalation" — 连续第 3 次 < 0.8，触发三选升级对话
+
+        Args:
+            contract:             P2-1 产出的 CreativeContract
+            evaluation_result:    评估师输出字典，须含 "overall_score"(float) 和
+                                  "dimensions"(Dict[str, float])
+            consecutive_fail_count: 当前已连续失败次数（调用方维护，初始 0）
+
+        Returns:
+            pass:      {"status": "pass", "consecutive_fail_count": 0, "exemption_map": dict}
+            fail:      {"status": "fail", "consecutive_fail_count": int, "exemption_map": dict}
+            escalation:{"status": "escalation", "consecutive_fail_count": int,
+                        "display_text": str, "exemption_map": dict}
+        """
+        from core.inspiration.evaluator_exemption import build_exemption_map
+        from core.inspiration.escalation_dialogue import format_stage6_three_choice
+
+        FAIL_THRESHOLD = 3
+        SCORE_THRESHOLD = 0.8
+
+        # 构建豁免索引（skipped_by_author=True 时 preserve_list 为空，豁免索引为 {}）
+        try:
+            exemption_map = build_exemption_map(contract)
+        except Exception:
+            exemption_map = {}
+
+        score = evaluation_result.get("overall_score", 1.0)
+
+        if score >= SCORE_THRESHOLD:
+            return {
+                "status": "pass",
+                "consecutive_fail_count": 0,
+                "exemption_map": exemption_map,
+            }
+
+        new_fail_count = consecutive_fail_count + 1
+
+        if new_fail_count >= FAIL_THRESHOLD:
+            # 构造三选升级对话
+            item_summaries = [
+                {
+                    "item_id": p.item_id,
+                    "summary": f"{p.applied_constraint_id}: {p.rationale[:30]}",
+                }
+                for p in contract.preserve_list
+            ]
+            failed_dimensions = [
+                dim
+                for dim, score_val in evaluation_result.get("dimensions", {}).items()
+                if score_val < SCORE_THRESHOLD
+            ]
+            display_text = format_stage6_three_choice(
+                item_summaries=item_summaries,
+                failed_dimensions=failed_dimensions,
+                consecutive_fail_count=new_fail_count,
+            )
+            return {
+                "status": "escalation",
+                "consecutive_fail_count": new_fail_count,
+                "display_text": display_text,
+                "exemption_map": exemption_map,
+            }
+
+        return {
+            "status": "fail",
+            "consecutive_fail_count": new_fail_count,
+            "exemption_map": exemption_map,
+        }
+
+    def run_stage7_force_pass(
+        self,
+        contract: "CreativeContract",
+        chapter_ref: str,
+        reason: str,
+    ) -> Dict[str, Any]:
+        """Stage 7 推翻事件回流（author_force_pass）。
+
+        作者选择强制通过时：
+          1. 向 memory_points_v1 写入推翻记忆点（polarity="+", retrieval_weight=2.0）
+          2. 通知 AuditTrigger，累计 10 次时产生推翻审计报告
+
+        调用约定
+        --------
+        result = workflow.run_stage7_force_pass(contract, chapter_ref, reason)
+        # result["status"] == "overturn_recorded"
+        # result["memory_point_id"] → 新写入的记忆点 ID
+        # result["audit_report"]    → 审计报告文本（None 表示未到阈值）
+        """
+        from core.inspiration.memory_point_sync import MemoryPointSync
+        from core.inspiration.audit_trigger import AuditTrigger
+
+        # 写入推翻记忆点
+        payload = {
+            "mp_id": None,          # create() 内部赋值
+            "chapter_ref": chapter_ref,
+            "contract_id": contract.contract_id,
+            "segment_text": f"[force_pass] {chapter_ref}: {reason}",
+            "polarity": "+",        # 作者认可的结果，存为正样本
+            "resonance_type": "force_pass",
+            "intensity": 2.0,       # Q3 明确：不回流权重字段，retrieval_weight 放在 intensity
+            "scene_type": "general",
+        }
+
+        try:
+            mp_sync = MemoryPointSync()
+            mp_id = mp_sync.create(payload=payload)
+        except Exception:
+            mp_id = "mp_offline_fallback"
+
+        # 触发推翻审计计数
+        audit_trigger = AuditTrigger()
+        audit_report = audit_trigger.record_overturn()
+
+        return {
+            "status": "overturn_recorded",
+            "memory_point_id": mp_id,
+            "audit_report": audit_report,
+        }
+
+    def run_stage8_experience_write(
+        self,
+        chapter_ref: str,
+        contract: "CreativeContract",
+        evaluation_result: Dict[str, Any],
+    ) -> Dict[str, Any]:
+        """Stage 8 经验写入 — 把本章创意契约采纳结果写入章节经验日志。
+
+        在现有 write_chapter_log() 基础上，额外补充：
+          - techniques_used: 从 contract.preserve_list 提取采纳的约束 ID + rationale
+          - what_worked / what_didnt_work: 来自 evaluation_result
+
+        调用约定
+        --------
+        result = workflow.run_stage8_experience_write(chapter_ref, contract, eval_result)
+        # result["status"] == "experience_written"
+        # result["log_path"]  → 写入的 log.json 路径字符串
+        """
+        import json as _json
+        import re
+        from datetime import datetime, timezone, timedelta
+        from pathlib import Path as _Path
+
+        SHANGHAI_TZ = timezone(timedelta(hours=8))
+
+        # 从契约提取 techniques_used
+        techniques_used: list = []
+        if not contract.skipped_by_author:
+            for item in contract.preserve_list:
+                techniques_used.append({
+                    "constraint_id": item.applied_constraint_id,
+                    "rationale": item.rationale,
+                    "item_id": item.item_id,
+                    "scope_paragraph": item.scope.paragraph_index,
+                })
+
+        log_entry = {
+            "chapter_ref": chapter_ref,
+            "contract_id": contract.contract_id,
+            "skipped_by_author": contract.skipped_by_author,
+            "techniques_used": techniques_used,
+            "overall_score": evaluation_result.get("overall_score"),
+            "dimensions": evaluation_result.get("dimensions", {}),
+            "what_worked": evaluation_result.get("what_worked", []),
+            "what_didnt_work": evaluation_result.get("what_didnt_work", []),
+            "created_at": datetime.now(SHANGHAI_TZ).isoformat(),
+        }
+
+        # 写入章节经验日志目录（沿用现有 write_chapter_log 的目录约定）
+        log_dir = PROJECT_DIR / "章节经验日志"
+        log_dir.mkdir(parents=True, exist_ok=True)
+
+        safe_ref = re.sub(r"[^\w\u4e00-\u9fff]", "_", chapter_ref)
+        timestamp = datetime.now(SHANGHAI_TZ).strftime("%Y%m%d_%H%M%S")
+        log_file = log_dir / f"{safe_ref}_v2_{timestamp}.json"
+
+        log_file.write_text(
+            _json.dumps(log_entry, ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
+
+        return {
+            "status": "experience_written",
+            "log_path": str(log_file),
+        }
+
 # ============================================================
 # 独立函数（可独立调用）
 # ============================================================

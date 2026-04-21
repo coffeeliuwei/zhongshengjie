@@ -26,14 +26,15 @@ try:
 except ImportError:
     QdrantClient = None
 
-# 配置导入
+# [N14 2026-04-18] 改为 core 包内的 config_loader
 try:
     import sys
 
-    sys.path.insert(0, str(Path(__file__).parent.parent.parent / ".vectorstore"))
-    from config_loader import get_project_root, get_qdrant_url
+    _project_root = Path(__file__).parent.parent.parent
+    if str(_project_root) not in sys.path:
+        sys.path.insert(0, str(_project_root))
+    from core.config_loader import get_project_root, get_qdrant_url
 except ImportError:
-    # 兼容独立运行场景
     def get_project_root():
         return Path.cwd()
 

@@ -160,8 +160,12 @@ __pycache__/
 *.so
 .Python
 build/
+
+# Cython 编译产物（M6 闭源分发）
+*.pyd
+*.c
+
 develop-eggs/
-dist/
 downloads/
 eggs/
 .eggs/
@@ -236,3 +240,9 @@ coverage.xml
 archived/
 .archived/
 存档/
+
+# 运行时状态（不入库）
+.workflow_states/
+
+# skill 备份目录（大型快照，不入库）
+docs/m7_artifacts/skill_backup_*/

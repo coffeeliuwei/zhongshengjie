@@ -10,20 +10,11 @@ from pathlib import Path
 from typing import Dict, List, Any, Optional
 
 # 从配置加载器导入路径获取函数
-import sys
-from pathlib import Path
-
-_project_root = Path(__file__).resolve().parent.parent
-import sys as _sys  # alias to avoid shadowing
-
-if (
-    str(_project_root) not in _sys.modules
-    and str(_project_root) not in __import__("sys").path
-):
-    __import__("sys").path.insert(0, str(_project_root))
-
+# [N8 2026-04-18] 修复：原 sys.path 计算 .parent.parent 指到 modules/ 而非项目根，
+# 且 config_loader 在 core/ 下而非项目根；改用与 __init__.py:25、
+# hybrid_search_manager.py:21 一致的 `from core.config_loader import (...)`。
 try:
-    from config_loader import (
+    from core.config_loader import (
         get_project_root,
         get_qdrant_url,
         get_vectorstore_dir,
@@ -79,9 +70,12 @@ class SyncManager:
     """
 
     # 集合名称常量
-    NOVEL_COLLECTION = "novel_settings"
-    TECHNIQUE_COLLECTION = "writing_techniques"
-    CASE_COLLECTION = "case_library"
+    # [N11 2026-04-18] 三集合统一加 _v2 后缀，与 core/config_loader.py 中
+    # qdrant.collections 配置完全对齐；修复前 CLI `kb --stats` 显示 0/0/0
+    # 因为查的是无 _v2 的旧集合名（Qdrant 中不存在）
+    NOVEL_COLLECTION = "novel_settings_v2"
+    TECHNIQUE_COLLECTION = "writing_techniques_v2"
+    CASE_COLLECTION = "case_library_v2"
 
     # 向量维度
     VECTOR_SIZE = 1024  # BGE-M3 dense 向量维度
@@ -469,122 +463,56 @@ class SyncManager:
         return len(points)
 
     def sync_cases(self, rebuild: bool = False) -> int:
-        """
-        同步案例库
+        """[M3-β] 薄壳：委托给 .case-library/scripts/sync_to_qdrant.py 的 QdrantSyncer
+
+        反转方向说明：
+        - sync_to_qdrant.py 是 case_library_v2 (256k 点) 的生产级实现
+          含断点续传、uuid5 确定性 ID、11 字段 payload、rglob 递归发现
+        - 本方法原始实现是早期未成熟版本（无 resume、自增 ID、payload 字段缺失）
+        - 用户决议（2026-04-18 方案 A）：保留 sync_to_qdrant 全部逻辑，
+          本方法改为通过 importlib 加载并委托
 
         Args:
-            rebuild: 是否重建数据库
-
+            rebuild: True 时先删除集合再全量同步；False 时启用断点续传
         Returns:
-            同步数量
+            成功同步的案例数量
         """
-        print("\n[同步案例库]")
+        import importlib.util
 
-        client = self._get_client()
-        model = self._load_model()
-
-        cases_dir = self.case_library_dir / "cases"
-        if not cases_dir.exists():
-            print(f"  [错误] 案例目录不存在: {cases_dir}")
+        script_path = (
+            self.project_dir / ".case-library" / "scripts" / "sync_to_qdrant.py"
+        )
+        if not script_path.exists():
+            print(f"  [错误] sync_to_qdrant.py 不存在: {script_path}")
             return 0
 
-        # 重建集合
+        # rebuild=True 语义：删除集合后重新同步
         if rebuild:
-            collections = [c.name for c in client.get_collections().collections]
-            if self.CASE_COLLECTION in collections:
-                print(f"  [删除] 旧集合 {self.CASE_COLLECTION}")
-                client.delete_collection(collection_name=self.CASE_COLLECTION)
+            try:
+                client = self._get_client()
+                collections = [
+                    c.name for c in client.get_collections().collections
+                ]
+                if self.CASE_COLLECTION in collections:
+                    print(f"  [M3-β rebuild] 删除旧集合 {self.CASE_COLLECTION}")
+                    client.delete_collection(collection_name=self.CASE_COLLECTION)
+            except Exception as e:
+                print(f"  [警告] rebuild 删除集合失败（继续尝试同步）: {e}")
 
-        # 创建集合
-        client.create_collection(
-            collection_name=self.CASE_COLLECTION,
-            vectors_config=VectorParams(
-                size=self.VECTOR_SIZE, distance=Distance.COSINE
-            ),
+        # 显式按文件路径加载，避免与 .novel-extractor/sync_to_qdrant.py 模块名冲突
+        spec = importlib.util.spec_from_file_location(
+            "_case_lib_sync_to_qdrant", str(script_path)
         )
-
-        # 收集所有案例
-        all_cases = []
-        for scene_dir in cases_dir.iterdir():
-            if not scene_dir.is_dir():
-                continue
-
-            scene_type = scene_dir.name
-            for json_file in scene_dir.glob("*.json"):
-                try:
-                    with open(json_file, "r", encoding="utf-8") as f:
-                        case_data = json.load(f)
-
-                    filename = json_file.stem
-                    parts = filename.split("_")
-
-                    if len(parts) >= 3:
-                        genre = parts[1]
-                        novel_name = "_".join(parts[2:])
-                    else:
-                        genre = case_data.get("genre", "未知")
-                        novel_name = case_data.get("novel_name", "未知")
-
-                    case_data["scene_type"] = case_data.get("scene_type", scene_type)
-                    case_data["genre"] = case_data.get("genre", genre)
-                    case_data["novel_name"] = case_data.get("novel_name", novel_name)
-
-                    all_cases.append(case_data)
-                except Exception:
-                    pass
-
-        print(f"  发现 {len(all_cases)} 个案例")
-
-        # 过滤有效内容
-        valid_cases = [c for c in all_cases if len(c.get("content", "")) >= 50]
-        print(f"  有效案例: {len(valid_cases)} 个")
-
-        if not valid_cases:
+        if spec is None or spec.loader is None:
+            print(f"  [错误] 无法加载 sync_to_qdrant.py: {script_path}")
             return 0
 
-        # 批量提取文本和嵌入（BGE-M3）
-        texts = [c.get("content", "")[:1000] for c in valid_cases]
-        print("  [生成] 正在批量生成嵌入向量...")
-        _output = model.encode(
-            texts,
-            batch_size=32,
-            max_length=512,
-            return_dense=True,
-            return_sparse=False,
-            return_colbert_vecs=False,
-        )
-        vectors = _output["dense_vecs"]
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
 
-        # 创建点并上传
-        points = []
-        for i, (case, vector) in enumerate(zip(valid_cases, vectors)):
-            content = case.get("content", "")
-            point = PointStruct(
-                id=i,
-                vector=vector.tolist(),
-                payload={
-                    "novel_name": case.get("novel_name", "未知"),
-                    "scene_type": case.get("scene_type", "未知"),
-                    "genre": case.get("genre", "未知"),
-                    "quality_score": case.get(
-                        "quality_score", case.get("confidence", 0) * 10
-                    ),
-                    "word_count": case.get("word_count", len(content)),
-                    "content": content[:2000],
-                    "cross_genre_value": case.get("cross_genre_value", ""),
-                },
-            )
-            points.append(point)
-
-        # 批量上传
-        batch_size = 100
-        for j in range(0, len(points), batch_size):
-            batch = points[j : j + batch_size]
-            client.upsert(collection_name=self.CASE_COLLECTION, points=batch)
-            print(f"    上传: {min(j + batch_size, len(points))}/{len(points)}")
-
-        print(f"  [完成] 已同步 {len(points)} 条案例")
-        return len(points)
+        syncer = module.QdrantSyncer(use_docker=self.use_docker)
+        result = syncer.sync(resume=not rebuild)
+        return int(result.get("synced", 0))
 
     def _extract_technique_sections(self, content: str) -> List[Dict[str, str]]:
         """

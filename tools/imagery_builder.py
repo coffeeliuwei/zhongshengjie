@@ -20,8 +20,9 @@ from typing import Dict, List, Any, Optional
 
 # 添加路径
 PROJECT_ROOT = Path(__file__).parent.parent
-VECTORSTORE_CORE = PROJECT_ROOT / ".vectorstore" / "core"
-sys.path.insert(0, str(VECTORSTORE_CORE))
+# [N15 2026-04-18] 删除 .vectorstore/core sys.path 注入（已归档），改用 core 包
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
 # Windows编码修复
 if sys.platform == "win32":

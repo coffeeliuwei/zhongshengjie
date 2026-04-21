@@ -61,10 +61,8 @@ except ImportError:
 # 从配置加载路径
 if HAS_CONFIG_LOADER:
     sys.path.insert(0, str(get_novel_extractor_dir()))
-    sys.path.insert(0, str(get_vectorstore_dir() / "core"))
 else:
     sys.path.insert(0, str(PROJECT_ROOT / ".novel-extractor"))
-    sys.path.insert(0, str(PROJECT_ROOT / ".vectorstore" / "core"))
 
 try:
     from unified_config import (
