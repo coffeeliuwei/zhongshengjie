@@ -277,3 +277,93 @@ def test_stage8_experience_write_skipped_contract(tmp_path):
     log_path = Path(result["log_path"])
     data = _json.loads(log_path.read_text(encoding="utf-8"))
     assert data["techniques_used"] == []
+
+
+# ── ExperienceWriter 向量同步 ────────────────────────────
+
+def test_experience_writer_vector_sync_called_when_scenes_provided(tmp_path):
+    """write_chapter_experience 在 experience 含 scenes 时触发向量同步。"""
+    from unittest.mock import patch, MagicMock
+    from core.feedback.experience_writer import ExperienceWriter
+
+    writer = ExperienceWriter(log_dir=str(tmp_path))
+    mock_sync_result = {"success": 2, "failed": 0}
+
+    with patch(
+        "core.conversation.file_updater.FileUpdater.write_scenes_to_case_library",
+        return_value=mock_sync_result,
+    ) as mock_write:
+        result = writer.write_chapter_experience(
+            chapter=3,
+            experience={
+                "chapter": "第3章",
+                "chapter_name": "第三章",
+                "novel_name": "众生界",
+                "scene_types": ["战斗"],
+                "what_worked": [{"content": "测试成功", "scene_type": "战斗"}],
+                "what_didnt_work": [{"content": "测试失败", "scene_type": "战斗"}],
+                "for_next_chapter": ["建议"],
+                "techniques_used": [],
+                "scenes": [
+                    {
+                        "scene_type": "战斗",
+                        "content": "测试场景内容",
+                        "techniques_used": ["ANTI_001"],
+                        "quality_score": 0.8,
+                    }
+                ],
+            },
+        )
+
+    mock_write.assert_called_once()
+    assert result["vector_sync"]["success"] == 2
+
+
+def test_experience_writer_vector_sync_skipped_when_no_scenes(tmp_path):
+    """write_chapter_experience 在 experience 无 scenes 时跳过向量同步。"""
+    from core.feedback.experience_writer import ExperienceWriter
+
+    writer = ExperienceWriter(log_dir=str(tmp_path))
+    result = writer.write_chapter_experience(
+        chapter=3,
+        experience={
+            "chapter": "第3章",
+            "scene_types": ["战斗"],
+            "what_worked": [{"content": "测试成功", "scene_type": "战斗"}],
+            "what_didnt_work": [{"content": "测试失败", "scene_type": "战斗"}],
+            "for_next_chapter": ["建议"],
+        },
+    )
+
+    assert "vector_sync" in result
+    assert result["vector_sync"].get("skipped") is not None
+
+
+def test_experience_writer_vector_sync_silent_on_error(tmp_path):
+    """write_scenes_to_case_library 抛异常时，write_chapter_experience 不崩溃。"""
+    from unittest.mock import patch
+    from core.feedback.experience_writer import ExperienceWriter
+
+    writer = ExperienceWriter(log_dir=str(tmp_path))
+
+    with patch(
+        "core.conversation.file_updater.FileUpdater.write_scenes_to_case_library",
+        side_effect=RuntimeError("Qdrant 连接失败"),
+    ):
+        result = writer.write_chapter_experience(
+            chapter=3,
+            experience={
+                "chapter": "第3章",
+                "chapter_name": "第三章",
+                "novel_name": "众生界",
+                "scene_types": ["战斗"],
+                "what_worked": [{"content": "测试成功", "scene_type": "战斗"}],
+                "what_didnt_work": [{"content": "测试失败", "scene_type": "战斗"}],
+                "for_next_chapter": ["建议"],
+                "techniques_used": [],
+                "scenes": [{"scene_type": "战斗", "content": "x", "techniques_used": [], "quality_score": 0.7}],
+            },
+        )
+
+    # 不应抛出，error 字段应存在
+    assert "error" in result["vector_sync"]

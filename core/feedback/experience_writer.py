@@ -152,10 +152,29 @@ class ExperienceWriter:
             success = False
             print(f"写入经验日志失败: {e}")
 
+        # ── 阶段8向量同步：写入 novel_chapters_v1 ──────────────────
+        try:
+            from core.conversation.file_updater import FileUpdater
+            scenes = experience.get("scenes", [])
+            if scenes:
+                fu = FileUpdater()
+                chapter_name = experience.get("chapter_name", f"第{chapter}章")
+                novel_name = experience.get("novel_name", "众生界")
+                sync_result = fu.write_scenes_to_case_library(
+                    chapter_name=chapter_name,
+                    scenes=scenes,
+                    novel_name=novel_name,
+                )
+            else:
+                sync_result = {"success": 0, "failed": 0, "skipped": "no scenes provided"}
+        except Exception as _e:
+            sync_result = {"success": 0, "failed": 0, "error": str(_e)}
+
         return {
             "success": success,
             "log_file": str(log_file),
             "experience_data": experience_data,
+            "vector_sync": sync_result,
         }
 
     def _extract_what_worked(self, experience: Dict) -> List[Dict[str, Any]]:
