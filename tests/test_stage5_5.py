@@ -244,3 +244,48 @@ def test_list_recent_empty_collection():
 
 # 注：NovelWorkflow.run_stage5_5_negotiation() 集成测试需在 .vectorstore 包内单独运行
 # 核心逻辑已通过以上 13 个单元测试验证
+
+
+# ── build_stage5_5_prompt_with_real_data ────────────────
+
+def test_build_real_data_prompt_returns_correct_shape():
+    """集成函数在无 Qdrant 的情况下也能返回正确格式（MemoryPointSync 失败时回退空列表）。"""
+    from core.inspiration.stage5_5 import build_stage5_5_prompt_with_real_data
+    # ConstraintLibrary 会读真实 config；在测试环境 constraints JSON 可能为空，但不应抛出
+    try:
+        spec = build_stage5_5_prompt_with_real_data(
+            chapter_text="测试章节文本",
+            chapter_ref="第X章",
+            scene_type=None,
+        )
+    except Exception as e:
+        # 如果 config 路径不存在，ConstraintLibrary 会返回空库而非抛出，应到不了这里
+        raise AssertionError(f"不应抛出异常: {e}")
+
+    assert spec["skill_name"] == "novelist-connoisseur"
+    assert isinstance(spec["prompt"], str)
+    assert "第X章" in spec["prompt"]
+    assert "测试章节文本" in spec["prompt"]
+
+
+def test_build_real_data_prompt_contains_menu_header():
+    """集成函数产出的 prompt 必须含约束库菜单头部标识。"""
+    from core.inspiration.stage5_5 import build_stage5_5_prompt_with_real_data
+    spec = build_stage5_5_prompt_with_real_data(
+        chapter_text="文本",
+        chapter_ref="第1章",
+    )
+    assert "反模板约束库菜单" in spec["prompt"]
+
+
+def test_build_real_data_prompt_no_menu_items_still_works():
+    """菜单为空时（约束库为空），prompt 中应出现 '(约束库为空)' 标记而非崩溃。"""
+    from unittest.mock import patch
+    from core.inspiration.stage5_5 import build_stage5_5_prompt_with_real_data
+    with patch("core.inspiration.constraint_library.ConstraintLibrary.as_menu", return_value=[]):
+        spec = build_stage5_5_prompt_with_real_data(
+            chapter_text="文本",
+            chapter_ref="第1章",
+        )
+    assert spec["skill_name"] == "novelist-connoisseur"
+    assert "(约束库为空)" in spec["prompt"]

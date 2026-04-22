@@ -34,6 +34,7 @@ __all__ = [
     "ConnoisseurSuggestion",
     "ConnoisseurResponse",
     "build_connoisseur_prompt",
+    "build_stage5_5_prompt_with_real_data",
     "parse_connoisseur_response",
     "suggestions_to_preserve_candidates",
     "build_creative_contract",
@@ -263,3 +264,48 @@ def build_creative_contract(
     )
     contract.validate()
     return contract
+
+
+def build_stage5_5_prompt_with_real_data(
+    chapter_text: str,
+    chapter_ref: str,
+    scene_type: Optional[str] = None,
+    positive_top_k: int = 5,
+    negative_top_k: int = 5,
+) -> Dict[str, Any]:
+    """build_connoisseur_prompt 的集成入口：自动从 ConstraintLibrary 和 MemoryPointSync 加载真实数据。
+
+    解决 as_menu() 未接入问题：直接调用此函数即可获得含完整约束菜单的 prompt 规格，
+    无需调用方手动获取 menu_items / positive_samples / negative_samples。
+
+    Args:
+        chapter_text:    云溪整章润色完成的完整章节文本
+        chapter_ref:     章节标识，例 "第3章"
+        scene_type:      场景类型过滤（None = 返回全部活跃约束）
+        positive_top_k:  正样本检索数量
+        negative_top_k:  负样本检索数量
+
+    Returns:
+        {"skill_name": "novelist-connoisseur", "prompt": str}
+        与 build_connoisseur_prompt() 返回格式完全一致。
+    """
+    from core.inspiration.constraint_library import ConstraintLibrary
+    from core.inspiration.memory_point_sync import MemoryPointSync
+
+    menu_items = ConstraintLibrary().as_menu(scene_type=scene_type)
+
+    try:
+        sync = MemoryPointSync()
+        positive_samples = sync.list_recent("+", top_k=positive_top_k)
+        negative_samples = sync.list_recent("-", top_k=negative_top_k)
+    except Exception:
+        positive_samples = []
+        negative_samples = []
+
+    return build_connoisseur_prompt(
+        chapter_text=chapter_text,
+        chapter_ref=chapter_ref,
+        menu_items=menu_items,
+        positive_samples=positive_samples,
+        negative_samples=negative_samples,
+    )
