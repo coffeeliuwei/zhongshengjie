@@ -171,33 +171,20 @@ opencode config set anthropic-api-key [我提供的 API Key]
 
 ---
 
-## 阶段 6.5：安装 opencode 插件（superpowers + oh-my-opencode）
+## 阶段 6.5：安装 opencode 插件（superpowers + oh-my-openagent）
 
 这两个插件让 opencode 具备技能调用能力和增强配置，众生界系统依赖它们运行。
 
-执行以下命令安装：
+请分析以下两个 GitHub 仓库的 README，找到各自的安装方法，然后依次完成安装：
 
-```
-opencode plugin install superpowers
-opencode plugin install oh-my-opencode
-```
+- https://github.com/obra/superpowers
+- https://github.com/code-yeongyu/oh-my-openagent
 
-验证安装：
-```
-opencode plugin list
-```
+安装完成后验证：确认两个插件都已正常加载。
 
-看到 superpowers 和 oh-my-opencode 都在列表中 → 成功。
+安装过程中遇到任何报错，就地分析原因并修复，不要跳过。
 
-如果 `opencode plugin install` 命令不存在，尝试 npm 方式安装：
-```
-cd [opencode 安装目录]
-npm install superpowers oh-my-opencode
-```
-
-安装失败时告诉我报错内容，就地分析解决。
-
-⚠️ 重要：插件安装后 .opencode/ 目录里会出现 package.json 等文件，这是正常现象，不要管它，也不要手动创建或修改 opencode.json 文件，否则会报错。
+⚠️ 重要：安装后 .opencode/ 目录里会出现 package.json 等文件，这是正常现象，不要管它，也不要手动创建或修改 opencode.json 文件，否则会报错。
 
 ---
 
