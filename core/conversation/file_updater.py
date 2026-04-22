@@ -857,6 +857,64 @@ class FileUpdater:
         except Exception:
             pass
 
+    # ===== 案例库回流：阶段8触发 =====
+
+    def write_scenes_to_case_library(
+        self,
+        chapter_name: str,
+        scenes: List[Dict[str, Any]],
+        novel_name: str = "众生界",
+    ) -> Dict[str, Any]:
+        """
+        将本章场景写入本书案例库，供后续章节一致性检索。
+        在阶段8（经验写入）完成后调用。
+
+        Args:
+            chapter_name: 章节名（如"第二章"）
+            scenes: 场景列表，格式：
+                [{scene_type, content, techniques_used, quality_score}, ...]
+            novel_name: 小说名
+
+        Returns:
+            {"success": int, "failed": int} 写入结果统计
+        """
+        from modules.knowledge_base.search_manager import SearchManager
+
+        sm = SearchManager()
+        success_count = 0
+        failed_count = 0
+
+        for i, scene in enumerate(scenes):
+            try:
+                result = sm.write_own_chapter_scene(
+                    chapter_name=chapter_name,
+                    scene_index=i,
+                    scene_type=scene.get("scene_type", "未知"),
+                    content=scene.get("content", ""),
+                    techniques_used=scene.get("techniques_used", []),
+                    quality_score=scene.get("quality_score", 0.7),
+                    novel_name=novel_name,
+                )
+                if result:
+                    success_count += 1
+                else:
+                    failed_count += 1
+            except Exception:
+                failed_count += 1
+
+        # 记录日志
+        self._log_vectorstore_update(
+            "novel_chapters_v1",
+            {
+                "chapter_name": chapter_name,
+                "scene_count": len(scenes),
+                "success": success_count,
+                "failed": failed_count,
+            },
+        )
+
+        return {"success": success_count, "failed": failed_count}
+
 
 # 测试代码
 if __name__ == "__main__":
