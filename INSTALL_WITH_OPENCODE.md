@@ -197,6 +197,8 @@ npm install superpowers oh-my-opencode
 
 安装失败时告诉我报错内容，就地分析解决。
 
+⚠️ 重要：插件安装后 .opencode/ 目录里会出现 package.json 等文件，这是正常现象，不要管它，也不要手动创建或修改 opencode.json 文件，否则会报错。
+
 ---
 
 ## 阶段 7：安装技能包（Skills）

@@ -124,7 +124,10 @@ docs/写手工作流启动手册_*.md
 
 .state/
 .opencode/node_modules/
+.opencode/package.json
 .opencode/package-lock.json
+.opencode/bun.lock
+.opencode/opencode.json
 .seren/
 .seren/
 .agents/
