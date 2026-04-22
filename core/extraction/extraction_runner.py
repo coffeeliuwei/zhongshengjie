@@ -28,7 +28,17 @@ class ExtractionRunner:
             return False
         try:
             pid = int(self.pid_file.read_text().strip())
-            os.kill(pid, 0)
+            # os.kill(pid, 0) on Windows sends CTRL_C_EVENT instead of checking
+            # existence, causing KeyboardInterrupt when pid == os.getpid().
+            # Use OpenProcess (Windows) or signal 0 (Unix) instead.
+            if sys.platform == "win32":
+                import ctypes
+                handle = ctypes.windll.kernel32.OpenProcess(0x0400, False, pid)
+                if handle == 0:
+                    raise OSError("process not found")
+                ctypes.windll.kernel32.CloseHandle(handle)
+            else:
+                os.kill(pid, 0)
             return True
         except (OSError, ValueError):
             try:

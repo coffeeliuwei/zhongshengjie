@@ -41,6 +41,7 @@ class SearchManager:
     NOVEL_COLLECTION = "novel_settings_v2"
     TECHNIQUE_COLLECTION = "writing_techniques_v2"
     CASE_COLLECTION = "case_library_v2"
+    OWN_CHAPTERS_COLLECTION = "novel_chapters_v1"  # 本书已写章节集合
 
     # 向量维度
     VECTOR_SIZE = 1024  # BGE-M3 dense 向量维度
@@ -530,3 +531,293 @@ class SearchManager:
             return info.points_count
         except Exception:
             return 0
+
+    # ==================== 案例库三条新链路 ====================
+
+    def search_case_quality_anchor(
+        self,
+        scene_type: str,
+        emotional_tone: Optional[str] = None,
+        top_k: int = 3,
+        min_quality: float = 7.0,
+    ) -> List[Dict[str, Any]]:
+        """
+        检索质量锚点：同场景类型中 quality_score 最高的案例。
+        用于在写手动笔前设定质量目标，而非作为"参考"附在末尾。
+
+        Args:
+            scene_type: 场景类型（如"战斗"、"情感"、"开篇"）
+            emotional_tone: 情绪基调过滤（可选，如"压抑"、"激烈"）
+            top_k: 返回数量
+            min_quality: 最低质量分（0-10，默认7.0）
+
+        Returns:
+            按 quality_score 降序排列的案例列表
+        """
+        try:
+            client = self._get_client()
+        except Exception:
+            return []
+
+        filter_conditions = [
+            models.FieldCondition(
+                key="scene_type",
+                match=models.MatchValue(value=scene_type),
+            ),
+            models.FieldCondition(
+                key="quality_score",
+                range=models.Range(gte=min_quality),
+            ),
+        ]
+        if emotional_tone:
+            filter_conditions.append(
+                models.FieldCondition(
+                    key="emotional_tone",
+                    match=models.MatchValue(value=emotional_tone),
+                )
+            )
+
+        try:
+            results = client.scroll(
+                collection_name=self.CASE_COLLECTION,
+                scroll_filter=models.Filter(must=filter_conditions),
+                limit=top_k * 3,
+                with_payload=True,
+                with_vectors=False,
+            )
+            points = results[0]
+        except Exception:
+            return []
+
+        # 按 quality_score 降序排列，取 top_k
+        points_sorted = sorted(
+            points,
+            key=lambda p: p.payload.get("quality_score", 0),
+            reverse=True,
+        )[:top_k]
+
+        return [
+            {
+                "id": p.id,
+                "novel_name": p.payload.get("novel_name", "未知"),
+                "scene_type": p.payload.get("scene_type", "未知"),
+                "quality_score": p.payload.get("quality_score", 0),
+                "word_count": p.payload.get("word_count", 0),
+                "content": p.payload.get("content", ""),
+                "cross_genre_value": p.payload.get("cross_genre_value", ""),
+            }
+            for p in points_sorted
+        ]
+
+    def search_case_technique_instance(
+        self,
+        constraint_text: str,
+        scene_type: Optional[str] = None,
+        top_k: int = 2,
+        min_score: float = 0.55,
+    ) -> List[Dict[str, Any]]:
+        """
+        技法实例检索：以约束条文为查询，语义匹配案例库中的技法应用示例。
+        把"从败者视角写战斗"这样的抽象规则，变成一段真实的中文prose。
+
+        Args:
+            constraint_text: ANTI_XXX 的 constraint_text 字段原文
+            scene_type: 场景类型过滤（可选，提高相关性）
+            top_k: 返回数量（建议2，太多会稀释注意力）
+            min_score: 最低语义相似度
+
+        Returns:
+            技法示例案例列表
+        """
+        try:
+            client = self._get_client()
+            query_vector = self._get_embedding(constraint_text)
+        except Exception:
+            return []
+
+        filter_conditions = []
+        if scene_type:
+            filter_conditions.append(
+                models.FieldCondition(
+                    key="scene_type",
+                    match=models.MatchValue(value=scene_type),
+                )
+            )
+
+        query_filter = (
+            models.Filter(must=filter_conditions) if filter_conditions else None
+        )
+
+        try:
+            results = client.query_points(
+                collection_name=self.CASE_COLLECTION,
+                query=query_vector,
+                query_filter=query_filter,
+                limit=top_k,
+                score_threshold=min_score,
+                with_payload=True,
+            )
+        except Exception:
+            return []
+
+        return [
+            {
+                "id": p.id,
+                "novel_name": p.payload.get("novel_name", "未知"),
+                "scene_type": p.payload.get("scene_type", "未知"),
+                "quality_score": p.payload.get("quality_score", 0),
+                "content": p.payload.get("content", ""),
+                "score": p.score,
+            }
+            for p in results.points
+        ]
+
+    # ==================== 本书已写章节回流 ====================
+
+    def ensure_own_chapters_collection(self) -> None:
+        """确保本书章节集合存在，不存在则自动创建"""
+        client = self._get_client()
+        existing = [c.name for c in client.get_collections().collections]
+        if self.OWN_CHAPTERS_COLLECTION not in existing:
+            client.create_collection(
+                collection_name=self.OWN_CHAPTERS_COLLECTION,
+                vectors_config=models.VectorParams(
+                    size=self.VECTOR_SIZE,
+                    distance=models.Distance.COSINE,
+                ),
+            )
+
+    def write_own_chapter_scene(
+        self,
+        chapter_name: str,
+        scene_index: int,
+        scene_type: str,
+        content: str,
+        techniques_used: List[str],
+        quality_score: float,
+        novel_name: str = "众生界",
+    ) -> bool:
+        """
+        将已完成场景写入本书章节集合，供后续章节做一致性检索和技法去重。
+        在阶段8（经验写入）完成后调用。
+
+        Args:
+            chapter_name: 章节名（如"第二章"）
+            scene_index: 场景序号（0-based）
+            scene_type: 场景类型
+            content: 场景正文
+            techniques_used: 本场景使用的技法ID列表（如["ANTI_001","ANTI_015"]）
+            quality_score: 评估师打分（0-1，乘10存储）
+            novel_name: 小说名
+
+        Returns:
+            True 表示写入成功
+        """
+        try:
+            self.ensure_own_chapters_collection()
+            client = self._get_client()
+
+            import uuid
+            point_id = str(uuid.uuid4())
+            vector = self._get_embedding(content[:500])  # 取前500字做向量
+
+            client.upsert(
+                collection_name=self.OWN_CHAPTERS_COLLECTION,
+                points=[
+                    models.PointStruct(
+                        id=point_id,
+                        vector=vector,
+                        payload={
+                            "novel_name": novel_name,
+                            "chapter_name": chapter_name,
+                            "scene_index": scene_index,
+                            "scene_type": scene_type,
+                            "content": content,
+                            "techniques_used": techniques_used,
+                            "quality_score": quality_score * 10,
+                            "word_count": len(content),
+                        },
+                    )
+                ],
+            )
+            return True
+        except Exception:
+            return False
+
+    def search_own_chapters(
+        self,
+        scene_type: str,
+        novel_name: str = "众生界",
+        exclude_chapter: Optional[str] = None,
+        top_k: int = 3,
+        min_score: float = 0.5,
+    ) -> List[Dict[str, Any]]:
+        """
+        检索本书已写章节：用于风格一致性检查和技法去重。
+        在阶段2.5（经验检索）中与经验日志一同调用。
+
+        Args:
+            scene_type: 场景类型
+            novel_name: 小说名
+            exclude_chapter: 排除的章节名（通常是当前章节）
+            top_k: 返回数量
+            min_score: 最低相似度
+
+        Returns:
+            本书相同场景类型的已写场景列表，含 techniques_used
+        """
+        try:
+            client = self._get_client()
+            query_vector = self._get_embedding(scene_type)
+        except Exception:
+            return []
+
+        filter_conditions = [
+            models.FieldCondition(
+                key="novel_name",
+                match=models.MatchValue(value=novel_name),
+            ),
+            models.FieldCondition(
+                key="scene_type",
+                match=models.MatchValue(value=scene_type),
+            ),
+        ]
+
+        if exclude_chapter:
+            # exclude 用 must_not
+            include_conditions = filter_conditions
+            exclude_condition = models.FieldCondition(
+                key="chapter_name",
+                match=models.MatchValue(value=exclude_chapter),
+            )
+            query_filter = models.Filter(
+                must=include_conditions,
+                must_not=[exclude_condition],
+            )
+        else:
+            query_filter = models.Filter(must=filter_conditions)
+
+        try:
+            results = client.query_points(
+                collection_name=self.OWN_CHAPTERS_COLLECTION,
+                query=query_vector,
+                query_filter=query_filter,
+                limit=top_k,
+                score_threshold=min_score,
+                with_payload=True,
+            )
+        except Exception:
+            return []
+
+        return [
+            {
+                "chapter_name": p.payload.get("chapter_name", ""),
+                "scene_index": p.payload.get("scene_index", 0),
+                "scene_type": p.payload.get("scene_type", ""),
+                "techniques_used": p.payload.get("techniques_used", []),
+                "quality_score": p.payload.get("quality_score", 0),
+                "content_preview": p.payload.get("content", "")[:200],
+                "score": p.score,
+            }
+            for p in results.points
+        ]
