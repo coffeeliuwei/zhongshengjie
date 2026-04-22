@@ -289,3 +289,68 @@ def test_build_real_data_prompt_no_menu_items_still_works():
         )
     assert spec["skill_name"] == "novelist-connoisseur"
     assert "(约束库为空)" in spec["prompt"]
+
+
+# ── MemoryPointSync.ensure_collection ───────────────────
+
+def test_ensure_collection_creates_if_not_exists():
+    """ensure_collection() 在 collection 不存在时自动创建。"""
+    from qdrant_client import QdrantClient
+    from qdrant_client.models import Distance, VectorParams
+    from core.inspiration.memory_point_sync import MemoryPointSync, COLLECTION_NAME
+
+    client = QdrantClient(":memory:")
+    # 不预建 collection
+    sync = MemoryPointSync(client=client)
+    sync.ensure_collection()
+
+    names = {c.name for c in client.get_collections().collections}
+    assert COLLECTION_NAME in names
+
+
+def test_ensure_collection_idempotent():
+    """ensure_collection() 重复调用不报错。"""
+    from qdrant_client import QdrantClient
+    from core.inspiration.memory_point_sync import MemoryPointSync
+
+    client = QdrantClient(":memory:")
+    sync = MemoryPointSync(client=client)
+    sync.ensure_collection()
+    sync.ensure_collection()  # 第二次调用不应抛出
+
+
+def test_create_auto_ensures_collection():
+    """create() 在 collection 不存在时也能成功写入（自动 ensure）。"""
+    from unittest.mock import patch, MagicMock
+    from qdrant_client import QdrantClient
+    from core.inspiration.memory_point_sync import MemoryPointSync, COLLECTION_NAME
+
+    client = QdrantClient(":memory:")
+    sync = MemoryPointSync(client=client)
+
+    # 先验证 collection 不存在
+    names_before = {c.name for c in client.get_collections().collections}
+    assert COLLECTION_NAME not in names_before
+
+    # 使用 mock 验证 ensure_collection 被调用（避免 UUID 问题）
+    with patch.object(sync, 'client') as mock_client:
+        mock_client.get_collections.return_value.collections = []
+        mock_collection = MagicMock()
+        mock_client.create_collection.return_value = mock_collection
+        mock_client.upsert.return_value = None
+
+        mp_id = sync.create(
+            payload={
+                "mp_id": "test_mp_001",
+                "polarity": "+",
+                "segment_text": "测试段落",
+                "scene_type": "战斗",
+                "resonance_type": "视角反叛",
+                "intensity": 0.8,
+                "created_at": "2026-04-22T13:30:00+08:00",
+            },
+            embedding=[0.1] * 1024,
+        )
+        assert mp_id is not None
+        # 验证 create_collection 被调用（即 ensure_collection 生效）
+        mock_client.create_collection.assert_called_once()

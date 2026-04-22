@@ -27,6 +27,7 @@ except ImportError:
 
 
 COLLECTION_NAME = "memory_points_v1"
+_VECTOR_SIZE = 1024  # BGE-M3 向量维度
 
 
 class MemoryPointSync:
@@ -42,6 +43,23 @@ class MemoryPointSync:
         else:
             self.client = QdrantClient(url=get_qdrant_url())
 
+    def ensure_collection(self) -> None:
+        """确保 memory_points_v1 collection 存在，不存在则自动创建。
+
+        create() 在写入前自动调用此方法，无需外部手动初始化。
+        """
+        from qdrant_client.http.models import Distance, VectorParams
+
+        existing = {c.name for c in self.client.get_collections().collections}
+        if COLLECTION_NAME not in existing:
+            self.client.create_collection(
+                collection_name=COLLECTION_NAME,
+                vectors_config=VectorParams(
+                    size=_VECTOR_SIZE,
+                    distance=Distance.COSINE,
+                ),
+            )
+
     def create(
         self, payload: Dict[str, Any], embedding: Optional[List[float]] = None
     ) -> str:
@@ -55,6 +73,7 @@ class MemoryPointSync:
         Returns:
             生成的记忆点 ID
         """
+        self.ensure_collection()
         # 默认字段
         now = datetime.now(timezone.utc)
         mp_id = f"mp_{now.strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:6]}"
