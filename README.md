@@ -43,7 +43,8 @@
 基于AI的小说创作辅助系统，采用Anthropic Harness架构实现Generator/Evaluator分离的多Agent协作创作。
 
 **核心特性**：
-- 5位专业作家 + 1位审核评估师
+- 5位专业作家 + 1位鉴赏师 + 1位审核评估师
+- **灵感引擎（v2）**：鉴赏师三方协商 → 创意契约 → 派单写手重写 → 带豁免评估
 - **四层专家架构**：方法论层 → 统一API层 → 技法/案例库层 → 世界观适配层
 - **统一提炼引擎**：单一入口、11维度并行提取、数据回流闭环
 - 技法库/知识库/案例库向量检索（BGE-M3混合检索）
@@ -77,7 +78,7 @@
 
 ## 更新日志
 
-### v0.2.2 (开发中，v2-dev) - 案例库链路扩展 & 稳定性修复
+### v0.2.2 (开发中，master) - 案例库链路扩展 & 稳定性修复 & 灵感引擎修复
 
 **案例库检索扩展**：
 - ✨ `search_case_quality_anchor()`：按 quality_score 倒序检索，写前提供高质量目标锚点
@@ -91,7 +92,11 @@
 - 🔧 `anti_template_constraints.json`：ANTI_046/051/052/053 的 constraint_text 中 ASCII 双引号改为「」，修复 JSON 解析失败
 - 📖 实训指导书步骤 6 新增 Docker 镜像加速配置说明（解决国内拉取 Qdrant 超时）
 
-**测试**：pytest 666 passed, 2 skipped, 0 failed（与 v0.2.1 基线持平，+11 新用例覆盖新链路）
+**灵感引擎修复**：
+- 🔧 `stage5_5.py`：新增 `build_stage5_5_prompt_with_real_data()` — 修复鉴赏师 `as_menu()` 未接入导致的伪造0建议
+- 🔧 `novel-inspiration-ingest` SKILL：阶段2必读清单与势力列表改为从 `config.json → worldview/paths` 动态读取，删除众生界专属硬编码
+
+**测试**：pytest 669 passed, 2 skipped, 0 failed（+3 vs v0.2.1 基线，覆盖灵感引擎修复）
 
 ---
 
