@@ -77,6 +77,24 @@
 
 ## 更新日志
 
+### v0.2.2 (开发中，v2-dev) - 案例库链路扩展 & 稳定性修复
+
+**案例库检索扩展**：
+- ✨ `search_case_quality_anchor()`：按 quality_score 倒序检索，写前提供高质量目标锚点
+- ✨ `search_case_technique_instance()`：语义匹配 ANTI_XXX 约束 → 返回反例散文示范
+- ✨ `write_own_chapter_scene()` / `search_own_chapters()`：写手自有章节写入向量库，支持跨章检索
+- ✨ `ensure_own_chapters_collection()`：首次调用自动建 collection，无需手动初始化
+- ✨ `FileUpdater.write_scenes_to_case_library()`：阶段 8 触发，自动归档本章场景
+
+**稳定性修复**：
+- 🔧 `extraction_runner.py`：Windows 下改用 `OpenProcess` 替代 `os.kill(pid, 0)`，修复进程存活检测崩溃
+- 🔧 `anti_template_constraints.json`：ANTI_046/051/052/053 的 constraint_text 中 ASCII 双引号改为「」，修复 JSON 解析失败
+- 📖 实训指导书步骤 6 新增 Docker 镜像加速配置说明（解决国内拉取 Qdrant 超时）
+
+**测试**：pytest 666 passed, 2 skipped, 0 failed（与 v0.2.1 基线持平，+11 新用例覆盖新链路）
+
+---
+
 ### v0.2.1 (2026-04-21) - 多小说解耦完整实施（M8）
 
 **多小说解耦（M8）**：
