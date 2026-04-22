@@ -361,6 +361,70 @@
       "constraint_text": "本场伏笔回收必须先重现当初埋笔的具体意象（一个原样复现的动作/物件/环境），再揭示其含义。",
       "intensity": "hard",
       "status": "active"
+    },
+    {
+      "id": "ANTI_046",
+      "category": "AI味清除",
+      "trigger_scene_types": ["*"],
+      "constraint_text": "全章禁用「某种」。每处情绪描写必须是具体词或身体动作，不得用「某种X」作为情绪容器。",
+      "intensity": "hard",
+      "status": "active"
+    },
+    {
+      "id": "ANTI_047",
+      "category": "AI味清除",
+      "trigger_scene_types": ["*"],
+      "constraint_text": "同一比喻禁止在全章出现超过一次。写完后须自查关键词，重复者必须重写成不同的动作或意象。",
+      "intensity": "hard",
+      "status": "active"
+    },
+    {
+      "id": "ANTI_048",
+      "category": "AI味清除",
+      "trigger_scene_types": ["*"],
+      "constraint_text": "不同角色的外貌/服装描写不得使用相同词组。每个角色只能有一个专属外部特征，不得套用通用模板。",
+      "intensity": "hard",
+      "status": "active"
+    },
+    {
+      "id": "ANTI_049",
+      "category": "AI味清除",
+      "trigger_scene_types": ["世界观展开", "势力登场", "转折", "结尾"],
+      "constraint_text": "禁止在同一段落内等量并列描述三个以上势力/阵营。只详写一个，其余以反应、沉默、缺席呈现。信息不对称才是叙事，等量呈现是数据库。",
+      "intensity": "hard",
+      "status": "active"
+    },
+    {
+      "id": "ANTI_050",
+      "category": "AI味清除",
+      "trigger_scene_types": ["*"],
+      "constraint_text": "全章段落长度必须有明显变化：每写3-4个中等段落后，必须插入一个极短段落（1-3句）或一个极长段落（10句以上）。不得连续出现5个以上相近长度的段落。",
+      "intensity": "soft",
+      "status": "active"
+    },
+    {
+      "id": "ANTI_051",
+      "category": "AI味清除",
+      "trigger_scene_types": ["战斗", "势力登场", "冲突升级"],
+      "constraint_text": "多文明/多势力同场时，每次只写一个势力的具体动作作为主体，其余势力只能以声音、残影、余光、被动反应出现。同一场景内禁止出现「A做了X，B做了X，C做了X」的对称列举结构。",
+      "intensity": "hard",
+      "status": "active"
+    },
+    {
+      "id": "ANTI_052",
+      "category": "AI味清除",
+      "trigger_scene_types": ["悬念", "危机降临", "战斗", "情感"],
+      "constraint_text": "用动作/感官展示完某能力或本能后，禁止紧接一句解释性陈述（「这是X的Y能力」、「这是Z留下的本能」）。读者从画面感受到的内容，不需要作者再说一遍。",
+      "intensity": "hard",
+      "status": "active"
+    },
+    {
+      "id": "ANTI_053",
+      "category": "AI味清除",
+      "trigger_scene_types": ["结尾", "成长蜕变", "转折"],
+      "constraint_text": "场景或章节结尾禁用宣告式总结句（「他要X」、「他宣告Y」、「每一步都在Z」）。结尾必须是一个具体动作、感官细节或静止画面，意义由读者自行感受，不由叙述者点明。",
+      "intensity": "hard",
+      "status": "active"
     }
   ]
 }
