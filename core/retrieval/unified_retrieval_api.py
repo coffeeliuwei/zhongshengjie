@@ -47,6 +47,16 @@ from core.config_loader import (
     get_collection_name,
 )
 
+# 导入日志工具
+from core.logging_utils import get_logger
+
+# 导入 metrics（可选依赖，prometheus 未安装时 record_retrieval 为 no-op）
+try:
+    from core.metrics import record_retrieval
+except ImportError:
+    def record_retrieval(source, dimension=None, latency_seconds=0.0, results_count=0):
+        pass
+
 
 class UnifiedRetrievalAPI:
     """
@@ -185,6 +195,9 @@ class UnifiedRetrievalAPI:
         # 权重预设
         self.weight_preset = weight_preset
 
+        # 检索延迟日志器
+        self._logger = get_logger("retrieval")
+
     def _get_cache_key(
         self,
         query: str,
@@ -252,103 +265,136 @@ class UnifiedRetrievalAPI:
             }
         """
         results = {}
+        start_time = time.time()
 
-        for source in sources:
-            if source not in self.SOURCE_TYPES:
-                continue
+        try:
+            for source in sources:
+                if source not in self.SOURCE_TYPES:
+                    continue
 
-            # 检查缓存
-            cache_key = self._get_cache_key(query, source, filters, top_k)
-            cached_result = self._get_cached(cache_key)
-            if cached_result is not None:
-                results[source] = cached_result
-                continue
+                # 检查缓存
+                cache_key = self._get_cache_key(query, source, filters, top_k)
+                cached_result = self._get_cached(cache_key)
+                if cached_result is not None:
+                    results[source] = cached_result
+                    continue
 
-            # 根据数据源调用对应方法
-            source_filters = filters.get(source, {}) if filters else {}
+                # 根据数据源调用对应方法
+                source_filters = filters.get(source, {}) if filters else {}
 
-            if source == "novel":
-                result = self._search_manager.search_novel(
-                    query=query,
-                    entity_type=source_filters.get("entity_type"),
-                    top_k=top_k,
-                    use_rerank=use_rerank,
-                )
-            elif source == "technique":
-                result = self._search_manager.search_technique(
-                    query=query,
-                    dimension=source_filters.get("dimension"),
-                    top_k=top_k,
-                    use_rerank=use_rerank,
-                )
-            elif source == "case":
-                result = self._search_manager.search_case(
-                    query=query,
-                    scene_type=source_filters.get("scene_type"),
-                    genre=source_filters.get("genre"),
-                    top_k=top_k,
-                    use_rerank=use_rerank,
-                )
-            elif source == "power_vocabulary":
-                result = self.search_power_vocabulary(
-                    query=query,
-                    power_type=source_filters.get("power_type"),
-                    top_k=top_k,
-                    use_rerank=use_rerank,
-                )
-            elif source == "dialogue_style":
-                result = self.search_dialogue_style(
-                    query=query,
-                    faction=source_filters.get("faction"),
-                    top_k=top_k,
-                    use_rerank=use_rerank,
-                )
-            elif source == "emotion_arc":
-                result = self.search_emotion_arc(
-                    query=query,
-                    arc_type=source_filters.get("arc_type"),
-                    top_k=top_k,
-                    use_rerank=use_rerank,
-                )
-            elif source == "worldview_element":
-                result = self.search_worldview_element(
-                    query=query,
-                    element_type=source_filters.get("element_type"),
-                    top_k=top_k,
-                    use_rerank=use_rerank,
-                )
-            elif source == "character_relation":
-                result = self.search_character_relation(
-                    query=query,
-                    relation_type=source_filters.get("relation_type"),
-                    top_k=top_k,
-                    use_rerank=use_rerank,
-                )
-            elif source == "author_style":
-                result = self.search_author_style(
-                    query=query,
-                    top_k=top_k,
-                    use_rerank=use_rerank,
-                )
-            elif source == "foreshadow_pair":
-                result = self.search_foreshadow_pair(
-                    query=query,
-                    top_k=top_k,
-                    use_rerank=use_rerank,
-                )
-            elif source == "power_cost":
-                result = self.search_power_cost(
-                    query=query,
-                    power_type=source_filters.get("power_type"),
-                    top_k=top_k,
-                    use_rerank=use_rerank,
-                )
-            else:
-                # 未知数据源，返回空列表
-                result = []
+                if source == "novel":
+                    result = self._search_manager.search_novel(
+                        query=query,
+                        entity_type=source_filters.get("entity_type"),
+                        top_k=top_k,
+                        use_rerank=use_rerank,
+                    )
+                elif source == "technique":
+                    result = self._search_manager.search_technique(
+                        query=query,
+                        dimension=source_filters.get("dimension"),
+                        top_k=top_k,
+                        use_rerank=use_rerank,
+                    )
+                elif source == "case":
+                    result = self._search_manager.search_case(
+                        query=query,
+                        scene_type=source_filters.get("scene_type"),
+                        genre=source_filters.get("genre"),
+                        top_k=top_k,
+                        use_rerank=use_rerank,
+                    )
+                elif source == "power_vocabulary":
+                    result = self.search_power_vocabulary(
+                        query=query,
+                        power_type=source_filters.get("power_type"),
+                        top_k=top_k,
+                        use_rerank=use_rerank,
+                    )
+                elif source == "dialogue_style":
+                    result = self.search_dialogue_style(
+                        query=query,
+                        faction=source_filters.get("faction"),
+                        top_k=top_k,
+                        use_rerank=use_rerank,
+                    )
+                elif source == "emotion_arc":
+                    result = self.search_emotion_arc(
+                        query=query,
+                        arc_type=source_filters.get("arc_type"),
+                        top_k=top_k,
+                        use_rerank=use_rerank,
+                    )
+                elif source == "worldview_element":
+                    result = self.search_worldview_element(
+                        query=query,
+                        element_type=source_filters.get("element_type"),
+                        top_k=top_k,
+                        use_rerank=use_rerank,
+                    )
+                elif source == "character_relation":
+                    result = self.search_character_relation(
+                        query=query,
+                        relation_type=source_filters.get("relation_type"),
+                        top_k=top_k,
+                        use_rerank=use_rerank,
+                    )
+                elif source == "author_style":
+                    result = self.search_author_style(
+                        query=query,
+                        top_k=top_k,
+                        use_rerank=use_rerank,
+                    )
+                elif source == "foreshadow_pair":
+                    result = self.search_foreshadow_pair(
+                        query=query,
+                        top_k=top_k,
+                        use_rerank=use_rerank,
+                    )
+                elif source == "power_cost":
+                    result = self.search_power_cost(
+                        query=query,
+                        power_type=source_filters.get("power_type"),
+                        top_k=top_k,
+                        use_rerank=use_rerank,
+                    )
+                else:
+                    # 未知数据源，返回空列表
+                    result = []
 
-            results[source] = result
-            self._set_cache(cache_key, result)
+                results[source] = result
+                self._set_cache(cache_key, result)
+
+        except Exception as e:
+            # 异常时也记录延迟日志
+            elapsed_ms = (time.time() - start_time) * 1000
+            self._logger.error(
+                "检索异常",
+                query_len=len(query),
+                sources=sources,
+                elapsed_ms=round(elapsed_ms, 1),
+                error=str(e),
+            )
+            raise
+
+        # 记录检索延迟日志
+        elapsed_ms = (time.time() - start_time) * 1000
+        total_results = sum(len(r) for r in results.values() if isinstance(r, list))
+        self._logger.info(
+            "检索完成",
+            query_len=len(query),
+            sources=sources,
+            total_results=total_results,
+            elapsed_ms=round(elapsed_ms, 1),
+            use_rerank=use_rerank,
+        )
+
+        # Prometheus 指标（prometheus_client 未安装时为 no-op）
+        record_retrieval(
+            source=",".join(sources),
+            latency_seconds=elapsed_ms / 1000,
+            results_count=total_results,
+        )
 
         return results
 
