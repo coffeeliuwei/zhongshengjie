@@ -18,6 +18,7 @@ import os
 import sys
 import json
 import uuid
+import hashlib
 import logging
 from pathlib import Path
 from datetime import datetime
@@ -222,6 +223,7 @@ class QdrantSyncer:
     def _load_cases_from_directory(self, limit: int = None) -> List[CaseForSync]:
         """从cases目录加载案例（使用rglob遍历所有JSON）"""
         cases = []
+        seen_hashes: set = set()
 
         logger.info("扫描cases目录（使用rglob遍历所有JSON）...")
 
@@ -243,6 +245,14 @@ class QdrantSyncer:
 
                 if not content:
                     continue
+
+                # 内容去重：相同内容前500字的MD5视为重复
+                _content_hash = hashlib.md5(
+                    content[:500].encode("utf-8", errors="ignore")
+                ).hexdigest()
+                if _content_hash in seen_hashes:
+                    continue
+                seen_hashes.add(_content_hash)
 
                 # 从路径和文件名提取scene_type和genre
                 # 路径格式: cases/scene_type/case_xxx.json
