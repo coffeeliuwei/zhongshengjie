@@ -231,7 +231,10 @@ class QdrantSyncer:
         logger.info("扫描cases目录（使用rglob遍历所有JSON）...")
 
         # 使用rglob遍历所有JSON文件
-        for json_file in CASES_DIR.rglob("*.json"):
+        all_json_files = list(CASES_DIR.rglob("*.json"))
+        total_files = len(all_json_files)
+        print(f"发现 {total_files:,} 个JSON文件，开始加载+去重（MinHash LSH）...")
+        for file_idx, json_file in enumerate(all_json_files, 1):
             try:
                 with open(json_file, "r", encoding="utf-8") as f:
                     data = json.load(f)
@@ -256,10 +259,14 @@ class QdrantSyncer:
                     m.update(s.encode("utf-8", errors="ignore"))
                 if lsh.query(m):
                     dup_skipped += 1
+                    if file_idx % 10000 == 0:
+                        print(f"  加载进度: {file_idx:,}/{total_files:,} 文件 | 保留 {len(cases):,} | 去重 {dup_skipped:,}")
                     continue
                 lsh_key = f"case_{len(cases)}"
                 lsh.insert(lsh_key, m)
                 minhash_cache[lsh_key] = m
+                if file_idx % 10000 == 0:
+                    print(f"  加载进度: {file_idx:,}/{total_files:,} 文件 | 保留 {len(cases):,} | 去重 {dup_skipped:,}")
 
                 # 从路径和文件名提取scene_type和genre
                 # 路径格式: cases/scene_type/case_xxx.json
