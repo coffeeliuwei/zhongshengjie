@@ -222,18 +222,14 @@ class QdrantSyncer:
 
     def _load_cases_from_directory(self, limit: int = None) -> List[CaseForSync]:
         """从cases目录加载案例（使用rglob遍历所有JSON）"""
-        from datasketch import MinHash, MinHashLSH
         cases = []
-        lsh = MinHashLSH(threshold=0.85, num_perm=128)
-        minhash_cache: dict = {}
-        dup_skipped = 0
 
         logger.info("扫描cases目录（使用rglob遍历所有JSON）...")
 
         # 使用rglob遍历所有JSON文件
         all_json_files = list(CASES_DIR.rglob("*.json"))
         total_files = len(all_json_files)
-        print(f"发现 {total_files:,} 个JSON文件，开始加载+去重（MinHash LSH）...")
+        print(f"发现 {total_files:,} 个JSON文件，开始加载...")
         for file_idx, json_file in enumerate(all_json_files, 1):
             try:
                 with open(json_file, "r", encoding="utf-8") as f:
@@ -252,21 +248,8 @@ class QdrantSyncer:
                 if not content:
                     continue
 
-                # MinHash 近重复检测（shingle = 连续5字，threshold=0.85）
-                shingles = {content[k:k+5] for k in range(0, min(len(content), 2000) - 4)}
-                m = MinHash(num_perm=128)
-                for s in shingles:
-                    m.update(s.encode("utf-8", errors="ignore"))
-                if lsh.query(m):
-                    dup_skipped += 1
-                    if file_idx % 10000 == 0:
-                        print(f"  加载进度: {file_idx:,}/{total_files:,} 文件 | 保留 {len(cases):,} | 去重 {dup_skipped:,}")
-                    continue
-                lsh_key = f"case_{len(cases)}"
-                lsh.insert(lsh_key, m)
-                minhash_cache[lsh_key] = m
-                if file_idx % 10000 == 0:
-                    print(f"  加载进度: {file_idx:,}/{total_files:,} 文件 | 保留 {len(cases):,} | 去重 {dup_skipped:,}")
+                if file_idx % 20000 == 0:
+                    print(f"  加载进度: {file_idx:,}/{total_files:,} 文件 | 已加载 {len(cases):,}")
 
                 # 从路径和文件名提取scene_type和genre
                 # 路径格式: cases/scene_type/case_xxx.json
@@ -311,8 +294,6 @@ class QdrantSyncer:
             except Exception as e:
                 logger.warning(f"读取案例失败: {json_file.name} - {e}")
 
-        if dup_skipped:
-            logger.info(f"近重复过滤: 跳过 {dup_skipped} 条（MinHash LSH threshold=0.85）")
         logger.info(f"共加载 {len(cases)} 个案例")
         return cases
 
