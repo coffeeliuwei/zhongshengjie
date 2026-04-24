@@ -294,8 +294,111 @@ class QdrantSyncer:
             except Exception as e:
                 logger.warning(f"读取案例失败: {json_file.name} - {e}")
 
+        # 追加扫描 .md 案例（novel-paste-extract / novel-inspiration-ingest 产出）
+        md_cases = self._load_md_cases_from_directory()
+        if md_cases:
+            logger.info(f"追加 {len(md_cases)} 个 Markdown 案例（技能驱动产出）")
+            cases.extend(md_cases)
+
         logger.info(f"共加载 {len(cases)} 个案例")
         return cases
+
+    def _load_md_cases_from_directory(self) -> List[CaseForSync]:
+        """加载 .md 格式案例（novel-paste-extract / novel-inspiration-ingest 写入）。
+
+        期望格式（YAML frontmatter + Markdown body）：
+            ---
+            title: ...
+            dimension: ...
+            applicable_scene: ...
+            source: ...
+            created_at: ...
+            ---
+            # 标题
+            ## 原文
+            ...正文...
+            ## 为什么值得学习
+            ...
+        """
+        import re as _re
+
+        md_cases: List[CaseForSync] = []
+        md_files = list(CASES_DIR.rglob("*.md"))
+        if not md_files:
+            return md_cases
+
+        print(f"发现 {len(md_files):,} 个 Markdown 案例文件，开始解析...")
+        for md_file in md_files:
+            try:
+                raw = md_file.read_text(encoding="utf-8")
+
+                # 解析 frontmatter
+                fm: Dict[str, str] = {}
+                body = raw
+                fm_match = _re.match(r"^---\s*\n(.*?)\n---\s*\n(.*)$", raw, _re.DOTALL)
+                if fm_match:
+                    fm_text, body = fm_match.group(1), fm_match.group(2)
+                    for line in fm_text.splitlines():
+                        if ":" in line:
+                            k, _, v = line.partition(":")
+                            fm[k.strip()] = v.strip().strip('"').strip("'")
+
+                # 提取 "## 原文" 段的正文
+                content = ""
+                yuanwen_match = _re.search(
+                    r"##\s*原文\s*\n(.*?)(?=\n##\s|\Z)", body, _re.DOTALL
+                )
+                if yuanwen_match:
+                    content = yuanwen_match.group(1).strip()
+                else:
+                    # 没有"## 原文"分节时，把去除一级标题后的全文作为正文
+                    stripped = _re.sub(r"^#\s+.*\n", "", body.strip(), count=1).strip()
+                    content = stripped
+
+                if not content or len(content) < 50:
+                    continue
+
+                # 从 source 字段或路径推断 novel_name / genre
+                source_path = fm.get("source", "")
+                slug_match = _re.search(
+                    r"素材库/([^/]+)/source", source_path
+                ) or _re.search(r"素材库[\\/]([^\\/]+)[\\/]source", source_path)
+                novel_name = slug_match.group(1) if slug_match else "用户粘贴"
+
+                # 从目录路径推断 scene_type / genre
+                try:
+                    rel_parts = md_file.relative_to(CASES_DIR).parts
+                except ValueError:
+                    rel_parts = md_file.parts
+
+                scene_type = fm.get("applicable_scene") or (
+                    rel_parts[-2] if len(rel_parts) >= 2 else "通用"
+                )
+                dimension = fm.get("dimension", "")
+                genre = dimension or "通用"
+
+                # case_id：md 文件相对路径的稳定 hash
+                case_id = f"md_{hashlib.md5(str(md_file).encode('utf-8', 'ignore')).hexdigest()[:16]}"
+
+                md_cases.append(
+                    CaseForSync(
+                        case_id=case_id,
+                        scene_type=scene_type,
+                        genre=genre,
+                        novel_name=novel_name,
+                        content=content,
+                        word_count=len(content),
+                        quality_score=7.5,  # Claude 人工筛选，基础分高于批量提炼
+                        emotion_value=5.0,
+                        techniques=[],
+                        keywords=[fm.get("title", "")] if fm.get("title") else [],
+                        writers=[],
+                    )
+                )
+            except Exception as e:
+                logger.warning(f"解析 Markdown 案例失败: {md_file.name} - {e}")
+
+        return md_cases
 
     def sync(
         self, limit: int = None, batch_size: int = 100, resume: bool = True
