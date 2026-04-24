@@ -1,0 +1,22 @@
+{
+  "updated_at": "2026-04-13T13:14:00.903730",
+  "total_fragments": 1,
+  "discovered_types": [
+    {
+      "name": "血脉力量",
+      "category": "power",
+      "keywords": [
+        "血脉",
+        "觉醒"
+      ],
+      "sample_count": 50,
+      "sample_sources": [
+        "小说1"
+      ],
+      "confidence": 0.8,
+      "description": "",
+      "created_at": "2026-04-13T13:14:00.903730",
+      "status": "pending"
+    }
+  ]
+}

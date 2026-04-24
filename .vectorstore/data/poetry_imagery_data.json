@@ -1,0 +1,282 @@
+[
+  {
+    "name": "空营",
+    "emotion_core": "虚无感、胜利后的凄凉",
+    "emotion_tags": ["虚无", "凄凉", "战争", "代价"],
+    "world_context": null,
+    "usage_examples": ["空营独守望故人", "胜利空营显代价"],
+    "philosophy_link": null
+  },
+  {
+    "name": "残旗",
+    "emotion_core": "虚无感、战争后的凄凉",
+    "emotion_tags": ["虚无", "凄凉", "战争", "代价"],
+    "world_context": null,
+    "usage_examples": ["独倚残旗望故里", "残旗飘摇映凄凉"],
+    "philosophy_link": null
+  },
+  {
+    "name": "残阳",
+    "emotion_core": "悲凉、落幕感",
+    "emotion_tags": ["悲凉", "落幕", "时间", "结束"],
+    "world_context": null,
+    "usage_examples": ["残阳如血染天际", "残阳落尽悲凉至"],
+    "philosophy_link": null
+  },
+  {
+    "name": "孤雁",
+    "emotion_core": "孤独、漂泊",
+    "emotion_tags": ["孤独", "漂泊", "离别", "思乡"],
+    "world_context": null,
+    "usage_examples": ["孤雁南飞思故土", "孤雁独鸣悲离群"],
+    "philosophy_link": null
+  },
+  {
+    "name": "落叶",
+    "emotion_core": "凋零、逝去",
+    "emotion_tags": ["凋零", "逝去", "时间", "无常"],
+    "world_context": null,
+    "usage_examples": ["落叶飘零归故土", "落叶无声诉凋零"],
+    "philosophy_link": null
+  },
+  {
+    "name": "寒月",
+    "emotion_core": "冷寂、孤独",
+    "emotion_tags": ["冷寂", "孤独", "清冷", "思念"],
+    "world_context": null,
+    "usage_examples": ["寒月冷照孤人心", "寒月无声映冷寂"],
+    "philosophy_link": null
+  },
+  {
+    "name": "秋风",
+    "emotion_core": "萧瑟、离别",
+    "emotion_tags": ["萧瑟", "离别", "凄凉", "流动"],
+    "world_context": null,
+    "usage_examples": ["秋风萧瑟送故人", "秋风无情掠落叶"],
+    "philosophy_link": null
+  },
+  {
+    "name": "长空",
+    "emotion_core": "苍茫、开阔",
+    "emotion_tags": ["苍茫", "开阔", "壮阔", "远望"],
+    "world_context": null,
+    "usage_examples": ["长空万里独飞雁", "长空苍茫映悲凉"],
+    "philosophy_link": null
+  },
+  {
+    "name": "古道",
+    "emotion_core": "沧桑、旅途",
+    "emotion_tags": ["沧桑", "旅途", "离别", "怀旧"],
+    "world_context": null,
+    "usage_examples": ["古道西风瘦马行", "古道沧桑映岁月"],
+    "philosophy_link": null
+  },
+  {
+    "name": "孤舟",
+    "emotion_core": "漂泊、孤独",
+    "emotion_tags": ["漂泊", "孤独", "旅途", "离别"],
+    "world_context": null,
+    "usage_examples": ["孤舟一叶漂江中", "孤舟独行显漂泊"],
+    "philosophy_link": null
+  },
+  {
+    "name": "断剑",
+    "emotion_core": "失败、不屈",
+    "emotion_tags": ["失败", "不屈", "战斗", "悲壮"],
+    "world_context": null,
+    "usage_examples": ["断剑在手志未灭", "断剑映照不屈心"],
+    "philosophy_link": null
+  },
+  {
+    "name": "血旗",
+    "emotion_core": "牺牲、悲壮",
+    "emotion_tags": ["牺牲", "悲壮", "战争", "热血"],
+    "world_context": null,
+    "usage_examples": ["血旗飘扬映牺牲", "血旗之下英雄逝"],
+    "philosophy_link": null
+  },
+  {
+    "name": "枯骨",
+    "emotion_core": "死亡、凄凉",
+    "emotion_tags": ["死亡", "凄凉", "战争", "代价"],
+    "world_context": null,
+    "usage_examples": ["枯骨遍地映战争", "枯骨无声诉代价"],
+    "philosophy_link": null
+  },
+  {
+    "name": "残垣",
+    "emotion_core": "毁灭、废墟",
+    "emotion_tags": ["毁灭", "废墟", "战争", "凄凉"],
+    "world_context": null,
+    "usage_examples": ["残垣断壁映毁灭", "残垣之下悲凉至"],
+    "philosophy_link": null
+  },
+  {
+    "name": "烽火",
+    "emotion_core": "战争、紧张",
+    "emotion_tags": ["战争", "紧张", "危险", "冲突"],
+    "world_context": null,
+    "usage_examples": ["烽火连天映战争", "烽火起时紧张至"],
+    "philosophy_link": null
+  },
+  {
+    "name": "孤灯",
+    "emotion_core": "孤独、思念",
+    "emotion_tags": ["孤独", "思念", "夜晚", "凄凉"],
+    "world_context": null,
+    "usage_examples": ["孤灯一盏照思念", "孤灯之下独思人"],
+    "philosophy_link": null
+  },
+  {
+    "name": "黄昏",
+    "emotion_core": "落幕、过渡",
+    "emotion_tags": ["落幕", "过渡", "时间", "悲凉"],
+    "world_context": null,
+    "usage_examples": ["黄昏时分落幕至", "黄昏之中过渡显"],
+    "philosophy_link": null
+  },
+  {
+    "name": "白发",
+    "emotion_core": "岁月、衰老",
+    "emotion_tags": ["岁月", "衰老", "时间", "遗憾"],
+    "world_context": null,
+    "usage_examples": ["白发苍苍映岁月", "白发之中遗憾显"],
+    "philosophy_link": null
+  },
+  {
+    "name": "浊酒",
+    "emotion_core": "悲壮、醉意",
+    "emotion_tags": ["悲壮", "醉意", "豪迈", "哀愁"],
+    "world_context": null,
+    "usage_examples": ["浊酒一杯映悲壮", "浊酒之中醉意显"],
+    "philosophy_link": null
+  },
+  {
+    "name": "尘土",
+    "emotion_core": "渺小、无常",
+    "emotion_tags": ["渺小", "无常", "时间", "遗忘"],
+    "world_context": null,
+    "usage_examples": ["尘土飞扬映渺小", "尘土之中无常显"],
+    "philosophy_link": null
+  },
+  {
+    "name": "云月",
+    "emotion_core": "远望、思念",
+    "emotion_tags": ["远望", "思念", "旅途", "离别"],
+    "world_context": null,
+    "usage_examples": ["云月千里映思念", "云月之中远望显"],
+    "philosophy_link": null
+  },
+  {
+    "name": "少年头",
+    "emotion_core": "壮志、遗憾",
+    "emotion_tags": ["壮志", "遗憾", "时间", "未酬"],
+    "world_context": null,
+    "usage_examples": ["少年头白壮志空", "少年头中遗憾显"],
+    "philosophy_link": null
+  },
+  {
+    "name": "丹心",
+    "emotion_core": "忠诚、信念",
+    "emotion_tags": ["忠诚", "信念", "忠义", "牺牲"],
+    "world_context": null,
+    "usage_examples": ["丹心一片映忠诚", "丹心之中信念显"],
+    "philosophy_link": null
+  },
+{
+    "name": "轮回",
+    "emotion_core": "无解、循环",
+    "emotion_tags": ["无解", "循环", "命运", "虚无"],
+    "world_context": "众生界",
+    "usage_examples": ["轮回无尽众生困", "轮回之中虚无显"],
+    "philosophy_link": "轮回体系 - 命运的循环往复"
+  },
+  {
+    "name": "盐霜",
+    "emotion_core": "苦难、苦涩",
+    "emotion_tags": ["苦难", "苦涩", "泪水", "代价"],
+    "world_context": "众生界",
+    "usage_examples": ["荒野盐霜映苦难", "盐霜之下众生苦"],
+    "philosophy_link": "众生皆苦 - 泪水结晶，苦难痕迹"
+  },
+  {
+    "name": "尘封的名字",
+    "emotion_core": "身份消逝、被遗忘",
+    "emotion_tags": ["遗忘", "无名", "身份消逝", "卑微"],
+    "world_context": "众生界",
+    "usage_examples": ["名字尘封无人记", "尘封之下皆是众生"],
+    "philosophy_link": "众生皆无名 - 每个生命都曾有名字，终被尘封"
+  },
+  {
+    "name": "黎民",
+    "emotion_core": "众生、卑微",
+    "emotion_tags": ["众生", "卑微", "苦难", "底层"],
+    "world_context": "众生界",
+    "usage_examples": ["黎民苍生皆如尘", "黎民之下苦难深"],
+    "philosophy_link": "众生皆苦 - 千千万万个无名者"
+  },
+  {
+    "name": "碎梦",
+    "emotion_core": "希望破灭、悲悯",
+    "emotion_tags": ["破灭", "悲悯", "希望", "代价"],
+    "world_context": "众生界",
+    "usage_examples": ["碎梦之下众生悲", "碎梦无声诉苦难"],
+    "philosophy_link": "每个生命都曾有希望与梦想"
+  },
+  {
+    "name": "血泪",
+    "emotion_core": "苦难、悲悯",
+    "emotion_tags": ["苦难", "悲悯", "代价", "血肉"],
+    "world_context": "众生界",
+    "usage_examples": ["血泪交织映众生", "血泪之下是苦难"],
+    "philosophy_link": "时光之下是血肉 - 每个时代都是众生的苦难"
+  },
+  {
+    "name": "枯骨成山",
+    "emotion_core": "苦难堆积、悲悯",
+    "emotion_tags": ["苦难", "死亡", "悲悯", "代价"],
+    "world_context": "众生界",
+    "usage_examples": ["枯骨成山众生苦", "山山枯骨皆众生"],
+    "philosophy_link": "时代的代价 - 无数众生的血肉堆积"
+  },
+  {
+    "name": "无名墓",
+    "emotion_core": "被遗忘、悲悯",
+    "emotion_tags": ["遗忘", "无名", "死亡", "悲悯"],
+    "world_context": "众生界",
+    "usage_examples": ["无名墓下皆众生", "墓碑无名诉悲凉"],
+    "philosophy_link": "众生皆无名 - 死后无人铭记，只有风知道"
+  },
+  {
+    "name": "风碑",
+    "emotion_core": "历史沉默、无人应答",
+    "emotion_tags": ["沉默", "无言", "历史", "悲悯"],
+    "world_context": "众生界",
+    "usage_examples": ["风碑无言证浮沉", "风穿碑纹诉苦难"],
+    "philosophy_link": "历史的沉默者 - 见证众生苦难，却无法言说"
+  },
+  {
+    "name": "黎明前的日落",
+    "emotion_core": "无人见证、悲悯",
+    "emotion_tags": ["无人见证", "遗憾", "悲悯", "瞬间"],
+    "world_context": "众生界",
+    "usage_examples": ["黎明前的日落无人记", "日落无声众生悲"],
+    "philosophy_link": "无人铭记的瞬间 - 众生的苦难无人见证"
+  },
+  {
+    "name": "众生",
+    "emotion_core": "苦难、悲悯、卑微",
+    "emotion_tags": ["苦难", "悲悯", "卑微", "无名"],
+    "world_context": "众生界",
+    "usage_examples": ["众生皆苦众生悲", "众生如尘埃落定"],
+    "philosophy_link": "众生皆苦 - 各个时代下众生的生存状态"
+  },
+  {
+    "name": "时光洪流",
+    "emotion_core": "无常、渺小",
+    "emotion_tags": ["无常", "渺小", "时间", "命运"],
+    "world_context": "众生界",
+    "usage_examples": ["时光洪流众生浮", "洪流之下皆渺小"],
+    "philosophy_link": "众生在时代洪流中浮沉 - 无法自主的命运"
+  }
+]

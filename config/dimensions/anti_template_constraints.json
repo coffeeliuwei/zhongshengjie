@@ -1,0 +1,430 @@
+{
+  "version": "1.0",
+  "created_at": "2026-04-14",
+  "constraints": [
+    {
+      "id": "ANTI_001",
+      "category": "视角反叛",
+      "trigger_scene_types": ["战斗", "高潮", "打脸"],
+      "constraint_text": "本场必须从败者/被动方的视角写，禁用主角内心视角。所有主角动作只能通过败者的感官呈现。",
+      "intensity": "hard",
+      "status": "active"
+    },
+    {
+      "id": "ANTI_002",
+      "category": "视角反叛",
+      "trigger_scene_types": ["战斗", "打脸", "修炼突破"],
+      "constraint_text": "用旁观者（路人、仆从、无关角色）的视角写，主角只是画面中的一个人。",
+      "intensity": "hard",
+      "status": "active"
+    },
+    {
+      "id": "ANTI_003",
+      "category": "视角反叛",
+      "trigger_scene_types": ["情感", "回忆场景", "社交"],
+      "constraint_text": "从一个物件的视角写（被主角握过的剑、墙上的画、地上的影子）。物件不说话，但记录一切发生在它周围的事。",
+      "intensity": "hard",
+      "status": "active"
+    },
+    {
+      "id": "ANTI_004",
+      "category": "视角反叛",
+      "trigger_scene_types": ["高潮", "转折", "阴谋揭露"],
+      "constraint_text": "用未来视角回望本场（多年后，当他想起这一刻...），但叙述本场时不暴露未来的任何具体内容。",
+      "intensity": "soft",
+      "status": "active"
+    },
+    {
+      "id": "ANTI_005",
+      "category": "视角反叛",
+      "trigger_scene_types": ["战斗", "高潮"],
+      "constraint_text": "从反派的视角写本场，让主角成为那个来杀我的人。",
+      "intensity": "hard",
+      "status": "active"
+    },
+    {
+      "id": "ANTI_006",
+      "category": "视角反叛",
+      "trigger_scene_types": ["情感", "成长蜕变"],
+      "constraint_text": "从主角的过去视角写（幼年时的他对现在的他会怎么看）。现在的主角是那个变成了这样的人。",
+      "intensity": "soft",
+      "status": "active"
+    },
+    {
+      "id": "ANTI_007",
+      "category": "视角反叛",
+      "trigger_scene_types": ["环境", "探索发现"],
+      "constraint_text": "从环境自身的视角写——风、石、水、光如何见证这群人到来。人类角色在环境眼中是短暂的扰动。",
+      "intensity": "hard",
+      "status": "active"
+    },
+    {
+      "id": "ANTI_008",
+      "category": "词汇剥夺",
+      "trigger_scene_types": ["战斗", "修炼突破"],
+      "constraint_text": "本场禁用所有力量/气息/能量/灵力/真元类词汇。必须用具体可感的方式描述力量的存在（冷、压、静、光的扭曲等）。",
+      "intensity": "hard",
+      "status": "active"
+    },
+    {
+      "id": "ANTI_009",
+      "category": "词汇剥夺",
+      "trigger_scene_types": ["打脸", "高潮"],
+      "constraint_text": "本场禁用冷笑/冷哼/冷漠/淡然等情绪标签词。必须通过动作细节传达情绪。",
+      "intensity": "hard",
+      "status": "active"
+    },
+    {
+      "id": "ANTI_010",
+      "category": "词汇剥夺",
+      "trigger_scene_types": ["战斗"],
+      "constraint_text": "本场禁止出现任何招式命名（剑气斩、烈焰斩等）。所有技巧通过其效果和过程呈现。",
+      "intensity": "hard",
+      "status": "active"
+    },
+    {
+      "id": "ANTI_011",
+      "category": "词汇剥夺",
+      "trigger_scene_types": ["情感", "社交"],
+      "constraint_text": "本场禁用心中一震/心头一紧/心如刀绞等心理活动短语。人物情绪必须通过身体动作、视觉变化或说话节奏呈现。",
+      "intensity": "hard",
+      "status": "active"
+    },
+    {
+      "id": "ANTI_012",
+      "category": "词汇剥夺",
+      "trigger_scene_types": ["战斗", "高潮"],
+      "constraint_text": "本场禁用副词修饰动作（猛地、狠狠地、快速地）。用动词本身和对比呈现力度。",
+      "intensity": "hard",
+      "status": "active"
+    },
+    {
+      "id": "ANTI_013",
+      "category": "词汇剥夺",
+      "trigger_scene_types": ["阴谋揭露", "悬念"],
+      "constraint_text": "本场禁用突然/忽然/骤然类转折词。转折必须通过前后对照本身完成。",
+      "intensity": "hard",
+      "status": "active"
+    },
+    {
+      "id": "ANTI_014",
+      "category": "词汇剥夺",
+      "trigger_scene_types": ["环境", "开篇"],
+      "constraint_text": "本场禁用色彩词（红、黑、金）。通过物质感、温度、光源状态呈现色彩。",
+      "intensity": "soft",
+      "status": "active"
+    },
+    {
+      "id": "ANTI_015",
+      "category": "节奏反转",
+      "trigger_scene_types": ["高潮", "打脸"],
+      "constraint_text": "本场高潮处必须降噪留白——关键一击后无描写，只剩一个静止的画面或一句简短的话。",
+      "intensity": "hard",
+      "status": "active"
+    },
+    {
+      "id": "ANTI_016",
+      "category": "节奏反转",
+      "trigger_scene_types": ["开篇", "恢复休养"],
+      "constraint_text": "本场平淡场景必须高密度意象——每句至少一个具体可感的物件或动作。",
+      "intensity": "hard",
+      "status": "active"
+    },
+    {
+      "id": "ANTI_017",
+      "category": "节奏反转",
+      "trigger_scene_types": ["战斗"],
+      "constraint_text": "本场战斗必须有至少一处静止——战斗中某个瞬间所有动作停下，只剩一个细节（呼吸、眼神、手指的颤动）。",
+      "intensity": "hard",
+      "status": "active"
+    },
+    {
+      "id": "ANTI_018",
+      "category": "节奏反转",
+      "trigger_scene_types": ["转折", "阴谋揭露"],
+      "constraint_text": "本场关键转折处必须延迟——用一两句不相关的环境描写拖一下，再切入真相。",
+      "intensity": "hard",
+      "status": "active"
+    },
+    {
+      "id": "ANTI_019",
+      "category": "节奏反转",
+      "trigger_scene_types": ["社交", "情感"],
+      "constraint_text": "本场对话必须有一次长沉默（至少30字的非对话描写打断对白）。",
+      "intensity": "soft",
+      "status": "active"
+    },
+    {
+      "id": "ANTI_020",
+      "category": "节奏反转",
+      "trigger_scene_types": ["结尾"],
+      "constraint_text": "本场结尾必须是一个开放动作（一个人抬手、回头、开口但没说完），不得用总结性陈述。",
+      "intensity": "hard",
+      "status": "active"
+    },
+    {
+      "id": "ANTI_021",
+      "category": "节奏反转",
+      "trigger_scene_types": ["危机降临"],
+      "constraint_text": "本场危机必须先以一个极普通的动作引入（倒水、关门、系带），危机的预兆只在该动作的细节上。",
+      "intensity": "soft",
+      "status": "active"
+    },
+    {
+      "id": "ANTI_022",
+      "category": "感官错位",
+      "trigger_scene_types": ["战斗", "高潮"],
+      "constraint_text": "本场必须用听觉写视觉（剑锋的声音、沉默的重量）。至少3处以听觉名词描述视觉现象。",
+      "intensity": "hard",
+      "status": "active"
+    },
+    {
+      "id": "ANTI_023",
+      "category": "感官错位",
+      "trigger_scene_types": ["情感", "社交"],
+      "constraint_text": "本场必须用触觉写情感（怀里塞进了一块冷铁写压抑、指节卡在门缝里写克制）。",
+      "intensity": "hard",
+      "status": "active"
+    },
+    {
+      "id": "ANTI_024",
+      "category": "感官错位",
+      "trigger_scene_types": ["环境", "开篇", "探索发现"],
+      "constraint_text": "本场必须用嗅觉引入场景——第一段必须有一个气味细节，且该气味贯穿全场作为情绪基调。",
+      "intensity": "hard",
+      "status": "active"
+    },
+    {
+      "id": "ANTI_025",
+      "category": "感官错位",
+      "trigger_scene_types": ["修炼突破", "高潮"],
+      "constraint_text": "本场力量的显现必须通过温度变化呈现（冷/热/骤降/灼烧），禁用光/色/气这类视觉化描写。",
+      "intensity": "hard",
+      "status": "active"
+    },
+    {
+      "id": "ANTI_026",
+      "category": "感官错位",
+      "trigger_scene_types": ["悬念", "阴谋揭露"],
+      "constraint_text": "本场紧张感必须通过身体感官传达（手心出汗、耳鸣、口干、脚底发虚），禁用紧张/担心/不安类直接陈述。",
+      "intensity": "hard",
+      "status": "active"
+    },
+    {
+      "id": "ANTI_027",
+      "category": "感官错位",
+      "trigger_scene_types": ["回忆场景"],
+      "constraint_text": "本场回忆必须由一个具体感官触发（一声、一味、一个触感），且整场不得脱离该感官锚点。",
+      "intensity": "soft",
+      "status": "active"
+    },
+    {
+      "id": "ANTI_028",
+      "category": "时态异化",
+      "trigger_scene_types": ["开篇"],
+      "constraint_text": "本场必须以完成时开头（他已经三天没开口了），再倒叙回到当前时刻。",
+      "intensity": "hard",
+      "status": "active"
+    },
+    {
+      "id": "ANTI_029",
+      "category": "时态异化",
+      "trigger_scene_types": ["伏笔设置"],
+      "constraint_text": "本场必须使用将来时预言式句子（他此刻不会知道，这是最后一次...），但该预言的具体内容留待未来章节。",
+      "intensity": "hard",
+      "status": "active"
+    },
+    {
+      "id": "ANTI_030",
+      "category": "时态异化",
+      "trigger_scene_types": ["转折", "阴谋揭露"],
+      "constraint_text": "本场必须嵌套一个子回忆（当前场景中插入一段过去场景），且子回忆与当前构成对照或伏笔回收。",
+      "intensity": "soft",
+      "status": "active"
+    },
+    {
+      "id": "ANTI_031",
+      "category": "时态异化",
+      "trigger_scene_types": ["高潮", "打脸"],
+      "constraint_text": "本场必须有至少一次时间慢放——某个0.5秒的动作用50字以上展开（每个细节都放大）。",
+      "intensity": "hard",
+      "status": "active"
+    },
+    {
+      "id": "ANTI_032",
+      "category": "时态异化",
+      "trigger_scene_types": ["结尾"],
+      "constraint_text": "本场结尾必须跳时间——跳出当前瞬间写几小时/几天后的一个小动作，回扣本场。",
+      "intensity": "soft",
+      "status": "active"
+    },
+    {
+      "id": "ANTI_033",
+      "category": "时态异化",
+      "trigger_scene_types": ["回忆场景", "情感"],
+      "constraint_text": "本场回忆与当前交错出现（一段当前一段回忆，至少交替3次），但两条线必须在最后一段汇合。",
+      "intensity": "hard",
+      "status": "active"
+    },
+    {
+      "id": "ANTI_034",
+      "category": "情绪逆压",
+      "trigger_scene_types": ["情感", "成长蜕变"],
+      "constraint_text": "本场悲伤/痛苦场景必须用克制冷静的笔调。禁止流泪、嚎哭、心碎等外显反应。",
+      "intensity": "hard",
+      "status": "active"
+    },
+    {
+      "id": "ANTI_035",
+      "category": "情绪逆压",
+      "trigger_scene_types": ["打脸", "高潮"],
+      "constraint_text": "本场爽点必须用沉重压抑的笔调。胜利时刻不要欢呼，用疲惫、沉默、不适感收尾。",
+      "intensity": "hard",
+      "status": "active"
+    },
+    {
+      "id": "ANTI_036",
+      "category": "情绪逆压",
+      "trigger_scene_types": ["危机降临"],
+      "constraint_text": "本场危机必须用平静甚至琐碎的笔调铺陈。危险就在平常动作里，但叙述者（视角）不察觉。",
+      "intensity": "hard",
+      "status": "active"
+    },
+    {
+      "id": "ANTI_037",
+      "category": "情绪逆压",
+      "trigger_scene_types": ["战斗"],
+      "constraint_text": "本场战斗必须有一处反差的轻——在最激烈时插入一个柔软的细节（一片叶子、一滴雨、孩子的笑声），不解释。",
+      "intensity": "hard",
+      "status": "active"
+    },
+    {
+      "id": "ANTI_038",
+      "category": "情绪逆压",
+      "trigger_scene_types": ["团队组建", "社交"],
+      "constraint_text": "本场团结/情谊时刻必须用疏离的笔调。人与人之间留出空白，不写彼此懂得、默契等直接描述。",
+      "intensity": "soft",
+      "status": "active"
+    },
+    {
+      "id": "ANTI_039",
+      "category": "情绪逆压",
+      "trigger_scene_types": ["资源获取", "修炼突破"],
+      "constraint_text": "本场获得/突破的时刻必须伴随一丝不安或代价感——得到的同时失去了什么（一个细节暗示即可）。",
+      "intensity": "soft",
+      "status": "active"
+    },
+    {
+      "id": "ANTI_040",
+      "category": "情绪逆压",
+      "trigger_scene_types": ["反派出场"],
+      "constraint_text": "本场反派出场必须平静甚至温和，禁止凶狠、嗜血、狂妄的外显表达。威胁感来自言行的错位。",
+      "intensity": "hard",
+      "status": "active"
+    },
+    {
+      "id": "ANTI_041",
+      "category": "节奏反转",
+      "trigger_scene_types": ["人物出场"],
+      "constraint_text": "本场人物出场前必须先写环境，用3句以上铺垫环境细节后人物才出现。人物与环境要有呼应。",
+      "intensity": "soft",
+      "status": "active"
+    },
+    {
+      "id": "ANTI_042",
+      "category": "视角反叛",
+      "trigger_scene_types": ["情报揭示"],
+      "constraint_text": "本场情报揭示不能由知情人直接说出——必须通过听者的反应间接呈现，让读者从反应中反推情报内容。",
+      "intensity": "hard",
+      "status": "active"
+    },
+    {
+      "id": "ANTI_043",
+      "category": "词汇剥夺",
+      "trigger_scene_types": ["世界观展开", "势力登场"],
+      "constraint_text": "本场世界观/势力介绍禁止使用任何设定名词的定义式解释。设定通过人物的动作、对话、反应间接呈现。",
+      "intensity": "hard",
+      "status": "active"
+    },
+    {
+      "id": "ANTI_044",
+      "category": "感官错位",
+      "trigger_scene_types": ["冲突升级"],
+      "constraint_text": "本场冲突升级必须通过空间感的变化呈现（房间变小、墙壁靠近、天花板下压），人物本身动作幅度反而变小。",
+      "intensity": "hard",
+      "status": "active"
+    },
+    {
+      "id": "ANTI_045",
+      "category": "时态异化",
+      "trigger_scene_types": ["伏笔回收"],
+      "constraint_text": "本场伏笔回收必须先重现当初埋笔的具体意象（一个原样复现的动作/物件/环境），再揭示其含义。",
+      "intensity": "hard",
+      "status": "active"
+    },
+    {
+      "id": "ANTI_046",
+      "category": "AI味清除",
+      "trigger_scene_types": ["*"],
+      "constraint_text": "全章禁用「某种」。每处情绪描写必须是具体词或身体动作，不得用「某种X」作为情绪容器。",
+      "intensity": "hard",
+      "status": "active"
+    },
+    {
+      "id": "ANTI_047",
+      "category": "AI味清除",
+      "trigger_scene_types": ["*"],
+      "constraint_text": "同一比喻禁止在全章出现超过一次。写完后须自查关键词，重复者必须重写成不同的动作或意象。",
+      "intensity": "hard",
+      "status": "active"
+    },
+    {
+      "id": "ANTI_048",
+      "category": "AI味清除",
+      "trigger_scene_types": ["*"],
+      "constraint_text": "不同角色的外貌/服装描写不得使用相同词组。每个角色只能有一个专属外部特征，不得套用通用模板。",
+      "intensity": "hard",
+      "status": "active"
+    },
+    {
+      "id": "ANTI_049",
+      "category": "AI味清除",
+      "trigger_scene_types": ["世界观展开", "势力登场", "转折", "结尾"],
+      "constraint_text": "禁止在同一段落内等量并列描述三个以上势力/阵营。只详写一个，其余以反应、沉默、缺席呈现。信息不对称才是叙事，等量呈现是数据库。",
+      "intensity": "hard",
+      "status": "active"
+    },
+    {
+      "id": "ANTI_050",
+      "category": "AI味清除",
+      "trigger_scene_types": ["*"],
+      "constraint_text": "全章段落长度必须有明显变化：每写3-4个中等段落后，必须插入一个极短段落（1-3句）或一个极长段落（10句以上）。不得连续出现5个以上相近长度的段落。",
+      "intensity": "soft",
+      "status": "active"
+    },
+    {
+      "id": "ANTI_051",
+      "category": "AI味清除",
+      "trigger_scene_types": ["战斗", "势力登场", "冲突升级"],
+      "constraint_text": "多文明/多势力同场时，每次只写一个势力的具体动作作为主体，其余势力只能以声音、残影、余光、被动反应出现。同一场景内禁止出现「A做了X，B做了X，C做了X」的对称列举结构。",
+      "intensity": "hard",
+      "status": "active"
+    },
+    {
+      "id": "ANTI_052",
+      "category": "AI味清除",
+      "trigger_scene_types": ["悬念", "危机降临", "战斗", "情感"],
+      "constraint_text": "用动作/感官展示完某能力或本能后，禁止紧接一句解释性陈述（「这是X的Y能力」、「这是Z留下的本能」）。读者从画面感受到的内容，不需要作者再说一遍。",
+      "intensity": "hard",
+      "status": "active"
+    },
+    {
+      "id": "ANTI_053",
+      "category": "AI味清除",
+      "trigger_scene_types": ["结尾", "成长蜕变", "转折"],
+      "constraint_text": "场景或章节结尾禁用宣告式总结句（「他要X」、「他宣告Y」、「每一步都在Z」）。结尾必须是一个具体动作、感官细节或静止画面，意义由读者自行感受，不由叙述者点明。",
+      "intensity": "hard",
+      "status": "active"
+    }
+  ]
+}

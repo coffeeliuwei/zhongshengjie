@@ -1,0 +1,280 @@
+{
+  "world_name": "星海纪元",
+  "world_type": "auto-generated",
+  "description": "自动从大纲生成的世界观配置 - 2026-04-07",
+  "power_systems": {
+    "灵能": {
+      "source": "宇宙能量共鸣",
+      "cultivation": "精神冥想",
+      "combat_style": "心灵感应、念力、预知",
+      "costs": [
+        "待补充"
+      ],
+      "subtypes": {}
+    },
+    "基因改造": {
+      "source": "基因序列编辑",
+      "cultivation": "生物工程",
+      "combat_style": "超强体质、再生能力、感官强化",
+      "costs": [
+        "待补充"
+      ],
+      "subtypes": {}
+    },
+    "机械融合": {
+      "source": "纳米机械植入",
+      "cultivation": "技术升级",
+      "combat_style": "机械臂、神经接口、意识上传",
+      "costs": [
+        "待补充"
+      ],
+      "subtypes": {}
+    },
+    "林星河": {
+      "source": "银河联邦",
+      "cultivation": "灵能（共鸣者级）",
+      "combat_style": "理想主义、追求正义",
+      "costs": [
+        "待补充"
+      ],
+      "subtypes": {}
+    },
+    "凯瑟琳": {
+      "source": "星辰帝国",
+      "cultivation": "基因改造（三级）",
+      "combat_style": "冷酷、忠诚、内心挣扎",
+      "costs": [
+        "待补充"
+      ],
+      "subtypes": {}
+    },
+    "雷恩": {
+      "source": "自由联盟",
+      "cultivation": "机械融合（神经接口）",
+      "combat_style": "自由散漫、重情义",
+      "costs": [
+        "待补充"
+      ],
+      "subtypes": {}
+    },
+    "艾达": {
+      "source": "中立科学家",
+      "cultivation": "三系皆通",
+      "combat_style": "神秘、智慧、目的不明",
+      "costs": [
+        "待补充"
+      ],
+      "subtypes": {}
+    },
+    "维克多": {
+      "source": "帝国将军",
+      "cultivation": "基因改造（五级）",
+      "combat_style": "复仇、摧毁联邦",
+      "costs": [
+        "待补充"
+      ],
+      "subtypes": {}
+    },
+    "塞拉芬": {
+      "source": "联邦高层",
+      "cultivation": "灵能（圣者级）",
+      "combat_style": "追求绝对秩序",
+      "costs": [
+        "待补充"
+      ],
+      "subtypes": {}
+    },
+    "零号": {
+      "source": "AI觉醒体",
+      "cultivation": "机械融合（纯数据）",
+      "combat_style": "人类进化计划",
+      "costs": [
+        "待补充"
+      ],
+      "subtypes": {}
+    }
+  },
+  "factions": {
+    "世界本质": {
+      "structure": "待补充",
+      "political": [],
+      "economy": [
+        "待补充"
+      ],
+      "culture": [],
+      "architecture": "待补充"
+    },
+    "灵能体系详情": {
+      "structure": "待补充",
+      "political": [],
+      "economy": [
+        "待补充"
+      ],
+      "culture": [],
+      "architecture": "待补充"
+    },
+    "基因改造体系": {
+      "structure": "待补充",
+      "political": [],
+      "economy": [
+        "待补充"
+      ],
+      "culture": [],
+      "architecture": "待补充"
+    },
+    "银河联邦": {
+      "structure": "议会民主制",
+      "political": [],
+      "economy": [
+        "科技发展与资源分配"
+      ],
+      "culture": [],
+      "architecture": "最大科技实力，但官僚主义严重"
+    },
+    "星辰帝国": {
+      "structure": "君主立宪制",
+      "political": [],
+      "economy": [
+        "领土扩张与军事力量"
+      ],
+      "culture": [],
+      "architecture": "最强军事力量，但资源紧张"
+    },
+    "自由联盟": {
+      "structure": "松散联盟",
+      "political": [],
+      "economy": [
+        "贸易自由与独立自主"
+      ],
+      "culture": [],
+      "architecture": "经济最强，但军事分散"
+    },
+    "主角组": {
+      "structure": "待补充",
+      "political": [],
+      "economy": [
+        "待补充"
+      ],
+      "culture": [],
+      "architecture": "待补充"
+    },
+    "「文明的意义是什么」": {
+      "structure": "待补充",
+      "political": [],
+      "economy": [
+        "待补充"
+      ],
+      "culture": [],
+      "architecture": "待补充"
+    }
+  },
+  "key_characters": {
+    "灵能": {
+      "faction": "宇宙能量共鸣",
+      "power": "精神冥想",
+      "subtype": "待补充",
+      "abilities": []
+    },
+    "基因改造": {
+      "faction": "基因序列编辑",
+      "power": "生物工程",
+      "subtype": "待补充",
+      "abilities": []
+    },
+    "机械融合": {
+      "faction": "纳米机械植入",
+      "power": "技术升级",
+      "subtype": "待补充",
+      "abilities": []
+    },
+    "林星河": {
+      "faction": "银河联邦",
+      "power": "灵能（共鸣者级）",
+      "subtype": "待补充",
+      "abilities": []
+    },
+    "凯瑟琳": {
+      "faction": "星辰帝国",
+      "power": "基因改造（三级）",
+      "subtype": "待补充",
+      "abilities": []
+    },
+    "雷恩": {
+      "faction": "自由联盟",
+      "power": "机械融合（神经接口）",
+      "subtype": "待补充",
+      "abilities": []
+    },
+    "艾达": {
+      "faction": "中立科学家",
+      "power": "三系皆通",
+      "subtype": "待补充",
+      "abilities": []
+    },
+    "维克多": {
+      "faction": "帝国将军",
+      "power": "基因改造（五级）",
+      "subtype": "待补充",
+      "abilities": []
+    },
+    "塞拉芬": {
+      "faction": "联邦高层",
+      "power": "灵能（圣者级）",
+      "subtype": "待补充",
+      "abilities": []
+    },
+    "零号": {
+      "faction": "AI觉醒体",
+      "power": "机械融合（纯数据）",
+      "subtype": "待补充",
+      "abilities": []
+    }
+  },
+  "eras": {
+    "黑暗时代": {
+      "mood": "绝望、挣扎",
+      "color": "待补充",
+      "symbols": "待补充"
+    },
+    "觉醒时代": {
+      "mood": "希望、探索",
+      "color": "待补充",
+      "symbols": "待补充"
+    },
+    "扩张时代": {
+      "mood": "进取、竞争",
+      "color": "待补充",
+      "symbols": "待补充"
+    },
+    "冲突时代": {
+      "mood": "紧张、危机",
+      "color": "待补充",
+      "symbols": "待补充"
+    },
+    "终章时代": {
+      "mood": "史诗、命运",
+      "color": "待补充",
+      "symbols": "待补充"
+    }
+  },
+  "core_principles": {
+    "moral_view": "待补充",
+    "core_theme": "「文明的意义是什么」",
+    "romance_rule": "待补充"
+  },
+  "relationships": {
+    "love": [],
+    "enemy": []
+  },
+  "technique_mappings": {
+    "战斗": {
+      "power_specific": {}
+    },
+    "意境": {
+      "era_specific": {}
+    },
+    "人物": {
+      "faction_specific": {}
+    }
+  }
+}

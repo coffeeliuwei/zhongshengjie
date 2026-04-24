@@ -1,0 +1,139 @@
+{
+  "scene_writer_mapping": {
+    "开篇场景": {
+      "primary_writer": "玄一",
+      "workflow_order": [
+        "苍澜",
+        "玄一"
+      ],
+      "collaboration": [
+        {
+          "writer": "苍澜",
+          "phase": "前置"
+        },
+        {
+          "writer": "玄一",
+          "phase": "核心"
+        }
+      ]
+    },
+    "战斗场景": {
+      "primary_writer": "剑尘",
+      "workflow_order": [
+        "苍澜",
+        "玄一",
+        "墨言",
+        "剑尘"
+      ],
+      "collaboration": [
+        {
+          "writer": "苍澜",
+          "phase": "前置"
+        },
+        {
+          "writer": "玄一",
+          "phase": "前置"
+        },
+        {
+          "writer": "墨言",
+          "phase": "前置"
+        },
+        {
+          "writer": "剑尘",
+          "phase": "核心"
+        }
+      ]
+    },
+    "人物出场": {
+      "primary_writer": "墨言",
+      "workflow_order": [
+        "苍澜",
+        "玄一",
+        "墨言"
+      ],
+      "collaboration": [
+        {
+          "writer": "苍澜",
+          "phase": "前置"
+        },
+        {
+          "writer": "玄一",
+          "phase": "前置"
+        },
+        {
+          "writer": "墨言",
+          "phase": "核心"
+        }
+      ]
+    },
+    "情感场景": {
+      "primary_writer": "墨言",
+      "workflow_order": [
+        "玄一",
+        "墨言"
+      ],
+      "collaboration": [
+        {
+          "writer": "玄一",
+          "phase": "前置"
+        },
+        {
+          "writer": "墨言",
+          "phase": "核心"
+        }
+      ]
+    },
+    "悬念场景": {
+      "primary_writer": "玄一",
+      "workflow_order": [
+        "苍澜",
+        "玄一"
+      ],
+      "collaboration": [
+        {
+          "writer": "苍澜",
+          "phase": "前置"
+        },
+        {
+          "writer": "玄一",
+          "phase": "核心"
+        }
+      ]
+    },
+    "环境场景": {
+      "primary_writer": "云溪",
+      "workflow_order": [
+        "云溪"
+      ],
+      "collaboration": [
+        {
+          "writer": "云溪",
+          "phase": "核心"
+        }
+      ]
+    }
+  },
+  "writer_definitions": {
+    "苍澜": {
+      "skill": "novelist-canglan",
+      "default_phase": "前置"
+    },
+    "玄一": {
+      "skill": "novelist-xuanyi",
+      "default_phase": "核心"
+    },
+    "墨言": {
+      "skill": "novelist-moyan",
+      "default_phase": "核心"
+    },
+    "剑尘": {
+      "skill": "novelist-jianchen",
+      "default_phase": "核心"
+    },
+    "云溪": {
+      "skill": "novelist-yunxi",
+      "default_phase": "收尾"
+    }
+  },
+  "inactive_scenes": {}
+}

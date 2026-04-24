@@ -1,0 +1,148 @@
+{
+  "_说明": "检索质量评估基准数据 - 用于 eval_retrieval_quality.py 的自动化评估",
+  "version": "1.0",
+  "created": "2026-04-24",
+  "total_queries": 20,
+  "queries": [
+    {
+      "query": "战斗场景描写",
+      "source": "technique",
+      "expected_ids": [],
+      "relevant_keywords": ["战斗", "冲突", "招式", "剑法"],
+      "min_relevance": 0.5
+    },
+    {
+      "query": "伏笔设计技巧",
+      "source": "technique",
+      "expected_ids": [],
+      "relevant_keywords": ["伏笔", "悬念", "暗示", "回收"],
+      "min_relevance": 0.5
+    },
+    {
+      "query": "人物出场塑造",
+      "source": "technique",
+      "expected_ids": [],
+      "relevant_keywords": ["人物", "出场", "形象", "弧光"],
+      "min_relevance": 0.5
+    },
+    {
+      "query": "开篇三章写法",
+      "source": "technique",
+      "expected_ids": [],
+      "relevant_keywords": ["开篇", "黄金三章", "吸引", "悬念"],
+      "min_relevance": 0.5
+    },
+    {
+      "query": "情感爆发场景",
+      "source": "technique",
+      "expected_ids": [],
+      "relevant_keywords": ["情感", "爆发", "情绪", "高潮"],
+      "min_relevance": 0.5
+    },
+    {
+      "query": "玄幻小说战斗片段",
+      "source": "case",
+      "expected_ids": [],
+      "relevant_keywords": ["战斗", "招式", "灵力", "斗气"],
+      "min_relevance": 0.4
+    },
+    {
+      "query": "对话潜台词写法",
+      "source": "case",
+      "expected_ids": [],
+      "relevant_keywords": ["对话", "潜台词", "暗示", "言外之意"],
+      "min_relevance": 0.4
+    },
+    {
+      "query": "转折场景案例",
+      "source": "case",
+      "expected_ids": [],
+      "relevant_keywords": ["转折", "意外", "反转", "震惊"],
+      "min_relevance": 0.4
+    },
+    {
+      "query": "打脸爽文片段",
+      "source": "case",
+      "expected_ids": [],
+      "relevant_keywords": ["打脸", "震惊", "嘲讽", "不可能"],
+      "min_relevance": 0.4
+    },
+    {
+      "query": "环境描写烘托氛围",
+      "source": "case",
+      "expected_ids": [],
+      "relevant_keywords": ["环境", "氛围", "烘托", "场景"],
+      "min_relevance": 0.4
+    },
+    {
+      "query": "修仙力量体系设定",
+      "source": "novel",
+      "expected_ids": [],
+      "relevant_keywords": ["修仙", "境界", "灵气", "突破"],
+      "min_relevance": 0.4
+    },
+    {
+      "query": "主角人物设定",
+      "source": "novel",
+      "expected_ids": [],
+      "relevant_keywords": ["主角", "人物", "性格", "成长"],
+      "min_relevance": 0.4
+    },
+    {
+      "query": "宗门势力设定",
+      "source": "novel",
+      "expected_ids": [],
+      "relevant_keywords": ["宗门", "势力", "门派", "长老"],
+      "min_relevance": 0.4
+    },
+    {
+      "query": "世界观力量代价",
+      "source": "novel",
+      "expected_ids": [],
+      "relevant_keywords": ["代价", "力量", "修炼", "限制"],
+      "min_relevance": 0.4
+    },
+    {
+      "query": "悬念布局技法",
+      "source": "technique",
+      "expected_ids": [],
+      "relevant_keywords": ["悬念", "布局", "揭秘", "期待"],
+      "min_relevance": 0.5
+    },
+    {
+      "query": "反转设计写法",
+      "source": "technique",
+      "expected_ids": [],
+      "relevant_keywords": ["反转", "意外", "颠覆", "真相"],
+      "min_relevance": 0.5
+    },
+    {
+      "query": "氛围意境营造",
+      "source": "technique",
+      "expected_ids": [],
+      "relevant_keywords": ["氛围", "意境", "写意", "渲染"],
+      "min_relevance": 0.5
+    },
+    {
+      "query": "高潮场景节奏控制",
+      "source": "technique",
+      "expected_ids": [],
+      "relevant_keywords": ["高潮", "节奏", "爆发", "顶点"],
+      "min_relevance": 0.5
+    },
+    {
+      "query": "修炼突破场景",
+      "source": "case",
+      "expected_ids": [],
+      "relevant_keywords": ["突破", "修炼", "境界", "顿悟"],
+      "min_relevance": 0.4
+    },
+    {
+      "query": "势力登场写法",
+      "source": "case",
+      "expected_ids": [],
+      "relevant_keywords": ["势力", "登场", "亮相", "排场"],
+      "min_relevance": 0.4
+    }
+  ]
+}

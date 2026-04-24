@@ -1,0 +1,96 @@
+================================================================================
+ n18cd_audit_log_20260419.txt — N18c + N18d 审计日志(事后补建)
+================================================================================
+生成时间 : 2026-04-19 (Asia/Shanghai)
+生成执行 : opencode (GLM5),按 docs/计划_N18cd_patch补做_20260419.md §3.A
+补建原因 : N18cd 首次执行完成了 Part B 主任务(4 skill 注入 [N18d 2026-04-19]
+           标记 + skill_backup_20260419/ 创建),但遗漏了 Part A 审计采集与
+           注入器脚本保留。本日志事后采集采集到真实状态,标记"补建",
+           并在第 3 节诚实记录已知受限(原始版本丢失)。
+覆盖范围 :
+  [N18-E] novelist-worldview-generator/SKILL.md ⚠️ DEPRECATED 横幅(证据)
+  [N18-F] 8 个已处理 SKILL.md 相对 skill_backup_20260418/ 的大小变化 < 30%
+  Part B 事后记录:4 skill 注入 [N18d 2026-04-19] 结果
+已知受限 : skill_backup_20260419/ 下 4 skill 是"改后版本",原始版本永久丢失
+           (见 skill_backup_20260419/README_backup_note.md)
+数据基线 : m7_summary.md (诚实版,2026-04-19)
+================================================================================
+
+################################################################################
+# [N18-E] novelist-worldview-generator/SKILL.md 含 DEPRECATED 横幅
+################################################################################
+
+--- 文件前 15 行(frontmatter + DEPRECATED 横幅)---
+1: ---
+2: name: novelist-worldview-generator
+3: description: "世界观生成器 - 从小说大纲自动提取并生成世界观配置。支持多用户、大纲同步、配置更新。"
+4: ---
+5: 
+6: > # ⚠️ DEPRECATED — M2-β 后该 skill 整体不可用
+7: >
+8: > **[N18 2026-04-18]** 本 skill 引用的 `.vectorstore/core/worldview_genera
+9: > `.vectorstore/core/worldview_sync.py` 已在 M2-β 重构中归档至
+10: > `.archived/vectorstore_core_20260418/`,所有 `python .vectorstore/core/
+11: > 报 FileNotFoundError。
+12: >
+13: > **临时替代方案**:
+14: > - 世界观生成:在 Claude Code 对话中说"请根据总大纲生成世界观",由 LLM 直接产出
+15: > - 世界观同步:`python -m core kb --sync`(走 KB 重建流程)
+
+--- grep -n DEPRECATED ---
+DEPRECATED 出现行: [6]
+DEPRECATED 总命中: 1
+
+--- grep -n N18 2026-04-18 ---
+N18 出现行: [8]
+
+[N18-E] 判定:PASS
+
+################################################################################
+# [N18-F] 8 个已处理 SKILL.md 相对备份的大小变化 < 30%
+################################################################################
+
+skill                                backup_B   current_B    delta%   verdict
+------------------------------------------------------------------------------------------
+novel-workflow 97544 97991 0.46% PASS
+novelist-evaluator 49057 49123 0.13% PASS
+novelist-canglan 6167 6345 2.89% PASS
+novelist-jianchen 5380 5567 3.48% PASS
+novelist-moyan 5489 5670 3.3% PASS
+novelist-xuanyi 5731 5918 3.26% PASS
+novelist-yunxi 6947 7140 2.78% PASS
+novelist-worldview-generator 9256 9983 7.85% PASS
+
+最大 |delta| = 7.85% (阈值 30%)
+[N18-F] 判定:PASS
+
+################################################################################
+# Part B 事后记录 - 4 skill [N18d 2026-04-19] 注入状态
+################################################################################
+novel-inspiration-ingest N18d-hits=1 backup_post=15232 current=15232 delta=0.0%
+novelist-connoisseur N18d-hits=2 backup_post=5119 current=5119 delta=0.0%
+novelist-shared N18d-hits=1 backup_post=15537 current=15537 delta=0.0%
+novelist-technique-search N18d-hits=1 backup_post=6627 current=6627 delta=0.0%
+
+--- connoisseur P1-3 占位 ---
+6: # [N18d 2026-04-19] P0-4 清理:已核验无死引用,纳入 N18 范围
+7: # [N18d 2026-04-19] 注:P1-3 将大改(鉴赏师重写),此处仅标记不改动内容
+
+[Part B 事后] 判定:PASS
+
+################################################################################
+# 综合判定
+################################################################################
+
+P0-3 N18c : [N18-E] + [N18-F] 双 PASS
+P0-4 N18d : 4 skill N18d 标记注入 PASS
+
+12 skill 清理口径闭合:
+  原 N18(8): novel-workflow/evaluator/canglan/jianchen/moyan/xuanyi/yunxi/worldview-generator
+  新 N18d(4): inspiration-ingest/connoisseur/shared/technique-search
+
+已知受限: 4 skill 原始版本丢失(见 README_backup_note.md)
+
+================================================================================
+日志结束 - 2026-04-19 Asia/Shanghai
+================================================================================

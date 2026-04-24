@@ -1,0 +1,12 @@
+
+=== M8 A类替换脚本 [APPLY] ===
+Skills 目录: C:\Users\39477\.agents\skills
+
+  [OK] 写入 SKILL.md：17 处替换
+  [OK] 写入 SKILL.md：4 处替换
+  [OK] 写入 SKILL.md：5 处替换
+  [OK] 写入 SKILL.md：1 处替换
+  [OK] 写入 SKILL.md：1 处替换
+
+========================================
+合计 28 处已写入

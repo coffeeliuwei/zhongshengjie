@@ -1,0 +1,407 @@
+{
+  "version": "1.0",
+  "description": "人工标注检索基准集，用于 eval_retrieval_quality.py",
+  "annotated_at": "2026-04-24T09:56:12.509569",
+  "queries": [
+    {
+      "id": "q_001",
+      "query": "战斗场景描写",
+      "source": "technique",
+      "expected_results": [
+        {
+          "id": "374",
+          "relevance": 3
+        },
+        {
+          "id": "424",
+          "relevance": 3
+        },
+        {
+          "id": "391",
+          "relevance": 3
+        },
+        {
+          "id": "389",
+          "relevance": 3
+        },
+        {
+          "id": "375",
+          "relevance": 3
+        },
+        {
+          "id": "393",
+          "relevance": 3
+        },
+        {
+          "id": "397",
+          "relevance": 3
+        },
+        {
+          "id": "392",
+          "relevance": 3
+        },
+        {
+          "id": "386",
+          "relevance": 3
+        }
+      ],
+      "min_recall_target": 0.75,
+      "annotated_at": "2026-04-24T10:01:55.054318"
+    },
+    {
+      "id": "q_002",
+      "query": "伏笔设计技巧",
+      "source": "technique",
+      "expected_results": [
+        {
+          "id": "103",
+          "relevance": 3
+        },
+        {
+          "id": "1116",
+          "relevance": 2
+        },
+        {
+          "id": "154",
+          "relevance": 3
+        },
+        {
+          "id": "150",
+          "relevance": 3
+        },
+        {
+          "id": "196",
+          "relevance": 3
+        },
+        {
+          "id": "149",
+          "relevance": 3
+        },
+        {
+          "id": "505",
+          "relevance": 3
+        },
+        {
+          "id": "153",
+          "relevance": 3
+        },
+        {
+          "id": "111",
+          "relevance": 3
+        },
+        {
+          "id": "112",
+          "relevance": 2
+        }
+      ],
+      "min_recall_target": 0.75,
+      "annotated_at": "2026-04-24T10:06:05.758873"
+    },
+    {
+      "id": "q_003",
+      "query": "人物出场塑造",
+      "source": "technique",
+      "expected_results": [
+        {
+          "id": "283",
+          "relevance": 3
+        },
+        {
+          "id": "762",
+          "relevance": 3
+        },
+        {
+          "id": "270",
+          "relevance": 3
+        },
+        {
+          "id": "868",
+          "relevance": 2
+        },
+        {
+          "id": "521",
+          "relevance": 3
+        },
+        {
+          "id": "599",
+          "relevance": 3
+        },
+        {
+          "id": "279",
+          "relevance": 3
+        },
+        {
+          "id": "331",
+          "relevance": 3
+        },
+        {
+          "id": "598",
+          "relevance": 3
+        }
+      ],
+      "min_recall_target": 0.75,
+      "annotated_at": "2026-04-24T10:09:57.630837"
+    },
+    {
+      "id": "q_004",
+      "query": "开篇三章写法",
+      "source": "technique",
+      "expected_results": [
+        {
+          "id": "1054",
+          "relevance": 3
+        },
+        {
+          "id": "211",
+          "relevance": 3
+        },
+        {
+          "id": "1055",
+          "relevance": 1
+        },
+        {
+          "id": "1099",
+          "relevance": 3
+        },
+        {
+          "id": "226",
+          "relevance": 3
+        },
+        {
+          "id": "1056",
+          "relevance": 3
+        },
+        {
+          "id": "219",
+          "relevance": 1
+        },
+        {
+          "id": "813",
+          "relevance": 1
+        },
+        {
+          "id": "227",
+          "relevance": 3
+        },
+        {
+          "id": "1121",
+          "relevance": 3
+        }
+      ],
+      "min_recall_target": 0.75,
+      "annotated_at": "2026-04-24T10:11:48.299120"
+    },
+    {
+      "id": "q_005",
+      "query": "情感爆发场景",
+      "source": "technique",
+      "expected_results": [
+        {
+          "id": "785",
+          "relevance": 3
+        },
+        {
+          "id": "578",
+          "relevance": 3
+        },
+        {
+          "id": "577",
+          "relevance": 3
+        },
+        {
+          "id": "766",
+          "relevance": 3
+        },
+        {
+          "id": "290",
+          "relevance": 3
+        },
+        {
+          "id": "487",
+          "relevance": 3
+        },
+        {
+          "id": "195",
+          "relevance": 3
+        },
+        {
+          "id": "277",
+          "relevance": 3
+        }
+      ],
+      "min_recall_target": 0.75,
+      "annotated_at": "2026-04-24T10:13:13.119196"
+    },
+    {
+      "id": "q_006",
+      "query": "对话潜台词写法",
+      "source": "case",
+      "expected_results": [
+        {
+          "id": "adf5197e-c4cf-55e9-b1cc-71da403b2865",
+          "relevance": 3
+        },
+        {
+          "id": "afbc38db-31fb-5be7-a154-431bd2c1ea42",
+          "relevance": 2
+        },
+        {
+          "id": "4f4d3cce-ee34-58cb-bdf9-1bb8054b7a63",
+          "relevance": 2
+        },
+        {
+          "id": "3e46425a-fd47-501b-9055-fdc75a0cabb1",
+          "relevance": 2
+        }
+      ],
+      "min_recall_target": 0.75,
+      "annotated_at": "2026-04-24T10:15:33.573073"
+    },
+    {
+      "id": "q_007",
+      "query": "转折场景案例",
+      "source": "case",
+      "expected_results": [
+        {
+          "id": "3ab9c618-12c8-59f3-ab73-07be7575fcf8",
+          "relevance": 3
+        },
+        {
+          "id": "3635e45e-056b-5b7b-9c2c-0e61e5c3cd98",
+          "relevance": 3
+        },
+        {
+          "id": "c9eb2aa7-abda-5a09-b21f-41b3263827b2",
+          "relevance": 3
+        },
+        {
+          "id": "9e8f57a3-8f1b-55f7-8641-dfcc73101efe",
+          "relevance": 3
+        },
+        {
+          "id": "acd9fe1d-8927-58c6-b490-6707f11c05d6",
+          "relevance": 3
+        },
+        {
+          "id": "52f9f6c7-c9ea-5d00-abe8-23329277fb47",
+          "relevance": 3
+        },
+        {
+          "id": "31bf2ff2-0b17-5d10-9c57-413945c94de5",
+          "relevance": 3
+        }
+      ],
+      "min_recall_target": 0.75,
+      "annotated_at": "2026-04-24T10:16:22.108243"
+    },
+    {
+      "id": "q_008",
+      "query": "打脸爽文片段",
+      "source": "case",
+      "expected_results": [
+        {
+          "id": "4c235462-25d0-57c6-8f76-f9d1df9f4fca",
+          "relevance": 3
+        },
+        {
+          "id": "428491b3-f368-54d8-8a0e-c6e3652bde31",
+          "relevance": 3
+        },
+        {
+          "id": "50b1a851-4a2d-519e-87e0-e326cec0d796",
+          "relevance": 3
+        },
+        {
+          "id": "c2d745a9-153f-52f2-a4ff-09eea0e3dec0",
+          "relevance": 3
+        },
+        {
+          "id": "607a85ca-c054-5f8b-bff4-dadeff22d1ee",
+          "relevance": 3
+        },
+        {
+          "id": "9ac6ed65-c9d8-582b-a685-1dddc38e5ec4",
+          "relevance": 3
+        }
+      ],
+      "min_recall_target": 0.75,
+      "annotated_at": "2026-04-24T10:17:00.432899"
+    },
+    {
+      "id": "q_009",
+      "query": "环境描写烘托氛围",
+      "source": "case",
+      "expected_results": [
+        {
+          "id": "05a2ff66-21a9-5f91-b13e-16d7a373009f",
+          "relevance": 3
+        },
+        {
+          "id": "6e06eaf4-ccb7-58d1-b412-66c1890b204f",
+          "relevance": 3
+        },
+        {
+          "id": "59f32cf6-abae-585d-9ce4-9e4b8f95a893",
+          "relevance": 3
+        },
+        {
+          "id": "94769311-a509-5676-80c9-3464e0258bec",
+          "relevance": 3
+        }
+      ],
+      "min_recall_target": 0.75,
+      "annotated_at": "2026-04-24T10:17:28.753445"
+    },
+    {
+      "id": "q_010",
+      "query": "修仙力量体系设定",
+      "source": "novel",
+      "expected_results": [
+        {
+          "id": "98",
+          "relevance": 3
+        },
+        {
+          "id": "88",
+          "relevance": 3
+        },
+        {
+          "id": "109",
+          "relevance": 3
+        },
+        {
+          "id": "75",
+          "relevance": 3
+        },
+        {
+          "id": "104",
+          "relevance": 3
+        },
+        {
+          "id": "72",
+          "relevance": 3
+        },
+        {
+          "id": "114",
+          "relevance": 3
+        },
+        {
+          "id": "67",
+          "relevance": 3
+        },
+        {
+          "id": "68",
+          "relevance": 3
+        },
+        {
+          "id": "66",
+          "relevance": 3
+        }
+      ],
+      "min_recall_target": 0.75,
+      "annotated_at": "2026-04-24T10:17:58.486513"
+    }
+  ],
+  "total_queries": 10,
+  "last_updated": "2026-04-24T10:18:15.940505"
+}

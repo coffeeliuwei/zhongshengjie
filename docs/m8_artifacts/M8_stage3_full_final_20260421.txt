@@ -1,0 +1,26 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.7, pytest-9.0.2, pluggy-1.6.0
+rootdir: D:\动画\众生界
+configfile: pytest.ini
+plugins: anyio-4.12.1, langsmith-0.7.22
+collected 675 items
+
+tests\test_appraisal_agent.py ........                                   [  1%]
+tests\test_audit_trigger.py ......                                       [  2%]
+tests\test_change_detector.py .........................................  [  8%]
+tests\test_chapter_outline_parser.py ............                        [  9%]
+tests\test_chapter_state_tracker.py ....                                 [ 10%]
+tests\test_constraint_library.py ................................        [ 15%]
+tests\test_creation_context_api.py ...                                   [ 15%]
+tests\test_creative_contract.py .......................................  [ 21%]
+tests\test_dispatcher.py ..........................................      [ 27%]
+tests\test_embedder.py ......                                            [ 28%]
+tests\test_encoding_handling.py ..........                               [ 30%]
+tests\test_end_to_end.py ................                                [ 32%]
+tests\test_escalation_dialogue.py ....................                   [ 35%]
+tests\test_eval_criteria_in_workflow.py ..                               [ 35%]
+tests\test_eval_criteria_workflow.py ....                                [ 36%]
+tests\test_evaluator_exemption.py .................                      [ 38%]
+tests\test_experience_writer_schema.py ...                               [ 39%]
+tests\test_extraction_formatter.py ......                                [ 40%]
+tests\test_extraction_runner.py .......                                  [ 41%]

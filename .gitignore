@@ -1,0 +1,279 @@
+# ========================================
+# 众生界项目 - Git推送配置
+# ========================================
+# 
+# master分支推送内容：
+# - 项目代码（core/、modules/、tools/、tests/）
+# - 案例库索引和脚本（.case-library/*.json、scripts/）
+# - 配置模板（config.example.json）
+# - 向量库代码（.vectorstore/core/）
+# - 核心文档（README.md、docs/核心文档）
+# 
+# 不推送（需用户自行构建）：
+# - Skills源码（skills/）→ 安装到 ~/.agents/skills/
+# - 技法库数据（创作技法/*.md）
+# - 小说设定（设定/*.md）
+# - 案例数据（.case-library/cases/*.json/*.txt）
+# - 向量数据（Qdrant本地数据，约20G）
+# - 用户创作内容（正文/、章节大纲/、总大纲.md）
+# - 提炼临时数据（.novel-extractor/extracted/）
+# 
+# 不推送（开发环境特定）：
+# - .claude/（Claude Code配置）
+# - .obsidian/（Obsidian编辑器）
+# - .workbuddy/（WorkBuddy工具）
+# - docs/superpowers/（本地开发计划）
+# 
+# 作者：coffeeliuwei
+# 版本：v16.0
+# 最后更新：2026-04-16
+# ========================================
+
+# ========================================
+# 用户自建内容 - 不推送
+# ========================================
+
+创作技法/**/*.md
+创作技法/**/*.txt
+创作技法/**/*.json
+创作技法/99-从小说提取/
+设定/
+正文/
+章节大纲/
+章节经验日志/
+写作标准积累/
+评估报告/
+/总大纲.md
+
+# 案例库数据（太大，仅推送索引和脚本）
+.case-library/cases/
+
+# ========================================
+# Skills源码 - 安装到 ~/.agents/skills/
+# ========================================
+
+skills/
+
+# ========================================
+# 小说提炼系统 - 运行时数据
+# ========================================
+
+# 提炼临时数据和进度标记
+.novel-extractor/extracted/
+.novel-extractor/*.json
+.novel-extractor/unified_progress.json
+
+# 提炼脚本保留，但数据不推送
+# .novel-extractor/*.py 可推送（代码）
+# .novel-extractor/extracted/ 不推送（数据）
+
+# ========================================
+# 开发环境特定 - 本地私有
+# ========================================
+
+# Claude Code
+.claude/
+
+# Obsidian编辑器
+.obsidian/
+
+# WorkBuddy工具
+.workbuddy/
+
+# 项目审核报告（本地文档）
+项目审核报告_AI工程评估.md
+
+# ========================================
+# 文档目录 - 仅推送核心文档
+# ========================================
+
+# superpowers spec/plans - 本地开发用
+docs/superpowers/
+
+# 存档文档
+docs/archived/
+
+# 设计方案文档（已实现或废弃）
+docs/专家级能力体系设计方案.md
+docs/*设计方案*.md
+
+# 内部开发文档（不对外公开）
+docs/计划_*.md
+docs/审核报告_*.md
+docs/SESSION_HANDOFF_*.md
+docs/opencode_dev_protocol_*.md
+docs/ADR-*.md
+docs/architecture_design_report.md
+docs/ROADMAP_*.md
+docs/evolution_roadmap.md
+docs/AI项目掌控手册.md
+docs/DIRECTORY_STRUCTURE.md
+docs/数据工程优化方案.md
+docs/整库拆解报告.md
+docs/统一提炼引擎重构方案.md
+docs/audit/
+docs/m5_evidence/
+docs/m6_artifacts/
+docs/m7_artifacts/
+docs/workflows/
+docs/写手工作流启动手册_*.md
+
+# ========================================
+# 运行时状态 - 本地私有
+# ========================================
+
+.state/
+.opencode/node_modules/
+.opencode/package.json
+.opencode/package-lock.json
+.opencode/bun.lock
+.opencode/opencode.json
+.seren/
+.seren/
+.agents/
+.project_memory/
+
+# 迁移临时文件
+tools/evaluation_criteria_migrated.json
+tools/*_migrated.json
+
+# Qdrant本地数据（约20G）
+.vectorstore/qdrant/
+.vectorstore/qdrant_docker/
+
+# 日志和缓存
+logs/
+.cache/
+*.log
+*.cache
+
+# ========================================
+# 配置文件 - 含本地路径
+# ========================================
+
+config.json
+config.local.json
+system_config.json
+.env
+*.env
+
+# ========================================
+# IDE 和编辑器
+# ========================================
+
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ========================================
+# OS 文件
+# ========================================
+
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# ========================================
+# Python
+# ========================================
+
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+
+# Cython 编译产物（M6 闭源分发）
+*.pyd
+*.c
+
+develop-eggs/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# ========================================
+# 临时文件
+# ========================================
+
+*.tmp
+*.bak
+*.backup
+*.old
+*.orig
+
+# 根目录临时测试文件
+/test_*.py
+/test_*.txt
+/temp_*.txt
+/verify_*.py
+/fix_*.py
+
+# 测试数据库
+.test_chroma/
+.test_qdrant/
+
+# ========================================
+# 测试覆盖率
+# ========================================
+
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache/
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# ========================================
+# 向量库缓存
+# ========================================
+
+.vectorstore/__pycache__/
+.vectorstore/*/__pycache__/
+.vectorstore/*/segments/
+.vectorstore/*/temp_segments/
+*.pickle
+*.index
+
+# ========================================
+# 数据库文件
+# ========================================
+
+*.sqlite
+*.sqlite3
+
+# ========================================
+# 归档文件
+# ========================================
+
+archived/
+.archived/
+存档/
+
+# 运行时状态（不入库）
+.workflow_states/
+
+# skill 备份目录（大型快照，不入库）
+docs/m7_artifacts/skill_backup_*/
+
+# 用户素材库（含 PDF/原始资料，不入库）
+素材库/
+
+# 临时搜索结果
+/search_results.txt

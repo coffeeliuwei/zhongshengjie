@@ -1,0 +1,13 @@
+{
+  "scan_time": "2026-04-09 02:02:52",
+  "total_files": 6245,
+  "file_types": {
+    "txt": 639,
+    "epub": 2361,
+    "mobi": 3237,
+    "other": 8
+  },
+  "source_dirs": [
+    "E:\\小说资源"
+  ]
+}

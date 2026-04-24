@@ -1,0 +1,13 @@
+{
+  "dimension_id": "character_relation",
+  "status": "running",
+  "total_novels": 6237,
+  "processed_novels": 0,
+  "total_items": 0,
+  "extracted_items": 0,
+  "last_novel_id": "",
+  "last_update": "2026-04-11T06:07:45.829206",
+  "errors": [],
+  "started_at": "2026-04-11T06:07:45.829206",
+  "completed_at": ""
+}

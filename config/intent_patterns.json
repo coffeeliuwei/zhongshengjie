@@ -1,0 +1,595 @@
+{
+  "_meta": {
+    "version": "1.0",
+    "extracted_from": "core/conversation/intent_classifier.py",
+    "extracted_at": "2026-04-18T13:58:52",
+    "milestone": "M4 (类 B 字符串外化)",
+    "core_intents_count": 14,
+    "extended_intents_count": 36,
+    "total_pattern_strings": 186
+  },
+  "core_intents": {
+    "start_chapter": {
+      "patterns": [
+        "写第(.+?)章",
+        "开始创作第(.+?)章",
+        "帮我写第(.+?)章",
+        "创作第(.+?)章"
+      ],
+      "category": "WORKFLOW_CONTROL",
+      "entities": [
+        "chapter"
+      ]
+    },
+    "continue_workflow": {
+      "patterns": [
+        "继续",
+        "继续写",
+        "接着刚才",
+        "往下写"
+      ],
+      "category": "WORKFLOW",
+      "entities": []
+    },
+    "pause_workflow": {
+      "patterns": [
+        "暂停",
+        "等一下",
+        "先停",
+        "休息一下"
+      ],
+      "category": "WORKFLOW_CONTROL",
+      "entities": []
+    },
+    "undo_last": {
+      "patterns": [
+        "撤销",
+        "不对",
+        "我说错了",
+        "重写",
+        "重来"
+      ],
+      "category": "WORKFLOW",
+      "entities": []
+    },
+    "full_extraction": {
+      "patterns": [
+        "提炼数据",
+        "初始化数据",
+        "全面提炼",
+        "更新案例库",
+        "重新提炼",
+        "全量提炼"
+      ],
+      "category": "DATA_EXTRACTION",
+      "entities": []
+    },
+    "incremental_extraction": {
+      "patterns": [
+        "增量提炼",
+        "同步新小说",
+        "更新数据",
+        "同步小说库",
+        "增量同步"
+      ],
+      "category": "DATA_EXTRACTION",
+      "entities": []
+    },
+    "add_character": {
+      "patterns": [
+        "加个新角色叫(.+)",
+        "新增角色(.+)",
+        "有个新角色(.+)",
+        "加一个角色(.+)"
+      ],
+      "category": "SETTING_UPDATE",
+      "entities": [
+        "character_name"
+      ]
+    },
+    "add_character_ability": {
+      "patterns": [
+        "(.+?)有个新能力叫(.+)",
+        "(.+?)的血脉能力是(.+)",
+        "(.+?)获得了(.+)能力",
+        "(.+?)学会了(.+)",
+        "(.+?)觉醒了(.+)能力"
+      ],
+      "category": "SETTING_UPDATE",
+      "entities": [
+        "character",
+        "ability"
+      ]
+    },
+    "add_character_relation": {
+      "patterns": [
+        "(.+?)和(.+?)是(.+)",
+        "(.+?)和(.+?)的关系是(.+)",
+        "(.+?)是(.+?)的(.+)"
+      ],
+      "category": "SETTING_UPDATE",
+      "entities": [
+        "character1",
+        "character2",
+        "relation"
+      ]
+    },
+    "modify_character": {
+      "patterns": [
+        "(.+?)的性格改成(.+)",
+        "(.+?)的设定改成(.+)",
+        "修改(.+?)的(.+)"
+      ],
+      "category": "SETTING_UPDATE",
+      "entities": [
+        "character",
+        "attribute",
+        "value"
+      ]
+    },
+    "add_faction": {
+      "patterns": [
+        "加个新势力叫(.+)",
+        "有个新势力叫(.+)",
+        "新增势力(.+)",
+        "加一个势力(.+)"
+      ],
+      "category": "SETTING_UPDATE",
+      "entities": [
+        "faction_name"
+      ]
+    },
+    "add_faction_member": {
+      "patterns": [
+        "(.+?)加入(.+)",
+        "(.+?)归属于(.+)",
+        "(.+?)属于(.+)"
+      ],
+      "category": "SETTING_UPDATE",
+      "entities": [
+        "character",
+        "faction"
+      ]
+    },
+    "modify_plot": {
+      "patterns": [
+        "剧情改成(.+)",
+        "(.+?)改成(.+)",
+        "修改剧情(.+)",
+        "剧情变成(.+)"
+      ],
+      "category": "SETTING_UPDATE",
+      "entities": [
+        "plot_change"
+      ]
+    },
+    "add_plot_point": {
+      "patterns": [
+        "加个剧情(.+)",
+        "新增剧情(.+)",
+        "加一个情节(.+)"
+      ],
+      "category": "SETTING_UPDATE",
+      "entities": [
+        "plot_point"
+      ]
+    }
+  },
+  "extended_intents": {
+    "add_hook": {
+      "patterns": [
+        "这里埋个伏笔[：:]?(.+)",
+        "埋下伏笔[：:]?(.+)",
+        "伏笔(.+)"
+      ],
+      "category": "TRACKING",
+      "entities": [
+        "hook_content"
+      ]
+    },
+    "advance_hook": {
+      "patterns": [
+        "这个伏笔推进一下",
+        "推进伏笔(.+)",
+        "伏笔(.+?)推进"
+      ],
+      "category": "TRACKING",
+      "entities": [
+        "hook_name"
+      ]
+    },
+    "resolve_hook": {
+      "patterns": [
+        "这个伏笔回收了",
+        "回收伏笔(.+)",
+        "伏笔(.+?)回收"
+      ],
+      "category": "TRACKING",
+      "entities": [
+        "hook_name"
+      ]
+    },
+    "add_resource": {
+      "patterns": [
+        "(.+?)获得了(.+)",
+        "(.+?)得到(.+)",
+        "(.+?)拥有了(.+)"
+      ],
+      "category": "TRACKING",
+      "entities": [
+        "character",
+        "resource"
+      ]
+    },
+    "consume_resource": {
+      "patterns": [
+        "(.+?)用了(.+)",
+        "(.+?)消耗了(.+)",
+        "(.+?)花费了(.+)"
+      ],
+      "category": "TRACKING",
+      "entities": [
+        "character",
+        "resource"
+      ]
+    },
+    "add_injury": {
+      "patterns": [
+        "(.+?)受了(.+)",
+        "(.+?)受伤(.+)",
+        "(.+?)的伤(.+)"
+      ],
+      "category": "TRACKING",
+      "entities": [
+        "character",
+        "injury"
+      ]
+    },
+    "add_character_info": {
+      "patterns": [
+        "(.+?)知道了(.+)",
+        "(.+?)发现(.+)",
+        "(.+?)得知(.+)"
+      ],
+      "category": "TRACKING",
+      "entities": [
+        "character",
+        "info"
+      ]
+    },
+    "share_info": {
+      "patterns": [
+        "(.+?)告诉(.+?)(.+)",
+        "(.+?)向(.+?)透露(.+)",
+        "(.+?)通知(.+?)(.+)"
+      ],
+      "category": "TRACKING",
+      "entities": [
+        "character1",
+        "character2",
+        "info"
+      ]
+    },
+    "add_payoff": {
+      "patterns": [
+        "(.+?)发誓要(.+)",
+        "(.+?)承诺(.+)",
+        "(.+?)决心(.+)",
+        "(.+?)发誓(.+)"
+      ],
+      "category": "TRACKING",
+      "entities": [
+        "character",
+        "promise"
+      ]
+    },
+    "deliver_payoff": {
+      "patterns": [
+        "这个承诺兑现了",
+        "兑现承诺(.+)",
+        "承诺(.+?)完成"
+      ],
+      "category": "TRACKING",
+      "entities": [
+        "promise_name"
+      ]
+    },
+    "add_power_type": {
+      "patterns": [
+        "加个新力量体系叫(.+)",
+        "新增力量体系(.+)",
+        "加一个力量类型(.+)"
+      ],
+      "category": "SETTING_UPDATE",
+      "entities": [
+        "power_type"
+      ]
+    },
+    "add_power_level": {
+      "patterns": [
+        "力量体系加个新境界(.+)",
+        "(.+?)的力量境界是(.+)",
+        "加一个境界(.+)"
+      ],
+      "category": "SETTING_UPDATE",
+      "entities": [
+        "power_system",
+        "level"
+      ]
+    },
+    "add_power_cost": {
+      "patterns": [
+        "(.+?)的代价是(.+)",
+        "使用(.+?)代价(.+)",
+        "(.+?)代价(.+)"
+      ],
+      "category": "SETTING_UPDATE",
+      "entities": [
+        "power",
+        "cost"
+      ]
+    },
+    "add_era": {
+      "patterns": [
+        "加个新时代叫(.+)",
+        "新增时代(.+)",
+        "加一个时代(.+)"
+      ],
+      "category": "SETTING_UPDATE",
+      "entities": [
+        "era_name"
+      ]
+    },
+    "add_era_event": {
+      "patterns": [
+        "(.+?)时代加个事件(.+)",
+        "(.+?)时代发生(.+)",
+        "(.+?)时代事件(.+)"
+      ],
+      "category": "SETTING_UPDATE",
+      "entities": [
+        "era",
+        "event"
+      ]
+    },
+    "query_character": {
+      "patterns": [
+        "(.+?)是什么设定",
+        "查一下(.+?)(的)?(设定|背景|能力|信息|情况|状态|资料)",
+        "(.+?)的设定",
+        "查询角色(.+)"
+      ],
+      "category": "QUERY",
+      "entities": [
+        "character_name"
+      ]
+    },
+    "query_progress": {
+      "patterns": [
+        "进度",
+        "写到哪了",
+        "现在在干什么",
+        "当前状态"
+      ],
+      "category": "QUERY",
+      "entities": []
+    },
+    "extract_technique": {
+      "patterns": [
+        "从(.+)提炼技法",
+        "这段(.+)用了什么技法",
+        "分析(.+)的写法",
+        "学习(.+)的技巧",
+        "(.+)有什么技法可以学习",
+        "看看(.+)用的是什么手法",
+        "提炼一下(.+)的技法",
+        "这段(.+)很好，提炼技法"
+      ],
+      "category": "TECHNIQUE",
+      "entities": [
+        "content_reference"
+      ]
+    },
+    "extract_technique_from_file": {
+      "patterns": [
+        "从文件(.+)提炼技法",
+        "分析文档(.+)的技法",
+        "提炼(.+)\\\\.md里的技法",
+        "看看(.+)文档有什么技法",
+        "分析(.+)\\\\.txt中的技法",
+        "帮我分析(.+)文档",
+        "提炼这个文档(.+)的技法"
+      ],
+      "category": "TECHNIQUE",
+      "entities": [
+        "file_path"
+      ]
+    },
+    "confirm_technique": {
+      "patterns": [
+        "确认入库",
+        "这个技法可以",
+        "好的入库",
+        "入库吧",
+        "没问题入库"
+      ],
+      "category": "CONFIRMATION",
+      "entities": []
+    },
+    "modify_technique": {
+      "patterns": [
+        "技法名称改成(.+)",
+        "改成(.+)技法",
+        "名称用(.+)"
+      ],
+      "category": "TECHNIQUE",
+      "entities": [
+        "new_name"
+      ]
+    },
+    "add_evaluation_criteria": {
+      "patterns": [
+        "添加禁止项(.+)",
+        "新禁止项(.+)",
+        "加入禁止项(.+)",
+        "添加评估标准(.+)",
+        "新评估标准(.+)",
+        "(.+)感觉很假，加入禁止项",
+        "(.+)这个表达很假",
+        "这个表达很假(.+)",
+        "(.+)感觉很假",
+        "(.+)是假的",
+        "这个表达很假",
+        "这个感觉很假"
+      ],
+      "category": "EVALUATION",
+      "entities": [
+        "criteria_content"
+      ]
+    },
+    "discover_prohibitions_from_file": {
+      "patterns": [
+        "从文档(.+)发现禁止项",
+        "扫描文件(.+)找禁止项",
+        "分析(.+)文档的禁止项",
+        "发现(.+)\\\\.md里的假表达",
+        "扫描(.+)文档找假表达",
+        "帮我从(.+)文档发现常见问题表达"
+      ],
+      "category": "EVALUATION",
+      "entities": [
+        "file_path"
+      ]
+    },
+    "modify_evaluation_threshold": {
+      "patterns": [
+        "修改阈值(.+)",
+        "调整阈值(.+)",
+        "把(.+)阈值改成(.+)",
+        "(.+)的阈值改为(.+)"
+      ],
+      "category": "EVALUATION",
+      "entities": [
+        "threshold_name",
+        "new_value"
+      ]
+    },
+    "confirm_evaluation_criteria": {
+      "patterns": [
+        "确认添加",
+        "添加这个禁止项",
+        "好的添加"
+      ],
+      "category": "CONFIRMATION",
+      "entities": []
+    },
+    "reader_moment_feedback": {
+      "patterns": [
+        "(第.+章|刚才|那段|这段).*(很|太|有点).*(解气|好|漂亮|棒|震撼|感动|燃|舒服|对味)",
+        "(第.+章|刚才|那段|这段).*(很|太|有点).*(出戏|乏味|假|别扭)"
+      ],
+      "category": "FEEDBACK",
+      "entities": [
+        "chapter_ref",
+        "resonance_type"
+      ]
+    },
+    "comparative_moment_feedback": {
+      "patterns": [
+        "(.+)比(.+)(好|差|强|弱).+因为",
+        "原来.+换成.+就"
+      ],
+      "category": "FEEDBACK",
+      "entities": [
+        "segment_a",
+        "segment_b",
+        "reason"
+      ]
+    },
+    "external_moment_inject": {
+      "patterns": [
+        "把.+这段.+记(下|一下)",
+        "粘给你.+记"
+      ],
+      "category": "FEEDBACK",
+      "entities": [
+        "segment_text"
+      ]
+    },
+    "overturn_feedback": {
+      "patterns": [
+        "(这|那)版.*不(接受|满意)",
+        "鉴赏师.*选错",
+        "评估师.*漏了",
+        "虽然(过了|定稿).*但"
+      ],
+      "category": "FEEDBACK",
+      "entities": []
+    },
+    "connoisseur_audit_response": {
+      "patterns": [
+        "第.+次.*(真|是)点火",
+        "都是敷衍",
+        "审计.*[1-9]"
+      ],
+      "category": "FEEDBACK",
+      "entities": [
+        "audit_result"
+      ]
+    },
+    "inspiration_status_query": {
+      "patterns": [
+        "你(现在|最近).*(学到|记住|倾向)",
+        "灵感引擎.*状态"
+      ],
+      "category": "QUERY",
+      "entities": []
+    },
+    "constraint_query": {
+      "patterns": [
+        "查(一下)?.*约束",
+        "现在有(多少|哪些)约束"
+      ],
+      "category": "QUERY",
+      "entities": []
+    },
+    "constraint_tuning": {
+      "patterns": [
+        "(那条|这个).*约束.*(别扭|太怪|没用|有效)",
+        "(禁用|调整).*约束"
+      ],
+      "category": "MANAGEMENT",
+      "entities": [
+        "constraint_id"
+      ]
+    },
+    "constraint_add": {
+      "patterns": [
+        "加(一条|个)约束",
+        "我想加约束"
+      ],
+      "category": "MANAGEMENT",
+      "entities": []
+    },
+    "inspiration_conflict_resolution": {
+      "patterns": [
+        "用变体.[ABC12345]",
+        "放宽.*一次",
+        "调整.*后重写"
+      ],
+      "category": "WORKFLOW",
+      "entities": [
+        "variant_choice"
+      ]
+    },
+    "inspiration_bailout": {
+      "patterns": [
+        "关(掉|闭).*灵感(引擎)?",
+        "这章.*不(要)?折腾",
+        "走原(流程)?"
+      ],
+      "category": "WORKFLOW",
+      "entities": []
+    }
+  }
+}

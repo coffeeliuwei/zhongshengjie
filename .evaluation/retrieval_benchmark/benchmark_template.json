@@ -1,0 +1,33 @@
+{
+  "version": "1.0",
+  "description": "检索质量评估基准数据集模板。人工标注期望结果，用于计算 Recall@K 和 NDCG。",
+  "queries": [
+    {
+      "id": "q_001",
+      "query": "战斗场景的代价描写",
+      "expected_results": [
+        {"id": "tech_战斗冲突维度_001", "relevance": 3, "rationale": "高度相关：直接讨论战斗代价描写技法"},
+        {"id": "tech_战斗冲突维度_002", "relevance": 2, "rationale": "中度相关：涉及战斗节奏与代价平衡"},
+        {"id": "case_战斗_001", "relevance": 2, "rationale": "相关案例：包含代价描写的战斗片段"}
+      ],
+      "expected_dimensions": ["战斗冲突维度"],
+      "min_recall_target": 0.75
+    },
+    {
+      "id": "q_002",
+      "query": "开篇悬念设计",
+      "expected_results": [
+        {"id": "tech_剧情维度_开篇_001", "relevance": 3},
+        {"id": "tech_叙事维度_悬念_001", "relevance": 2}
+      ],
+      "expected_dimensions": ["剧情维度", "叙事维度"],
+      "min_recall_target": 0.80
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-04-23",
+    "total_queries": 2,
+    "status": "template",
+    "note": "需要人工扩充至200条查询后才能用于正式评估"
+  }
+}

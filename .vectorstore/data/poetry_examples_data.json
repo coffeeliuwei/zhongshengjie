@@ -1,0 +1,242 @@
+[
+  {
+    "title": "满江红·写怀",
+    "author": "岳飞",
+    "era": "南宋",
+    "category": "悲壮",
+    "emotion_core": "壮志未酬、忠愤激昂",
+    "emotion_tags": ["悲壮", "愤怒", "忠诚", "报国", "未酬"],
+    "famous_lines": [
+      "三十功名尘与土，八千里路云和月",
+      "莫等闲，白了少年头，空悲切",
+      "壮志饥餐胡虏肉，笑谈渴饮匈奴血"
+    ],
+    "imagery_used": ["尘土", "云月", "少年头", "胡虏肉", "匈奴血"],
+    "structure_style": "七言词，节奏激昂，对仗工整",
+    "world_context": null,
+    "usage_scene": ["战争场景", "复仇场景", "壮志场景"],
+    "philosophy_link": null
+  },
+  {
+    "title": "过零丁洋",
+    "author": "文天祥",
+    "era": "南宋",
+    "category": "悲壮",
+    "emotion_core": "生死抉择、忠义不屈",
+    "emotion_tags": ["悲壮", "忠义", "牺牲", "不屈", "抉择"],
+    "famous_lines": [
+      "人生自古谁无死，留取丹心照汗青"
+    ],
+    "imagery_used": ["零丁洋", "丹心", "汗青"],
+    "structure_style": "七言律诗，起承转合完整",
+    "world_context": null,
+    "usage_scene": ["死亡场景", "牺牲场景", "忠义场景"],
+    "philosophy_link": null
+  },
+  {
+    "title": "登幽州台歌",
+    "author": "陈子昂",
+    "era": "唐",
+    "category": "悲凉",
+    "emotion_core": "孤独悲怆、时空苍茫",
+    "emotion_tags": ["悲凉", "孤独", "苍茫", "怀古", "时空"],
+    "famous_lines": [
+      "前不见古人，后不见来者",
+      "念天地之悠悠，独怆然而涕下"
+    ],
+    "imagery_used": ["幽州台", "古人", "来者", "天地"],
+    "structure_style": "杂言歌行，长短句错落，悲怆节奏",
+    "world_context": null,
+    "usage_scene": ["孤独场景", "怀古场景", "登高场景"],
+    "philosophy_link": null
+  },
+  {
+    "title": "凉州词",
+    "author": "王翰",
+    "era": "唐",
+    "category": "悲凉",
+    "emotion_core": "边塞悲凉、生死豪迈",
+    "emotion_tags": ["悲凉", "边塞", "生死", "豪迈", "醉战"],
+    "famous_lines": [
+      "葡萄美酒夜光杯，欲饮琵琶马上催",
+      "醉卧沙场君莫笑，古来征战几人回"
+    ],
+    "imagery_used": ["葡萄美酒", "夜光杯", "琵琶", "沙场"],
+    "structure_style": "七言绝句，对仗工整，节奏明快悲壮",
+    "world_context": null,
+    "usage_scene": ["战争场景", "边塞场景", "生死场景"],
+    "philosophy_link": null
+  },
+  {
+    "title": "声声慢·寻寻觅觅",
+    "author": "李清照",
+    "era": "宋",
+    "category": "哀愁",
+    "emotion_core": "凄凉孤独、愁绪满怀",
+    "emotion_tags": ["哀愁", "凄凉", "孤独", "愁绪", "凄惨"],
+    "famous_lines": [
+      "寻寻觅觅，冷冷清清，凄凄惨惨戚戚",
+      "这次第，怎一个愁字了得"
+    ],
+    "imagery_used": ["淡酒", "晚风", "黄花", "梧桐", "细雨"],
+    "structure_style": "慢词，叠字入韵，愁绪层层叠加",
+    "world_context": null,
+    "usage_scene": ["孤独场景", "哀悼场景", "凄凉场景"],
+    "philosophy_link": null
+  },
+  {
+    "title": "虞美人·春花秋月何时了",
+    "author": "李煜",
+    "era": "南唐",
+    "category": "哀愁",
+    "emotion_core": "亡国之痛、往事哀思",
+    "emotion_tags": ["哀愁", "亡国", "往事", "哀思", "愁恨"],
+    "famous_lines": [
+      "春花秋月何时了，往事知多少",
+      "问君能有几多愁，恰似一江春水向东流"
+    ],
+    "imagery_used": ["春花", "秋月", "小楼", "东风", "江水"],
+    "structure_style": "小令，以愁为核，意象层叠",
+    "world_context": null,
+    "usage_scene": ["回忆场景", "亡国场景", "哀愁场景"],
+    "philosophy_link": null
+  },
+  {
+    "title": "念奴娇·赤壁怀古",
+    "author": "苏轼",
+    "era": "宋",
+    "category": "怀古",
+    "emotion_core": "英雄感慨、人生短暂",
+    "emotion_tags": ["怀古", "英雄", "感慨", "人生", "短暂"],
+    "famous_lines": [
+      "大江东去，浪淘尽，千古风流人物",
+      "江山如画，一时多少豪杰",
+      "人生如梦，一尊还酹江月"
+    ],
+    "imagery_used": ["大江", "赤壁", "乱石", "惊涛", "江月"],
+    "structure_style": "长调，气势磅礴，古今对比",
+    "world_context": null,
+    "usage_scene": ["怀古场景", "英雄场景", "感慨场景"],
+    "philosophy_link": null
+  },
+  {
+    "title": "永遇乐·京口北固亭怀古",
+    "author": "辛弃疾",
+    "era": "宋",
+    "category": "怀古",
+    "emotion_core": "壮志难酬、英雄迟暮",
+    "emotion_tags": ["怀古", "壮志", "难酬", "英雄", "迟暮"],
+    "famous_lines": [
+      "千古江山，英雄无觅孙仲谋处",
+      "廉颇老矣，尚能饭否"
+    ],
+    "imagery_used": ["北固亭", "孙仲谋", "寄奴", "廉颇"],
+    "structure_style": "长调，典故层叠，壮志与悲凉交织",
+    "world_context": null,
+    "usage_scene": ["怀古场景", "壮志场景", "迟暮场景"],
+    "philosophy_link": null
+  },
+  {
+    "title": "滕王阁序节选",
+    "author": "王勃",
+    "era": "唐",
+    "category": "苍凉",
+    "emotion_core": "时空苍茫、人生无常",
+    "emotion_tags": ["苍凉", "时空", "无常", "感慨", "壮美"],
+    "famous_lines": [
+      "落霞与孤鹜齐飞，秋水共长天一色",
+      "天高地迥，觉宇宙之无穷",
+      "兴尽悲来，识盈虚之有数"
+    ],
+    "imagery_used": ["落霞", "孤鹜", "秋水", "长天", "滕王阁"],
+    "structure_style": "骈文，对仗华丽，意象宏大",
+    "world_context": null,
+    "usage_scene": ["登高场景", "苍凉场景", "感慨场景"],
+    "philosophy_link": null
+  },
+  {
+    "title": "棋局·众生界原创",
+    "author": "云溪(创作)",
+    "era": "众生界",
+    "category": "苍凉",
+    "emotion_core": "被操控感、命运无解",
+    "emotion_tags": ["苍凉", "被操控", "命运", "无解", "棋局"],
+    "famous_lines": [
+      "棋子落盘声如裂，不知谁手执先行",
+      "一步落定生死局，众生皆在棋局中"
+    ],
+    "imagery_used": ["棋", "棋盘", "棋子", "落定"],
+    "structure_style": "七言律诗，隐喻命运操控",
+    "world_context": "众生界",
+    "usage_scene": ["命运场景", "操控场景", "觉悟场景"],
+    "philosophy_link": "众生皆棋子，被高层力量操控的命运观"
+  },
+  {
+    "title": "缝隙·众生界原创",
+    "author": "云溪(创作)",
+    "era": "众生界",
+    "category": "悲凉",
+    "emotion_core": "缝隙中挣扎、突破束缚",
+    "emotion_tags": ["悲凉", "缝隙", "挣扎", "突破", "束缚"],
+    "famous_lines": [
+      "缝隙一线光，穿透无尽暗",
+      "凡人何以胜天命，只因心中不屈服"
+    ],
+    "imagery_used": ["缝隙", "一线光", "无尽暗"],
+    "structure_style": "五言律，简洁有力，意象集中",
+    "world_context": "众生界",
+    "usage_scene": ["突破场景", "挣扎场景", "觉悟场景"],
+    "philosophy_link": "裂缝理论 - 体系中的漏洞带来突破可能"
+  },
+  {
+    "title": "轮回·众生界原创",
+    "author": "云溪(创作)",
+    "era": "众生界",
+    "category": "虚无",
+    "emotion_core": "轮回无解、虚无感",
+    "emotion_tags": ["虚无", "轮回", "无解", "命运", "循环"],
+    "famous_lines": [
+      "轮回无尽路，众生皆困局",
+      "一世一世复一世，何人能破此轮环"
+    ],
+    "imagery_used": ["轮回", "轮环", "无尽路"],
+    "structure_style": "七言律，强调循环无解",
+    "world_context": "众生界",
+    "usage_scene": ["轮回场景", "虚无场景", "命运场景"],
+    "philosophy_link": "轮回体系 - 宇宙级操控者的设计"
+  },
+  {
+    "title": "棋手·众生界原创",
+    "author": "云溪(创作)",
+    "era": "众生界",
+    "category": "苍凉",
+    "emotion_core": "棋手视角、超然冷眼",
+    "emotion_tags": ["苍凉", "棋手", "超然", "冷眼", "操控"],
+    "famous_lines": [
+      "棋手冷眼看盘局，众生悲欢皆棋步",
+      "落子无悔局已定，谁人能改命运棋"
+    ],
+    "imagery_used": ["棋手", "盘局", "棋步"],
+    "structure_style": "七言律，超然视角",
+    "world_context": "众生界",
+    "usage_scene": ["操控者场景", "觉悟场景", "高层视角场景"],
+    "philosophy_link": "高层操控者视角 - 看众生如棋子"
+  },
+  {
+    "title": "未落定的棋子·众生界原创",
+    "author": "云溪(创作)",
+    "era": "众生界",
+    "category": "希望",
+    "emotion_core": "未定性、可能的突破",
+    "emotion_tags": ["希望", "未定性", "突破", "可能", "变数"],
+    "famous_lines": [
+      "棋子未落定，变数仍存中",
+      "一线变数一线光，裂缝之中见希望"
+    ],
+    "imagery_used": ["未落定的棋子", "变数", "裂缝"],
+    "structure_style": "五言律，简洁有力，意象集中",
+    "world_context": "众生界",
+    "usage_scene": ["突破场景", "希望场景", "变数场景"],
+    "philosophy_link": "裂缝理论 - 未落定的棋子代表变数与突破可能"
+  }
+]

@@ -1,0 +1,132 @@
+{
+  "_说明": "众生界小说创作系统 - 用户配置文件",
+  "_注意": "此文件包含您的本地路径，不会推送到GitHub",
+
+  "project": {
+    "name": "众生界",
+    "version": "1.0.0"
+  },
+
+  "worldview": {
+    "current_world": "众生界",
+    "outline_path": "总大纲.md",
+    "auto_sync": true,
+    "_说明": "current_world: 当前世界观名称，对应 world_configs/*.json；outline_path: 大纲文件路径；auto_sync: 大纲改动时是否自动同步世界观"
+  },
+
+  "paths": {
+    "_说明": "项目路径配置",
+    "project_root": "D:/动画/众生界",
+    "settings_dir": "设定",
+    "techniques_dir": "创作技法",
+    "chapters_dir": "章节大纲",
+    "content_dir": "正文",
+    "experience_dir": "章节经验日志",
+    "standards_dir": "写作标准积累",
+    "vectorstore_dir": ".vectorstore",
+    "case_library_dir": ".case-library",
+    "logs_dir": "logs",
+    "cache_dir": "E:/众生界_cache",
+    "temp_dir": "E:/众生界_temp",
+    "contracts_dir": "scene_contracts",
+    "skills_base_path": "C:/Users/39477/.agents/skills",
+    "_重组后路径": "以下路径已重组到 config/ 目录下",
+    "novel_extractor_dir": ".novel-extractor",
+    "world_configs_dir": "config/worlds",
+    "scene_writer_mapping_file": "config/scene_writer_mapping.json",
+    "knowledge_graph_file": ".vectorstore/knowledge_graph.json",
+    "qdrant_storage_dir": ".vectorstore/qdrant",
+    "config_dir": "config"
+  },
+
+  "validation": {
+    "_说明": "一致性校验规则配置",
+    "_多境界体系说明": "众生界有7大力量体系，境界配置自动从世界观配置(world_configs/众生界.json)中加载",
+    "realm_order": ["凡人", "觉醒", "淬体", "凝脉", "结丹", "元婴", "化神"],
+    "_realm_order说明": "此配置作为默认值；各力量体系的境界从世界观配置中自动读取：修仙(realms)、魔法(grades)、神术(faith_levels)、科技(upgrade_levels)、兽力(blood_realms)、异能(grades)、AI力(ai_levels)",
+    "skip_rules": []
+  },
+
+  "database": {
+    "_说明": "Qdrant向量数据库配置",
+    "qdrant_host": "localhost",
+    "qdrant_port": 6333,
+    "qdrant_url": "http://localhost:6333",
+    "timeout": 10,
+    "collections": {
+      "novel_settings": "novel_settings_v2",
+      "writing_techniques": "writing_techniques_v2",
+      "case_library": "case_library_v2",
+      "creation_context": "creation_context"
+    }
+  },
+
+  "model": {
+    "_说明": "模型配置 - 嵌入模型与 LLM 模型",
+    "embedding": {
+      "name": "BAAI/bge-m3",
+      "model_path": "E:/huggingface_cache/hub/models--BAAI--bge-m3/snapshots/5617a9f61b028005a4858fdac845db406aefb181",
+      "vector_size": 1024,
+      "batch_size": 20
+    },
+    "llm": {
+      "name": "default",
+      "provider": "openai",
+      "model": "gpt-4",
+      "temperature": 0.7,
+      "max_tokens": 4096
+    },
+    "hf_cache_dir": "E:/huggingface_cache",
+    "vector_size": 1024,
+    "batch_size": 20
+  },
+
+  "retrieval": {
+    "_说明": "检索配置",
+    "dense_limit": 100,
+    "sparse_limit": 100,
+    "fusion_limit": 50,
+    "max_content_length": 3000,
+    "max_payload_size": 8000
+  },
+
+  "novel_sources": {
+    "_说明": "外部小说资源目录 - 用于案例提取",
+    "directories": [
+      "E:\\小说资源"
+    ]
+  },
+
+  "inspiration_engine": {
+    "_说明": "鉴赏师成长阶段阈值配置 (N4修复)",
+    "appraisal_cold_start_threshold": 50,
+    "_appraisal_cold_start_threshold说明": "冷启动阈值，低于此值纯LLM直感",
+    "appraisal_growing_threshold": 300,
+    "_appraisal_growing_threshold说明": "成长期阈值，50-300注入top3记忆点，>=300注入top5记忆点"
+  },
+
+  "quality_thresholds": {
+    "_说明": "数据清洗质量阈值配置",
+    "chinese_ratio_min": 0.6,
+    "_chinese_ratio_min说明": "中文比例阈值，低于此值判定为外语小说",
+    "novel_features_min": 10,
+    "_novel_features_min说明": "小说特征词数量阈值，低于此值判定为非小说内容",
+    "compression_ratio_min": 0.65,
+    "_compression_ratio_min说明": "压缩率下限，过低表示重复内容过多",
+    "compression_ratio_max": 0.80,
+    "_compression_ratio_max说明": "压缩率上限，过高表示噪音过多",
+    "quality_score_min": 0.6,
+    "_quality_score_min说明": "综合质量评分阈值",
+    "noise_ratio_max": 0.10,
+    "_noise_ratio_max说明": "噪音比例上限，高于此值禁止入库"
+  },
+
+  "clean_pipeline": {
+    "_说明": "清洗流程配置",
+    "clean_dir": ".case-library/clean",
+    "use_gpu": true,
+    "_use_gpu说明": "是否使用GPU加速嵌入生成",
+    "validate_before_ingest": true,
+    "_validate_before_ingest说明": "入库前是否执行噪音校验"
+  }
+}

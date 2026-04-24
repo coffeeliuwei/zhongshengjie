@@ -1,0 +1,36 @@
+# 众生界小说创作支持系统依赖
+# 核心依赖
+sentence-transformers>=2.2.0
+qdrant-client>=1.4.0
+tenacity>=8.0.0
+numpy>=1.21.0
+torch>=2.0.0
+
+# 格式转换
+ebooklib>=0.18
+mobi>=0.3.3
+
+# 数据清洗依赖
+lz4>=4.0.0
+jieba>=0.42.1
+
+# 测试依赖
+pytest>=7.4.0
+pytest-cov>=4.1.0
+pytest-timeout>=2.1.0
+pytest-xdist>=3.3.0
+pytest-mock>=3.11.0
+
+# 可选依赖
+# transformers>=4.30.0
+
+# Schema校验
+jsonschema>=4.0.0
+
+# BGE-M3向量嵌入
+FlagEmbedding>=1.2.0
+
+# Prometheus 监控指标
+prometheus-client>=0.16.0
+# 近重复检测
+datasketch>=1.6.0

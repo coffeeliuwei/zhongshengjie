@@ -1,0 +1,72 @@
+{
+  "_说明": "众生界小说创作系统 - 配置示例",
+  "_用法": "复制此文件为 config.json 并修改为您的实际路径",
+
+  "project": {
+    "name": "My Novel",
+    "version": "1.0.0"
+  },
+
+  "worldview": {
+    "current_world": "众生界",
+    "outline_path": "总大纲.md",
+    "auto_sync": true,
+    "_说明": "current_world: 当前世界观名称，对应 world_configs/*.json；outline_path: 大纲文件路径；auto_sync: 大纲改动时是否自动同步世界观"
+  },
+
+  "paths": {
+    "project_root": null,
+    "settings_dir": "设定",
+    "techniques_dir": "创作技法",
+    "chapters_dir": "章节大纲",
+    "content_dir": "正文",
+    "experience_dir": "章节经验日志",
+    "standards_dir": "写作标准积累",
+    "vectorstore_dir": ".vectorstore",
+    "case_library_dir": ".case-library",
+    "logs_dir": "logs",
+    "cache_dir": ".cache",
+    "contracts_dir": "scene_contracts",
+    "skills_base_path": null
+  },
+
+  "validation": {
+    "_说明": "一致性校验规则配置",
+    "_多境界体系说明": "如果项目有多个力量体系，境界配置会自动从世界观配置(world_configs/*.json)中加载",
+    "realm_order": ["凡人", "觉醒", "淬体", "凝脉", "结丹", "元婴", "化神"],
+    "_realm_order说明": "单一境界体系时使用此配置；多境界体系时此配置作为默认值，各力量体系的境界从世界观配置中读取",
+    "skip_rules": [],
+    "_skip_rules说明": "跳过的校验规则列表，如 ['R008', 'R010'] 跳过天气一致性和称呼一致性"
+  },
+
+  "database": {
+    "qdrant_host": "localhost",
+    "qdrant_port": 6333,
+    "timeout": 10,
+    "collections": {
+      "novel_settings": "novel_settings_v2",
+      "writing_techniques": "writing_techniques_v2",
+      "case_library": "case_library_v2"
+    }
+  },
+
+  "model": {
+    "embedding_model": "BAAI/bge-m3",
+    "model_path": null,
+    "hf_cache_dir": null,
+    "vector_size": 1024,
+    "batch_size": 20
+  },
+
+  "retrieval": {
+    "dense_limit": 100,
+    "sparse_limit": 100,
+    "fusion_limit": 50,
+    "max_content_length": 3000,
+    "max_payload_size": 8000
+  },
+
+  "novel_sources": {
+    "directories": []
+  }
+}
