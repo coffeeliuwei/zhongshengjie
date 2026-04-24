@@ -32,3 +32,5 @@ FlagEmbedding>=1.2.0
 
 # Prometheus 监控指标
 prometheus-client>=0.16.0
+# 近重复检测
+datasketch>=1.6.0

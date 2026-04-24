@@ -222,8 +222,11 @@ class QdrantSyncer:
 
     def _load_cases_from_directory(self, limit: int = None) -> List[CaseForSync]:
         """从cases目录加载案例（使用rglob遍历所有JSON）"""
+        from datasketch import MinHash, MinHashLSH
         cases = []
-        seen_hashes: set = set()
+        lsh = MinHashLSH(threshold=0.85, num_perm=128)
+        minhash_cache: dict = {}
+        dup_skipped = 0
 
         logger.info("扫描cases目录（使用rglob遍历所有JSON）...")
 
@@ -246,13 +249,17 @@ class QdrantSyncer:
                 if not content:
                     continue
 
-                # 内容去重：相同内容前500字的MD5视为重复
-                _content_hash = hashlib.md5(
-                    content[:500].encode("utf-8", errors="ignore")
-                ).hexdigest()
-                if _content_hash in seen_hashes:
+                # MinHash 近重复检测（shingle = 连续5字，threshold=0.85）
+                shingles = {content[k:k+5] for k in range(0, min(len(content), 2000) - 4)}
+                m = MinHash(num_perm=128)
+                for s in shingles:
+                    m.update(s.encode("utf-8", errors="ignore"))
+                if lsh.query(m):
+                    dup_skipped += 1
                     continue
-                seen_hashes.add(_content_hash)
+                lsh_key = f"case_{len(cases)}"
+                lsh.insert(lsh_key, m)
+                minhash_cache[lsh_key] = m
 
                 # 从路径和文件名提取scene_type和genre
                 # 路径格式: cases/scene_type/case_xxx.json
@@ -297,6 +304,8 @@ class QdrantSyncer:
             except Exception as e:
                 logger.warning(f"读取案例失败: {json_file.name} - {e}")
 
+        if dup_skipped:
+            logger.info(f"近重复过滤: 跳过 {dup_skipped} 条（MinHash LSH threshold=0.85）")
         logger.info(f"共加载 {len(cases)} 个案例")
         return cases
 

@@ -215,3 +215,51 @@ class TestUUIDDeterminism:
         u1 = str(uuid.uuid5(uuid.NAMESPACE_DNS, "content_hash_aaa"))
         u2 = str(uuid.uuid5(uuid.NAMESPACE_DNS, "content_hash_bbb"))
         assert u1 != u2
+
+# ────────────────────────────────────────────────
+# P2 进阶测试
+# ────────────────────────────────────────────────
+
+class TestCleanLines:
+    def _call(self, text: str) -> str:
+        from tools.case_builder import _clean_lines
+        return _clean_lines(text)
+
+    def test_removes_javascript_line(self):
+        text = "他拔出了剑。\nJavaScript is required.\n剑光闪烁。"
+        result = self._call(text)
+        assert "javascript" not in result.lower()
+        assert "他拔出了剑" in result
+        assert "剑光闪烁" in result
+
+    def test_removes_copyright_line(self):
+        text = "版权所有 不得转载\n萧炎凝视远方，目光坚毅。"
+        result = self._call(text)
+        assert "版权所有" not in result
+        assert "萧炎凝视远方" in result
+
+    def test_keeps_clean_prose(self):
+        text = "他仰望星空，心中一片澄明。\n这一刻，所有的烦恼都烟消云散。"
+        result = self._call(text)
+        assert "仰望星空" in result
+
+
+class TestBigramEntropy:
+    def _call(self, text: str) -> float:
+        from tools.case_builder import _bigram_entropy
+        return _bigram_entropy(text)
+
+    def test_normal_prose_high_entropy(self):
+        prose = (
+            "萧炎深吸一口气，体内斗气奔涌，如同一条蛟龙盘踞丹田。"
+            "他凝神静气，缓缓抬起右手，掌心一点火光瞬间化作滔天烈焰。"
+            "众人倒吸凉气，谁也没想到他竟能将异火驾驭到这般地步。"
+        )
+        assert self._call(prose) > 6.0
+
+    def test_repeated_text_low_entropy(self):
+        text = "他打了他，他打了他，他打了他，" * 10
+        assert self._call(text) < 5.0
+
+    def test_short_text_returns_zero(self):
+        assert self._call("短") == 0.0

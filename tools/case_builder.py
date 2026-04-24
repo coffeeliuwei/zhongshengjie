@@ -101,6 +101,48 @@ def _info_density(text: str) -> float:
     return len(set(chars)) / len(chars)
 
 
+# C4 风格行级过滤标志
+_LINE_BAD_SUBSTRINGS = (
+    "javascript", "cookie policy", "terms of use", "lorem ipsum",
+    "用户协议", "隐私政策", "免责声明", "版权所有", "all rights reserved",
+    "请扫描", "关注我们", "长按识别",
+)
+
+
+def _clean_lines(paragraph: str) -> str:
+    """C4 风格行级清洗：逐行判定，丢弃广告/声明行后重新拼接。"""
+    good_lines = []
+    for line in paragraph.split('\n'):
+        stripped = line.strip()
+        if len(stripped) < 2:
+            continue
+        low = stripped.lower()
+        if any(bad in low for bad in _LINE_BAD_SUBSTRINGS):
+            continue
+        if _AD_PATTERN.search(stripped):
+            continue
+        good_lines.append(stripped)
+    return '\n'.join(good_lines)
+
+
+import math as _math
+from collections import Counter as _Counter
+
+
+def _bigram_entropy(text: str) -> float:
+    """计算 bigram Shannon 熵。正常汉语小说 bigram 熵 > 7.0；模板化/重复文本 < 5.0。"""
+    chars = [c for c in text if not c.isspace()]
+    if len(chars) < 20:
+        return 0.0
+    bigrams = [chars[i] + chars[i+1] for i in range(len(chars) - 1)]
+    counter = _Counter(bigrams)
+    total = sum(counter.values())
+    return -sum(
+        (count / total) * _math.log2(count / total)
+        for count in counter.values()
+    )
+
+
 # 获取项目根目录
 _project_root = Path(__file__).resolve().parent.parent
 if str(_project_root) not in sys.path:
@@ -888,7 +930,9 @@ python case_builder.py --sync
         filtered = []
         for p in paragraphs:
             p = p.strip()
-            # 长度门槛
+            # C4 风格行级清洗（先清理段内坏行）
+            p = _clean_lines(p)
+            # 长度门槛（清洗后再检查）
             if not (100 <= len(p) <= 5000):
                 continue
             # 广告/下载站
@@ -1000,6 +1044,14 @@ python case_builder.py --sync
         # 句末完整性
         if not _is_sentence_complete(content):
             score -= 0.5
+
+        # Bigram 熵（<5.0 视为模板化文本，扣 1.5）
+        if len(content) > 100:
+            entropy = _bigram_entropy(content)
+            if entropy < 5.0:
+                score -= 1.5
+            elif entropy > 8.0:
+                score += 0.3
 
         return min(max(score, 0), 10)
 
