@@ -120,7 +120,7 @@ def test_load_real_constraints_file():
     """加载真实约束文件"""
     lib = ConstraintLibrary(DEFAULT_CONSTRAINTS_PATH)
     assert lib.get_version() == "1.0"
-    assert lib.count_total() == 45
+    assert lib.count_total() == 53  # 已扩充至53个（2026-04-24）
     # 至少应有 40 个活跃约束
     assert lib.count_active() >= 40
 

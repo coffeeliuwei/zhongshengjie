@@ -274,3 +274,6 @@ docs/m7_artifacts/skill_backup_*/
 
 # 用户素材库（含 PDF/原始资料，不入库）
 素材库/
+
+# 临时搜索结果
+/search_results.txt

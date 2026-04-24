@@ -320,11 +320,10 @@ class CLI:
         return 2  # exit code 2 = 命令存在但未实现/已迁移
 
     def _handle_migration(self, args: argparse.Namespace) -> int:
-        """处理移植模块"""
-        # TODO: 实现移植工具
-        print("移植模块 - 功能开发中")
-        print("移植工具开发进行中")
-        return 0
+        """处理移植模块（功能未实现，返回 exit code 2）"""
+        print("[migration] 迁移命令尚未实现。")
+        print("[migration] 历史迁移脚本见 tools/archived_migrations/README.md")
+        return 2
 
     def _handle_visualization(self, args: argparse.Namespace) -> int:
         """处理可视化模块"""
