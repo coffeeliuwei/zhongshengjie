@@ -901,6 +901,12 @@ python case_builder.py --sync
 
         print(f"\n提取完成: {len(all_cases)} 条案例")
 
+        # MinHash LSH 近重复过滤（跨运行持久化）
+        all_cases, dedup_stats = self._filter_near_duplicates(all_cases)
+        print(
+            f"\n[去重] 保留 {dedup_stats['kept']} 条，跳过近重复 {dedup_stats['skipped']} 条"
+        )
+
         # 保存案例
         self._save_cases(all_cases)
 
@@ -1058,6 +1064,41 @@ python case_builder.py --sync
     def _generate_case_id(self, content: str) -> str:
         """生成案例ID"""
         return hashlib.md5(content.encode()).hexdigest()[:12]
+
+    def _filter_near_duplicates(
+        self, cases: "List[Case]", index_path: Optional[Path] = None,
+    ) -> "tuple[List[Case], Dict[str, int]]":
+        """用 MinHash LSH 过滤近重复案例，并把新增案例写入持久化索引。
+
+        Args:
+            cases: 候选案例列表
+            index_path: LSH pickle 路径；None 则用 case_library_dir/dedup_index.pkl
+
+        Returns:
+            (filtered_cases, stats) — stats keys: kept / skipped
+        """
+        from tools.dedup_utils import (
+            compute_minhash, load_lsh, save_lsh,
+        )
+
+        if index_path is None:
+            index_path = self.case_library_dir / "dedup_index.pkl"
+
+        lsh, cache = load_lsh(index_path)
+        kept: List[Case] = []
+        skipped = 0
+
+        for case in cases:
+            m = compute_minhash(case.content)
+            if lsh.query(m):
+                skipped += 1
+                continue
+            lsh.insert(case.case_id, m)
+            cache[case.case_id] = m
+            kept.append(case)
+
+        save_lsh(lsh, cache, index_path)
+        return kept, {"kept": len(kept), "skipped": skipped}
 
     def _save_cases(self, cases: List[Case]):
         """保存案例到文件"""
