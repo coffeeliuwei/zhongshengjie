@@ -7,3 +7,6 @@ from .world_loader import (  # noqa: F401
     switch_world,
     list_available_worlds,
 )
+
+# Structured JSON logging
+from .logging_utils import JSONLogger, get_logger  # noqa: F401

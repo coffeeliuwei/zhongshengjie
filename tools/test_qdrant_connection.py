@@ -11,6 +11,7 @@ Qdrant向量数据库连接和数据完整性测试
 4. 检索功能测试
 """
 
+import os
 import sys
 import json
 import time
@@ -18,10 +19,19 @@ from typing import Dict, List, Any, Optional
 
 sys.stdout.reconfigure(encoding="utf-8")
 
+# 从统一配置获取 Qdrant URL
+_project_root = Path(__file__).parent.parent if 'Path' in dir() else __import__('pathlib').Path(__file__).parent.parent
+sys.path.insert(0, str(_project_root))
+try:
+    from core.config_loader import get_qdrant_url
+    _QDRANT_URL = get_qdrant_url()
+except ImportError:
+    _QDRANT_URL = os.environ.get("QDRANT_URL", "http://localhost:6333")
+
 # ==================== 测试结果收集 ====================
 
 test_results = {
-    "connection": {"status": "FAIL", "url": "http://localhost:6333", "error": None},
+    "connection": {"status": "FAIL", "url": _QDRANT_URL, "error": None},
     "collections": {},
     "integrity": {
         "vector_dimension": {"expected": 1024, "actual": None, "status": "FAIL"},
@@ -40,7 +50,7 @@ def test_connection() -> bool:
     try:
         from qdrant_client import QdrantClient
 
-        client = QdrantClient(url="http://localhost:6333", timeout=10)
+        client = QdrantClient(url=_QDRANT_URL, timeout=10)
 
         # 测试 get_collections()
         start_time = time.time()
@@ -326,7 +336,7 @@ def run_all_tests():
     # 创建客户端
     from qdrant_client import QdrantClient
 
-    client = QdrantClient(url="http://localhost:6333", timeout=10)
+    client = QdrantClient(url=_QDRANT_URL, timeout=10)
 
     # 2. Collection测试
     print("### 2. Collections状态")

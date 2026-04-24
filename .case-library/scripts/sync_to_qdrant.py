@@ -149,11 +149,12 @@ class QdrantSyncer:
                 from qdrant_client import QdrantClient
                 from qdrant_client.http.models import Distance, VectorParams
 
-                # Docker模式：连接到localhost:6333
+                # Docker模式：连接到 Qdrant（URL 优先读环境变量）
                 # 本地模式：使用文件存储
                 if self.use_docker:
-                    logger.info("连接Docker Qdrant: http://localhost:6333")
-                    self.client = QdrantClient(url="http://localhost:6333")
+                    _qdrant_url = os.environ.get("QDRANT_URL", "http://localhost:6333")
+                    logger.info(f"连接Docker Qdrant: {_qdrant_url}")
+                    self.client = QdrantClient(url=_qdrant_url)
                 else:
                     logger.info(f"使用本地模式: {QDRANT_DIR}")
                     QDRANT_DIR.mkdir(parents=True, exist_ok=True)

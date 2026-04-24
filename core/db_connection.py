@@ -10,6 +10,29 @@ from typing import Dict, Any, Optional, List
 from dataclasses import dataclass
 from enum import Enum
 
+from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
+
+# 导入统一配置
+try:
+    from core.config_loader import get_qdrant_url
+    HAS_CONFIG_LOADER = True
+except ImportError:
+    HAS_CONFIG_LOADER = False
+
+# 导入日志工具
+try:
+    from core.logging_utils import get_logger
+    _db_logger = get_logger("db_connection")
+except ImportError:
+    _db_logger = None
+
+# 导入 Qdrant 异常类型（用于重试）
+try:
+    from qdrant_client.http.exceptions import UnexpectedResponse
+    _HAS_UNEXPECTED_RESPONSE = True
+except ImportError:
+    _HAS_UNEXPECTED_RESPONSE = False
+
 
 class DatabaseStatus(Enum):
     """数据库状态"""
@@ -50,8 +73,7 @@ class DatabaseConnectionManager:
 
     def __init__(
         self,
-        host: str = "localhost",
-        port: int = 6333,
+        qdrant_url: Optional[str] = None,
         cache_dir: Path = None,
         auto_check: bool = True,
     ):
@@ -59,13 +81,17 @@ class DatabaseConnectionManager:
         初始化数据库连接管理器
 
         Args:
-            host: Qdrant 主机地址
-            port: Qdrant 端口
+            qdrant_url: Qdrant 服务 URL（默认从 get_qdrant_url() 获取）
             cache_dir: 本地缓存目录（降级模式使用）
             auto_check: 是否自动检测连接
         """
-        self.host = host
-        self.port = port
+        if qdrant_url is None:
+            if HAS_CONFIG_LOADER:
+                qdrant_url = get_qdrant_url()
+            else:
+                import os
+                qdrant_url = os.environ.get("QDRANT_URL", "http://localhost:6333")
+        self.qdrant_url = qdrant_url
         self.cache_dir = cache_dir or Path(".cache/db_cache")
 
         # 状态
@@ -84,23 +110,27 @@ class DatabaseConnectionManager:
         if auto_check:
             self.check_connection()
 
-    @property
-    def status(self) -> DatabaseStatus:
-        """获取数据库状态"""
-        # 定期重新检测
-        if time.time() - self._last_check_time > self._check_interval:
-            self.check_connection()
-        return self._status
+    @retry(
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(min=1, max=10),
+        retry=retry_if_exception_type(
+            (ConnectionError, TimeoutError, OSError)
+            + ((UnexpectedResponse,) if _HAS_UNEXPECTED_RESPONSE else ())
+        ),
+        before_sleep=lambda retry_state: (
+            _db_logger.warning(
+                "Qdrant 连接失败，重试中",
+                attempt=retry_state.attempt_number,
+            ) if _db_logger else print(
+                f"Qdrant 连接失败，第 {retry_state.attempt_number} 次重试..."
+            )
+        ),
+    )
+    def _create_qdrant_client(self) -> "QdrantClient":
+        """创建 Qdrant 客户端（带重试）"""
+        from qdrant_client import QdrantClient
 
-    @property
-    def is_available(self) -> bool:
-        """数据库是否可用"""
-        return self._status == DatabaseStatus.AVAILABLE
-
-    @property
-    def is_degraded(self) -> bool:
-        """是否处于降级模式"""
-        return self._status == DatabaseStatus.DEGRADED
+        return QdrantClient(url=self.qdrant_url, timeout=5)
 
     def check_connection(self) -> ConnectionInfo:
         """
@@ -112,10 +142,8 @@ class DatabaseConnectionManager:
         start_time = time.time()
 
         try:
-            # 尝试连接 Qdrant
-            from qdrant_client import QdrantClient
-
-            client = QdrantClient(host=self.host, port=self.port, timeout=5)
+            # 尝试连接 Qdrant（带重试）
+            client = self._create_qdrant_client()
 
             # 获取集合列表
             collections = client.get_collections().collections
@@ -138,8 +166,8 @@ class DatabaseConnectionManager:
 
             return ConnectionInfo(
                 status=DatabaseStatus.AVAILABLE,
-                host=self.host,
-                port=self.port,
+                host=self.qdrant_url,
+                port=0,
                 message="数据库连接正常",
                 latency_ms=latency,
                 collections=collection_counts,
@@ -151,8 +179,8 @@ class DatabaseConnectionManager:
 
             return ConnectionInfo(
                 status=DatabaseStatus.UNAVAILABLE,
-                host=self.host,
-                port=self.port,
+                host=self.qdrant_url,
+                port=0,
                 message="qdrant-client 未安装，请运行: pip install qdrant-client",
             )
 
@@ -165,10 +193,15 @@ class DatabaseConnectionManager:
 
             return ConnectionInfo(
                 status=DatabaseStatus.DEGRADED,
-                host=self.host,
-                port=self.port,
+                host=self.qdrant_url,
+                port=0,
                 message=f"数据库不可用，使用本地缓存模式: {str(e)}",
             )
+
+    @property
+    def is_available(self) -> bool:
+        """是否可用（Qdrant 连接正常）"""
+        return self._status == DatabaseStatus.AVAILABLE
 
     def get_client(self):
         """
@@ -437,8 +470,7 @@ class DatabaseConnectionManager:
                 collections = self._client.get_collections().collections
                 stats = {
                     "status": "available",
-                    "host": self.host,
-                    "port": self.port,
+                    "url": self.qdrant_url,
                     "collections": {},
                 }
 
@@ -453,8 +485,7 @@ class DatabaseConnectionManager:
         # 降级模式：返回缓存统计
         return {
             "status": "degraded",
-            "host": self.host,
-            "port": self.port,
+            "url": self.qdrant_url,
             "message": "使用本地缓存模式",
             "collections": self.get_cache_stats(),
         }
@@ -465,8 +496,7 @@ _global_db_manager: Optional[DatabaseConnectionManager] = None
 
 
 def get_db_manager(
-    host: str = "localhost",
-    port: int = 6333,
+    qdrant_url: Optional[str] = None,
     cache_dir: Path = None,
     auto_check: bool = True,
 ) -> DatabaseConnectionManager:
@@ -474,8 +504,7 @@ def get_db_manager(
     获取全局数据库连接管理器
 
     Args:
-        host: Qdrant 主机地址
-        port: Qdrant 端口
+        qdrant_url: Qdrant 服务 URL（默认从 get_qdrant_url() 获取）
         cache_dir: 本地缓存目录
         auto_check: 是否自动检测连接
 
@@ -486,7 +515,7 @@ def get_db_manager(
 
     if _global_db_manager is None:
         _global_db_manager = DatabaseConnectionManager(
-            host=host, port=port, cache_dir=cache_dir, auto_check=auto_check
+            qdrant_url=qdrant_url, cache_dir=cache_dir, auto_check=auto_check
         )
 
     return _global_db_manager

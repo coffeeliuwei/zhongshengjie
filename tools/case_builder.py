@@ -453,8 +453,9 @@ class CaseBuilder:
             self.novel_sources = get_novel_sources()
         else:
             # 回退到旧方式
+            import os
             self.config = config or {}
-            self.qdrant_url = self.config.get("qdrant_url", "http://localhost:6333")
+            self.qdrant_url = self.config.get("qdrant_url", os.environ.get("QDRANT_URL", "http://localhost:6333"))
             self.collection_name = self.config.get("collections", {}).get(
                 "case_library", "case_library_v2"
             )

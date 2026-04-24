@@ -14,17 +14,17 @@ except ImportError:
 
 # 配置导入
 try:
-    import sys
-
-    sys.path.insert(0, str(Path(__file__).parent.parent.parent / ".vectorstore"))
-    from config_loader import get_project_root, get_qdrant_url
+    from core.config_loader import get_project_root, get_qdrant_url
 except ImportError:
+    import os
+    from pathlib import Path
+
     # 兼容独立运行场景
     def get_project_root():
         return Path.cwd()
 
     def get_qdrant_url():
-        return "http://localhost:6333"
+        return os.environ.get("QDRANT_URL", "http://localhost:6333")
 
 
 class SearchManager:

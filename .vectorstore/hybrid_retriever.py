@@ -14,6 +14,7 @@
 """
 
 import json
+import os
 import sys
 import time
 from pathlib import Path
@@ -58,7 +59,7 @@ except ImportError:
     else:
         MODEL_PATH = None
         HF_CACHE_DIR = "E:/huggingface_cache"
-        QDRANT_URL = "http://localhost:6333"
+        QDRANT_URL = os.environ.get("QDRANT_URL", "http://localhost:6333")
 
 
 @dataclass

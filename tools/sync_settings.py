@@ -13,6 +13,7 @@
 
 import argparse
 import json
+import os
 import re
 from pathlib import Path
 from datetime import datetime
@@ -207,7 +208,9 @@ def main():
         "--collection", default="novel_settings_v2", help="collection名称"
     )
     parser.add_argument(
-        "--qdrant-url", default="http://localhost:6333", help="Qdrant地址"
+        "--qdrant-url",
+        default=os.environ.get("QDRANT_URL"),
+        help="Qdrant地址（默认从 QDRANT_URL 环境变量或 core.config_loader 获取）"
     )
     parser.add_argument("--model-path", help="BGE-M3模型路径")
     parser.add_argument("--batch-size", type=int, default=20, help="批处理大小")

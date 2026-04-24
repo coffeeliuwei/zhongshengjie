@@ -491,7 +491,13 @@ class ImageryBuilder:
 
     def __init__(self, config: Optional[Dict] = None):
         self.config = config or {}
-        self.qdrant_url = self.config.get("qdrant_url", "http://localhost:6333")
+        # 尝试从统一配置加载器获取 Qdrant URL
+        try:
+            from core.config_loader import get_qdrant_url
+            self.qdrant_url = self.config.get("qdrant_url", get_qdrant_url())
+        except ImportError:
+            import os
+            self.qdrant_url = self.config.get("qdrant_url", os.environ.get("QDRANT_URL", "http://localhost:6333"))
         self.client = None
         self.model = None
 

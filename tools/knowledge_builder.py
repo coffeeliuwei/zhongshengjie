@@ -353,7 +353,8 @@ class KnowledgeBuilder:
             self.knowledge_graph_file = get_knowledge_graph_path()
         else:
             # 回退到旧方式
-            self.qdrant_url = self.config.get("qdrant_url", "http://localhost:6333")
+            import os
+            self.qdrant_url = self.config.get("qdrant_url", os.environ.get("QDRANT_URL", "http://localhost:6333"))
             self.collection_name = self.config.get("collections", {}).get(
                 "novel_settings", "novel_settings_v2"
             )

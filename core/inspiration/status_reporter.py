@@ -28,7 +28,7 @@ def report_status(sync: Optional[MemoryPointSync] = None) -> str:
     """生成状态报告文本
 
     Args:
-        sync: MemoryPointSync 实例；为 None 时自动创建（连接 localhost:6333）
+        sync: MemoryPointSync 实例；为 None 时自动创建（URL via get_qdrant_url()）
 
     Returns:
         可直接呈现给作者的多行文本

@@ -30,6 +30,7 @@
 
 import argparse
 import json
+import os
 import sys
 from pathlib import Path
 from datetime import datetime
@@ -109,7 +110,7 @@ def check_docker():
 
             try:
                 with urllib.request.urlopen(
-                    "http://localhost:6333/collections", timeout=5
+                    f"{QDRANT_URL}/collections", timeout=5
                 ) as response:
                     if response.status == 200:
                         print("    ✓ Qdrant运行中")

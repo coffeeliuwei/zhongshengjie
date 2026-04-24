@@ -28,8 +28,10 @@ from datetime import datetime
 from typing import Dict, List, Any, Optional
 
 # 配置
+import os
+
 DEFAULT_CONFIG = {
-    "qdrant_url": "http://localhost:6333",
+    "qdrant_url": os.environ.get("QDRANT_URL", "http://localhost:6333"),
     "collections": {
         # 核心 Collections (v2 - BGE-M3混合检索)
         "novel_settings": "novel_settings_v2",
@@ -73,9 +75,15 @@ class DataBuilder:
         """连接Qdrant"""
         from qdrant_client import QdrantClient
 
-        self.client = QdrantClient(
-            url=self.config.get("qdrant_url", "http://localhost:6333")
-        )
+        # 尝试从统一配置获取 URL
+        qdrant_url = self.config.get("qdrant_url", os.environ.get("QDRANT_URL", "http://localhost:6333"))
+        try:
+            from core.config_loader import get_qdrant_url
+            qdrant_url = get_qdrant_url()
+        except ImportError:
+            pass
+
+        self.client = QdrantClient(url=qdrant_url)
         return self.client
 
     def _load_model(self):

@@ -21,9 +21,10 @@ from qdrant_client.http.models import (
 try:
     from core.config_loader import get_qdrant_url
 except ImportError:
+    import os
 
     def get_qdrant_url():
-        return "http://localhost:6333"
+        return os.environ.get("QDRANT_URL", "http://localhost:6333")
 
 
 COLLECTION_NAME = "memory_points_v1"

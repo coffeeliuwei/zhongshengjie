@@ -22,6 +22,7 @@
 
 import argparse
 import json
+import os
 import re
 from pathlib import Path
 from datetime import datetime
@@ -83,7 +84,12 @@ class TechniqueBuilder:
     def __init__(self, techniques_dir: Path, config: Optional[Dict] = None):
         self.techniques_dir = techniques_dir
         self.config = config or {}
-        self.qdrant_url = self.config.get("qdrant_url", "http://localhost:6333")
+        # 尝试从统一配置加载器获取 Qdrant URL
+        try:
+            from core.config_loader import get_qdrant_url
+            self.qdrant_url = self.config.get("qdrant_url", get_qdrant_url())
+        except ImportError:
+            self.qdrant_url = self.config.get("qdrant_url", os.environ.get("QDRANT_URL", "http://localhost:6333"))
         self.collection_name = self.config.get("collections", {}).get(
             "writing_techniques", "writing_techniques_v2"
         )

@@ -35,11 +35,13 @@ try:
         sys.path.insert(0, str(_project_root))
     from core.config_loader import get_project_root, get_qdrant_url
 except ImportError:
+    import os
+
     def get_project_root():
         return Path.cwd()
 
     def get_qdrant_url():
-        return "http://localhost:6333"
+        return os.environ.get("QDRANT_URL", "http://localhost:6333")
 
 
 # ============================================================

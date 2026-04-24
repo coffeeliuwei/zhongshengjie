@@ -13,15 +13,17 @@ from datetime import datetime
 os.environ["HF_HUB_OFFLINE"] = "1"
 
 # 从配置获取 Qdrant URL
-sys.path.insert(0, str(Path(__file__).parent.parent / ".vectorstore"))
+_project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(_project_root))
 try:
-    from config_loader import get_qdrant_url, get_collection_name
+    from core.config_loader import get_qdrant_url, get_collection_name
 
     QDRANT_URL = get_qdrant_url()
     OLD_COLLECTION = "writing_techniques"
     NEW_COLLECTION = get_collection_name("writing_techniques")
 except Exception:
-    QDRANT_URL = "http://localhost:6333"
+    import os
+    QDRANT_URL = os.environ.get("QDRANT_URL", "http://localhost:6333")
     OLD_COLLECTION = "writing_techniques"
     NEW_COLLECTION = "writing_techniques_v2"
 
