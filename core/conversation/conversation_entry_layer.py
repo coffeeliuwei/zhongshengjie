@@ -34,6 +34,14 @@ from .intent_router import IntentRouter
 from core.feedback.feedback_collector import FeedbackCollector
 from core.parsing.chapter_outline_parser import ChapterOutlineParser
 
+# 链路追踪（可选，ImportError 时跳过）
+try:
+    from core.tracing import new_trace as _new_trace
+    _HAS_TRACING = True
+except ImportError:
+    _HAS_TRACING = False
+    def _new_trace(): return ""
+
 
 class ProcessingStatus(Enum):
     """处理状态"""
@@ -131,6 +139,9 @@ class ConversationEntryLayer:
         Returns:
             ProcessingResult
         """
+        # 为本次请求建立链路追踪 ID
+        _new_trace()
+
         # 记录对话上下文
         self._conversation_context.append(
             {
