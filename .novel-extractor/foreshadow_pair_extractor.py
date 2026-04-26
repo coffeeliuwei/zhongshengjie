@@ -230,17 +230,20 @@ class ForeshadowPairExtractor(BaseExtractor):
                 # 计算相似度
                 similarity = self._calculate_similarity(fs["context"], po["context"])
 
-                # 综合评分
-                # 距离越近分数越高，相似度越高分数越高
-                distance_score = 1.0 - (distance / max_distance)
-                score = similarity * 0.7 + distance_score * 0.3
+                # 近乎相同的文本是重复段落，不是伏笔配对
+                if similarity > 0.6:
+                    continue
+
+                # 综合评分：长距离伏笔更典型，相似度适中为佳
+                distance_score = distance / max_distance
+                score = similarity * 0.5 + distance_score * 0.5
 
                 if score > best_score:
                     best_score = score
                     best_payoff = po
 
-            # 如果找到匹配
-            if best_payoff and best_score > 0.1:
+            # 如果找到匹配（阈值降低：距离贡献的分数已很小）
+            if best_payoff and best_score > 0.005:
                 pairs.append(
                     ForeshadowPair(
                         foreshadow_text=fs_text,
@@ -337,6 +340,19 @@ class ForeshadowPairExtractor(BaseExtractor):
                     "description": self._get_relation_description(relation_type),
                 }
             )
+
+        # 短距离降权（< 1000 字，可能是同段重复而非跨章伏笔）
+        result = []
+        for item in results:
+            for ex in item.get("examples", []):
+                distance = ex.get("distance", 99999)
+                if distance < 1000:
+                    ex["confidence"] = round(ex.get("confidence", 0.5) * 0.3, 2)
+            # 过滤低置信度示例（阈值对应新分数区间 0.005-0.8）
+            item["examples"] = [ex for ex in item.get("examples", []) if ex.get("confidence", 0) >= 0.01]
+            if item.get("examples"):
+                result.append(item)
+        results = result
 
         return results
 

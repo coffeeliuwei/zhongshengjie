@@ -15,8 +15,9 @@
   },
 
   "paths": {
-    "_说明": "项目路径配置",
+    "_说明": "项目路径配置。project_root 必须改成你的实际项目路径。cache_dir/temp_dir/mobi_temp_dir 需要有足够磁盘空间（建议放数据盘，不要放 C 盘）",
     "project_root": "D:/动画/众生界",
+    "_project_root说明": "★必须修改：你的项目根目录，改成你的实际路径（如 D:/novels/众生界）",
     "settings_dir": "设定",
     "techniques_dir": "创作技法",
     "chapters_dir": "章节大纲",
@@ -27,9 +28,14 @@
     "case_library_dir": ".case-library",
     "logs_dir": "logs",
     "cache_dir": "E:/众生界_cache",
+    "_cache_dir说明": "缓存目录，需要 5-10 GB 空间。如果没有 E 盘，改为其他数据盘（如 D:/众生界_cache）",
     "temp_dir": "E:/众生界_temp",
+    "_temp_dir说明": "临时文件目录，改为你有空间的盘（如 D:/众生界_temp）",
+    "mobi_temp_dir": "E:/tmp_mobi",
+    "_mobi_temp_dir说明": "★必须有足够空间：mobi 格式小说解压临时目录，每本最大约 500 MB，不能放 C 盘（否则系统盘会被塞满）。如果没有 E 盘，改为 D:/tmp_mobi",
     "contracts_dir": "scene_contracts",
     "skills_base_path": "C:/Users/39477/.agents/skills",
+    "_skills_base_path说明": "★必须修改：把 39477 改成你的 Windows 用户名（在 CMD 里输入 echo %USERNAME% 查看）",
     "_重组后路径": "以下路径已重组到 config/ 目录下",
     "novel_extractor_dir": ".novel-extractor",
     "world_configs_dir": "config/worlds",
@@ -91,7 +97,8 @@
   },
 
   "novel_sources": {
-    "_说明": "外部小说资源目录 - 用于案例提取",
+    "_说明": "外部小说资源目录 - 用于案例提取。支持 TXT/EPUB/MOBI/PDF/DOCX 格式",
+    "_directories说明": "★必须修改：改成你存放小说文件的实际目录路径。如果没有 E 盘，改为其他盘（如 D:\\小说资源）",
     "directories": [
       "E:\\小说资源"
     ]
@@ -128,5 +135,12 @@
     "_use_gpu说明": "是否使用GPU加速嵌入生成",
     "validate_before_ingest": true,
     "_validate_before_ingest说明": "入库前是否执行噪音校验"
+  },
+
+  "extractor": {
+    "_说明": "小说维度提炼系统配置",
+    "output_dir": "E:/novel_extracted",
+    "_output_dir说明": "★必须有足够空间：提炼输出目录，11个维度全量提炼约占 20-55 GB。不要放 C 盘。如没有 E 盘，改为 D:/novel_extracted",
+    "progress_dir": ".novel-extractor/progress"
   }
 }

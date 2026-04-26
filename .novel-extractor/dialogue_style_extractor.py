@@ -52,8 +52,9 @@ class DialogueStyleExtractor(BaseExtractor):
         """加载题材-小说映射（从案例库）"""
         mapping = defaultdict(list)
 
-        # 从案例库的sources.json加载
-        sources_path = Path("D:/动画/众生界/.case-library/sources.json")
+        # 从案例库的sources.json加载（路径从 PROJECT_DIR 推导，不硬编码）
+        from config import PROJECT_DIR
+        sources_path = PROJECT_DIR / ".case-library" / "sources.json"
         if sources_path.exists():
             with open(sources_path, "r", encoding="utf-8") as f:
                 sources = json.load(f)
@@ -65,7 +66,7 @@ class DialogueStyleExtractor(BaseExtractor):
         return mapping
 
     def _detect_genre(self, novel_path: Path) -> Optional[str]:
-        """检测小说题材"""
+        """检测小说题材（路径匹配）"""
         path_str = str(novel_path)
 
         for genre, keywords in [
@@ -82,6 +83,26 @@ class DialogueStyleExtractor(BaseExtractor):
                 return genre
 
         return "Z未分类"
+
+    def _detect_genre_from_content(self, content: str) -> str:
+        """从内容关键词检测题材（路径无法识别时的兜底）"""
+        sample = content[:10000]
+        genre_keywords = {
+            "玄幻奇幻": ["修炼", "灵气", "魔力", "魔法", "境界", "宗门", "剑气", "元婴", "丹药", "异界"],
+            "武侠仙侠": ["江湖", "内力", "武功", "侠客", "武林", "真气", "仙人", "渡劫", "飞升"],
+            "现代都市": ["公司", "老板", "手机", "微信", "警察", "医院", "大学", "股票"],
+            "历史军事": ["将军", "皇帝", "太子", "朝廷", "大臣", "圣旨", "皇宫", "兵马"],
+            "科幻灵异": ["星球", "飞船", "机器人", "基因", "纳米", "星际", "AI", "量子"],
+            "游戏竞技": ["玩家", "副本", "BOSS", "经验值", "装备", "NPC", "技能点"],
+        }
+        scores = {}
+        for genre, keywords in genre_keywords.items():
+            score = sum(1 for kw in keywords if kw in sample)
+            if score > 0:
+                scores[genre] = score
+        if not scores:
+            return "Z未分类"
+        return max(scores.items(), key=lambda x: x[1])[0]
 
     def _extract_dialogues(self, content: str) -> List[Dict[str, Any]]:
         """提取对话片段"""
@@ -141,7 +162,7 @@ class DialogueStyleExtractor(BaseExtractor):
             "word_features": word_features,
             "sentence_features": sentence_features,
             "tone_features": tone_features,
-            "sample_dialogues": [d["text"] for d in dialogues[:10]],
+            "sample_dialogues": [d["text"][:200] for d in dialogues[:3]],
         }
 
     def _extract_word_features(self, text: str, faction: str) -> Dict[str, Any]:
@@ -245,8 +266,10 @@ class DialogueStyleExtractor(BaseExtractor):
     ) -> List[dict]:
         """从小说提取对话风格"""
 
-        # 检测题材
+        # 检测题材（路径优先，内容兜底）
         genre = self._detect_genre(novel_path)
+        if genre == "Z未分类":
+            genre = self._detect_genre_from_content(content)
         if genre == "Z未分类":
             return []
 
@@ -346,7 +369,7 @@ class DialogueStyleExtractor(BaseExtractor):
             "tone_features": {
                 "tone_distribution": dict(tone_sum),
             },
-            "sample_dialogues": all_samples[:50],
+            "sample_dialogues": all_samples[:10],
             "style_summary": self._generate_style_summary(
                 faction, all_word_freq, tone_sum
             ),

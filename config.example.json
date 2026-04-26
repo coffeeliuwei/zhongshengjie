@@ -1,6 +1,7 @@
 {
-  "_说明": "众生界小说创作系统 - 配置示例",
-  "_用法": "复制此文件为 config.json 并修改为您的实际路径",
+  "_说明": "众生界小说创作系统 - 配置模板",
+  "_用法": "复制此文件为 config.json，按注释说明修改标有★的必填项，其余保持默认即可",
+  "_注意": "此文件包含您的本地路径，不会推送到 GitHub",
 
   "project": {
     "name": "My Novel",
@@ -8,14 +9,19 @@
   },
 
   "worldview": {
+    "_说明": "当前小说世界观配置",
     "current_world": "众生界",
+    "_current_world说明": "★必须修改：改成你的小说名（和 config/worlds/ 下的配置文件名一致）",
     "outline_path": "总大纲.md",
     "auto_sync": true,
-    "_说明": "current_world: 当前世界观名称，对应 world_configs/*.json；outline_path: 大纲文件路径；auto_sync: 大纲改动时是否自动同步世界观"
+    "_auto_sync说明": "大纲改动时是否自动同步到知识库，保持 true 即可"
   },
 
   "paths": {
+    "_说明": "路径配置。project_root 自动推导无需填写。标有★的路径请根据你的电脑实际情况修改，不要放 C 盘",
     "project_root": null,
+    "_project_root说明": "留 null 即可，系统自动从文件位置推导项目根目录",
+
     "settings_dir": "设定",
     "techniques_dir": "创作技法",
     "chapters_dir": "章节大纲",
@@ -25,40 +31,72 @@
     "vectorstore_dir": ".vectorstore",
     "case_library_dir": ".case-library",
     "logs_dir": "logs",
-    "cache_dir": ".cache",
     "contracts_dir": "scene_contracts",
-    "skills_base_path": null
+    "novel_extractor_dir": ".novel-extractor",
+    "world_configs_dir": "config/worlds",
+    "scene_writer_mapping_file": "config/scene_writer_mapping.json",
+    "knowledge_graph_file": ".vectorstore/knowledge_graph.json",
+    "config_dir": "config",
+
+    "skills_base_path": "C:/Users/你的用户名/.agents/skills",
+    "_skills_base_path说明": "★必须修改：把「你的用户名」改成你的 Windows 用户名（CMD 里输入 echo %USERNAME% 查看）",
+
+    "cache_dir": "D:/众生界_cache",
+    "_cache_dir说明": "缓存目录，需要 5-10 GB 空间，不要放 C 盘。如果有独立数据盘可改为 E:/众生界_cache",
+
+    "temp_dir": "D:/众生界_temp",
+    "_temp_dir说明": "临时文件目录，不要放 C 盘",
+
+    "mobi_temp_dir": "D:/tmp_mobi",
+    "_mobi_temp_dir说明": "★绝对不能放 C 盘：mobi 格式小说解压临时目录，每本最大约 500MB，批量提炼时会大量占用空间。建议放数据盘（D: 或 E:）"
   },
 
   "validation": {
     "_说明": "一致性校验规则配置",
-    "_多境界体系说明": "如果项目有多个力量体系，境界配置会自动从世界观配置(world_configs/*.json)中加载",
     "realm_order": ["凡人", "觉醒", "淬体", "凝脉", "结丹", "元婴", "化神"],
-    "_realm_order说明": "单一境界体系时使用此配置；多境界体系时此配置作为默认值，各力量体系的境界从世界观配置中读取",
+    "_realm_order说明": "★必须修改：改成你小说的境界体系，从低到高排列。不需要境界检测就留空数组 []",
     "skip_rules": [],
-    "_skip_rules说明": "跳过的校验规则列表，如 ['R008', 'R010'] 跳过天气一致性和称呼一致性"
+    "_skip_rules说明": "需要跳过的校验规则编号，比如 ['R008'] 跳过天气一致性检测"
   },
 
   "database": {
+    "_说明": "Qdrant 向量数据库配置，默认本地 Docker 运行",
     "qdrant_host": "localhost",
     "qdrant_port": 6333,
+    "qdrant_url": "http://localhost:6333",
     "timeout": 10,
     "collections": {
       "novel_settings": "novel_settings_v2",
       "writing_techniques": "writing_techniques_v2",
-      "case_library": "case_library_v2"
+      "case_library": "case_library_v2",
+      "creation_context": "creation_context"
     }
   },
 
   "model": {
-    "embedding_model": "BAAI/bge-m3",
-    "model_path": null,
-    "hf_cache_dir": null,
+    "_说明": "嵌入模型配置（BGE-M3），首次运行会自动下载约 2.3 GB",
+    "embedding": {
+      "name": "BAAI/bge-m3",
+      "model_path": null,
+      "_model_path说明": "留 null 自动下载；如果老师提供了离线模型，填写模型文件夹路径，如 D:/models/bge-m3",
+      "vector_size": 1024,
+      "batch_size": 20
+    },
+    "llm": {
+      "name": "default",
+      "provider": "openai",
+      "model": "gpt-4",
+      "temperature": 0.7,
+      "max_tokens": 4096
+    },
+    "hf_cache_dir": "D:/huggingface_cache",
+    "_hf_cache_dir说明": "HuggingFace 模型缓存目录，约 3 GB，不要放 C 盘",
     "vector_size": 1024,
     "batch_size": 20
   },
 
   "retrieval": {
+    "_说明": "检索参数，通常不需要修改",
     "dense_limit": 100,
     "sparse_limit": 100,
     "fusion_limit": 50,
@@ -67,6 +105,43 @@
   },
 
   "novel_sources": {
-    "directories": []
+    "_说明": "外部小说资源目录，用于案例提取。支持 TXT/EPUB/MOBI/PDF/DOCX 格式",
+    "_directories说明": "★必须修改：改成你存放小说文件的实际目录路径",
+    "directories": [
+      "D:/小说资源"
+    ]
+  },
+
+  "inspiration_engine": {
+    "_说明": "鉴赏师成长阶段配置，通常不需要修改",
+    "appraisal_cold_start_threshold": 50,
+    "_appraisal_cold_start_threshold说明": "冷启动阈值，低于此值纯 LLM 直感",
+    "appraisal_growing_threshold": 300,
+    "_appraisal_growing_threshold说明": "成长期阈值，50-300 注入 top3 记忆点，≥300 注入 top5"
+  },
+
+  "quality_thresholds": {
+    "_说明": "数据清洗质量阈值，通常不需要修改",
+    "chinese_ratio_min": 0.6,
+    "novel_features_min": 10,
+    "compression_ratio_min": 0.65,
+    "compression_ratio_max": 0.80,
+    "quality_score_min": 0.6,
+    "noise_ratio_max": 0.10
+  },
+
+  "clean_pipeline": {
+    "_说明": "清洗流程配置",
+    "clean_dir": ".case-library/clean",
+    "use_gpu": false,
+    "_use_gpu说明": "是否使用 GPU 加速嵌入生成，没有独立显卡的电脑保持 false",
+    "validate_before_ingest": true
+  },
+
+  "extractor": {
+    "_说明": "小说维度提炼系统配置",
+    "output_dir": "D:/novel_extracted",
+    "_output_dir说明": "★必须有足够空间：11个维度全量提炼约占 20-55 GB，不要放 C 盘。有大容量数据盘的建议改为 E:/novel_extracted",
+    "progress_dir": ".novel-extractor/progress"
   }
 }
