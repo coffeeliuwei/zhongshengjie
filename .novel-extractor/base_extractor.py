@@ -27,6 +27,7 @@ from config import (
     OUTPUT_DIR,
     PROGRESS_DIR,
     EXTRACTION_DIMENSIONS,
+    MOBI_TEMP_DIR,
     get_output_path,
     get_progress_path,
     Priority,
@@ -88,49 +89,40 @@ class BaseExtractor(ABC):
 
     def _get_novel_id(self, novel_path: Path) -> str:
         """生成小说唯一ID（基于路径hash）"""
-        relative_path = str(novel_path.relative_to(NOVEL_SOURCE_DIR))
+        try:
+            relative_path = str(novel_path.relative_to(NOVEL_SOURCE_DIR))
+        except ValueError:
+            relative_path = novel_path.stem
         return hashlib.md5(relative_path.encode()).hexdigest()[:12]
 
-def _scan_novels(self) -> Generator[Path, None, None]:
+    def _scan_novels(self) -> Generator[Path, None, None]:
         """扫描所有小说文件
         
-        优先使用已转换的txt文件（避免重复转换和C盘空间占用）
-        
-        处理顺序：
-        1. converted目录中的已转换txt文件（优先）
-        2. 源目录中的原始txt文件
-        3. 源目录中尚未转换的epub/mobi文件
+        优先使用已转换的txt文件，其次源目录txt，最后 epub/mobi/pdf/docx。
+        用 seen_stems 防止同一本书被多路径重复 yield。
         """
         from config import CONVERTED_DIR
-        
-        # 支持的小说文件格式
-        extensions = [".txt", ".epub", ".mobi"]
-        
-        # 优先使用已转换的txt文件（避免重复转换）
+
+        seen_stems: set = set()
+
+        # 1. 优先使用 converted 目录中的已转换 txt
         if CONVERTED_DIR.exists():
-            for converted_file in CONVERTED_DIR.glob("*.txt"):
+            for converted_file in sorted(CONVERTED_DIR.glob("*.txt")):
+                seen_stems.add(converted_file.stem)
                 yield converted_file
-            print(f"[INFO] 使用已转换文件: {len(list(CONVERTED_DIR.glob('*.txt')))} 个")
-        
-        # 然后处理源目录中的txt文件（排除已在converted目录中的）
-        converted_names = set()
-        if CONVERTED_DIR.exists():
-            converted_names = {f.stem for f in CONVERTED_DIR.glob("*.txt")}
-        
+
+        # 2. 源目录中的原始 txt（排除已在 converted 中的）
         for novel_path in NOVEL_SOURCE_DIR.rglob("*.txt"):
-            # 检查是否已处理（避免重复）
-            novel_id = self._get_novel_id(novel_path)
-            if novel_id not in self.progress.processed_novels:
+            if novel_path.stem not in seen_stems:
+                seen_stems.add(novel_path.stem)
                 yield novel_path
-        
-        # 最后处理未转换的epub/mobi（跳过已在converted目录中的同名文件）
-        for ext in [".epub", ".mobi"]:
+
+        # 3. epub / mobi / pdf / docx（排除已有同名 txt 的）
+        for ext in [".epub", ".mobi", ".pdf", ".docx"]:
             for novel_path in NOVEL_SOURCE_DIR.rglob(f"*{ext}"):
-                # 检查是否已有转换版本
-                converted_name = novel_path.stem + ".txt"
-                if CONVERTED_DIR.exists() and (CONVERTED_DIR / converted_name).exists():
-                    continue  # 已有转换版本，跳过
-                yield novel_path
+                if novel_path.stem not in seen_stems:
+                    seen_stems.add(novel_path.stem)
+                    yield novel_path
 
     def _read_novel(self, novel_path: Path) -> Optional[str]:
         """读取小说内容"""
@@ -146,11 +138,13 @@ def _scan_novels(self) -> Generator[Path, None, None]:
                         continue
                 return None
             elif novel_path.suffix == ".epub":
-                # 使用 EbookLib 读取 epub
                 return self._read_epub(novel_path)
             elif novel_path.suffix == ".mobi":
-                # 使用 mobi 库读取 mobi
                 return self._read_mobi(novel_path)
+            elif novel_path.suffix == ".pdf":
+                return self._read_pdf(novel_path)
+            elif novel_path.suffix == ".docx":
+                return self._read_docx(novel_path)
         except Exception as e:
             print(f"[WARN] Failed to read {novel_path}: {e}")
             return None
@@ -203,25 +197,72 @@ def _scan_novels(self) -> Generator[Path, None, None]:
 
     def _read_mobi(self, novel_path: Path) -> Optional[str]:
         """读取 mobi 文件内容"""
+        import tempfile, shutil, os
+
+        # mobi 解压临时目录：从 config.json paths.mobi_temp_dir 读取，默认 E:\tmp_mobi
+        # 不能放 C 盘（mobi 解压体积大，会把系统盘塞满）
+        _MOBI_TMPDIR = MOBI_TEMP_DIR
+        _MOBI_TMPDIR.mkdir(parents=True, exist_ok=True)
+
+        old_tempdir = tempfile.tempdir
         try:
             from mobi import extract
 
-            # mobi.extract 返回转换后的 epub 文件路径
-            epub_path = extract(str(novel_path))
-            if epub_path and Path(epub_path).exists():
+            tempfile.tempdir = str(_MOBI_TMPDIR)
+            result = extract(str(novel_path))
+            # mobi.extract 可能返回 (tmpdir, epub_path) 元组，也可能直接返回路径字符串
+            if isinstance(result, tuple):
+                tmpdir, epub_path = result[0], result[1] if len(result) > 1 else result[0]
+            else:
+                epub_path = result
+                tmpdir = None
+            epub_path = Path(epub_path)
+            if epub_path.exists():
                 try:
-                    # 读取转换后的 epub 文件
-                    return self._read_epub(Path(epub_path))
+                    return self._read_epub(epub_path)
                 finally:
-                    # 清理临时文件
-                    import shutil
-
-                    temp_dir = Path(epub_path).parent
-                    if temp_dir.exists() and "mobi" in str(temp_dir).lower():
-                        shutil.rmtree(temp_dir, ignore_errors=True)
+                    clean_dir = Path(tmpdir) if tmpdir else epub_path.parent
+                    if clean_dir.exists() and str(clean_dir).startswith(str(_MOBI_TMPDIR)):
+                        shutil.rmtree(clean_dir, ignore_errors=True)
             return None
         except Exception as e:
             print(f"[WARN] Failed to read mobi {novel_path}: {e}")
+            return None
+        finally:
+            tempfile.tempdir = old_tempdir
+
+    def _read_pdf(self, novel_path: Path) -> Optional[str]:
+        """读取 PDF 文件内容（可选依赖 pdfminer.six）"""
+        try:
+            from pdfminer.high_level import extract_text
+            content = extract_text(str(novel_path))
+            # 清理提取的文本
+            content = content.replace('\x00', '')  # 移除空字节
+            content = '\n'.join(line.strip() for line in content.splitlines() if line.strip())
+            return content if content.strip() else None
+        except ImportError:
+            print(f"[WARN] pdfminer.six not installed, skipping PDF: {novel_path}")
+            return None
+        except Exception as e:
+            print(f"[WARN] Failed to read PDF {novel_path}: {e}")
+            return None
+
+    def _read_docx(self, novel_path: Path) -> Optional[str]:
+        """读取 DOCX 文件内容（可选依赖 python-docx）"""
+        try:
+            from docx import Document
+            doc = Document(str(novel_path))
+            content_parts = []
+            for para in doc.paragraphs:
+                text = para.text.strip()
+                if text:
+                    content_parts.append(text)
+            return '\n\n'.join(content_parts) if content_parts else None
+        except ImportError:
+            print(f"[WARN] python-docx not installed, skipping DOCX: {novel_path}")
+            return None
+        except Exception as e:
+            print(f"[WARN] Failed to read DOCX {novel_path}: {e}")
             return None
 
     def run(self, limit: int = None, resume: bool = True) -> Dict[str, Any]:

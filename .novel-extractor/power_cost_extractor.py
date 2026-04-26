@@ -153,22 +153,31 @@ class PowerCostExtractor(BaseExtractor):
                 ],
                 "恢复方式": ["基因稳定剂", "休养", "精神治疗"],
             },
+            # 通用代价（跨题材兜底）
+            "通用": {
+                "技能": [
+                    "出手", "动手", "出招", "施展", "释放", "使用", "激活",
+                    "攻击", "防御", "反击", "爆发", "全力",
+                ],
+                "代价表现": [
+                    "脸色苍白", "喷血", "踉跄", "气息紊乱", "精神萎靡",
+                    "身体颤抖", "嘴角溢血", "嘴角带血", "虚弱", "眩晕",
+                    "昏迷", "摔倒", "跌落", "倒退", "跌退", "膝盖弯曲",
+                    "力竭", "精疲力竭", "体力透支", "意志消磨",
+                    "鲜血", "伤口", "骨折", "肌肉撕裂",
+                    "眼眶泛红", "牙关咬紧", "冷汗", "汗水湿透",
+                ],
+                "恢复方式": ["休息", "疗伤", "休养", "调养", "恢复"],
+            },
         }
 
         # 战斗场景关键词
         self.battle_keywords = [
-            "战斗",
-            "厮杀",
-            "激战",
-            "交锋",
-            "对决",
-            "厮杀",
-            "攻击",
-            "防御",
-            "招式",
-            "技能",
-            "招",
-            "式",
+            "战斗", "厮杀", "激战", "交锋", "对决",
+            "攻击", "防御", "招式", "技能",
+            "出手", "出招", "施展", "爆发", "反击",
+            "伤势", "受伤", "喷血", "鲜血",
+            "重创", "受创", "击中", "命中",
         ]
 
         # 代价触发词
@@ -185,11 +194,13 @@ class PowerCostExtractor(BaseExtractor):
             "反噬",
         ]
 
-    def _detect_power_type(self, text: str) -> Optional[str]:
-        """检测文本中的力量类型"""
+    def _detect_power_type(self, text: str) -> str:
+        """检测文本中的力量类型，找不到时返回'通用'"""
         scores = {}
 
         for power_type, keywords in self.power_keywords.items():
+            if power_type == "通用":
+                continue  # 通用类型最后兜底
             score = 0
             for skill in keywords.get("技能", []):
                 if skill in text:
@@ -203,7 +214,7 @@ class PowerCostExtractor(BaseExtractor):
 
         if scores:
             return max(scores.items(), key=lambda x: x[1])[0]
-        return None
+        return "通用"  # 改为返回"通用"而非 None
 
     def _detect_cost_expression(self, text: str, power_type: str) -> List[str]:
         """检测代价表现"""
@@ -216,15 +227,12 @@ class PowerCostExtractor(BaseExtractor):
             if cost in text:
                 found_costs.append(cost)
 
-        # 也检查通用代价词
+        # 通用代价词（扩充版）
         general_costs = [
-            "脸色苍白",
-            "喷血",
-            "踉跄",
-            "气息紊乱",
-            "精神萎靡",
-            "身体颤抖",
-            "嘴角溢血",
+            "脸色苍白", "喷血", "踉跄", "气息紊乱", "精神萎靡",
+            "身体颤抖", "嘴角溢血", "嘴角带血", "虚弱", "眩晕",
+            "昏迷", "力竭", "精疲力竭", "体力透支", "冷汗",
+            "牙关咬紧", "眼眶泛红", "骨折", "肌肉撕裂",
         ]
         for cost in general_costs:
             if cost in text and cost not in found_costs:
@@ -272,29 +280,18 @@ class PowerCostExtractor(BaseExtractor):
 
             # 检测是否是战斗场景
             battle_score = sum(1 for kw in self.battle_keywords if kw in para)
-            if battle_score >= 2:
+            if battle_score >= 1:
                 battle_paragraphs.append(para)
 
         return battle_paragraphs
 
-    def _extract_cost_pairs(self, content: str) -> List[PowerCost]:
+    def _extract_cost_pairs(self, content: str, power_type: str = None) -> List[PowerCost]:
         """提取力量使用-代价配对"""
         costs = []
 
-        # 先检测力量类型
-        power_type = self._detect_power_type(content)
-        if not power_type:
-            # 尝试从段落检测
-            for pt in self.power_keywords.keys():
-                if any(
-                    skill in content
-                    for skill in self.power_keywords[pt].get("技能", [])
-                ):
-                    power_type = pt
-                    break
-
-        if not power_type:
-            return []
+        # 使用传入的力量类型，或从场景内容检测
+        if power_type is None:
+            power_type = self._detect_power_type(content)
 
         # 检测代价表现
         cost_expressions = self._detect_cost_expression(content, power_type)
@@ -346,16 +343,19 @@ class PowerCostExtractor(BaseExtractor):
     ) -> List[dict]:
         """从小说提取力量代价"""
 
+        # 从全文检测力量类型（单个段落信号太弱）
+        novel_power_type = self._detect_power_type(content)
+
         # 提取战斗场景
         battle_scenes = self._extract_battle_scenes(content)
 
         if not battle_scenes:
             return []
 
-        # 从每个战斗场景提取代价
+        # 从每个战斗场景提取代价，使用全文力量类型
         all_costs = []
         for scene in battle_scenes:
-            costs = self._extract_cost_pairs(scene)
+            costs = self._extract_cost_pairs(scene, power_type=novel_power_type)
             for cost in costs:
                 cost.novel_id = novel_id
                 cost.scene_type = "战斗场景"

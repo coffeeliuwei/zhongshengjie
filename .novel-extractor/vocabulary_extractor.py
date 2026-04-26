@@ -159,6 +159,30 @@ class VocabularyExtractor(BaseExtractor):
             "异能": ["异能", "基因", "变异", "进化", "觉醒"],
         }
 
+        # 题材检测关键词（用于自动识别题材）
+        self.genre_keywords = {
+            "修仙": ["修仙", "炼气", "筑基", "金丹", "元婴", "化神", "渡劫", "飞升", "宗门", "真气", "灵力", "丹药", "灵石"],
+            "魔法": ["魔法", "法术", "魔力", "魔法师", "法师", "魔法阵", "禁咒", "魔法学院"],
+            "都市": ["公司", "老板", "手机", "微信", "警察", "医院", "学校", "大学", "市场", "股票"],
+            "历史": ["将军", "皇帝", "太子", "朝廷", "官府", "大臣", "圣旨", "皇宫", "战场", "兵马"],
+            "科幻": ["星球", "飞船", "机器人", "AI", "基因", "纳米", "量子", "空间站", "星际", "虫洞"],
+            "武侠": ["江湖", "武功", "内力", "侠客", "武林", "门派", "帮派", "镖局", "武器谱"],
+            "游戏": ["玩家", "副本", "BOSS", "技能点", "经验值", "装备", "任务", "NPC", "等级"],
+        }
+
+        # 通用专有名词模式（跨题材）
+        self.general_term_patterns = [
+            # 人名/称谓
+            r"[\u4e00-\u9fa5]{2,4}(?:大人|前辈|师兄|师弟|师姐|师妹|长老|掌门|会长|队长|老师|教授|老师傅)",
+            # 功法/技能名（带括号或特定格式）
+            r"《[\u4e00-\u9fa5]{2,12}》",  # 书名号包裹
+            r"【[\u4e00-\u9fa5]{2,12}】",  # 【】包裹
+            # 地名后缀（更广泛）
+            r"[\u4e00-\u9fa5]{2,4}(?:城|市|国|星|域|界|空间|次元|位面|大陆|王国|帝国)",
+            # 组织名
+            r"[\u4e00-\u9fa5]{2,4}(?:集团|公司|组织|协会|联盟|学院|研究所|部队|军团)",
+        ]
+
     def _load_known_vocabulary(self) -> Dict[str, Dict[str, List[str]]]:
         """加载已知词汇"""
         # 从设定文件加载
@@ -200,6 +224,18 @@ class VocabularyExtractor(BaseExtractor):
         if scores:
             return max(scores.items(), key=lambda x: x[1])[0]
         return None
+
+    def _detect_genre(self, content: str) -> str:
+        """检测小说题材"""
+        sample = content[:5000]  # 只采样开头
+        scores = {}
+        for genre, keywords in self.genre_keywords.items():
+            score = sum(1 for kw in keywords if kw in sample)
+            if score > 0:
+                scores[genre] = score
+        if not scores:
+            return "通用"
+        return max(scores.items(), key=lambda x: x[1])[0]
 
     def _extract_terms(
         self, content: str, category: str, patterns: List[str]
@@ -275,8 +311,9 @@ class VocabularyExtractor(BaseExtractor):
 
         # 检测主要力量类型
         power_type = self._detect_power_type(content)
+        genre = self._detect_genre(content)
         if not power_type:
-            return []
+            power_type = genre  # 用题材名代替力量体系名，不再 return []
 
         results = []
 
@@ -329,19 +366,49 @@ class VocabularyExtractor(BaseExtractor):
                 term_data[term]["power_type"] = item.get("power_type", "")
                 term_data[term]["is_known"] = item.get("is_known", False)
 
+        # 过滤时间词和常用词
+        import re as _re
+
+        _TIME_PATTERN = _re.compile(r'^[一二三四五六七八九十百千万零\d]+[天年月日时分秒刻]$')
+        _COMMON_NOISE = {'一天', '两天', '三天', '几天', '多年', '一年', '数年', '多时',
+                         '一时', '片刻', '须臾', '瞬间', '刹那', '一瞬', '半天', '整天'}
+
+        filtered = []
+        for term, data in term_data.items():
+            if _TIME_PATTERN.match(term):
+                continue
+            if term in _COMMON_NOISE:
+                continue
+            filtered.append((term, data))
+
+        # 变体规范化（去"们/我/你"前缀）
+        _PREFIX_NOISE = _re.compile(r'^[们我你他她它这那]')
+        deduped: dict = {}
+        for term, data in filtered:
+            norm = _PREFIX_NOISE.sub("", term).strip()
+            if len(norm) < 2:
+                continue
+            data["term"] = norm
+            key = (norm, data.get("category", ""), data.get("power_type", ""))
+            if key not in deduped or data.get("total_frequency", 0) > deduped[key].get("total_frequency", 0):
+                deduped[key] = data
+
         # 排序输出
+        min_freq = self.config.extractor_config.get("min_frequency", 3)
         results = []
-        for term, data in sorted(
-            term_data.items(), key=lambda x: x[1]["total_frequency"], reverse=True
+        for key, data in sorted(
+            deduped.items(), key=lambda x: x[1]["total_frequency"], reverse=True
         ):
+            if data["total_frequency"] < min_freq:
+                continue
             results.append(
                 {
-                    "term": term,
+                    "term": data["term"],
                     "category": data["category"],
                     "power_type": data["power_type"],
                     "total_frequency": data["total_frequency"],
                     "novel_count": len(set(data["novel_ids"])),
-                    "sample_contexts": data["all_contexts"][:3],
+                    "sample_contexts": data["all_contexts"][:1],
                     "is_known": data["is_known"],
                 }
             )

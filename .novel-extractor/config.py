@@ -13,36 +13,38 @@ import sys
 
 # ==================== 路径配置 ====================
 
-PROJECT_DIR = Path(r"D:\动画\众生界")
+# PROJECT_DIR 从文件自身位置推导：本文件在 .novel-extractor/，父目录即项目根
+# 无论学生把项目装在哪个盘/目录都能自动找到，不硬编码
+PROJECT_DIR = Path(__file__).resolve().parent.parent
 
 
-def _get_novel_source_dir() -> Path:
-    """从配置加载小说资源目录"""
+def _load_config():
+    """从 config.json 加载配置，失败时返回空字典"""
     try:
         if str(PROJECT_DIR) not in sys.path:
             sys.path.insert(0, str(PROJECT_DIR))
-
         from core.config_loader import get_config
-
-        config = get_config()
-        novel_sources = config.get("novel_sources", {})
-        directories = novel_sources.get("directories", [])
-
-        if directories:
-            # 返回第一个配置的目录作为默认目录
-            return Path(directories[0])
-
-        # 如果未配置，返回默认路径（兼容旧版）
-        return Path(r"E:\小说资源")
+        return get_config()
     except Exception:
-        # 如果加载失败，返回默认路径
-        return Path(r"E:\小说资源")
+        return {}
 
 
-NOVEL_SOURCE_DIR = _get_novel_source_dir()
+_cfg = _load_config()
+
+# 小说资源目录 —— 从 config.json 的 novel_sources.directories 读取
+_novel_dirs = _cfg.get("novel_sources", {}).get("directories", [])
+NOVEL_SOURCE_DIR = Path(_novel_dirs[0]) if _novel_dirs else Path(r"E:\小说资源")
+
+# 输出目录 —— 从 config.json 的 extractor.output_dir 读取
 EXTRACTOR_DIR = PROJECT_DIR / ".novel-extractor"
-OUTPUT_DIR = EXTRACTOR_DIR / "extracted"
+OUTPUT_DIR = Path(_cfg.get("extractor", {}).get("output_dir", r"E:\novel_extracted"))
 PROGRESS_DIR = EXTRACTOR_DIR / "progress"
+CONVERTED_DIR = PROJECT_DIR / ".case-library" / "converted"
+CASE_OUTPUT_DIR = PROJECT_DIR / ".case-library" / "cases"
+
+# mobi 解压临时目录 —— 从 config.json 的 paths.mobi_temp_dir 读取
+# 默认 E:\tmp_mobi，不能放 C 盘（mobi 解压体积大会塞满系统盘）
+MOBI_TEMP_DIR = Path(_cfg.get("paths", {}).get("mobi_temp_dir", r"E:\tmp_mobi"))
 
 # 向量库路径
 VECTORSTORE_DIR = PROJECT_DIR / ".vectorstore"
@@ -54,6 +56,11 @@ class Priority(Enum):
     HIGH = "high"  # 高价值 - 直接用于创作
     MEDIUM = "medium"  # 中价值 - 需适配后使用
     LOW = "low"  # 低价值 - 长期有益
+
+
+# unified_config 兼容别名
+DimensionCategory = Priority          # 外部代码用 DimensionCategory，实际等价于 Priority
+EXTENDED_OUTPUT_DIR = OUTPUT_DIR      # unified_config 用 EXTENDED_OUTPUT_DIR，指向同一目录
 
 
 # ==================== 提炼维度定义 ====================
@@ -76,11 +83,42 @@ class ExtractionDimension:
     extractor_class: str = ""
     extractor_config: Dict[str, Any] = field(default_factory=dict)
 
+    @property
+    def category(self) -> Priority:
+        """unified_config 兼容：category 是 priority 的别名"""
+        return self.priority
+
+    @property
+    def enabled(self) -> bool:
+        """unified_config 兼容：默认启用"""
+        return True
+
 
 # ==================== 所有提炼维度 ====================
 
 EXTRACTION_DIMENSIONS = {
     # ========== 高价值 ==========
+    "case": ExtractionDimension(
+        id="case",
+        name="场景案例库",
+        description="提取22种场景类型的标杆案例（打脸/高潮/战斗/对话等）",
+        priority=Priority.HIGH,
+        output_format="json",
+        incremental=True,
+        extractor_class="CaseExtractor",
+        extractor_config={
+            "scene_types": [
+                "开篇场景", "人物出场", "战斗场景", "对话场景", "情感场景",
+                "悬念场景", "转折场景", "结尾场景", "环境场景", "心理场景",
+                "修炼突破", "势力登场", "资源获取", "探索发现", "伏笔回收",
+                "危机降临", "成长蜕变", "情报揭示", "社交场景", "阴谋揭露",
+                "冲突升级", "团队组建", "打脸场景", "高潮场景", "反派出场",
+                "恢复休养", "回忆场景", "伏笔设置",
+            ],
+            "min_quality_score": 6.0,
+            "max_cases_per_chapter": 3,
+        },
+    ),
     "dialogue_style": ExtractionDimension(
         id="dialogue_style",
         name="势力对话风格库",
@@ -132,7 +170,7 @@ EXTRACTION_DIMENSIONS = {
         dependencies=["case_library"],
         extractor_class="CharacterRelationExtractor",
         extractor_config={
-            "min_cooccurrence": 3,  # 最小共现次数
+            "min_cooccurrence": 2,  # 最小共现次数
             "relation_types": [
                 "爱慕",
                 "敌对",
@@ -170,7 +208,7 @@ EXTRACTION_DIMENSIONS = {
     "power_vocabulary": ExtractionDimension(
         id="power_vocabulary",
         name="力量体系词汇库",
-        description="提取修仙/魔法/科技等专有名词",
+        description="提取各题材专有名词（力量体系、地名、组织、势力等）",
         priority=Priority.MEDIUM,
         dependencies=["case_library"],
         extractor_class="VocabularyExtractor",
@@ -190,7 +228,7 @@ EXTRACTION_DIMENSIONS = {
                     "等级": ["一级改造", "二级改造"],
                 },
             },
-            "min_frequency": 5,
+            "min_frequency": 3,
             "use_ner": True,
         },
     ),
@@ -373,3 +411,8 @@ def init_extractor():
     print(f"[OK] Novel Extractor initialized at {EXTRACTOR_DIR}")
     print(f"     Source: {NOVEL_SOURCE_DIR}")
     print(f"     Dimensions: {len(EXTRACTION_DIMENSIONS)}")
+
+# unified_config 兼容：init_system 是 init_extractor 的别名
+def init_system():
+    """unified_config 兼容别名，等价于 init_extractor()"""
+    init_extractor()
