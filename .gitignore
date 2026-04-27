@@ -91,14 +91,28 @@ skills/
 项目审核报告_AI工程评估.md
 
 # ========================================
-# 文档目录 - 仅推送核心文档
+# 文档目录 - 仅推送学生可见文档
 # ========================================
+# 保留：实训指导书_学生版.md / 系统架构.md / 检索系统API手册.md / RELEASE_NOTES_*.md
 
-# superpowers spec/plans - 本地开发用
+# 开发内部文档 - 不对学生公开
 docs/superpowers/
-
-# 存档文档
 docs/archived/
+docs/audit/
+docs/m5_evidence/
+docs/m6_artifacts/
+docs/m7_artifacts/
+docs/m8_artifacts/
+docs/workflows/
+docs/SESSION_HANDOFF_*.md
+docs/ROADMAP_*.md
+docs/计划_*.md
+docs/审核报告_*.md
+docs/写手工作流启动手册_*.md
+docs/系统架构_对话路由*.md
+docs/opencode_dev_protocol_*.md
+docs/external_skills_registry.md
+docs/同步提炼数据*.md
 
 # 设计方案文档（已实现或废弃）
 docs/专家级能力体系设计方案.md
