@@ -1,6 +1,6 @@
 # 众生界 · opencode 自动安装引导
 
-> **生成日期**：2026-04-22（Asia/Shanghai）
+> **生成日期**：2026-04-27（Asia/Shanghai）
 >
 > **使用方式**：把下方「提示词」部分的全部内容复制，粘贴到 opencode 对话框，按回车。opencode 会自动逐步完成安装，中途只在需要你填信息时停下来问你。
 
@@ -81,6 +81,28 @@ pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 - `No module named pip` → 执行 `python -m ensurepip --upgrade`
 - 某个包安装失败 → 单独执行 `pip install [包名] -i https://pypi.tuna.tsinghua.edu.cn/simple`
 - MSVC 编译错误（Windows 特有）→ 告诉我需要安装 Visual Studio Build Tools，引导我去下载
+
+---
+
+## 阶段 3.5：快速验证安装结果
+
+依赖安装完成后，立刻跑一下系统自检，确认没有遗漏：
+
+```
+python tools/check_env.py --quick
+```
+
+逐项看结果：
+- `[OK]` = 正常
+- `[X]` = 必须修复（按照提示执行命令）
+- `[!]` = 警告（可选，不影响基本使用）
+
+**重点关注第 6 项「GPU / 推理加速」：**
+- 显示 `GPU 可用：NVIDIA ...` → 系统会自动用 GPU 加速，推理速度很快
+- 显示 `torch ... 是 CPU 版` → 系统会用 CPU 推理，速度较慢但完全可用；想加速的话按提示里的 `pip install` 命令操作即可
+- 显示 `未检测到可用 GPU` → 没有独立显卡，用 CPU 推理，正常
+
+看到 `6/7` 或 `7/7 通过` 且没有 `[X]` → 继续阶段 4。
 
 ---
 
@@ -317,14 +339,18 @@ python tools/unified_extractor.py --status
 
 ## 阶段 11：验证环境
 
-执行完整验证：
+执行完整验证（含 Qdrant 连接检查）：
 
 ```
 cd /d D:\novels\众生界
-python tools/data_builder.py --status
+python tools/check_env.py
 ```
 
-确认各 collection 已创建。然后运行一次基础测试：
+每一项都是 `[OK]` 或 `[!]`（警告），没有 `[X]`（错误）→ 环境正常，可以开始使用。
+
+如果某项显示 `[X]`，按它下面的提示修复，修复后重新运行 `check_env.py` 确认通过。
+
+然后运行一次基础测试：
 
 ```
 python -m pytest tests/ -x -q --timeout=30 2>&1 | tail -5

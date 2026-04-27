@@ -24,7 +24,8 @@ def _load_model():
         raise RuntimeError(
             "BGE-M3 模型路径未配置，请检查 config.json 或环境变量 BGE_M3_MODEL_PATH"
         )
-    _MODEL = BGEM3FlagModel(model_path, use_fp16=True)
+    from core.config_loader import get_device
+    _MODEL = BGEM3FlagModel(model_path, use_fp16=True, device=get_device(verbose=False))
     return _MODEL
 
 

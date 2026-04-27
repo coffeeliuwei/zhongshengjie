@@ -89,19 +89,20 @@ class DataBuilder:
     def _load_model(self):
         """加载嵌入模型"""
         from FlagEmbedding import BGEM3FlagModel
+        from core.config_loader import get_device
 
+        device = get_device()
         model_path = self.config.get("model_path")
         if model_path:
-            self.model = BGEM3FlagModel(model_path, use_fp16=True)
+            self.model = BGEM3FlagModel(model_path, use_fp16=True, device=device)
         else:
-            # 尝试环境变量或默认路径
             import os
 
             cache_path = os.environ.get("BGE_M3_MODEL_PATH")
             if cache_path:
-                self.model = BGEM3FlagModel(cache_path, use_fp16=True)
+                self.model = BGEM3FlagModel(cache_path, use_fp16=True, device=device)
             else:
-                self.model = BGEM3FlagModel("BAAI/bge-m3", use_fp16=True)
+                self.model = BGEM3FlagModel("BAAI/bge-m3", use_fp16=True, device=device)
         return self.model
 
     def init_collections(self):

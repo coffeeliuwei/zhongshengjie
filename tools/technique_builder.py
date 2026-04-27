@@ -559,17 +559,19 @@ python technique_builder.py --sync
 
         # 加载模型
         print("\n加载BGE-M3模型...")
+        from core.config_loader import get_device
+        device = get_device()
         model_path = self.config.get("model_path")
         if model_path:
-            model = BGEM3FlagModel(model_path, use_fp16=True)
+            model = BGEM3FlagModel(model_path, use_fp16=True, device=device)
         else:
             import os
 
             cache_path = os.environ.get("BGE_M3_MODEL_PATH")
             if cache_path:
-                model = BGEM3FlagModel(cache_path, use_fp16=True)
+                model = BGEM3FlagModel(cache_path, use_fp16=True, device=device)
             else:
-                model = BGEM3FlagModel("BAAI/bge-m3", use_fp16=True)
+                model = BGEM3FlagModel("BAAI/bge-m3", use_fp16=True, device=device)
         print("    模型加载完成")
 
         # 收集所有技法

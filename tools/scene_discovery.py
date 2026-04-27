@@ -336,10 +336,10 @@ class ClusteringEngine:
         if self._model is None:
             try:
                 from FlagEmbedding import BGEM3FlagModel
-                from core.config_loader import get_model_path
+                from core.config_loader import get_model_path, get_device
 
                 model_path = self._model_path or get_model_path()
-                self._model = BGEM3FlagModel(model_path, use_fp16=True)
+                self._model = BGEM3FlagModel(model_path, use_fp16=True, device=get_device())
             except ImportError:
                 print("请安装 FlagEmbedding: pip install FlagEmbedding")
                 return None

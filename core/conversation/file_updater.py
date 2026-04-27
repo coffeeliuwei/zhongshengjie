@@ -233,7 +233,8 @@ class FileUpdater:
                 return True
 
             try:
-                model = BGEM3FlagModel(model_path, use_fp16=True)
+                from core.config_loader import get_device
+                model = BGEM3FlagModel(model_path, use_fp16=True, device=get_device(verbose=False))
 
                 # 生成嵌入向量
                 embedding = model.encode(

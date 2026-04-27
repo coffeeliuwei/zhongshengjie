@@ -1200,13 +1200,14 @@ python case_builder.py --sync
 
         # 加载模型（使用统一配置）
         print("\n加载BGE-M3模型...")
+        from core.config_loader import get_device
+        device = get_device()
         if self.model_path:
             print(f"    模型路径: {self.model_path}")
-            model = BGEM3FlagModel(self.model_path, use_fp16=True)
+            model = BGEM3FlagModel(self.model_path, use_fp16=True, device=device)
         else:
-            # 回退到自动下载
             print("    自动下载模型...")
-            model = BGEM3FlagModel("BAAI/bge-m3", use_fp16=True)
+            model = BGEM3FlagModel("BAAI/bge-m3", use_fp16=True, device=device)
         print("    模型加载完成")
 
         # 同步
