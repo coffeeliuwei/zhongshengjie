@@ -576,24 +576,30 @@ def get_all_realm_orders() -> dict:
 
 
 def _load_current_world_config() -> dict:
-    """加载当前世界观配置"""
-    try:
-        import json
+    """加载当前世界观配置，文件不存在时静默返回空字典，其他异常打印警告"""
+    import json
 
-        # 从 config.json 获取当前世界观名称
+    try:
         config = get_config()
         world_name = config.get("worldview", {}).get("current_world", "众生界")
-
-        # 使用配置路径获取世界观配置文件
         world_config_path = get_world_config_path(world_name)
 
-        if world_config_path.exists():
-            with open(world_config_path, "r", encoding="utf-8") as f:
-                return json.load(f)
-    except Exception:
-        pass
+        if not world_config_path.exists():
+            return {}
 
-    return {}
+        with open(world_config_path, "r", encoding="utf-8") as f:
+            return json.load(f)
+
+    except json.JSONDecodeError as e:
+        import warnings
+
+        warnings.warn(f"[config_loader] 世界观配置 JSON 解析失败: {e}", stacklevel=2)
+        return {}
+    except Exception as e:
+        import warnings
+
+        warnings.warn(f"[config_loader] 加载世界观配置出错: {e}", stacklevel=2)
+        return {}
 
 
 def reset_config():
@@ -746,10 +752,11 @@ def get_device(verbose: bool = True) -> str:
     """
     try:
         import torch
+
         if torch.cuda.is_available():
             name = torch.cuda.get_device_name(0)
             if verbose:
-                vram = torch.cuda.get_device_properties(0).total_memory // (1024 ** 3)
+                vram = torch.cuda.get_device_properties(0).total_memory // (1024**3)
                 print(f"[设备] GPU: {name}（{vram}GB）— 已启用 CUDA 加速")
             return "cuda"
     except ImportError:
@@ -758,6 +765,36 @@ def get_device(verbose: bool = True) -> str:
     if verbose:
         print("[设备] 未检测到 GPU，使用 CPU 推理（速度较慢，属正常现象）")
     return "cpu"
+
+
+def get_inspiration_engine_config() -> dict:
+    """
+    获取灵感引擎配置
+
+    Returns:
+        {
+            "enabled": True,
+            "variant_count": 3,
+            "appraisal_cold_start_threshold": 50,
+            "appraisal_growing_threshold": 300,
+            "audit_interval_appraisals": 10,
+            "overturn_audit_threshold": 10,
+            "memory_point_overturn_weight": 2.0,
+        }
+    """
+    config = get_config()
+    return config.get(
+        "inspiration_engine",
+        {
+            "enabled": True,
+            "variant_count": 3,
+            "appraisal_cold_start_threshold": 50,
+            "appraisal_growing_threshold": 300,
+            "audit_interval_appraisals": 10,
+            "overturn_audit_threshold": 10,
+            "memory_point_overturn_weight": 2.0,
+        },
+    )
 
 
 # 初始化时打印配置信息（可选）

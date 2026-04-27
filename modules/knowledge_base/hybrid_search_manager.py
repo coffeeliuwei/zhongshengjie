@@ -149,22 +149,39 @@ class HybridSearchManager:
         return self._client
 
     def _load_model(self):
-        """加载 BGE-M3 模型"""
-        if self._model is None:
-            try:
-                from FlagEmbedding import BGEM3FlagModel
+        """加载 BGE-M3 模型，失败时重试三次"""
+        if self._model is not None:
+            return self._model
 
-                from core.config_loader import get_device
+        from FlagEmbedding import BGEM3FlagModel
+        from core.config_loader import get_device
+        import time
+
+        last_err = None
+        for attempt in range(1, 4):
+            try:
                 self._model = BGEM3FlagModel(
                     BGE_M3_MODEL_NAME,
                     use_fp16=USE_FP16,
                     device=get_device(verbose=False),
                 )
+                return self._model
             except ImportError as e:
                 raise ImportError(
                     f"请安装 FlagEmbedding: pip install FlagEmbedding ({e})"
                 )
-        return self._model
+            except Exception as e:
+                last_err = e
+                if attempt < 3:
+                    wait = attempt * 3
+                    print(
+                        f"[hybrid_search] 模型加载失败（第{attempt}次），{wait}秒后重试: {e}"
+                    )
+                    time.sleep(wait)
+
+        raise RuntimeError(
+            f"[hybrid_search] 模型加载连续失败 3 次: {last_err}"
+        ) from last_err
 
     def _encode_query(self, query: str) -> Dict[str, Any]:
         """
