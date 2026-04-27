@@ -105,11 +105,11 @@ DIMENSION_COLLECTION_MAP = {
     "power_cost": "power_cost_v1",
     "emotion_arc": "emotion_arc_v1",
     "power_vocabulary": "power_vocabulary_v1",
-    "character_relation": "novel_settings_v2",
+    "character_relation": "character_relation_v1",  # [U2] 修正：使用独立 collection
     "chapter_structure": None,  # 不入库
-    "author_style": None,  # 不入库
+    "author_style": "author_style_v1",  # [U2] 修正：使用独立 collection
     "foreshadow_pair": "foreshadow_pair_v1",
-    "worldview_element": "novel_settings_v2",
+    "worldview_element": "worldview_element_v1",  # [U2] 修正：使用独立 collection
 }
 
 # 维度优先级（用于并行提取的调度顺序）

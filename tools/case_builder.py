@@ -40,28 +40,45 @@ from dataclasses import dataclass, asdict
 # ──────────────────────────────────────────────────────────
 
 _AD_PATTERN = re.compile(
-    r'www\.\S+|http[s]?://\S+'
-    r'|(?:免费|全文|txt|epub|mobi).{0,6}(?:下载|书库|阅读站|小说网)'
-    r'|本书来自\S+'
-    r'|(?:手机版|移动版)\s*(?:访问|阅读)'
-    r'|书友群|QQ群|微信群|公众号'
-    r'|推荐票|月票|打赏|(?:求|送)\s*(?:票|赞)',
+    r"www\.\S+|http[s]?://\S+"
+    r"|(?:免费|全文|txt|epub|mobi).{0,6}(?:下载|书库|阅读站|小说网)"
+    r"|本书来自\S+"
+    r"|(?:手机版|移动版)\s*(?:访问|阅读)"
+    r"|书友群|QQ群|微信群|公众号"
+    r"|推荐票|月票|打赏|(?:求|送)\s*(?:票|赞)",
     re.IGNORECASE,
 )
 
 _CHAPTER_LINE_PATTERN = re.compile(
-    r'^第[一二三四五六七八九十百千万零\d]+[章节卷部回集]\s*'
+    r"^第[一二三四五六七八九十百千万零\d]+[章节卷部回集]\s*"
 )
 
 _SENTENCE_ENDERS = frozenset('。！？…"』」》）】')
 
 _FORBIDDEN_PHRASES = [
-    "总之", "综上所述", "不得不说", "让人不禁",
-    "作为一个", "值得一提的是", "不得不承认", "毋庸置疑",
-    "众所周知", "诚然", "固然", "首先，其次，",
-    "叮！恭喜宿主", "系统提示：", "【叮！】", "恭喜获得",
-    "经验值+", "技能书×", "属性面板",
-    "攻击力：", "防御力：", "品质：稀有", "品质：传说",
+    "总之",
+    "综上所述",
+    "不得不说",
+    "让人不禁",
+    "作为一个",
+    "值得一提的是",
+    "不得不承认",
+    "毋庸置疑",
+    "众所周知",
+    "诚然",
+    "固然",
+    "首先，其次，",
+    "叮！恭喜宿主",
+    "系统提示：",
+    "【叮！】",
+    "恭喜获得",
+    "经验值+",
+    "技能书×",
+    "属性面板",
+    "攻击力：",
+    "防御力：",
+    "品质：稀有",
+    "品质：传说",
 ]
 
 
@@ -72,7 +89,7 @@ def _is_ad_paragraph(para: str) -> bool:
 
 def _is_catalog_page(para: str) -> bool:
     """检测目录页：>= 3 行且 >= 40% 行符合章节标题格式。"""
-    lines = [l.strip() for l in para.split('\n') if l.strip()]
+    lines = [l.strip() for l in para.split("\n") if l.strip()]
     if len(lines) < 3:
         return False
     chapter_lines = sum(1 for l in lines if _CHAPTER_LINE_PATTERN.match(l))
@@ -83,7 +100,7 @@ def _get_chinese_ratio(text: str) -> float:
     """汉字占总字符数的比例。"""
     if not text:
         return 0.0
-    chinese = sum(1 for c in text if '\u4e00' <= c <= '\u9fff')
+    chinese = sum(1 for c in text if "\u4e00" <= c <= "\u9fff")
     return chinese / len(text)
 
 
@@ -103,16 +120,25 @@ def _info_density(text: str) -> float:
 
 # C4 风格行级过滤标志
 _LINE_BAD_SUBSTRINGS = (
-    "javascript", "cookie policy", "terms of use", "lorem ipsum",
-    "用户协议", "隐私政策", "免责声明", "版权所有", "all rights reserved",
-    "请扫描", "关注我们", "长按识别",
+    "javascript",
+    "cookie policy",
+    "terms of use",
+    "lorem ipsum",
+    "用户协议",
+    "隐私政策",
+    "免责声明",
+    "版权所有",
+    "all rights reserved",
+    "请扫描",
+    "关注我们",
+    "长按识别",
 )
 
 
 def _clean_lines(paragraph: str) -> str:
     """C4 风格行级清洗：逐行判定，丢弃广告/声明行后重新拼接。"""
     good_lines = []
-    for line in paragraph.split('\n'):
+    for line in paragraph.split("\n"):
         stripped = line.strip()
         if len(stripped) < 2:
             continue
@@ -122,7 +148,7 @@ def _clean_lines(paragraph: str) -> str:
         if _AD_PATTERN.search(stripped):
             continue
         good_lines.append(stripped)
-    return '\n'.join(good_lines)
+    return "\n".join(good_lines)
 
 
 import math as _math
@@ -134,12 +160,11 @@ def _bigram_entropy(text: str) -> float:
     chars = [c for c in text if not c.isspace()]
     if len(chars) < 20:
         return 0.0
-    bigrams = [chars[i] + chars[i+1] for i in range(len(chars) - 1)]
+    bigrams = [chars[i] + chars[i + 1] for i in range(len(chars) - 1)]
     counter = _Counter(bigrams)
     total = sum(counter.values())
     return -sum(
-        (count / total) * _math.log2(count / total)
-        for count in counter.values()
+        (count / total) * _math.log2(count / total) for count in counter.values()
     )
 
 
@@ -263,12 +288,24 @@ SCENE_TYPES = {
     },
     "转折场景": {
         "keywords": ["突然", "意外", "却", "竟", "不料", "没想到", "反转", "转折"],
+        "keyword_weights": {
+            "却": 0.05,  # 近乎无效：最高频虚词
+            "竟": 0.1,  # 低效：常用副词
+            "突然": 0.4,
+            "意外": 0.4,
+            "不料": 1.0,
+            "没想到": 1.0,
+            "反转": 1.5,
+            "转折": 1.5,
+        },
+        "min_kw_score": 1.0,  # 至少要有1个实质性词（不能只靠"却+竟"）
         "position": "any",
         "min_len": 300,
         "max_len": 2000,
     },
     "结尾场景": {
-        "keywords": [],
+        "keywords": ["结局", "最终", "终于", "落幕", "尾声", "完结", "谢幕", "大结局"],
+        "min_kw_score": 0.5,  # position=end 时放宽，但至少有1个结尾词
         "position": "end",
         "min_len": 300,
         "max_len": 1000,
@@ -309,7 +346,15 @@ SCENE_TYPES = {
             "暗想",
             "心道",
             "默念",
+            "思考",
+            "明悟",
+            "领悟",
+            "顿悟",
+            "自问",
+            "心想",
+            "暗忖",
         ],
+        "neg_keywords": ["一拳", "一剑", "出手", "攻击", "斩出"],  # 动作段排除
         "position": "any",
         "min_len": 300,
         "max_len": 1500,
@@ -499,6 +544,38 @@ SCENE_TYPES = {
     },
 }
 
+# Q4：场景类型语义描述（用于 Zero-shot 语义校验）
+SCENE_TYPE_DESCRIPTIONS = {
+    "开篇场景": "故事开始，主角登场，世界观初步介绍，序章内容",
+    "打脸场景": "被嘲讽轻视的主角在关键时刻反击，令对方震惊震慑的场面",
+    "高潮场景": "故事最激烈的决战顶点，生死之战，全力爆发",
+    "战斗场景": "双方交手对决，招式动作描写，攻防对抗",
+    "对话场景": "人物之间的深刻对话交流，包含说话问答的场景",
+    "情感场景": "人物间情感交流，感动落泪，深厚情谊或爱情表达",
+    "悬念场景": "谜团未解，秘密揭露，真相浮现，令人好奇的悬疑情节",
+    "转折场景": "情节发生意想不到的转折逆转，与之前预期完全相反",
+    "结尾场景": "故事结尾，大局已定，落幕收场，人物命运终局",
+    "人物出场": "重要人物首次登场亮相，外貌气质描写，给人深刻印象",
+    "环境场景": "自然风景、建筑场所的详细描写，烘托氛围",
+    "心理场景": "人物内心深处的思考挣扎，独白反思，心理活动描写",
+    "成长场景": "人物经历磨练后成熟蜕变，觉悟顿悟，性格转变",
+    "伏笔场景": "隐约暗示未来情节，埋下伏笔，若隐若现的线索",
+    "揭秘场景": "真相大白，秘密被揭开，多年谜团终于解开",
+    "突破场景": "主角修为境界突破，实力大幅提升，关键进阶",
+    "羁绊场景": "人物之间深厚情谊，生死与共的情义，重要的情感连接",
+    "危机场景": "主角或重要角色面临生死危机，险象环生，危在旦夕",
+    "反派场景": "反派登场行动，阴谋诡计，邪恶势力的描写",
+    "资源场景": "获得宝物资源，机缘际遇，重要物品或传承获取",
+    "休整场景": "战后休养，修炼恢复，平静时光的日常描写",
+    "探索场景": "探索未知地域，发现遗迹秘境，冒险旅途",
+    "情报场景": "打探消息，获取情报，信息交流的场景",
+    "势力场景": "门派宗门，势力格局，组织架构的描写",
+    "契约场景": "签订盟约协议，重要承诺，誓言立约",
+    "变故场景": "意外变故，计划被打乱，突发事件",
+    "记忆场景": "回忆往事，回想过去，历史追述的片段",
+    "传承场景": "传授功法技艺，接受指导，师徒传承",
+}
+
 # 题材关键词
 GENRE_KEYWORDS = {
     "玄幻奇幻": [
@@ -519,6 +596,12 @@ GENRE_KEYWORDS = {
     "青春校园": ["学校", "校园", "同学", "老师", "青春", "班级", "考试"],
     "游戏竞技": ["游戏", "玩家", "副本", "BOSS", "等级", "装备", "公会"],
     "女频言情": ["王爷", "妃", "宫", "公主", "丞相", "将军府", "嫡女"],
+    # Q2：新增题材类型
+    "穿越重生": ["穿越", "重生", "穿书", "转世", "时空", "回到", "前世", "今生"],
+    "盗墓探险": ["盗墓", "古墓", "陵寝", "机关", "棺椁", "摸金", "粽子", "倒斗"],
+    "末日废土": ["末日", "丧尸", "末世", "病毒", "废土", "异变", "变异", "幸存"],
+    "系统流": ["系统", "签到", "宿主", "任务面板", "属性面板", "称号", "商城", "兑换"],
+    "女频古言": ["王爷", "侧妃", "嫡女", "庶女", "府中", "姨娘", "宫斗", "穿越成"],
 }
 
 
@@ -563,8 +646,11 @@ class CaseBuilder:
         else:
             # 回退到旧方式
             import os
+
             self.config = config or {}
-            self.qdrant_url = self.config.get("qdrant_url", os.environ.get("QDRANT_URL", "http://localhost:6333"))
+            self.qdrant_url = self.config.get(
+                "qdrant_url", os.environ.get("QDRANT_URL", "http://localhost:6333")
+            )
             self.collection_name = self.config.get("collections", {}).get(
                 "case_library", "case_library_v2"
             )
@@ -778,7 +864,7 @@ python case_builder.py --sync
                 continue
 
             for file_path in source_dir.rglob("*"):
-                if limit and converted_count >= limit:
+                if limit > 0 and converted_count >= limit:
                     break
 
                 suffix = file_path.suffix.lower()
@@ -832,7 +918,7 @@ python case_builder.py --sync
         print(f"\n转换完成: {converted_count} 成功, {failed_count} 失败")
         return True
 
-    def extract_cases(self, limit: int = 1000, scene_types: Optional[List[str]] = None):
+    def extract_cases(self, limit: int = 0, scene_types: Optional[List[str]] = None):
         """提取案例"""
         print("\n" + "=" * 60)
         print("提取案例")
@@ -841,6 +927,27 @@ python case_builder.py --sync
         # 确定场景类型
         target_scenes = scene_types or list(SCENE_TYPES.keys())
         print(f"    目标场景: {len(target_scenes)} 种")
+
+        # Q3/Q4：尝试加载 BGE-M3 用于边界验证和语义校验（可选）
+        _bge_model = None
+        _scene_anchors = None
+        try:
+            from FlagEmbedding import BGEM3FlagModel
+            from core.config_loader import get_device, get_model_path
+
+            device = get_device()
+            model_path = get_model_path()
+            if model_path:
+                _bge_model = BGEM3FlagModel(model_path, use_fp16=True, device=device)
+            else:
+                _bge_model = BGEM3FlagModel("BAAI/bge-m3", use_fp16=True, device=device)
+            print("    [Q3] BGE-M3 已加载，启用场景边界验证")
+            # Q4：预计算场景类型锚向量
+            _scene_anchors = self._build_scene_type_anchors(_bge_model)
+            if _scene_anchors:
+                print(f"    [Q4] 场景类型锚向量已构建，启用 zero-shot 语义校验")
+        except Exception as e:
+            print(f"    [Q3/Q4] BGE-M3 加载失败，跳过边界验证和语义校验: {e}")
 
         # 扫描已转换的文件
         novel_files = list(self.converted_dir.glob("*.txt"))
@@ -851,13 +958,13 @@ python case_builder.py --sync
             return False
 
         print(f"    小说文件: {len(novel_files)} 本")
-        print(f"    提取限制: {limit} 条")
+        print(f"    提取限制: {limit if limit > 0 else '无限制'} 条")
 
         # 提取案例
         all_cases: List[Case] = []
 
         for i, novel_file in enumerate(novel_files):
-            if len(all_cases) >= limit:
+            if limit > 0 and len(all_cases) >= limit:
                 break
 
             try:
@@ -872,7 +979,7 @@ python case_builder.py --sync
 
                 # 按场景类型提取
                 for scene_type in target_scenes:
-                    if len(all_cases) >= limit:
+                    if limit > 0 and len(all_cases) >= limit:
                         break
 
                     scene_config = SCENE_TYPES.get(scene_type, {})
@@ -883,6 +990,8 @@ python case_builder.py --sync
                         novel_name=novel_name,
                         genre=genre,
                         source_file=novel_file.name,
+                        bge_model=_bge_model,
+                        scene_anchors=_scene_anchors,
                     )
 
                     all_cases.extend(cases)
@@ -912,18 +1021,111 @@ python case_builder.py --sync
         return True
 
     def _detect_genre(self, content: str) -> str:
-        """检测题材"""
-        scores = {}
-        for genre, keywords in GENRE_KEYWORDS.items():
-            score = sum(1 for kw in keywords if kw in content)
-            scores[genre] = score
+        """多位置采样题材检测（Q2：3段采样 + 扩充词库 + 默认未分类）"""
+        length = len(content)
+        # 从开头、1/3处、2/3处各取 5000 字，避免只看开篇
+        samples = [
+            content[:5000],
+            content[max(0, length // 3 - 2500) : length // 3 + 2500],
+            content[max(0, 2 * length // 3 - 2500) : 2 * length // 3 + 2500],
+        ]
 
-        if scores:
-            best = max(scores, key=scores.get)
-            if scores[best] >= 3:
+        total_scores: Dict[str, int] = {}
+        for genre, keywords in GENRE_KEYWORDS.items():
+            score = sum(sum(1 for kw in keywords if kw in sample) for sample in samples)
+            total_scores[genre] = score
+
+        if total_scores:
+            best = max(total_scores, key=lambda g: total_scores[g])
+            if total_scores[best] >= 3:
                 return best
 
-        return "玄幻奇幻"  # 默认
+        return "未分类"  # Q2：改为"未分类"，不再硬编码玄幻奇幻
+
+    def _compute_boundary_delta(
+        self,
+        paragraphs: List[str],
+        para_index: int,
+        model,
+        window: int = 3,
+    ) -> float:
+        """Q3：Embedding Delta Signal (Schneider et al. 2021).
+
+        计算 para_index 位置的场景边界强度：
+        - 用 BGE-M3 分别编码前 window 段和后 window 段的拼接文本
+        - 返回两者的余弦距离（0~2，越大越像真实边界）
+        - 降级：model=None 时返回 1.0（默认通过，不过滤）
+        """
+        if model is None:
+            return 1.0
+
+        before = " ".join(paragraphs[max(0, para_index - window) : para_index])
+        after = " ".join(paragraphs[para_index : para_index + window])
+        if not before or not after:
+            return 1.0
+
+        try:
+            import numpy as np
+
+            result = model.encode([before, after], batch_size=2, return_dense=True)
+            vecs = result["dense_vecs"]
+            a, b = np.array(vecs[0]), np.array(vecs[1])
+            cosine_sim = float(
+                np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b) + 1e-9)
+            )
+            return 1.0 - cosine_sim  # cosine distance
+        except Exception:
+            return 1.0
+
+    def _build_scene_type_anchors(self, model) -> Optional[Dict[str, Any]]:
+        """Q4：为 28 种场景类型预计算锚向量（one-time，结果不缓存到磁盘）。
+
+        Returns:
+            {"type_name": np.ndarray} 或 None（model=None 时）
+        """
+        if model is None:
+            return None
+        try:
+            import numpy as np
+
+            types = list(SCENE_TYPE_DESCRIPTIONS.keys())
+            descs = [SCENE_TYPE_DESCRIPTIONS[t] for t in types]
+            result = model.encode(descs, batch_size=len(descs), return_dense=True)
+            vecs = result["dense_vecs"]
+            return {t: np.array(vecs[i]) for i, t in enumerate(types)}
+        except Exception as e:
+            print(f"    [Q4] 锚向量构建失败，跳过语义校验: {e}")
+            return None
+
+    def _semantic_verify_case(
+        self,
+        case_embedding,  # np.ndarray，案例段落的 BGE-M3 dense vector
+        keyword_scene_type: str,
+        anchors: Dict[str, Any],
+        min_similarity: float = 0.20,
+    ) -> Optional[str]:
+        """Q4：Zero-shot 语义校验场景类型。
+
+        Returns:
+            修正后的 scene_type，或 None（相似度过低，丢弃该案例）
+        """
+        import numpy as np
+
+        best_type = keyword_scene_type
+        best_sim = -1.0
+        for stype, anchor_vec in anchors.items():
+            sim = float(
+                np.dot(case_embedding, anchor_vec)
+                / (np.linalg.norm(case_embedding) * np.linalg.norm(anchor_vec) + 1e-9)
+            )
+            if sim > best_sim:
+                best_sim = sim
+                best_type = stype
+
+        if best_sim < min_similarity:
+            return None  # 语义相关度太低，丢弃
+
+        return best_type  # 以语义分类为准
 
     def _split_paragraphs(self, content: str) -> List[str]:
         """分割段落，并过滤广告/目录/低质量内容。"""
@@ -958,8 +1160,10 @@ python case_builder.py --sync
         novel_name: str,
         genre: str,
         source_file: str,
+        bge_model=None,
+        scene_anchors=None,
     ) -> List[Case]:
-        """提取特定场景类型的案例"""
+        """提取特定场景类型的案例（含 Q3/Q4 语义验证）"""
         cases = []
 
         keywords = scene_config.get("keywords", [])
@@ -978,20 +1182,34 @@ python case_builder.py --sync
             if position == "end" and i < len(paragraphs) - 5:
                 continue
 
-            # 关键词检查
+            # 关键词检查（Q1：加权评分 + 负关键词过滤）
+            neg_keywords = scene_config.get("neg_keywords", [])
+            if any(nkw in para for nkw in neg_keywords):
+                continue
+
+            keyword_weights = scene_config.get("keyword_weights", {})
+            min_kw_score = scene_config.get("min_kw_score", None)
+
             match_count = 0
+            kw_score = 0.0
             matched_keywords = []
             for kw in keywords:
                 if kw in para:
                     match_count += 1
                     matched_keywords.append(kw)
+                    kw_score += keyword_weights.get(kw, 1.0)
 
-            # 至少匹配2个关键词（或开篇/结尾场景特殊处理）
-            if position == "any" and match_count < 2:
-                continue
+            if min_kw_score is not None:
+                # 新权重模式：用分数门槛
+                if kw_score < min_kw_score:
+                    continue
+            else:
+                # 兼容旧模式：至少2个关键词（position=any）
+                if position == "any" and match_count < 2:
+                    continue
 
             # 计算质量分
-            quality_score = self._calculate_quality(para, match_count)
+            quality_score = self._calculate_quality(para, match_count, kw_score)
 
             if quality_score < 6.0:
                 continue
@@ -1011,16 +1229,56 @@ python case_builder.py --sync
                 source_file=source_file,
             )
 
+            # Q3：边界验证（有 BGE-M3 时才做，失败降级通过）
+            BOUNDARY_DELTA_THRESHOLD = 0.12  # 余弦距离阈值，低于此则为场景中段
+            if bge_model is not None and position == "any":
+                delta = self._compute_boundary_delta(paragraphs, i, bge_model, window=3)
+                if delta < BOUNDARY_DELTA_THRESHOLD:
+                    continue  # 场景中段噪音，丢弃
+
+            # Q4：zero-shot 语义校验（有锚向量时才做）
+            if scene_anchors is not None and bge_model is not None:
+                try:
+                    import numpy as np
+
+                    enc = bge_model.encode(
+                        [para[:1000]], batch_size=1, return_dense=True
+                    )
+                    para_vec = np.array(enc["dense_vecs"][0])
+                    corrected_type = self._semantic_verify_case(
+                        para_vec, scene_type, scene_anchors
+                    )
+                    if corrected_type is None:
+                        continue  # 语义相关度过低，丢弃
+                    if corrected_type != scene_type:
+                        case = Case(
+                            case_id=case.case_id,
+                            scene_type=corrected_type,
+                            genre=case.genre,
+                            novel_name=case.novel_name,
+                            content=case.content,
+                            word_count=case.word_count,
+                            quality_score=case.quality_score,
+                            emotion_value=case.emotion_value,
+                            techniques=case.techniques,
+                            keywords=case.keywords + [f"[语义修正自:{scene_type}]"],
+                            source_file=case.source_file,
+                        )
+                except Exception:
+                    pass  # 降级：不影响结果
+
             cases.append(case)
 
         return cases
 
-    def _calculate_quality(self, content: str, match_count: int) -> float:
-        """计算质量分（扩展版：禁用词 + 信息密度 + 句末完整性）"""
+    def _calculate_quality(
+        self, content: str, match_count: int, kw_score: float = 0.0
+    ) -> float:
+        """计算质量分（扩展版：禁用词 + 信息密度 + 句末完整性 + Q1加权分）"""
         score = 6.0  # 基础分
 
-        # 关键词匹配加分（上限 1.5）
-        score += min(match_count * 0.3, 1.5)
+        # 关键词匹配加分（Q1：用加权分替代纯 match_count，上限 1.5）
+        score += min(max(kw_score, match_count) * 0.3, 1.5)
 
         # 长度适中加分
         if 500 <= len(content) <= 2000:
@@ -1032,7 +1290,7 @@ python case_builder.py --sync
                 score -= 0.5
 
         # 对话密度加分
-        quote_count = content.count('\u201c') + content.count('\u201d')
+        quote_count = content.count("\u201c") + content.count("\u201d")
         if quote_count >= 4:
             score += 0.3
 
@@ -1062,7 +1320,9 @@ python case_builder.py --sync
         return hashlib.md5(content.encode()).hexdigest()[:12]
 
     def _filter_near_duplicates(
-        self, cases: "List[Case]", index_path: Optional[Path] = None,
+        self,
+        cases: "List[Case]",
+        index_path: Optional[Path] = None,
     ) -> "tuple[List[Case], Dict[str, int]]":
         """用 MinHash LSH 过滤近重复案例，并把新增案例写入持久化索引。
 
@@ -1074,7 +1334,9 @@ python case_builder.py --sync
             (filtered_cases, stats) — stats keys: kept / skipped
         """
         from tools.dedup_utils import (
-            compute_minhash, load_lsh, save_lsh,
+            compute_minhash,
+            load_lsh,
+            save_lsh,
         )
 
         if index_path is None:
@@ -1201,6 +1463,7 @@ python case_builder.py --sync
         # 加载模型（使用统一配置）
         print("\n加载BGE-M3模型...")
         from core.config_loader import get_device
+
         device = get_device()
         if self.model_path:
             print(f"    模型路径: {self.model_path}")
@@ -1222,7 +1485,11 @@ python case_builder.py --sync
             points = []
             for j, case in enumerate(batch):
                 point = PointStruct(
-                        id=str(uuid.uuid5(uuid.NAMESPACE_DNS, case.get("case_id", f"case_{i+j}"))),
+                    id=str(
+                        uuid.uuid5(
+                            uuid.NAMESPACE_DNS, case.get("case_id", f"case_{i + j}")
+                        )
+                    ),
                     vector={
                         "dense": out["dense_vecs"][j].tolist(),
                         "sparse": {

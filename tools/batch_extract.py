@@ -67,11 +67,9 @@ def step1_case_builder(py: str, limit: int = 0):
 
 
 def step2_semantic_case(py: str, limit: int = 0):
-    """语义案例提炼：unified_case_extractor Ex3语义分组"""
-    cmd = [py, str(CASE_SCRIPTS / "unified_case_extractor.py"), "--extract"]
-    if limit:
-        cmd += ["--limit", str(limit)]
-    run_step("Step 2/6 语义案例提炼 (unified_case_extractor)", cmd, cwd=CASE_SCRIPTS)
+    """[U1] NOOP - 语义案例提炼已统一到 case_builder --extract"""
+    log("Step 2/6 语义案例提炼 (NOOP - 已统一到 case_builder)")
+    print("  [跳过] 语义案例提炼功能已合并至 case_builder --extract")
 
 
 def step3_dimensions(py: str, limit: int = 0):
@@ -124,10 +122,10 @@ def step4_scene_discovery(py: str):
 
 
 def step5_sync_cases(py: str):
-    """同步案例到 Qdrant case_library_v2"""
+    """[U1] 同步案例到 Qdrant case_library_v2 - 通过 case_builder --sync"""
     run_step(
         "Step 5/6 同步案例 → Qdrant case_library_v2",
-        [py, str(CASE_SCRIPTS / "sync_to_qdrant.py"), "--docker", "--no-resume"],
+        [py, str(TOOLS / "case_builder.py"), "--sync"],
     )
 
 
