@@ -5,9 +5,10 @@ tools/sync_extracted_to_qdrant.py
 每个 collection 全量重建（删除旧数据 + 重新写入）。
 
 用法:
-    python tools/sync_extracted_to_qdrant.py              # 同步全部8个维度
+    python tools/sync_extracted_to_qdrant.py                     # 同步全部8个维度
     python tools/sync_extracted_to_qdrant.py --dim author_style_v1
-    python tools/sync_extracted_to_qdrant.py --dry-run    # 不实际写入，只统计条数
+    python tools/sync_extracted_to_qdrant.py --dry-run           # 不实际写入，只统计条数
+    python tools/sync_extracted_to_qdrant.py --skip-existing     # 跳过已同步且条数一致的维度
 """
 
 import json
@@ -177,7 +178,7 @@ def _make_payload(item: Dict, embed_text: str) -> Dict:
 
 
 def sync_dimension(
-    client, model, dim_id: str, config: Dict, dry_run: bool = False
+    client, model, dim_id: str, config: Dict, dry_run: bool = False, skip_existing: bool = False
 ) -> int:
     """同步单个维度，返回已同步条数"""
     source_file = (
@@ -201,6 +202,20 @@ def sync_dimension(
     if dry_run:
         print(f"  [DRY-RUN] 预计写入 {total} 条，跳过实际操作")
         return total
+
+    # --skip-existing：检查 Qdrant 已有条数，和本地一致则跳过
+    if skip_existing:
+        try:
+            existing = [c.name for c in client.get_collections().collections]
+            if dim_id in existing:
+                info = client.get_collection(dim_id)
+                if info.points_count == total:
+                    print(f"  [跳过] 已同步 {total} 条，条数一致，无需重建")
+                    return total
+                else:
+                    print(f"  [重建] Qdrant 有 {info.points_count} 条，本地 {total} 条，不一致，重建")
+        except Exception as e:
+            print(f"  [警告] 无法检查已有条数（{e}），继续重建")
 
     rebuild_collection(client, dim_id)
 
@@ -259,6 +274,11 @@ def main():
         help="只同步指定维度（不指定则同步全部8个）",
     )
     parser.add_argument("--dry-run", action="store_true", help="不实际写入，只统计条数")
+    parser.add_argument(
+        "--skip-existing",
+        action="store_true",
+        help="跳过 Qdrant 中已存在且条数与本地一致的维度（断点重开时使用）",
+    )
     args = parser.parse_args()
 
     from qdrant_client import QdrantClient
@@ -273,17 +293,42 @@ def main():
         print(f"[错误] 无法连接 Qdrant: {e}")
         sys.exit(1)
 
+    targets = {args.dim: SYNC_DIMENSIONS[args.dim]} if args.dim else SYNC_DIMENSIONS
+
+    # 判断是否所有维度都会被跳过（--skip-existing 时提前检查，避免无意义加载模型）
     model = None
     if not args.dry_run:
-        model = load_model()
-
-    targets = {args.dim: SYNC_DIMENSIONS[args.dim]} if args.dim else SYNC_DIMENSIONS
+        if args.skip_existing:
+            need_sync = []
+            existing_cols = {c.name: c for c in client.get_collections().collections}
+            for dim_id, config in targets.items():
+                source_file = EXTRACTED_OUTPUT_DIR / config["source_dir"] / f"{config['source_dir']}_all.json"
+                if not source_file.exists():
+                    continue
+                with open(source_file, encoding="utf-8") as f:
+                    total = len(json.load(f))
+                if dim_id in existing_cols:
+                    info = client.get_collection(dim_id)
+                    if info.points_count == total:
+                        continue  # 会被跳过
+                need_sync.append(dim_id)
+            if need_sync:
+                print(f"[模型] 需要同步的维度：{need_sync}")
+                model = load_model()
+            else:
+                print("[模型] 所有维度已同步，无需加载模型")
+        else:
+            model = load_model()
 
     total_synced = 0
     t_start = time.time()
 
     for dim_id, config in targets.items():
-        count = sync_dimension(client, model, dim_id, config, dry_run=args.dry_run)
+        count = sync_dimension(
+            client, model, dim_id, config,
+            dry_run=args.dry_run,
+            skip_existing=args.skip_existing,
+        )
         total_synced += count
 
     elapsed = time.time() - t_start
