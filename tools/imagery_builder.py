@@ -558,7 +558,7 @@ class ImageryBuilder:
                     print("    未找到本地模型，尝试在线加载...")
                     model_path = "BAAI/bge-m3"
 
-                self.model = BGEM3FlagModel(model_path, use_fp16=True, device="cpu")
+                self.model = BGEM3FlagModel(model_path, use_fp16=True)
                 print(f"    ✓ 已加载BGE-M3模型")
             except Exception as e:
                 print(f"    ✗ 加载模型失败: {e}")

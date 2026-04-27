@@ -1202,11 +1202,11 @@ python case_builder.py --sync
         print("\n加载BGE-M3模型...")
         if self.model_path:
             print(f"    模型路径: {self.model_path}")
-            model = BGEM3FlagModel(self.model_path, use_fp16=True, device="cpu")
+            model = BGEM3FlagModel(self.model_path, use_fp16=True)
         else:
             # 回退到自动下载
             print("    自动下载模型...")
-            model = BGEM3FlagModel("BAAI/bge-m3", use_fp16=True, device="cpu")
+            model = BGEM3FlagModel("BAAI/bge-m3", use_fp16=True)
         print("    模型加载完成")
 
         # 同步

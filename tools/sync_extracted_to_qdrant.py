@@ -15,13 +15,14 @@ import json
 import sys
 import argparse
 import time
+from concurrent.futures import ThreadPoolExecutor, Future
 from pathlib import Path
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from core.config_loader import get_config
+from core.config_loader import get_config, get_device
 
 _cfg = get_config()
 EXTRACTED_OUTPUT_DIR = Path(
@@ -34,8 +35,8 @@ HF_CACHE = _cfg.get("model", {}).get("hf_cache_dir", r"D:\huggingface_cache")
 MODEL_NAME = _cfg.get("model", {}).get("embedding", {}).get("name", "BAAI/bge-m3")
 MODEL_PATH = _cfg.get("model", {}).get("embedding", {}).get("model_path", None)
 
-# 每次 upsert 到 Qdrant 的批次大小
-UPSERT_BATCH = 200
+# 每次 upsert 到 Qdrant 的批次大小（可被 --upsert-batch 覆盖）
+UPSERT_BATCH = 500
 
 
 # ==================== embedding 文本生成函数 ====================
@@ -137,8 +138,9 @@ def load_model():
     from FlagEmbedding import BGEM3FlagModel
 
     model_path = MODEL_PATH if MODEL_PATH else MODEL_NAME
+    device = get_device()
     print(f"[模型] 加载 {model_path} ...")
-    model = BGEM3FlagModel(model_path, use_fp16=True)
+    model = BGEM3FlagModel(model_path, use_fp16=True, device=device)
     print("[模型] 加载完成")
     return model
 
@@ -151,18 +153,21 @@ def embed_batch(model, texts: List[str]) -> List[List[float]]:
 
 def rebuild_collection(client, collection_name: str) -> None:
     """删除旧 collection 并重建（仅 dense 1024维 Cosine）"""
-    from qdrant_client.models import VectorParams, Distance
+    from qdrant_client.models import VectorParams, Distance, OptimizersConfigDiff
 
     existing = [c.name for c in client.get_collections().collections]
     if collection_name in existing:
         print(f"  [删除] 旧 collection: {collection_name}")
         client.delete_collection(collection_name)
 
+    # indexing_threshold=0 禁用 HNSW 自动构建，批量写入期间不触发索引重建
+    # 写完后再统一触发，避免边写边建索引导致速度越来越慢
     client.create_collection(
         collection_name=collection_name,
         vectors_config=VectorParams(size=VECTOR_SIZE, distance=Distance.COSINE),
+        optimizers_config=OptimizersConfigDiff(indexing_threshold=0),
     )
-    print(f"  [创建] collection: {collection_name}")
+    print(f"  [创建] collection: {collection_name}（上传期间禁用 HNSW 索引）")
 
 
 def _make_payload(item: Dict, embed_text: str) -> Dict:
@@ -178,7 +183,10 @@ def _make_payload(item: Dict, embed_text: str) -> Dict:
 
 
 def sync_dimension(
-    client, model, dim_id: str, config: Dict, dry_run: bool = False, skip_existing: bool = False
+    client, model, dim_id: str, config: Dict,
+    dry_run: bool = False, skip_existing: bool = False,
+    upsert_batch: int = UPSERT_BATCH, embed_batch: int = EMBED_BATCH_SIZE,
+    max_length: int = 512,
 ) -> int:
     """同步单个维度，返回已同步条数"""
     source_file = (
@@ -225,12 +233,9 @@ def sync_dimension(
 
     from qdrant_client.models import PointStruct
 
-    for batch_start in range(0, total, UPSERT_BATCH):
-        batch = items[batch_start : batch_start + UPSERT_BATCH]
-
-        # 生成 embedding 文本，兜底取第一个非空字符串字段
+    def _make_texts(batch_items):
         texts = []
-        for item in batch:
+        for item in batch_items:
             text = text_fn(item).strip()
             if not text:
                 for v in item.values():
@@ -238,29 +243,74 @@ def sync_dimension(
                         text = v[:512]
                         break
             texts.append(text[:512])
+        return texts
 
-        vectors = embed_batch(model, texts)
+    def _upsert_with_retry(pts, retries=5, backoff=5):
+        """遇到 502/网络错误时自动重试，避免 Qdrant 瞬间抖动导致全程崩溃"""
+        for attempt in range(retries):
+            try:
+                client.upsert(collection_name=dim_id, points=pts)
+                return
+            except Exception as e:
+                if attempt == retries - 1:
+                    raise
+                wait = backoff * (attempt + 1)
+                print(f"\n  [重试] upsert 失败({e.__class__.__name__})，{wait}s 后重试({attempt+1}/{retries})...")
+                time.sleep(wait)
 
-        points = []
-        for i, (item, vec) in enumerate(zip(batch, vectors)):
-            point_id = batch_start + i + 1  # 整数ID，从1开始
-            payload = _make_payload(item, texts[i])
-            points.append(PointStruct(id=point_id, vector=vec, payload=payload))
+    # 流水线：GPU 算第 N+1 批 embedding 的同时，后台线程上传第 N 批到 Qdrant
+    pending_future: Optional[Future] = None
+    pending_count = 0
 
-        client.upsert(collection_name=dim_id, points=points)
-        synced += len(batch)
+    with ThreadPoolExecutor(max_workers=1) as executor:
+        for batch_start in range(0, total, upsert_batch):
+            batch = items[batch_start : batch_start + upsert_batch]
+            texts = _make_texts(batch)
 
-        elapsed = time.time() - t0
-        speed = synced / elapsed if elapsed > 0 else 0
-        eta = (total - synced) / speed if speed > 0 else 0
-        print(
-            f"  [{synced:>6}/{total}] {synced / total * 100:5.1f}%"
-            f"  速度:{speed:.0f}条/s  剩余:{eta / 60:.1f}min",
-            end="\r",
-            flush=True,
-        )
+            result = model.encode(texts, batch_size=embed_batch, max_length=max_length)
+            vecs = result["dense_vecs"].tolist()
 
-    print(f"\n  [完成] {synced} 条  耗时:{(time.time() - t0) / 60:.1f}min")
+            points = [
+                PointStruct(
+                    id=batch_start + i + 1,
+                    vector=vec,
+                    payload=_make_payload(item, texts[i]),
+                )
+                for i, (item, vec) in enumerate(zip(batch, vecs))
+            ]
+
+            # 等上一批 upsert 完成后再提交新批（避免 Qdrant 被大量并发压垮）
+            if pending_future is not None:
+                pending_future.result()
+                synced += pending_count
+                elapsed = time.time() - t0
+                speed = synced / elapsed if elapsed > 0 else 0
+                eta = (total - synced) / speed if speed > 0 else 0
+                print(
+                    f"  [{synced:>6}/{total}] {synced / total * 100:5.1f}%"
+                    f"  速度:{speed:.0f}条/s  剩余:{eta / 60:.1f}min",
+                    end="\r",
+                    flush=True,
+                )
+
+            pending_future = executor.submit(_upsert_with_retry, points)
+            pending_count = len(batch)
+
+        # 等最后一批完成
+        if pending_future is not None:
+            pending_future.result()
+            synced += pending_count
+
+    # 恢复默认 indexing_threshold，触发 Qdrant 后台构建 HNSW 索引
+    from qdrant_client.models import OptimizersConfigDiff
+    print(f"\n  [索引] 触发 HNSW 构建（后台异步，不阻塞下一维度）...")
+    client.update_collection(
+        collection_name=dim_id,
+        optimizer_config=OptimizersConfigDiff(indexing_threshold=20000),
+    )
+
+    elapsed = time.time() - t0
+    print(f"  [完成] {synced} 条  耗时:{elapsed / 60:.1f}min")
     return synced
 
 
@@ -278,6 +328,24 @@ def main():
         "--skip-existing",
         action="store_true",
         help="跳过 Qdrant 中已存在且条数与本地一致的维度（断点重开时使用）",
+    )
+    parser.add_argument(
+        "--upsert-batch",
+        type=int,
+        default=UPSERT_BATCH,
+        help=f"每批 upsert 条数（默认 {UPSERT_BATCH}）",
+    )
+    parser.add_argument(
+        "--embed-batch",
+        type=int,
+        default=EMBED_BATCH_SIZE,
+        help=f"embedding 推理 batch size（默认 {EMBED_BATCH_SIZE}，GPU 够用可调大如 64）",
+    )
+    parser.add_argument(
+        "--max-length",
+        type=int,
+        default=512,
+        help="tokenizer 最大序列长度（默认 512；短文本维度如 power_vocabulary 建议用 128，速度约快 3~5x）",
     )
     args = parser.parse_args()
 
@@ -328,6 +396,9 @@ def main():
             client, model, dim_id, config,
             dry_run=args.dry_run,
             skip_existing=args.skip_existing,
+            upsert_batch=args.upsert_batch,
+            embed_batch=args.embed_batch,
+            max_length=args.max_length,
         )
         total_synced += count
 

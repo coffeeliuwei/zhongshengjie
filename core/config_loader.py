@@ -732,6 +732,34 @@ def ensure_all_dirs() -> list:
     return created
 
 
+def get_device(verbose: bool = True) -> str:
+    """检测可用的推理设备，返回 'cuda' 或 'cpu'。
+
+    所有需要加载 BGE-M3 的工具应调用此函数获取 device，
+    而不是硬编码 device="cpu"，以保证在有 GPU 的机器上自动加速。
+
+    Args:
+        verbose: 是否打印一行设备信息（默认 True，方便学生看到实际跑在哪里）
+
+    Returns:
+        'cuda' 或 'cpu'
+    """
+    try:
+        import torch
+        if torch.cuda.is_available():
+            name = torch.cuda.get_device_name(0)
+            if verbose:
+                vram = torch.cuda.get_device_properties(0).total_memory // (1024 ** 3)
+                print(f"[设备] GPU: {name}（{vram}GB）— 已启用 CUDA 加速")
+            return "cuda"
+    except ImportError:
+        pass
+
+    if verbose:
+        print("[设备] 未检测到 GPU，使用 CPU 推理（速度较慢，属正常现象）")
+    return "cpu"
+
+
 # 初始化时打印配置信息（可选）
 if __name__ == "__main__":
     print("=" * 60)

@@ -92,16 +92,16 @@ class DataBuilder:
 
         model_path = self.config.get("model_path")
         if model_path:
-            self.model = BGEM3FlagModel(model_path, use_fp16=True, device="cpu")
+            self.model = BGEM3FlagModel(model_path, use_fp16=True)
         else:
             # 尝试环境变量或默认路径
             import os
 
             cache_path = os.environ.get("BGE_M3_MODEL_PATH")
             if cache_path:
-                self.model = BGEM3FlagModel(cache_path, use_fp16=True, device="cpu")
+                self.model = BGEM3FlagModel(cache_path, use_fp16=True)
             else:
-                self.model = BGEM3FlagModel("BAAI/bge-m3", use_fp16=True, device="cpu")
+                self.model = BGEM3FlagModel("BAAI/bge-m3", use_fp16=True)
         return self.model
 
     def init_collections(self):

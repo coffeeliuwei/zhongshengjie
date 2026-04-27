@@ -161,6 +161,30 @@ def check_packages() -> bool:
     return all_required_ok
 
 
+def check_gpu() -> bool:
+    """检查 GPU / CUDA 状态，始终返回 True（无 GPU 是正常情况，不阻断使用）"""
+    try:
+        import torch
+        if torch.cuda.is_available():
+            name = torch.cuda.get_device_name(0)
+            vram = torch.cuda.get_device_properties(0).total_memory // (1024 ** 3)
+            ok(f"GPU 可用：{name}（{vram}GB VRAM）— 推理将自动使用 CUDA 加速")
+        else:
+            ver = torch.__version__
+            if "+cpu" in ver:
+                warn(
+                    f"torch {ver} 是 CPU 版，推理速度较慢\n"
+                    f"       → 如需加速，执行：\n"
+                    f"         pip install torch --index-url https://download.pytorch.org/whl/cu128 --upgrade"
+                )
+            else:
+                warn(f"torch {ver} 已安装，但未检测到可用 GPU，将使用 CPU 推理")
+    except ImportError:
+        warn("torch 未安装，GPU 状态无法检测（FlagEmbedding 安装后会自动附带）")
+
+    return True  # GPU 不是必须项，不影响系统运行
+
+
 def check_qdrant(quick: bool = False) -> bool:
     """检查 Qdrant 连接"""
     if quick:
@@ -230,7 +254,10 @@ def main():
     section("5. Python 包")
     results["packages"] = check_packages()
 
-    section("6. Qdrant 连接")
+    section("6. GPU / 推理加速")
+    results["gpu"] = check_gpu()
+
+    section("7. Qdrant 连接")
     results["qdrant"] = check_qdrant(quick=args.quick)
 
     # ---- 汇总 ----
