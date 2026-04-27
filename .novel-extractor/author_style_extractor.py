@@ -51,7 +51,7 @@ class AuthorStyleExtractor(BaseExtractor):
 
     def _segment_sentences(self, content: str) -> List[str]:
         """分割句子"""
-        sentences = re.split(r"[。！？]", content)
+        sentences = re.split(r"[。！？.!?]", content)
         return [s.strip() for s in sentences if s.strip()]
 
     def _count_chinese_chars(self, text: str) -> int:
@@ -163,7 +163,7 @@ class AuthorStyleExtractor(BaseExtractor):
         """从小说提取风格特征"""
         sentences = self._segment_sentences(content)
 
-        if len(sentences) < 100:
+        if len(sentences) < 20:
             return []
 
         # 分析各项特征

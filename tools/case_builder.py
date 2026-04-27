@@ -764,15 +764,11 @@ python case_builder.py --sync
         # 确定来源目录
         if source_dirs:
             dirs = source_dirs
+        elif self.novel_sources:
+            dirs = [Path(d) for d in self.novel_sources]
         else:
-            config_file = self.case_library_dir / "config.json"
-            if config_file.exists():
-                with open(config_file, "r", encoding="utf-8") as f:
-                    config = json.load(f)
-                dirs = [Path(d) for d in config.get("novel_sources", [])]
-            else:
-                print("    ✗ 未配置小说来源目录")
-                return False
+            print("    ✗ 未配置小说来源目录")
+            return False
 
         converted_count = 0
         failed_count = 0

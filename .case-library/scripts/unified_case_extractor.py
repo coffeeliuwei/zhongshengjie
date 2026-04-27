@@ -116,7 +116,7 @@ class SemanticSegmenter:
     - 参考：Ex3论文使用CoSENT模型，余弦距离阈值0.6
     """
 
-    def __init__(self, model_name: str = "paraphrase-multilingual-MiniLM-L12-v2"):
+    def __init__(self, model_name: str = "BAAI/bge-m3"):
         self.model = None
         self.model_name = model_name
         self.similarity_threshold = 0.6  # Ex3论文阈值
@@ -736,10 +736,7 @@ class UnifiedCaseExtractor:
             json.dump(self.index, f, ensure_ascii=False, indent=2)
 
     def _load_stats(self) -> Dict:
-        if STATS_FILE.exists():
-            with open(STATS_FILE, "r", encoding="utf-8") as f:
-                return json.load(f)
-        return {
+        defaults = {
             "total_files": 0,
             "novels_found": 0,
             "non_novels": 0,
@@ -750,6 +747,11 @@ class UnifiedCaseExtractor:
             "extraction_mode": "semantic" if self.use_semantic else "keyword",
             "last_update": None,
         }
+        if STATS_FILE.exists():
+            with open(STATS_FILE, "r", encoding="utf-8") as f:
+                loaded = json.load(f)
+            defaults.update(loaded)
+        return defaults
 
     def _save_stats(self):
         self.stats["last_update"] = datetime.now().isoformat()

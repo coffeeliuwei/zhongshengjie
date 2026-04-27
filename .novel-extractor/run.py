@@ -37,7 +37,7 @@ from typing import Dict, List, Optional
 # 添加路径
 sys.path.insert(0, str(Path(__file__).parent))
 
-from unified_config import (
+from config import (
     init_system,
     EXTRACTION_DIMENSIONS,
     DimensionCategory,
@@ -90,7 +90,7 @@ def print_banner():
     """打印横幅"""
     # 动态获取小说资源目录
     try:
-        from unified_config import NOVEL_SOURCE_DIR
+        from config import NOVEL_SOURCE_DIR
 
         source_dir = str(NOVEL_SOURCE_DIR)
     except Exception:
@@ -290,7 +290,7 @@ def generate_report():
 
     # 动态获取小说资源目录
     try:
-        from unified_config import NOVEL_SOURCE_DIR
+        from config import NOVEL_SOURCE_DIR
 
         source_dir = str(NOVEL_SOURCE_DIR)
     except Exception:

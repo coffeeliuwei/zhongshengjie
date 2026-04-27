@@ -336,6 +336,12 @@ class EmotionArcExtractor(BaseExtractor):
                 }
             )
 
+        for item in items:
+            arc = item.get("typical_arc", [])
+            if len(arc) > 10:
+                # 只保留首5点+尾5点作为摘要
+                item["typical_arc"] = arc[:5] + arc[-5:]
+
         return results
 
     def _get_arc_description(self, arc_type: str) -> str:
