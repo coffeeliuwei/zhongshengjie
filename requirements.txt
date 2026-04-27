@@ -34,3 +34,7 @@ FlagEmbedding>=1.2.0
 prometheus-client>=0.16.0
 # 近重复检测
 datasketch>=1.6.0
+
+# 批量提炼可选格式支持
+pdfminer.six>=20221105
+python-docx>=1.1.0
