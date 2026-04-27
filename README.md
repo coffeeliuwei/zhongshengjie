@@ -96,7 +96,7 @@
 - 🔧 `stage5_5.py`：新增 `build_stage5_5_prompt_with_real_data()` — 修复鉴赏师 `as_menu()` 未接入导致的伪造0建议
 - 🔧 `novel-inspiration-ingest` SKILL：阶段2必读清单与势力列表改为从 `config.json → worldview/paths` 动态读取，删除众生界专属硬编码
 
-**测试**：pytest 669 passed, 2 skipped, 0 failed（+3 vs v0.2.1 基线，覆盖灵感引擎修复）
+**测试**：pytest 708 passed, 2 skipped, 0 failed（删除废弃 workflow 测试文件，+39 新测试覆盖11维度提炼引擎）
 
 ---
 
