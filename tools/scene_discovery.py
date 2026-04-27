@@ -339,7 +339,7 @@ class ClusteringEngine:
                 from core.config_loader import get_model_path
 
                 model_path = self._model_path or get_model_path()
-                self._model = BGEM3FlagModel(model_path, use_fp16=True, device="cpu")
+                self._model = BGEM3FlagModel(model_path, use_fp16=True)
             except ImportError:
                 print("请安装 FlagEmbedding: pip install FlagEmbedding")
                 return None

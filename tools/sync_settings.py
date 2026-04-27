@@ -145,16 +145,16 @@ def sync_settings_to_qdrant(
     # 加载模型
     print(f"\n[加载模型] BGE-M3")
     if model_path:
-        model = BGEM3FlagModel(model_path, use_fp16=True, device="cpu")
+        model = BGEM3FlagModel(model_path, use_fp16=True)
     else:
         # 尝试从缓存加载
         import os
 
         cache_path = os.environ.get("BGE_M3_MODEL_PATH")
         if cache_path:
-            model = BGEM3FlagModel(cache_path, use_fp16=True, device="cpu")
+            model = BGEM3FlagModel(cache_path, use_fp16=True)
         else:
-            model = BGEM3FlagModel("BAAI/bge-m3", use_fp16=True, device="cpu")
+            model = BGEM3FlagModel("BAAI/bge-m3", use_fp16=True)
     print("    模型加载完成")
 
     # 分批同步

@@ -195,7 +195,7 @@ def main():
     from FlagEmbedding import BGEM3FlagModel
 
     model_path = get_model_path()
-    model = BGEM3FlagModel(model_path or "BAAI/bge-m3", use_fp16=True, device="cpu")
+    model = BGEM3FlagModel(model_path or "BAAI/bge-m3", use_fp16=True)
     print("    模型加载完成")
 
     # 同步技法
