@@ -660,6 +660,78 @@ def get_clean_dir() -> Path:
     return get_project_root() / clean_dir
 
 
+def ensure_all_dirs() -> list:
+    """
+    创建项目所需的全部本地目录（幂等，已存在则跳过）。
+
+    包含：
+    - 项目内相对路径目录（设定、正文、日志、缓存等）
+    - 绝对路径目录（E:\\novel_extracted、E:\\tmp_mobi 等，来自 config.json）
+
+    Returns:
+        list[Path]: 已创建或已存在的目录列表
+    """
+    dirs_to_create = []
+
+    # ---- 项目内目录（相对路径，由 config.json paths 配置） ----
+    relative_getters = [
+        get_settings_dir,
+        get_techniques_dir,
+        get_vectorstore_dir,
+        get_case_library_dir,
+        get_logs_dir,
+        get_cache_dir,
+        get_temp_dir,  # 这个已经自带 mkdir，再调一次也是幂等的
+        get_contracts_dir,
+        get_world_configs_dir,
+        get_config_dir,
+        get_clean_dir,
+        get_novel_extractor_dir,
+    ]
+
+    for getter in relative_getters:
+        try:
+            d = getter()
+            dirs_to_create.append(d)
+        except Exception:
+            pass  # config 缺字段时跳过，不崩溃
+
+    # ---- 绝对路径目录（来自 config.json 的 E 盘路径） ----
+    try:
+        cfg = get_config()
+        # 提炼输出目录（默认 E:\novel_extracted）
+        output_dir = cfg.get("extractor", {}).get("output_dir", r"E:\novel_extracted")
+        if output_dir:
+            dirs_to_create.append(Path(output_dir))
+
+        # mobi 临时目录（默认 E:\tmp_mobi）
+        mobi_tmp = cfg.get("paths", {}).get("mobi_temp_dir", r"E:\tmp_mobi")
+        if mobi_tmp:
+            dirs_to_create.append(Path(mobi_tmp))
+
+        # Qdrant 本地存储（仅本机部署时有意义）
+        qdrant_storage = cfg.get("paths", {}).get(
+            "qdrant_storage", r"E:\qdrant_storage"
+        )
+        if qdrant_storage:
+            dirs_to_create.append(Path(qdrant_storage))
+    except Exception:
+        pass
+
+    # ---- 执行创建 ----
+    created = []
+    for d in dirs_to_create:
+        try:
+            d.mkdir(parents=True, exist_ok=True)
+            created.append(d)
+        except PermissionError:
+            pass  # E 盘不存在时跳过，不崩溃
+        except Exception:
+            pass
+
+    return created
+
+
 # 初始化时打印配置信息（可选）
 if __name__ == "__main__":
     print("=" * 60)
