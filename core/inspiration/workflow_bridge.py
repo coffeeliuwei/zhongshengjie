@@ -136,8 +136,8 @@ def select_winner_spec(
 
     if retrieved_references is None:
         # N5修复：从配置读取阈值，而非硬编码
-        cfg = get_config()
-        inspiration_cfg = cfg.get("inspiration_engine", {})
+        from core.config_loader import get_inspiration_engine_config
+        inspiration_cfg = get_inspiration_engine_config()
         cold_threshold = inspiration_cfg.get("appraisal_cold_start_threshold", 50)
         growing_threshold = inspiration_cfg.get("appraisal_growing_threshold", 300)
 
