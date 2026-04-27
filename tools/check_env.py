@@ -212,6 +212,60 @@ def check_qdrant(quick: bool = False) -> bool:
         return False
 
 
+def check_config_values() -> bool:
+    """检查 config.json 中的关键字段值是否合理（不只是文件存在）"""
+    try:
+        from core.config_loader import get_config, get_model_path
+    except ImportError:
+        warn("config_loader 未就绪，跳过配置值检查")
+        return True
+
+    cfg = get_config()
+    all_ok = True
+
+    # 检查 1：skills_base_path 不能含默认用户名 39477
+    skills_path = cfg.get("paths", {}).get("skills_base_path", "")
+    if "39477" in skills_path:
+        fail(
+            f"skills_base_path 含默认用户名 '39477'：{skills_path}\n"
+            f"       → 用记事本打开 config.json，把 39477 改成你的 Windows 用户名\n"
+            f"       → 不知道用户名？PowerShell 输入 $env:USERNAME 查看"
+        )
+        all_ok = False
+    else:
+        ok(f"skills_base_path 用户名正常：{skills_path}")
+
+    # 检查 2：MOBI 临时目录可写（通常在 E 盘，不能放 C 盘）
+    mobi_tmp = Path(cfg.get("paths", {}).get("mobi_temp_dir", r"E:\tmp_mobi"))
+    try:
+        mobi_tmp.mkdir(parents=True, exist_ok=True)
+        ok(f"MOBI 临时目录可写：{mobi_tmp}")
+    except Exception as e:
+        fail(
+            f"MOBI 临时目录不可写：{mobi_tmp}（{e}）\n"
+            f"       → 检查该盘是否存在且有写入权限，或在 config.json 中改 mobi_temp_dir"
+        )
+        all_ok = False
+
+    # 检查 3：BGE-M3 模型文件存在
+    model_path = get_model_path()
+    if model_path:
+        mp = Path(model_path)
+        if mp.exists():
+            ok(f"BGE-M3 模型路径存在：{mp}")
+        else:
+            fail(
+                f"BGE-M3 模型路径不存在：{mp}\n"
+                f"       → 检查 config.json 中 model.embedding.model_path 是否正确\n"
+                f"       → 或删除该字段让系统自动下载（需要联网）"
+            )
+            all_ok = False
+    else:
+        warn("config.json 未配置模型路径，首次推理时将自动下载 BGE-M3（需联网，约 2.3 GB）")
+
+    return all_ok
+
+
 def check_config_loader_importable() -> bool:
     """核心模块是否可导入"""
     try:
@@ -247,6 +301,9 @@ def main():
 
     section("3. config.json")
     results["config"] = check_config_json()
+
+    section("3.5 config.json 关键字段值")
+    results["config_values"] = check_config_values()
 
     section("4. 目录检查")
     results["dirs"] = check_dirs()

@@ -100,7 +100,8 @@ class HybridSearchManager:
         if self._model is None:
             from FlagEmbedding import BGEM3FlagModel
 
-            self._model = BGEM3FlagModel("BAAI/bge-m3", use_fp16=True, device="cpu")
+            from core.config_loader import get_device
+            self._model = BGEM3FlagModel("BAAI/bge-m3", use_fp16=True, device=get_device(verbose=False))
         return self._model
 
     def _encode_query(self, query: str) -> dict:
