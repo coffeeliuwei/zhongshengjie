@@ -16,8 +16,9 @@ from core.config_loader import get_config
 
 def _get_thresholds():
     """从配置获取阈值"""
-    cfg = get_config()
-    inspiration_cfg = cfg.get("inspiration_engine", {})
+    from core.config_loader import get_inspiration_engine_config
+
+    inspiration_cfg = get_inspiration_engine_config()
     return (
         inspiration_cfg.get("appraisal_cold_start_threshold", 50),
         inspiration_cfg.get("appraisal_growing_threshold", 300),
