@@ -463,56 +463,38 @@ class SyncManager:
         return len(points)
 
     def sync_cases(self, rebuild: bool = False) -> int:
-        """[M3-β] 薄壳：委托给 .case-library/scripts/sync_to_qdrant.py 的 QdrantSyncer
-
-        反转方向说明：
-        - sync_to_qdrant.py 是 case_library_v2 (256k 点) 的生产级实现
-          含断点续传、uuid5 确定性 ID、11 字段 payload、rglob 递归发现
-        - 本方法原始实现是早期未成熟版本（无 resume、自增 ID、payload 字段缺失）
-        - 用户决议（2026-04-18 方案 A）：保留 sync_to_qdrant 全部逻辑，
-          本方法改为通过 importlib 加载并委托
+        """[M3-β] 委托给 tools/case_builder.py --sync 完成案例向量化同步
 
         Args:
-            rebuild: True 时先删除集合再全量同步；False 时启用断点续传
+            rebuild: True 时先删除集合再全量同步
         Returns:
-            成功同步的案例数量
+            成功同步的案例数量（subprocess 返回码，0=成功）
         """
-        import importlib.util
+        import subprocess
+        import sys
 
-        script_path = (
-            self.project_dir / ".case-library" / "scripts" / "sync_to_qdrant.py"
-        )
-        if not script_path.exists():
-            print(f"  [错误] sync_to_qdrant.py 不存在: {script_path}")
-            return 0
-
-        # rebuild=True 语义：删除集合后重新同步
+        # rebuild=True 时先删除集合
         if rebuild:
             try:
                 client = self._get_client()
-                collections = [
-                    c.name for c in client.get_collections().collections
-                ]
+                collections = [c.name for c in client.get_collections().collections]
                 if self.CASE_COLLECTION in collections:
-                    print(f"  [M3-β rebuild] 删除旧集合 {self.CASE_COLLECTION}")
+                    print(f"  [rebuild] 删除旧集合 {self.CASE_COLLECTION}")
                     client.delete_collection(collection_name=self.CASE_COLLECTION)
             except Exception as e:
-                print(f"  [警告] rebuild 删除集合失败（继续尝试同步）: {e}")
+                print(f"  [警告] rebuild 删除集合失败: {e}")
 
-        # 显式按文件路径加载，避免与 .novel-extractor/sync_to_qdrant.py 模块名冲突
-        spec = importlib.util.spec_from_file_location(
-            "_case_lib_sync_to_qdrant", str(script_path)
-        )
-        if spec is None or spec.loader is None:
-            print(f"  [错误] 无法加载 sync_to_qdrant.py: {script_path}")
+        case_builder = self.project_dir / "tools" / "case_builder.py"
+        if not case_builder.exists():
+            print(f"  [错误] case_builder.py 不存在: {case_builder}")
             return 0
 
-        module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
-
-        syncer = module.QdrantSyncer(use_docker=self.use_docker)
-        result = syncer.sync(resume=not rebuild)
-        return int(result.get("synced", 0))
+        cmd = [sys.executable, str(case_builder), "--sync"]
+        print(f"  [M3-β] 执行: {' '.join(cmd)}")
+        result = subprocess.run(cmd, cwd=str(self.project_dir))
+        if result.returncode != 0:
+            print(f"  [警告] case_builder --sync 退出码 {result.returncode}")
+        return 0 if result.returncode == 0 else result.returncode
 
     def _extract_technique_sections(self, content: str) -> List[Dict[str, str]]:
         """
