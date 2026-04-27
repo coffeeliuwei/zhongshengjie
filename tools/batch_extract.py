@@ -35,9 +35,9 @@ NOVEL_EXTRACTOR = PROJECT_ROOT / ".novel-extractor"
 
 
 def log(msg: str):
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print(f"  {msg}")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
 
 
 def run_step(label: str, cmd: list, cwd=None) -> bool:
@@ -86,10 +86,14 @@ def step3b_cleanup_jsonl():
     """删除各维度的 JSONL 原始积累文件（_all.json 已保存，JSONL 不再需要）"""
     from pathlib import Path
     import sys
+
     sys.path.insert(0, str(PROJECT_ROOT))
     try:
         from core.config_loader import get_config
-        output_dir = Path(get_config().get("extractor", {}).get("output_dir", r"E:\novel_extracted"))
+
+        output_dir = Path(
+            get_config().get("extractor", {}).get("output_dir", r"E:\novel_extracted")
+        )
     except Exception:
         output_dir = Path(r"E:\novel_extracted")
 
@@ -102,7 +106,9 @@ def step3b_cleanup_jsonl():
             removed += 1
         except Exception as e:
             print(f"  [WARN] 无法删除 {jsonl}: {e}")
-    print(f"[CLEANUP] 删除 {removed} 个 JSONL 文件，释放 {total_bytes/1024/1024/1024:.1f} GB")
+    print(
+        f"[CLEANUP] 删除 {removed} 个 JSONL 文件，释放 {total_bytes / 1024 / 1024 / 1024:.1f} GB"
+    )
 
 
 def step4_scene_discovery(py: str):
@@ -111,7 +117,10 @@ def step4_scene_discovery(py: str):
     if not scene_discoverer.exists():
         print("[SKIP] scene_discoverer.py 不存在，跳过场景发现")
         return
-    run_step("Step 4/6 场景自动发现 (scene_discoverer)", [py, str(scene_discoverer), "--discover"])
+    run_step(
+        "Step 4/6 场景自动发现 (scene_discoverer)",
+        [py, str(scene_discoverer), "--discover"],
+    )
 
 
 def step5_sync_cases(py: str):
@@ -123,46 +132,44 @@ def step5_sync_cases(py: str):
 
 
 def step6_sync_dimensions(py: str):
-    """同步已支持的维度到 Qdrant（novel/technique/case）"""
-    migrate = TOOLS / "archived_migrations" / "migrate_lite_resumable.py"
-    if not migrate.exists():
-        print("[SKIP] migrate_lite_resumable.py 不存在，跳过维度同步")
+    """将 E:\\novel_extracted 各维度 _all.json 向量化并全量重建 Qdrant collections"""
+    sync_script = PROJECT_ROOT / "tools" / "sync_extracted_to_qdrant.py"
+    if not sync_script.exists():
+        print("[SKIP] sync_extracted_to_qdrant.py 不存在，跳过维度同步")
         return
 
-    # migrate_lite_resumable.py 只支持这三个集合
-    # 新维度（character_relation/dialogue_style 等）尚无专用 sync 脚本，跳过
-    collections = ["novel", "technique", "case"]
-    env = os.environ.copy()
-    env["PYTHONPATH"] = str(PROJECT_ROOT) + os.pathsep + env.get("PYTHONPATH", "")
-    log("Step 6/6 同步维度 → Qdrant (novel/technique/case)")
-    for col in collections:
-        print(f"\n  同步 {col}...")
-        result = subprocess.run(
-            [py, str(migrate), "--collection", col],
-            cwd=PROJECT_ROOT,
-            env=env,
-        )
-        if result.returncode != 0:
-            print(f"  [WARN] {col} 同步失败，继续")
+    log("Step 6/6 同步维度 → Qdrant (8个维度全量重建)")
+    run_step(
+        "Step 6/6 同步维度 → Qdrant",
+        [py, str(sync_script)],
+    )
 
 
 def main():
     parser = argparse.ArgumentParser(description="批量外部小说提炼入口")
-    parser.add_argument("--limit", type=int, default=0, help="每维度限制处理小说数（0=不限）")
-    parser.add_argument("--skip-case", action="store_true", help="跳过案例提炼（Step 1-2）")
-    parser.add_argument("--skip-dims", action="store_true", help="跳过10维度提炼（Step 3）")
-    parser.add_argument("--sync-only", action="store_true", help="只同步，跳过所有提炼步骤")
+    parser.add_argument(
+        "--limit", type=int, default=0, help="每维度限制处理小说数（0=不限）"
+    )
+    parser.add_argument(
+        "--skip-case", action="store_true", help="跳过案例提炼（Step 1-2）"
+    )
+    parser.add_argument(
+        "--skip-dims", action="store_true", help="跳过10维度提炼（Step 3）"
+    )
+    parser.add_argument(
+        "--sync-only", action="store_true", help="只同步，跳过所有提炼步骤"
+    )
     args = parser.parse_args()
 
     py = sys.executable
     start = time.time()
 
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print(f"  众生界 批量外部小说提炼")
     print(f"  模式: {'sync-only' if args.sync_only else 'full'}")
     if args.limit:
         print(f"  限制: 每维度 {args.limit} 本（测试模式）")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
 
     if not args.sync_only:
         if not args.skip_case:
@@ -177,7 +184,9 @@ def main():
     step6_sync_dimensions(py)
 
     elapsed = int(time.time() - start)
-    print(f"\n[DONE] 批量提炼完成，总耗时 {elapsed//3600}h{(elapsed%3600)//60}m{elapsed%60}s")
+    print(
+        f"\n[DONE] 批量提炼完成，总耗时 {elapsed // 3600}h{(elapsed % 3600) // 60}m{elapsed % 60}s"
+    )
 
 
 if __name__ == "__main__":
