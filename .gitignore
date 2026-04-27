@@ -47,6 +47,12 @@
 
 # 案例库数据（太大，仅推送索引和脚本）
 .case-library/cases/
+.case-library/converted_bak/
+.case-library/case_index.json
+.case-library/unified_index.json
+.case-library/unified_stats.json
+.case-library/scan_result.json
+.case-library/dedup_index.pkl
 
 # ========================================
 # Skills源码 - 安装到 ~/.agents/skills/
@@ -58,14 +64,15 @@ skills/
 # 小说提炼系统 - 运行时数据
 # ========================================
 
-# 提炼临时数据和进度标记
+# 提炼数据（不入库，不上传）
 .novel-extractor/extracted/
+.novel-extractor/filtered/
+.novel-extractor/progress/
 .novel-extractor/*.json
 .novel-extractor/unified_progress.json
 
 # 提炼脚本保留，但数据不推送
 # .novel-extractor/*.py 可推送（代码）
-# .novel-extractor/extracted/ 不推送（数据）
 
 # ========================================
 # 开发环境特定 - 本地私有
@@ -137,9 +144,8 @@ docs/写手工作流启动手册_*.md
 tools/evaluation_criteria_migrated.json
 tools/*_migrated.json
 
-# Qdrant本地数据（约20G）
-.vectorstore/qdrant/
-.vectorstore/qdrant_docker/
+# Qdrant/向量库本地数据（不入库）
+.vectorstore/
 
 # 日志和缓存
 logs/
@@ -241,13 +247,9 @@ coverage.xml
 .pytest_cache/
 
 # ========================================
-# 向量库缓存
+# 向量库缓存（.vectorstore/ 已整目录忽略）
 # ========================================
 
-.vectorstore/__pycache__/
-.vectorstore/*/__pycache__/
-.vectorstore/*/segments/
-.vectorstore/*/temp_segments/
 *.pickle
 *.index
 

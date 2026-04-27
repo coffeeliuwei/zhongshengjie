@@ -20,7 +20,7 @@ from dataclasses import dataclass
 CASE_LIBRARY_DIR = Path(__file__).parent.parent.parent / ".case-library"
 sys.path.insert(0, str(CASE_LIBRARY_DIR / "scripts"))
 
-from unified_config import (
+from config import (
     CASE_OUTPUT_DIR,
     CONVERTED_DIR,
     NOVEL_SOURCE_DIR,

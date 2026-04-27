@@ -65,7 +65,7 @@ else:
     sys.path.insert(0, str(PROJECT_ROOT / ".novel-extractor"))
 
 try:
-    from unified_config import (
+    from config import (
         EXTRACTION_DIMENSIONS,
         DimensionCategory,
         init_system,

@@ -128,7 +128,7 @@ class TechniqueExtractor(BaseExtractor):
         super().__init__("technique")
         self.incremental = incremental
         progress_path = (
-            Path(__file__).resolve().parents[2] / "progress" / "technique_progress.json"
+            Path(__file__).resolve().parent.parent / "progress" / "technique_progress.json"
         )
         self.progress_tracker = TechniqueProgressTracker(str(progress_path))
         self.case_library_dir = (
@@ -271,7 +271,7 @@ class TechniqueExtractor(BaseExtractor):
         # 合并处理
         results = []
         for tech_name, tech_items in technique_groups.items():
-            if len(tech_items) < 2:  # 至少2次出现才认为是有效技法
+            if len(tech_items) < 1:  # 至少1次出现即保留（原2次过滤太严导致0输出）
                 continue
 
             # 聚合信息
