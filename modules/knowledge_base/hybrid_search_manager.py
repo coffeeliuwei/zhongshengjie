@@ -154,10 +154,11 @@ class HybridSearchManager:
             try:
                 from FlagEmbedding import BGEM3FlagModel
 
+                from core.config_loader import get_device
                 self._model = BGEM3FlagModel(
                     BGE_M3_MODEL_NAME,
                     use_fp16=USE_FP16,
-                    device="cpu",
+                    device=get_device(verbose=False),
                 )
             except ImportError as e:
                 raise ImportError(
