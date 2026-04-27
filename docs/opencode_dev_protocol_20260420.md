@@ -8,21 +8,18 @@
 
 ## 0. 分支规则(铁律)
 
-**当前开发分支:`v2-dev`**
+**开发分支:`master`（唯一分支，禁止创建任何新分支）**
 
 每次任务开始前,opencode 必须先跑:
 
 ```bash
 cd "D:/动画/众生界"
-git fetch origin
-git checkout v2-dev
+git checkout master
 git status --short | head -5   # 确认工作区 clean 或只有预期悬空
 git log -1 --format='%h %s'     # 确认 HEAD
 ```
 
-> `v2-dev` 分支已存在于 origin（2026-04-27 创建）。`git fetch origin` 后直接 `checkout` 即可，无需 `-b` 创建。如果 checkout 仍然报错，停下来说明错误，不要在 master 上操作。
-
-**禁止**:直接在 master 上写代码。master 是学生下载的 v1 稳定版,不接受 v2 开发 commit。
+**禁止**:创建任何分支（包括 v2-dev、feature/*、fix/* 等）。所有开发直接提交到 master。
 
 ---
 
