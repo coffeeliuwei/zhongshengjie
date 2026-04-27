@@ -212,10 +212,9 @@ class MemoryPointSync:
 
     def _determine_phase(self, count: int) -> str:
         """根据记忆点数判断鉴赏师阶段"""
-        from core.config_loader import get_config
+        from core.config_loader import get_inspiration_engine_config
 
-        config = get_config()
-        cfg = config.get("inspiration_engine", {})
+        cfg = get_inspiration_engine_config()
         cold_start = cfg.get("appraisal_cold_start_threshold", 50)
         growing = cfg.get("appraisal_growing_threshold", 300)
 
