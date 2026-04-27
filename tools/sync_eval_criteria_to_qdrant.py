@@ -277,9 +277,10 @@ def main():
         # 1. 加载模型
         log("\n[1] 加载BGE-M3模型...")
         from FlagEmbedding import BGEM3FlagModel
+        from core.config_loader import get_device
 
         model_path = get_model_path()
-        model = BGEM3FlagModel(model_path or "BAAI/bge-m3", use_fp16=True)
+        model = BGEM3FlagModel(model_path or "BAAI/bge-m3", use_fp16=True, device=get_device())
         log("    模型加载完成")
 
         # 2. 加载审核维度

@@ -193,9 +193,10 @@ def main():
     # 加载模型
     print("\n[3] 加载BGE-M3模型...")
     from FlagEmbedding import BGEM3FlagModel
+    from core.config_loader import get_device
 
     model_path = get_model_path()
-    model = BGEM3FlagModel(model_path or "BAAI/bge-m3", use_fp16=True)
+    model = BGEM3FlagModel(model_path or "BAAI/bge-m3", use_fp16=True, device=get_device())
     print("    模型加载完成")
 
     # 同步技法
