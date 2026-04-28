@@ -30,6 +30,10 @@ import re
 import hashlib
 import uuid
 import sys
+import time
+import tempfile
+import shutil
+from concurrent.futures import ThreadPoolExecutor, Future
 from pathlib import Path
 from datetime import datetime
 from typing import Dict, List, Any, Optional, Set
@@ -861,6 +865,13 @@ class CaseBuilder:
         self.index_file = self.case_library_dir / "case_index.json"
         self.stats_file = self.case_library_dir / "case_stats.json"
 
+        # mobi 解压临时目录（从 config 读取，默认 E:/tmp_mobi，不能放 C 盘）
+        if HAS_CONFIG_LOADER:
+            _paths = self.config.get("paths", {})
+            self.mobi_temp_dir = Path(_paths.get("mobi_temp_dir", "E:/tmp_mobi"))
+        else:
+            self.mobi_temp_dir = Path("E:/tmp_mobi")
+
         # 内部状态
         self.novel_index: Dict[str, Any] = {}
         self.processed_files: Set[str] = set()
@@ -1031,6 +1042,132 @@ python case_builder.py --sync
         print(f"\n    扫描结果已保存: {result_file}")
         return True
 
+    # ── 统一文件读取（对齐路径二 base_extractor）────────────────────────
+
+    def _read_novel(self, novel_path: Path) -> Optional[str]:
+        """统一入口：读取任意格式小说，返回纯文本。失败返回 None。"""
+        suffix = novel_path.suffix.lower()
+        try:
+            if suffix == ".txt":
+                return self._read_txt(novel_path)
+            elif suffix == ".epub":
+                return self._read_epub(novel_path)
+            elif suffix == ".mobi":
+                return self._read_mobi(novel_path)
+            elif suffix == ".pdf":
+                return self._read_pdf(novel_path)
+            elif suffix == ".docx":
+                return self._read_docx(novel_path)
+        except Exception as e:
+            print(f"    ⚠ 读取失败 {novel_path.name}: {e}")
+        return None
+
+    def _read_txt(self, path: Path) -> Optional[str]:
+        """txt 多编码回退：utf-8 → gbk → gb2312 → utf-16"""
+        for enc in ("utf-8", "gbk", "gb2312", "utf-16"):
+            try:
+                return path.read_text(encoding=enc)
+            except (UnicodeDecodeError, LookupError):
+                continue
+        return None  # 所有编码均失败
+
+    def _read_epub(self, path: Path) -> Optional[str]:
+        """epub 双路径 HTML 检测（对齐 base_extractor）"""
+        try:
+            from ebooklib import epub
+            book = epub.read_epub(str(path), options={"ignore_ncx": True})
+            parts = []
+            for item in book.get_items():
+                html = None
+                if hasattr(item, "get_body_content"):
+                    try:
+                        html = item.get_body_content()
+                    except Exception:
+                        pass
+                elif (
+                    hasattr(item, "get_content")
+                    and hasattr(item, "media_type")
+                    and item.media_type
+                    and "html" in item.media_type.lower()
+                ):
+                    try:
+                        html = item.get_content()
+                    except Exception:
+                        pass
+                if html:
+                    if isinstance(html, bytes):
+                        html = html.decode("utf-8", errors="ignore")
+                    text = re.sub(r"<[^>]+>", "", html)
+                    text = re.sub(r"\s+", " ", text).strip()
+                    if text:
+                        parts.append(text)
+            return "\n\n".join(parts) if parts else None
+        except ImportError:
+            print("    ⚠ 需要安装 ebooklib: pip install ebooklib")
+            return None
+        except Exception as e:
+            print(f"    ⚠ epub 读取失败 {path.name}: {e}")
+            return None
+
+    def _read_mobi(self, path: Path) -> Optional[str]:
+        """mobi → epub 路径，安全 tempfile.tempdir 设置"""
+        self.mobi_temp_dir.mkdir(parents=True, exist_ok=True)
+        old_tempdir = tempfile.tempdir
+        try:
+            from mobi import extract
+            tempfile.tempdir = str(self.mobi_temp_dir)
+            result = extract(str(path))
+            if isinstance(result, tuple):
+                tmpdir, epub_path = result[0], (result[1] if len(result) > 1 else result[0])
+            else:
+                tmpdir, epub_path = None, result
+            epub_path = Path(epub_path)
+            if epub_path.exists():
+                try:
+                    return self._read_epub(epub_path)
+                finally:
+                    clean = Path(tmpdir) if tmpdir else epub_path.parent
+                    if clean.exists() and str(clean).startswith(str(self.mobi_temp_dir)):
+                        shutil.rmtree(clean, ignore_errors=True)
+            return None
+        except ImportError:
+            print(f"    ⚠ 需要安装 mobi: pip install mobi")
+            return None
+        except Exception as e:
+            print(f"    ⚠ mobi 读取失败 {path.name}: {e}")
+            return None
+        finally:
+            tempfile.tempdir = old_tempdir
+
+    def _read_pdf(self, path: Path) -> Optional[str]:
+        """pdf → pdfminer.six（可选依赖）"""
+        try:
+            from pdfminer.high_level import extract_text
+            content = extract_text(str(path))
+            content = content.replace("\x00", "")
+            content = "\n".join(l.strip() for l in content.splitlines() if l.strip())
+            return content if content.strip() else None
+        except ImportError:
+            print(f"    ⚠ pdfminer.six 未安装，跳过 PDF: {path.name}")
+            return None
+        except Exception as e:
+            print(f"    ⚠ pdf 读取失败 {path.name}: {e}")
+            return None
+
+    def _read_docx(self, path: Path) -> Optional[str]:
+        """docx → python-docx（可选依赖）"""
+        try:
+            from docx import Document
+            doc = Document(str(path))
+            parts = [p.text.strip() for p in doc.paragraphs if p.text.strip()]
+            return "\n\n".join(parts) if parts else None
+        except ImportError:
+            print(f"    ⚠ python-docx 未安装，跳过 DOCX: {path.name}")
+            return None
+        except Exception as e:
+            print(f"    ⚠ docx 读取失败 {path.name}: {e}")
+            return None
+
     def convert_files(self, source_dirs: Optional[List[Path]] = None, limit: int = 0):
         """转换小说格式"""
         print("\n" + "=" * 60)
@@ -1049,6 +1186,8 @@ python case_builder.py --sync
         converted_count = 0
         failed_count = 0
 
+        SUPPORTED = {".txt", ".epub", ".mobi", ".pdf", ".docx"}
+
         for source_dir in dirs:
             if not source_dir.exists():
                 continue
@@ -1057,112 +1196,21 @@ python case_builder.py --sync
                 if limit > 0 and converted_count >= limit:
                     break
 
-                suffix = file_path.suffix.lower()
+                if file_path.suffix.lower() not in SUPPORTED:
+                    continue
 
-                if suffix == ".txt":
-                    # 直接复制
-                    dest = self.converted_dir / f"{file_path.stem}.txt"
-                    if not dest.exists():
-                        try:
-                            content = file_path.read_text(
-                                encoding="utf-8", errors="ignore"
-                            )
-                            dest.write_text(content, encoding="utf-8")
-                            converted_count += 1
-                            if converted_count % 100 == 0:
-                                print(f"    已转换: {converted_count}")
-                        except Exception as e:
-                            failed_count += 1
+                dest = self.converted_dir / f"{file_path.stem}.txt"
+                if dest.exists():
+                    continue  # 已转换，跳过
 
-                elif suffix == ".epub":
-                    # 需要ebooklib
-                    try:
-                        import ebooklib
-                        from ebooklib import epub
-
-                        book = epub.read_epub(str(file_path))
-                        content = ""
-                        for doc in book.get_items_of_type(ebooklib.ITEM_DOCUMENT):
-                            content += doc.get_content().decode(
-                                "utf-8", errors="ignore"
-                            )
-
-                        # 简单清理HTML
-                        content = re.sub(r"<[^>]+>", "", content)
-
-                        dest = self.converted_dir / f"{file_path.stem}.txt"
-                        dest.write_text(content, encoding="utf-8")
-                        converted_count += 1
-
-                    except ImportError:
-                        print("    ✗ 需要安装 ebooklib: pip install ebooklib")
-                        return False
-                    except Exception as e:
-                        failed_count += 1
-
-                elif suffix == ".mobi":
-                    # MOBI → 用 mobi 库解包，读 mobi7/book.html（单文件，最简洁）
-                    # mobi.extract() 返回 (tmp_dir, _)
-                    _mobi_tmp = None
-                    try:
-                        import mobi as _mobi
-                        import shutil
-
-                        result = _mobi.extract(str(file_path))
-                        _mobi_tmp = (
-                            result[0] if isinstance(result, tuple) else str(result)
-                        )
-                        tmp_path = pathlib.Path(_mobi_tmp)
-
-                        book_html = tmp_path / "mobi7" / "book.html"
-                        if not book_html.exists():
-                            # 降级：拼接 mobi8/OEBPS/Text/*.xhtml
-                            xhtml_files = sorted(
-                                (tmp_path / "mobi8" / "OEBPS" / "Text").glob("*.xhtml")
-                            )
-                            raw = b"".join(f.read_bytes() for f in xhtml_files)
-                        else:
-                            raw = book_html.read_bytes()
-
-                        # 从 HTML 头部读取 charset 声明
-                        import re as _re
-
-                        charset_m = _re.search(
-                            rb'charset[=\s]*["\']?([a-zA-Z0-9_-]+)', raw[:4000]
-                        )
-                        enc = (
-                            charset_m.group(1).decode("ascii").lower()
-                            if charset_m
-                            else "utf-8"
-                        )
-                        if enc == "ansi":
-                            enc = "gbk"
-                        try:
-                            content = raw.decode(enc, errors="replace")
-                        except LookupError:
-                            content = raw.decode("utf-8", errors="replace")
-
-                        content = re.sub(r"<[^>]+>", "", content)
-                        content = re.sub(r"[ \t]+", " ", content).strip()
-
-                        dest = self.converted_dir / f"{file_path.stem}.txt"
-                        dest.write_text(content, encoding="utf-8")
-                        converted_count += 1
-
-                    except ImportError:
-                        print(
-                            f"    ⚠ MOBI转换缺少依赖（pip install mobi），跳过: {file_path.name}"
-                        )
-                        failed_count += 1
-                    except Exception as e:
-                        print(f"    ⚠ MOBI转换失败，跳过: {file_path.name} ({e})")
-                        failed_count += 1
-                    finally:
-                        if _mobi_tmp:
-                            try:
-                                shutil.rmtree(_mobi_tmp, ignore_errors=True)
-                            except Exception:
-                                pass
+                content = self._read_novel(file_path)
+                if content:
+                    dest.write_text(content, encoding="utf-8")
+                    converted_count += 1
+                    if converted_count % 100 == 0:
+                        print(f"    已转换: {converted_count}")
+                else:
+                    failed_count += 1
 
         print(f"\n转换完成: {converted_count} 成功, {failed_count} 失败")
         return True
@@ -1209,6 +1257,10 @@ python case_builder.py --sync
         print(f"    小说文件: {len(novel_files)} 本")
         print(f"    提取限制: {limit if limit > 0 else '无限制'} 条")
 
+        # 增量标记目录（与 base_extractor 对齐）
+        progress_dir = self.converted_dir / ".extract_progress"
+        progress_dir.mkdir(parents=True, exist_ok=True)
+
         # 提取案例
         all_cases: List[Case] = []
 
@@ -1216,8 +1268,16 @@ python case_builder.py --sync
             if limit > 0 and len(all_cases) >= limit:
                 break
 
+            # 增量跳过：已处理过的文件直接跳过
+            novel_id = hashlib.md5(novel_file.stem.encode()).hexdigest()[:12]
+            processed_marker = progress_dir / f".processed_{novel_id}"
+            if processed_marker.exists():
+                continue
+
             try:
-                content = novel_file.read_text(encoding="utf-8", errors="ignore")
+                content = self._read_novel(novel_file)
+                if not content:
+                    continue
                 novel_name = novel_file.stem
 
                 # 检测题材
@@ -1244,6 +1304,9 @@ python case_builder.py --sync
                     )
 
                     all_cases.extend(cases)
+
+                # 写增量标记，下次跳过
+                processed_marker.touch()
 
                 if (i + 1) % 10 == 0:
                     print(
@@ -1682,14 +1745,17 @@ python case_builder.py --sync
 
         print(f"\n索引更新: {self.index_file}")
 
-    def sync_to_vectorstore(self, batch_size: int = 50):
-        """同步案例到向量库"""
+    def sync_to_vectorstore(
+        self,
+        batch_size: int = 128,
+        embed_batch: int = 128,
+        skip_existing: bool = False,
+    ):
+        """同步案例到向量库（对齐路径二：HNSW禁用 + upsert重试 + embed/upsert流水线）"""
         from qdrant_client import QdrantClient
-        from qdrant_client.http.models import (
-            PointStruct,
-            VectorParams,
-            Distance,
-            SparseVectorParams,
+        from qdrant_client.models import (
+            PointStruct, VectorParams, Distance,
+            SparseVectorParams, OptimizersConfigDiff,
         )
         from FlagEmbedding import BGEM3FlagModel
 
@@ -1702,98 +1768,142 @@ python case_builder.py --sync
         for scene_dir in self.cases_dir.iterdir():
             if not scene_dir.is_dir():
                 continue
-
             for meta_file in scene_dir.glob("*.json"):
                 try:
                     with open(meta_file, "r", encoding="utf-8") as f:
-                        case_data = json.load(f)
-                    all_cases.append(case_data)
-                except:
+                        all_cases.append(json.load(f))
+                except Exception:
                     continue
 
         if not all_cases:
             print("    ✗ 未找到案例")
             return False
 
-        print(f"    找到 {len(all_cases)} 条案例")
+        total = len(all_cases)
+        print(f"    找到 {total:,} 条案例")
 
-        # 连接Qdrant（使用统一配置）
+        # 连接 Qdrant
         print(f"    连接 Qdrant: {self.qdrant_url}")
-        client = QdrantClient(url=self.qdrant_url)
+        client = QdrantClient(url=self.qdrant_url, timeout=60)
 
-        # 检查collection
-        try:
-            info = client.get_collection(self.collection_name)
-            print(f"    {self.collection_name} 已存在 ({info.points_count:,} 条)")
-        except:
-            print(f"    创建 {self.collection_name}...")
-            client.create_collection(
-                collection_name=self.collection_name,
-                vectors_config={
-                    "dense": VectorParams(size=1024, distance=Distance.COSINE)
-                },
-                sparse_vectors_config={"sparse": SparseVectorParams()},
-            )
+        # --skip-existing：条数一致则跳过
+        if skip_existing:
+            try:
+                existing = [c.name for c in client.get_collections().collections]
+                if self.collection_name in existing:
+                    info = client.get_collection(self.collection_name)
+                    if info.points_count == total:
+                        print(f"    [跳过] 已同步 {total:,} 条，条数一致")
+                        return True
+                    print(f"    [重建] Qdrant {info.points_count:,} 条 ≠ 本地 {total:,} 条，重建")
+            except Exception as e:
+                print(f"    [警告] 无法检查已有条数（{e}），继续")
 
-        # 加载模型（使用统一配置）
-        print("\n加载BGE-M3模型...")
+        # 建/重建 collection，上传期间禁用 HNSW（避免越写越慢）
+        existing = [c.name for c in client.get_collections().collections]
+        if self.collection_name in existing:
+            client.delete_collection(self.collection_name)
+        client.create_collection(
+            collection_name=self.collection_name,
+            vectors_config={
+                "dense": VectorParams(size=1024, distance=Distance.COSINE),
+            },
+            sparse_vectors_config={"sparse": SparseVectorParams()},
+            optimizers_config=OptimizersConfigDiff(indexing_threshold=0),
+        )
+        print(f"    [创建] {self.collection_name}（上传期间禁用 HNSW）")
+
+        # 加载模型
+        print("\n加载 BGE-M3 模型...")
         from core.config_loader import get_device
-
         device = get_device()
-        if self.model_path:
-            print(f"    模型路径: {self.model_path}")
-            model = BGEM3FlagModel(self.model_path, use_fp16=True, device=device)
-        else:
-            print("    自动下载模型...")
-            model = BGEM3FlagModel("BAAI/bge-m3", use_fp16=True, device=device)
+        model = BGEM3FlagModel(
+            self.model_path or "BAAI/bge-m3", use_fp16=True, device=device
+        )
         print("    模型加载完成")
 
-        # 同步
+        def _upsert_with_retry(pts, retries=5, backoff=5):
+            """upsert 失败自动重试，防 Qdrant 502 闪断"""
+            for attempt in range(retries):
+                try:
+                    client.upsert(collection_name=self.collection_name, points=pts)
+                    return
+                except Exception as e:
+                    if attempt == retries - 1:
+                        raise
+                    wait = backoff * (attempt + 1)
+                    print(f"\n    [重试] {e.__class__.__name__}，{wait}s 后重试({attempt+1}/{retries})...")
+                    time.sleep(wait)
+
+        # 流水线：GPU 推理下一批时，后台线程上传当前批
         print("\n同步到向量库...")
+        synced = 0
+        t0 = time.time()
+        pending_future: Optional[Future] = None
+        pending_count = 0
 
-        for i in range(0, len(all_cases), batch_size):
-            batch = all_cases[i : i + batch_size]
+        with ThreadPoolExecutor(max_workers=1) as executor:
+            for batch_start in range(0, total, batch_size):
+                batch = all_cases[batch_start: batch_start + batch_size]
+                texts = [c.get("content", "")[:1000] for c in batch]
 
-            texts = [c.get("content", "") for c in batch]
-            out = model.encode(texts, return_dense=True, return_sparse=True)
+                out = model.encode(texts, batch_size=embed_batch, return_dense=True, return_sparse=True)
 
-            points = []
-            for j, case in enumerate(batch):
-                point = PointStruct(
-                    id=str(
-                        uuid.uuid5(
-                            uuid.NAMESPACE_DNS, case.get("case_id", f"case_{i + j}")
-                        )
-                    ),
-                    vector={
-                        "dense": out["dense_vecs"][j].tolist(),
-                        "sparse": {
-                            "indices": list(out["lexical_weights"][j].keys()),
-                            "values": list(out["lexical_weights"][j].values()),
+                points = []
+                for j, case in enumerate(batch):
+                    cid = case.get("case_id", f"case_{batch_start + j}")
+                    points.append(PointStruct(
+                        id=str(uuid.uuid5(uuid.NAMESPACE_DNS, cid)),
+                        vector={
+                            "dense": out["dense_vecs"][j].tolist(),
+                            "sparse": {
+                                "indices": list(out["lexical_weights"][j].keys()),
+                                "values": list(out["lexical_weights"][j].values()),
+                            },
                         },
-                    },
-                    payload={
-                        "name": case.get("novel_name", ""),
-                        "scene_type": case.get("scene_type", ""),
-                        "genre": case.get("genre", ""),
-                        "content": case.get("content", "")[:500],
-                        "word_count": case.get("word_count", 0),
-                        "quality_score": case.get("quality_score", 7.0),
-                        "keywords": case.get("keywords", []),
-                        "source": case.get("source_file", ""),
-                    },
-                )
-                points.append(point)
+                        payload={
+                            "novel_name": case.get("novel_name", ""),
+                            "scene_type": case.get("scene_type", ""),
+                            "genre": case.get("genre", ""),
+                            "content": case.get("content", "")[:500],
+                            "word_count": case.get("word_count", 0),
+                            "quality_score": case.get("quality_score", 7.0),
+                            "keywords": case.get("keywords", []),
+                            "cross_genre_value": case.get("cross_genre_value", ""),
+                            "source": case.get("source_file", ""),
+                        },
+                    ))
 
-            client.upsert(self.collection_name, points)
-            progress = min(i + batch_size, len(all_cases))
-            pct = progress / len(all_cases) * 100
-            print(f"    [{pct:.0f}%] {progress}/{len(all_cases)}")
+                # 等上一批完成
+                if pending_future is not None:
+                    pending_future.result()
+                    synced += pending_count
+                    elapsed = time.time() - t0
+                    speed = synced / elapsed if elapsed > 0 else 0
+                    eta = (total - synced) / speed if speed > 0 else 0
+                    print(
+                        f"  [{synced:>6}/{total}] {synced/total*100:5.1f}%"
+                        f"  速度:{speed:.0f}条/s  剩余:{eta/60:.1f}min",
+                        end="\r", flush=True,
+                    )
 
-        # 验证
+                pending_future = executor.submit(_upsert_with_retry, points)
+                pending_count = len(batch)
+
+            if pending_future is not None:
+                pending_future.result()
+                synced += pending_count
+
+        # 恢复 HNSW 阈值，触发后台索引构建
+        client.update_collection(
+            collection_name=self.collection_name,
+            optimizer_config=OptimizersConfigDiff(indexing_threshold=20000),
+        )
+        print(f"\n  [索引] HNSW 后台构建已触发")
+
+        elapsed = time.time() - t0
         info = client.get_collection(self.collection_name)
-        print(f"\n✓ {self.collection_name}: {info.points_count:,} 条")
-
+        print(f"✓ {self.collection_name}: {info.points_count:,} 条  耗时:{elapsed/60:.1f}min")
         return True
 
     def get_status(self):
@@ -2032,7 +2142,9 @@ def main():
     # 参数
     parser.add_argument("--limit", type=int, default=0, help="处理数量限制")
     parser.add_argument("--scenes", nargs="+", help="指定场景类型")
-    parser.add_argument("--batch-size", type=int, default=50, help="批处理大小")
+    parser.add_argument("--batch-size", type=int, default=128, help="sync upsert 批次大小")
+    parser.add_argument("--embed-batch", type=int, default=128, help="embedding 推理 batch size（GPU 建议 128）")
+    parser.add_argument("--skip-existing", action="store_true", help="sync 时条数一致则跳过重建")
     parser.add_argument("--min-cluster-size", type=int, default=10, help="最小聚类大小")
     parser.add_argument("--max-clusters", type=int, default=20, help="最大发现场景数")
     parser.add_argument("--confidence", type=float, default=0.6, help="置信度阈值")
@@ -2079,7 +2191,11 @@ def main():
     elif args.apply_discovered:
         builder.apply_discovered_scenes(confidence_threshold=args.confidence)
     elif args.sync:
-        builder.sync_to_vectorstore(batch_size=args.batch_size)
+        builder.sync_to_vectorstore(
+            batch_size=args.batch_size,
+            embed_batch=args.embed_batch,
+            skip_existing=args.skip_existing,
+        )
     elif args.status:
         builder.get_status()
     else:
