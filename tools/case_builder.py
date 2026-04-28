@@ -55,7 +55,8 @@ _CHAPTER_LINE_PATTERN = re.compile(
 
 _SENTENCE_ENDERS = frozenset('。！？…"』」》）】')
 
-_FORBIDDEN_PHRASES = [
+# 全局禁用词（任何场景都排除：AI 生成痕迹、说教文风）
+_FORBIDDEN_PHRASES_GLOBAL = [
     "总之",
     "综上所述",
     "不得不说",
@@ -68,6 +69,10 @@ _FORBIDDEN_PHRASES = [
     "诚然",
     "固然",
     "首先，其次，",
+]
+
+# 系统流专用词（仅在非系统流场景中禁用）
+_FORBIDDEN_PHRASES_SYSTEM_FLOW = [
     "叮！恭喜宿主",
     "系统提示：",
     "【叮！】",
@@ -80,6 +85,12 @@ _FORBIDDEN_PHRASES = [
     "品质：稀有",
     "品质：传说",
 ]
+
+# 场景类型白名单（允许系统流词汇的场景）
+_SYSTEM_FLOW_SCENE_TYPES = {"系统提示"}
+
+# 合并后的禁用词列表（用于旧代码兼容）
+_FORBIDDEN_PHRASES = _FORBIDDEN_PHRASES_GLOBAL + _FORBIDDEN_PHRASES_SYSTEM_FLOW
 
 
 def _is_ad_paragraph(para: str) -> bool:
@@ -111,11 +122,19 @@ def _is_sentence_complete(para: str) -> bool:
 
 
 def _info_density(text: str) -> float:
-    """信息密度 = 唯一字符数 / 非空白字符总数。"""
+    """词汇多样性（TTR）= 唯一 bigram 数 / 总 bigram 数。
+
+    正常汉语小说（内容丰富）: 0.70+
+    重复模板文本（打打打打打）: 0.10-
+    普通内心独白（中等重复）: 0.50-0.70
+    """
     chars = [c for c in text if not c.isspace()]
-    if not chars:
+    if len(chars) < 10:
         return 0.0
-    return len(set(chars)) / len(chars)
+    bigrams = [chars[i] + chars[i + 1] for i in range(len(chars) - 1)]
+    if not bigrams:
+        return 0.0
+    return len(set(bigrams)) / len(bigrams)
 
 
 # C4 风格行级过滤标志
@@ -234,17 +253,43 @@ SCENE_TYPES = {
     },
     "战斗场景": {
         "keywords": [
-            "招",
-            "剑",
-            "刀",
-            "拳",
+            # 动作词组（比单字精确）
+            "出招",
+            "一招",
+            "招式",
+            "剑光",
+            "剑气",
+            "刀光",
+            "刀气",
+            "拳印",
+            "掌力",
+            "一拳",
+            "一掌",
+            "出手",
+            "挥剑",
+            "挥刀",
+            # 战斗状态词（精确）
             "攻击",
             "防御",
-            "技能",
-            "招式",
+            "闪避",
+            "格挡",
+            "反击",
+            "斩出",
+            # 修炼系战斗词（精确）
             "斗气",
             "灵力",
+            "真气",
+            "元力",
+            "法力",
+            "战气",
+            # 通用激烈动作（高精确度）
+            "杀招",
+            "必杀",
+            "绝招",
+            "秘技",
         ],
+        "neg_keywords": ["招呼", "招募", "招聘", "菜刀", "刀叉", "刀具"],
+        "min_kw_score": 1.0,
         "position": "any",
         "min_len": 400,
         "max_len": 2500,
@@ -319,17 +364,31 @@ SCENE_TYPES = {
     # ========== 新增场景类型 (18种) ==========
     "环境场景": {
         "keywords": [
+            # 地理地貌（精确）
             "山脉",
             "森林",
             "宫殿",
             "城池",
             "荒野",
-            "天空",
-            "云雾",
-            "月光",
-            "风景",
-            "景色",
+            "平原",
+            "峡谷",
+            # 氛围环境（需配合描写动词）
+            "云雾弥漫",
+            "月光如水",
+            "风景如画",
+            "景色宜人",
+            "鸟语花香",
+            "寂静无声",
+            "万籁俱寂",
+            # 建筑/场所描写
+            "古朴",
+            "巍峨",
+            "雄伟",
+            "幽深",
+            "静谧",
         ],
+        "neg_keywords": ["冲向", "追赶", "逃跑", "厮杀"],  # 动作段排除
+        "min_kw_score": 1.5,  # 要求更高分，避免偶然出现
         "position": "any",
         "min_len": 300,
         "max_len": 1500,
@@ -542,6 +601,97 @@ SCENE_TYPES = {
         "min_len": 300,
         "max_len": 1500,
     },
+    # ========== 补充 5 种高频网文场景类型 ==========
+    "境界突破": {
+        "keywords": [
+            "突破",
+            "晋级",
+            "境界提升",
+            "大圆满",
+            "瓶颈",
+            "修为突破",
+            "突破了",
+            "晋入",
+            "踏入",
+            "跨入",
+        ],
+        "neg_keywords": ["突破重围", "突破防线", "突破封锁"],  # 排除军事突围
+        "min_kw_score": 1.5,
+        "position": "any",
+        "min_len": 300,
+        "max_len": 2000,
+    },
+    "拍卖竞标": {
+        "keywords": [
+            "拍卖",
+            "起拍价",
+            "灵石",
+            "竞价",
+            "出价",
+            "加价",
+            "落槌",
+            "底价",
+            "拍品",
+            "竞拍",
+            "成交价",
+        ],
+        "min_kw_score": 2.0,
+        "position": "any",
+        "min_len": 300,
+        "max_len": 2000,
+    },
+    "试炼考核": {
+        "keywords": [
+            "试炼",
+            "考核",
+            "闯关",
+            "关卡",
+            "积分",
+            "淘汰",
+            "晋级赛",
+            "选拔",
+            "测试",
+            "考验",
+        ],
+        "min_kw_score": 1.5,
+        "position": "any",
+        "min_len": 300,
+        "max_len": 2000,
+    },
+    "悟道领悟": {
+        "keywords": [
+            "领悟",
+            "感悟",
+            "顿悟",
+            "豁然贯通",
+            "道韵",
+            "明悟",
+            "悟道",
+            "参悟",
+            "恍然大悟",
+            "心境",
+        ],
+        "min_kw_score": 1.0,
+        "position": "any",
+        "min_len": 300,
+        "max_len": 1500,
+    },
+    "系统提示": {
+        "keywords": [
+            "系统提示",
+            "叮！",
+            "恭喜宿主",
+            "签到成功",
+            "任务完成",
+            "获得奖励",
+            "属性面板",
+            "经验值",
+        ],
+        "min_kw_score": 2.0,
+        "position": "any",
+        "min_len": 100,
+        "max_len": 1000,
+    },
 }
 
 # Q4：场景类型语义描述（用于 Zero-shot 语义校验）
@@ -574,6 +724,12 @@ SCENE_TYPE_DESCRIPTIONS = {
     "变故场景": "意外变故，计划被打乱，突发事件",
     "记忆场景": "回忆往事，回想过去，历史追述的片段",
     "传承场景": "传授功法技艺，接受指导，师徒传承",
+    # ========== 补充 5 种高频网文场景类型描述 ==========
+    "境界突破": "修炼者突破境界瓶颈，实力提升的关键时刻，感受到境界晋升的描写",
+    "拍卖竞标": "拍卖场景，各方势力竞相出价争夺珍贵物品",
+    "试炼考核": "进入试炼场地，闯过关卡或考核，展示实力争取晋级",
+    "悟道领悟": "人物顿悟天道或功法要义，豁然贯通，境界心境发生质变",
+    "系统提示": "游戏系统或金手指系统的提示弹窗，显示奖励、属性、任务完成",
 }
 
 # 题材关键词
@@ -643,6 +799,23 @@ class CaseBuilder:
             self.case_library_dir = case_library_dir or get_case_library_dir()
             self.model_path = get_model_path()
             self.novel_sources = get_novel_sources()
+
+            # 从 config 读取 case_builder 配置节
+            cb_cfg = self.config.get("case_builder", {})
+            self.quality_score_base = cb_cfg.get("quality_score_base", 4.5)
+            self.quality_score_min = cb_cfg.get("quality_score_min", 5.0)
+            self.bigram_entropy_min = cb_cfg.get("bigram_entropy_min", 5.0)
+            self.bigram_entropy_penalty = cb_cfg.get("bigram_entropy_penalty", 1.5)
+            self.content_max_len = cb_cfg.get("content_max_len", 3000)
+            self.embed_truncate_len = cb_cfg.get("embed_truncate_len", 1000)
+            self.boundary_delta_threshold = cb_cfg.get("boundary_delta_threshold", 0.12)
+            self.embedding_window_size = cb_cfg.get("embedding_window_size", 3)
+            self.semantic_min_similarity = cb_cfg.get("semantic_min_similarity", 0.20)
+            self.position_start_window = cb_cfg.get("position_start_window", 5)
+            self.position_end_window = cb_cfg.get("position_end_window", 5)
+            self.genre_detection_threshold = cb_cfg.get("genre_detection_threshold", 3)
+            self.genre_sample_size = cb_cfg.get("genre_sample_size", 5000)
+            self.minhash_threshold = cb_cfg.get("minhash_threshold", 0.80)
         else:
             # 回退到旧方式
             import os
@@ -659,6 +832,23 @@ class CaseBuilder:
             self.novel_sources = self.config.get("novel_sources", {}).get(
                 "directories", []
             )
+
+            # 从 config 读取 case_builder 配置节（回退模式）
+            cb_cfg = self.config.get("case_builder", {})
+            self.quality_score_base = cb_cfg.get("quality_score_base", 4.5)
+            self.quality_score_min = cb_cfg.get("quality_score_min", 5.0)
+            self.bigram_entropy_min = cb_cfg.get("bigram_entropy_min", 5.0)
+            self.bigram_entropy_penalty = cb_cfg.get("bigram_entropy_penalty", 1.5)
+            self.content_max_len = cb_cfg.get("content_max_len", 3000)
+            self.embed_truncate_len = cb_cfg.get("embed_truncate_len", 1000)
+            self.boundary_delta_threshold = cb_cfg.get("boundary_delta_threshold", 0.12)
+            self.embedding_window_size = cb_cfg.get("embedding_window_size", 3)
+            self.semantic_min_similarity = cb_cfg.get("semantic_min_similarity", 0.20)
+            self.position_start_window = cb_cfg.get("position_start_window", 5)
+            self.position_end_window = cb_cfg.get("position_end_window", 5)
+            self.genre_detection_threshold = cb_cfg.get("genre_detection_threshold", 3)
+            self.genre_sample_size = cb_cfg.get("genre_sample_size", 5000)
+            self.minhash_threshold = cb_cfg.get("minhash_threshold", 0.80)
 
         # 确保 case_library_dir 是 Path 对象
         if not isinstance(self.case_library_dir, Path):
@@ -919,7 +1109,9 @@ python case_builder.py --sync
                         import shutil
 
                         result = _mobi.extract(str(file_path))
-                        _mobi_tmp = result[0] if isinstance(result, tuple) else str(result)
+                        _mobi_tmp = (
+                            result[0] if isinstance(result, tuple) else str(result)
+                        )
                         tmp_path = pathlib.Path(_mobi_tmp)
 
                         book_html = tmp_path / "mobi7" / "book.html"
@@ -934,6 +1126,7 @@ python case_builder.py --sync
 
                         # 从 HTML 头部读取 charset 声明
                         import re as _re
+
                         charset_m = _re.search(
                             rb'charset[=\s]*["\']?([a-zA-Z0-9_-]+)', raw[:4000]
                         )
@@ -957,7 +1150,9 @@ python case_builder.py --sync
                         converted_count += 1
 
                     except ImportError:
-                        print(f"    ⚠ MOBI转换缺少依赖（pip install mobi），跳过: {file_path.name}")
+                        print(
+                            f"    ⚠ MOBI转换缺少依赖（pip install mobi），跳过: {file_path.name}"
+                        )
                         failed_count += 1
                     except Exception as e:
                         print(f"    ⚠ MOBI转换失败，跳过: {file_path.name} ({e})")
@@ -1076,12 +1271,20 @@ python case_builder.py --sync
 
     def _detect_genre(self, content: str) -> str:
         """多位置采样题材检测（Q2：3段采样 + 扩充词库 + 默认未分类）"""
+        sample_size = self.genre_sample_size
+        threshold = self.genre_detection_threshold
+
         length = len(content)
-        # 从开头、1/3处、2/3处各取 5000 字，避免只看开篇
+        # 从开头、1/3处、2/3处各取 sample_size 字，避免只看开篇
         samples = [
-            content[:5000],
-            content[max(0, length // 3 - 2500) : length // 3 + 2500],
-            content[max(0, 2 * length // 3 - 2500) : 2 * length // 3 + 2500],
+            content[:sample_size],
+            content[
+                max(0, length // 3 - sample_size // 2) : length // 3 + sample_size // 2
+            ],
+            content[
+                max(0, 2 * length // 3 - sample_size // 2) : 2 * length // 3
+                + sample_size // 2
+            ],
         ]
 
         total_scores: Dict[str, int] = {}
@@ -1091,7 +1294,7 @@ python case_builder.py --sync
 
         if total_scores:
             best = max(total_scores, key=lambda g: total_scores[g])
-            if total_scores[best] >= 3:
+            if total_scores[best] >= threshold:
                 return best
 
         return "未分类"  # Q2：改为"未分类"，不再硬编码玄幻奇幻
@@ -1156,13 +1359,16 @@ python case_builder.py --sync
         case_embedding,  # np.ndarray，案例段落的 BGE-M3 dense vector
         keyword_scene_type: str,
         anchors: Dict[str, Any],
-        min_similarity: float = 0.20,
+        min_similarity: float = None,
     ) -> Optional[str]:
         """Q4：Zero-shot 语义校验场景类型。
 
         Returns:
             修正后的 scene_type，或 None（相似度过低，丢弃该案例）
         """
+        if min_similarity is None:
+            min_similarity = self.semantic_min_similarity
+
         import numpy as np
 
         best_type = keyword_scene_type
@@ -1231,9 +1437,9 @@ python case_builder.py --sync
                 continue
 
             # 位置检查
-            if position == "start" and i > 5:
+            if position == "start" and i > self.position_start_window:
                 continue
-            if position == "end" and i < len(paragraphs) - 5:
+            if position == "end" and i < len(paragraphs) - self.position_end_window:
                 continue
 
             # 关键词检查（Q1：加权评分 + 负关键词过滤）
@@ -1263,9 +1469,11 @@ python case_builder.py --sync
                     continue
 
             # 计算质量分
-            quality_score = self._calculate_quality(para, match_count, kw_score)
+            quality_score = self._calculate_quality(
+                para, match_count, kw_score, scene_type=scene_type
+            )
 
-            if quality_score < 6.0:
+            if quality_score < self.quality_score_min:
                 continue
 
             # 创建案例
@@ -1274,7 +1482,7 @@ python case_builder.py --sync
                 scene_type=scene_type,
                 genre=genre,
                 novel_name=novel_name,
-                content=para[:2000],
+                content=para[: self.content_max_len],
                 word_count=len(para),
                 quality_score=quality_score,
                 emotion_value=0.5,
@@ -1284,10 +1492,11 @@ python case_builder.py --sync
             )
 
             # Q3：边界验证（有 BGE-M3 时才做，失败降级通过）
-            BOUNDARY_DELTA_THRESHOLD = 0.12  # 余弦距离阈值，低于此则为场景中段
             if bge_model is not None and position == "any":
-                delta = self._compute_boundary_delta(paragraphs, i, bge_model, window=3)
-                if delta < BOUNDARY_DELTA_THRESHOLD:
+                delta = self._compute_boundary_delta(
+                    paragraphs, i, bge_model, window=self.embedding_window_size
+                )
+                if delta < self.boundary_delta_threshold:
                     continue  # 场景中段噪音，丢弃
 
             # Q4：zero-shot 语义校验（有锚向量时才做）
@@ -1296,7 +1505,9 @@ python case_builder.py --sync
                     import numpy as np
 
                     enc = bge_model.encode(
-                        [para[:1000]], batch_size=1, return_dense=True
+                        [para[: self.embed_truncate_len]],
+                        batch_size=1,
+                        return_dense=True,
                     )
                     para_vec = np.array(enc["dense_vecs"][0])
                     corrected_type = self._semantic_verify_case(
@@ -1326,10 +1537,14 @@ python case_builder.py --sync
         return cases
 
     def _calculate_quality(
-        self, content: str, match_count: int, kw_score: float = 0.0
+        self,
+        content: str,
+        match_count: int,
+        kw_score: float = 0.0,
+        scene_type: str = "",
     ) -> float:
         """计算质量分（扩展版：禁用词 + 信息密度 + 句末完整性 + Q1加权分）"""
-        score = 6.0  # 基础分
+        score = self.quality_score_base  # 基础分（从 config 读取）
 
         # 关键词匹配加分（Q1：用加权分替代纯 match_count，上限 1.5）
         score += min(max(kw_score, match_count) * 0.3, 1.5)
@@ -1338,32 +1553,38 @@ python case_builder.py --sync
         if 500 <= len(content) <= 2000:
             score += 0.5
 
-        # 禁用词（扩展版）
-        for phrase in _FORBIDDEN_PHRASES:
+        # 全局禁用词
+        for phrase in _FORBIDDEN_PHRASES_GLOBAL:
             if phrase in content:
                 score -= 0.5
+
+        # 系统流词汇只在非系统流场景中禁用
+        if scene_type not in _SYSTEM_FLOW_SCENE_TYPES:
+            for phrase in _FORBIDDEN_PHRASES_SYSTEM_FLOW:
+                if phrase in content:
+                    score -= 0.5
 
         # 对话密度加分
         quote_count = content.count("\u201c") + content.count("\u201d")
         if quote_count >= 4:
             score += 0.3
 
-        # 信息密度奖励
+        # 信息密度奖励（TTR阈值调整：>0.65 加分，<0.30 扣分）
         density = _info_density(content)
-        if density > 0.4:
+        if density > 0.65:
             score += 0.3
-        elif density < 0.15:
+        elif density < 0.30:
             score -= 1.0
 
         # 句末完整性
         if not _is_sentence_complete(content):
             score -= 0.5
 
-        # Bigram 熵（<5.0 视为模板化文本，扣 1.5）
+        # Bigram 熵（从 config 读取阈值和扣分值）
         if len(content) > 100:
             entropy = _bigram_entropy(content)
-            if entropy < 5.0:
-                score -= 1.5
+            if entropy < self.bigram_entropy_min:
+                score -= self.bigram_entropy_penalty
             elif entropy > 8.0:
                 score += 0.3
 
