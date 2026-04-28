@@ -188,7 +188,8 @@ class CheckpointManager:
         try:
             data = json.loads(files[0].read_text(encoding="utf-8"))
             return WorkflowCheckpoint(**data)
-        except Exception:
+        except Exception as e:
+            print(f"[!] checkpoint 文件损坏或格式错误: {files[0].name}: {e}")
             return None
 
     def get_resume_description(self, chapter: int) -> str:

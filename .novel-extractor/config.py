@@ -29,6 +29,8 @@ def _load_config():
         return {}
 
 
+# 注意：此模块级调用在进程启动时执行一次，之后 config.json 的修改不会自动生效。
+# 若在批量提炼中途改了 config.json，需重启 Python 进程才能使新配置生效。
 _cfg = _load_config()
 
 # 小说资源目录 —— 从 config.json 的 novel_sources.directories 读取
