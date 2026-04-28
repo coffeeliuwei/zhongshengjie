@@ -785,6 +785,80 @@ class Case:
     position: str = ""
 
 
+def _mobi_to_txt(task: tuple) -> str:
+    """ProcessPoolExecutor worker：mobi → epub → txt。
+
+    每个进程有独立内存，可以安全设置 tempfile.tempdir，不影响主进程或其他 worker。
+    返回值："ok" / "skip" / "fail" / "err:..." / "no_lib"
+    """
+    path_str, dest_str, mobi_temp_str = task
+    import re as _re, tempfile as _tf, shutil as _sh
+    from pathlib import Path as _P
+
+    dest = _P(dest_str)
+    if dest.exists():
+        return "skip"
+
+    _P(mobi_temp_str).mkdir(parents=True, exist_ok=True)
+    _tf.tempdir = mobi_temp_str  # 进程独占，无竞争
+
+    tmpdir_path = None
+    try:
+        from mobi import extract
+        result = extract(path_str)
+        if isinstance(result, tuple):
+            tmpdir_path = _P(result[0]) if result[0] else None
+            epub_path = _P(result[1]) if len(result) > 1 else _P(result[0])
+        else:
+            epub_path = _P(result)
+
+        if not epub_path.exists():
+            return "fail"
+
+        # epub → text（与 _read_epub 逻辑一致，不能跨进程调用实例方法）
+        try:
+            from ebooklib import epub as _epub
+            book = _epub.read_epub(str(epub_path), options={"ignore_ncx": True})
+            parts = []
+            for item in book.get_items():
+                html = None
+                if hasattr(item, "get_body_content"):
+                    try:
+                        html = item.get_body_content()
+                    except Exception:
+                        pass
+                if html is None and hasattr(item, "get_content") and hasattr(item, "media_type"):
+                    if item.media_type and "html" in item.media_type.lower():
+                        try:
+                            html = item.get_content()
+                        except Exception:
+                            pass
+                if html:
+                    if isinstance(html, bytes):
+                        html = html.decode("utf-8", errors="ignore")
+                    text = _re.sub(r"<[^>]+>", "", html)
+                    text = _re.sub(r"\s+", " ", text).strip()
+                    if text:
+                        parts.append(text)
+            content = "\n\n".join(parts) if parts else None
+        except Exception:
+            content = None
+
+        if content:
+            dest.write_text(content, encoding="utf-8")
+            return "ok"
+        return "fail"
+
+    except ImportError:
+        return "no_lib"
+    except Exception as e:
+        return f"err:{e}"
+    finally:
+        if tmpdir_path and tmpdir_path.exists():
+            if str(tmpdir_path).startswith(mobi_temp_str):
+                _sh.rmtree(tmpdir_path, ignore_errors=True)
+
+
 class CaseBuilder:
     """案例库构建器"""
 
@@ -1196,8 +1270,9 @@ python case_builder.py --sync
 
         SUPPORTED = {".txt", ".epub", ".mobi", ".pdf", ".docx"}
 
-        # 收集所有待转换文件
-        todo = []
+        # 收集所有待转换文件，mobi 单独分组
+        todo_other: List[Path] = []
+        todo_mobi: List[Path] = []
         for source_dir in dirs:
             if not source_dir.exists():
                 continue
@@ -1205,17 +1280,27 @@ python case_builder.py --sync
                 if fp.suffix.lower() not in SUPPORTED:
                     continue
                 dest = self.converted_dir / f"{fp.stem}.txt"
-                if not dest.exists():
-                    todo.append(fp)
+                if dest.exists():
+                    continue
+                if fp.suffix.lower() == ".mobi":
+                    todo_mobi.append(fp)
+                else:
+                    todo_other.append(fp)
 
         if limit > 0:
-            todo = todo[:limit]
+            # limit 按总量截断
+            all_todo = todo_other + todo_mobi
+            all_todo = all_todo[:limit]
+            todo_other = [f for f in all_todo if f.suffix.lower() != ".mobi"]
+            todo_mobi  = [f for f in all_todo if f.suffix.lower() == ".mobi"]
 
-        total = len(todo)
-        print(f"    待转换: {total} 本（workers={workers}）")
+        total = len(todo_other) + len(todo_mobi)
+        mobi_workers = max(1, min(workers, 4))
+        print(f"    待转换: {total} 本（非mobi {len(todo_other)} 本 workers={workers}，mobi {len(todo_mobi)} 本 workers={mobi_workers}）")
 
-        ok = fail = 0
+        ok = fail = done = 0
 
+        # ── 非 mobi：ThreadPoolExecutor（线程安全）──────────────────────
         def _do_one(fp: Path) -> str:
             dest = self.converted_dir / f"{fp.stem}.txt"
             if dest.exists():
@@ -1227,15 +1312,35 @@ python case_builder.py --sync
             return "fail"
 
         with ThreadPoolExecutor(max_workers=workers) as ex:
-            futs = {ex.submit(_do_one, fp): fp for fp in todo}
-            for i, fut in enumerate(as_completed(futs), 1):
+            futs = {ex.submit(_do_one, fp): fp for fp in todo_other}
+            for fut in as_completed(futs):
                 r = fut.result()
+                done += 1
                 if r == "ok":
                     ok += 1
                 elif r == "fail":
                     fail += 1
-                if i % 200 == 0:
-                    print(f"    进度: {i}/{total}，成功 {ok}，失败 {fail}")
+                if done % 200 == 0:
+                    print(f"    进度: {done}/{total}，成功 {ok}，失败 {fail}")
+
+        # ── mobi：ProcessPoolExecutor（每进程独立 tempfile.tempdir）────
+        if todo_mobi:
+            from concurrent.futures import ProcessPoolExecutor
+            mobi_temp_str = str(self.mobi_temp_dir)
+            tasks = [
+                (str(fp), str(self.converted_dir / f"{fp.stem}.txt"), mobi_temp_str)
+                for fp in todo_mobi
+            ]
+            with ProcessPoolExecutor(max_workers=mobi_workers) as ex:
+                for r in as_completed({ex.submit(_mobi_to_txt, t): t for t in tasks}):
+                    done += 1
+                    res = r.result()
+                    if res == "ok":
+                        ok += 1
+                    elif res.startswith("err") or res in ("fail", "no_lib"):
+                        fail += 1
+                    if done % 200 == 0:
+                        print(f"    进度: {done}/{total}，成功 {ok}，失败 {fail}")
 
         print(f"\n转换完成: {ok} 成功, {fail} 失败")
         return True
