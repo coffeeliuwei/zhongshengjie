@@ -64,7 +64,11 @@ def get_vectorstore_dir() -> Path:
 # 这些变量在模块加载时初始化，用于兼容现有的硬编码方式
 PROJECT_DIR = Path(__file__).resolve().parent.parent
 VECTORSTORE_DIR = PROJECT_DIR / ".vectorstore"
-CASE_LIBRARY_DIR = PROJECT_DIR / ".case-library"
+try:
+    from core.config_loader import get_case_library_dir as _gcld
+    CASE_LIBRARY_DIR = _gcld()
+except Exception:
+    CASE_LIBRARY_DIR = PROJECT_DIR / ".case-library"
 TECHNIQUES_DIR = PROJECT_DIR / "创作技法"
 SETTINGS_DIR = PROJECT_DIR / "设定"
 CHAPTERS_DIR = PROJECT_DIR / "章节大纲"

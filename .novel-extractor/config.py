@@ -39,8 +39,9 @@ NOVEL_SOURCE_DIR = Path(_novel_dirs[0]) if _novel_dirs else Path(r"E:\小说资�
 EXTRACTOR_DIR = PROJECT_DIR / ".novel-extractor"
 OUTPUT_DIR = Path(_cfg.get("extractor", {}).get("output_dir", r"E:\novel_extracted"))
 PROGRESS_DIR = EXTRACTOR_DIR / "progress"
-CONVERTED_DIR = PROJECT_DIR / ".case-library" / "converted"
-CASE_OUTPUT_DIR = PROJECT_DIR / ".case-library" / "cases"
+_case_library_dir = Path(_cfg.get("paths", {}).get("case_library_dir", r"E:\case-library"))
+CONVERTED_DIR = _case_library_dir / "converted"
+CASE_OUTPUT_DIR = _case_library_dir / "cases"
 
 # mobi 解压临时目录 —— 从 config.json 的 paths.mobi_temp_dir 读取
 # 默认 E:\tmp_mobi，不能放 C 盘（mobi 解压体积大会塞满系统盘）
