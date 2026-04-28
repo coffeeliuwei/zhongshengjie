@@ -2251,6 +2251,7 @@ def main():
         metavar="DIR",
         help="扫描小说资源目录（无参数则使用 config.json 中的 novel_sources）",
     )
+    parser.add_argument("--all", action="store_true", help="一键完整流程：convert → extract → sync（等价于分别执行三步）")
     parser.add_argument("--convert", action="store_true", help="转换小说格式")
     parser.add_argument("--extract", action="store_true", help="提取案例")
     parser.add_argument("--discover", action="store_true", help="自动发现新场景类型")
@@ -2295,6 +2296,20 @@ def main():
     # 执行命令
     if args.init:
         builder.init_structure()
+    elif args.all:
+        # 一键全流程：convert → extract → sync
+        print("=== 一键全流程：convert → extract → sync ===")
+        builder.convert_files(limit=args.limit, workers=args.workers)
+        builder.extract_cases(
+            limit=args.limit,
+            scene_types=args.scenes,
+            embed_batch=args.embed_batch,
+        )
+        builder.sync_to_vectorstore(
+            batch_size=args.batch_size,
+            embed_batch=args.embed_batch,
+            skip_existing=args.skip_existing,
+        )
     elif args.scan is not None:  # --scan 被指定（可能有参数也可能没有）
         # 支持有参数和无参数两种方式
         scan_dirs = [Path(d) for d in args.scan] if args.scan else None
