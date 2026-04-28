@@ -911,9 +911,63 @@ python case_builder.py --sync
                         failed_count += 1
 
                 elif suffix == ".mobi":
-                    # MOBI需要calibre
-                    print(f"    ⚠ MOBI格式需要安装calibre，跳过: {file_path.name}")
-                    failed_count += 1
+                    # MOBI → 用 mobi 库解包，读 mobi7/book.html（单文件，最简洁）
+                    # mobi.extract() 返回 (tmp_dir, _)
+                    _mobi_tmp = None
+                    try:
+                        import mobi as _mobi
+                        import shutil
+
+                        result = _mobi.extract(str(file_path))
+                        _mobi_tmp = result[0] if isinstance(result, tuple) else str(result)
+                        tmp_path = pathlib.Path(_mobi_tmp)
+
+                        book_html = tmp_path / "mobi7" / "book.html"
+                        if not book_html.exists():
+                            # 降级：拼接 mobi8/OEBPS/Text/*.xhtml
+                            xhtml_files = sorted(
+                                (tmp_path / "mobi8" / "OEBPS" / "Text").glob("*.xhtml")
+                            )
+                            raw = b"".join(f.read_bytes() for f in xhtml_files)
+                        else:
+                            raw = book_html.read_bytes()
+
+                        # 从 HTML 头部读取 charset 声明
+                        import re as _re
+                        charset_m = _re.search(
+                            rb'charset[=\s]*["\']?([a-zA-Z0-9_-]+)', raw[:4000]
+                        )
+                        enc = (
+                            charset_m.group(1).decode("ascii").lower()
+                            if charset_m
+                            else "utf-8"
+                        )
+                        if enc == "ansi":
+                            enc = "gbk"
+                        try:
+                            content = raw.decode(enc, errors="replace")
+                        except LookupError:
+                            content = raw.decode("utf-8", errors="replace")
+
+                        content = re.sub(r"<[^>]+>", "", content)
+                        content = re.sub(r"[ \t]+", " ", content).strip()
+
+                        dest = self.converted_dir / f"{file_path.stem}.txt"
+                        dest.write_text(content, encoding="utf-8")
+                        converted_count += 1
+
+                    except ImportError:
+                        print(f"    ⚠ MOBI转换缺少依赖（pip install mobi），跳过: {file_path.name}")
+                        failed_count += 1
+                    except Exception as e:
+                        print(f"    ⚠ MOBI转换失败，跳过: {file_path.name} ({e})")
+                        failed_count += 1
+                    finally:
+                        if _mobi_tmp:
+                            try:
+                                shutil.rmtree(_mobi_tmp, ignore_errors=True)
+                            except Exception:
+                                pass
 
         print(f"\n转换完成: {converted_count} 成功, {failed_count} 失败")
         return True
