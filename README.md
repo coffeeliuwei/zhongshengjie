@@ -67,7 +67,7 @@
 
 **👉 [实训指导书（学生版）](docs/实训指导书_学生版.md)**
 
-涵盖内容：Python / Docker / BGE-M3 / Qdrant / Claude Code / opencode 安装，数据库初始化，小说创建，章节写作，大纲/设定/技法/评估维度的对话补全方式，以及常见问题解答。
+涵盖内容：全程对话驱动，复制一段提示词给 opencode 即可完成安装；世界观建立、章节写作、大纲/设定/技法/评估；外部小说库批量提炼（两路并行，GPU 加速）；常见问题速查。
 
 ---
 
@@ -78,7 +78,7 @@
 
 ## 更新日志
 
-### v0.2.2 (开发中，master) - 案例库链路扩展 & 稳定性修复 & 灵感引擎修复
+### v0.2.2 (2026-04-28，master) - 案例库性能 & 稳定性 & 架构修复
 
 **案例库检索扩展**：
 - ✨ `search_case_quality_anchor()`：按 quality_score 倒序检索，写前提供高质量目标锚点
@@ -87,16 +87,33 @@
 - ✨ `ensure_own_chapters_collection()`：首次调用自动建 collection，无需手动初始化
 - ✨ `FileUpdater.write_scenes_to_case_library()`：阶段 8 触发，自动归档本章场景
 
+**case_builder 性能优化**：
+- ⚡ `convert_files` 多线程：非 mobi → `ThreadPoolExecutor(workers=8)`，mobi → `ProcessPoolExecutor(workers=4)`，转换速度提升约 4x
+- ⚡ `extract_cases` 批量 BGE-M3：Phase2 批量 encode（Q3 2n 条 + Q4 n 条各一次），不再逐候选调用
+- ✨ `--all` 一键全流程（convert → extract → sync），`--embed-batch` 控制 GPU 推理批次
+- ✨ `convert_failures.txt`：转换失败文件自动记录到 `E:/case-library/convert_failures.txt`
+
 **稳定性修复**：
 - 🔧 `extraction_runner.py`：Windows 下改用 `OpenProcess` 替代 `os.kill(pid, 0)`，修复进程存活检测崩溃
 - 🔧 `anti_template_constraints.json`：ANTI_046/051/052/053 的 constraint_text 中 ASCII 双引号改为「」，修复 JSON 解析失败
-- 📖 实训指导书步骤 6 新增 Docker 镜像加速配置说明（解决国内拉取 Qdrant 超时）
+- 🔧 `case_builder.py`：print 中 `⚠`（U+26A0）→ `[!]`，修复 PowerShell GBK 环境下 epub 读取失败时进程崩溃
+- 🔧 `checkpoint_manager.py`：`load_latest_checkpoint` 异常静默 → 打印文件名和错误信息
+- 🔧 `health_check.py`：`scene_writer_mapping` 检查路径从 `.vectorstore/` 修正为 `config/`
+- 🔧 `tests/test_vector_dimension.py`：`sync_to_qdrant.py` 路径修正为 `.novel-extractor/`
 
 **灵感引擎修复**：
 - 🔧 `stage5_5.py`：新增 `build_stage5_5_prompt_with_real_data()` — 修复鉴赏师 `as_menu()` 未接入导致的伪造0建议
 - 🔧 `novel-inspiration-ingest` SKILL：阶段2必读清单与势力列表改为从 `config.json → worldview/paths` 动态读取，删除众生界专属硬编码
+- 🔧 `checkpoint_manager`：`session_id` 直接传递，不再从 `workflow_id` 倒推
 
-**测试**：pytest 708 passed, 2 skipped, 0 failed（删除废弃 workflow 测试文件，+39 新测试覆盖11维度提炼引擎）
+**实训指导书 v0.3.0 重构**：
+- 📖 全程对话驱动，除插件安装外无需手动敲命令
+- 📖 新增第五步：外部小说库批量提炼（独立章节，随时可做）
+- 📖 修复安装提示词中 BGE-M3 下载命令（`sentence_transformers` → `FlagEmbedding`）
+- 📖 三档 embed-batch（笔记本独显/台式独显/CPU），含散热提示
+- 📖 Q&A 改为"告诉 AI 描述问题"导向，删除附录B手动安装步骤
+
+**测试**：pytest 684 passed, 2 skipped（修复1个路径错误测试）
 
 ---
 
