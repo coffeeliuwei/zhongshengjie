@@ -1188,13 +1188,14 @@ python case_builder.py --sync
             pass
 
         # CJK 比例不足 → 强制 gb18030 / utf-8
+        # 用前 50KB 采样判断 CJK 比例，再对全文用 errors='ignore' 容忍少量非法字节
         for enc in ("gb18030", "utf-8"):
             try:
-                text = raw.decode(enc)
-                ratio = self._cjk_ratio(text)
+                sample = raw[:50000].decode(enc, errors="ignore")
+                ratio = self._cjk_ratio(sample)
                 if ratio >= 0.10:
-                    return text, enc + "-forced", ratio
-            except (UnicodeDecodeError, LookupError):
+                    return raw.decode(enc, errors="ignore"), enc + "-forced", ratio
+            except LookupError:
                 continue
 
         # 兜底（不崩，但内容可能有乱码）
