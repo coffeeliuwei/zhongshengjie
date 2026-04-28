@@ -355,7 +355,8 @@ def _run_scene_discovery(novel_paths: List[Path]):
 
         for novel_path in novel_paths:
             try:
-                content = novel_path.read_text(encoding="utf-8", errors="ignore")
+                from base_extractor import BaseExtractor
+                content = BaseExtractor._read_txt_smart(novel_path) or ""
                 paragraphs = re.split(r"\n\s*\n", content)
                 paragraphs = [
                     p.strip() for p in paragraphs if 100 <= len(p.strip()) <= 5000

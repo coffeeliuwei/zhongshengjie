@@ -124,19 +124,46 @@ class BaseExtractor(ABC):
                     seen_stems.add(novel_path.stem)
                     yield novel_path
 
+    @staticmethod
+    def _read_txt_smart(path: Path) -> Optional[str]:
+        """txt 编码自动检测：charset-normalizer + CJK比例验证 → gb18030兜底"""
+        raw = path.read_bytes()
+        if raw.startswith(b"\xef\xbb\xbf"):
+            return raw[3:].decode("utf-8", errors="replace")
+        if raw[:2] in (b"\xff\xfe", b"\xfe\xff"):
+            return raw.decode("utf-16", errors="replace")
+
+        def _cjk_ratio(text: str) -> float:
+            s = text[:3000].replace(" ", "").replace("\n", "")
+            if not s:
+                return 0.0
+            return sum(1 for c in s if "一" <= c <= "鿿") / len(s)
+
+        try:
+            from charset_normalizer import from_bytes
+            result = from_bytes(raw).best()
+            if result:
+                text = str(result)
+                if _cjk_ratio(text) >= 0.15:
+                    return text
+        except Exception:
+            pass
+
+        for enc in ("gb18030", "utf-8"):
+            try:
+                text = raw.decode(enc)
+                if _cjk_ratio(text) >= 0.10:
+                    return text
+            except (UnicodeDecodeError, LookupError):
+                continue
+
+        return raw.decode("utf-8", errors="replace")
+
     def _read_novel(self, novel_path: Path) -> Optional[str]:
         """读取小说内容"""
         try:
             if novel_path.suffix == ".txt":
-                # 尝试多种编码
-                for encoding in ["utf-8", "gbk", "gb2312", "utf-16"]:
-                    try:
-                        with open(novel_path, "r", encoding=encoding) as f:
-                            content = f.read()
-                        return content
-                    except UnicodeDecodeError:
-                        continue
-                return None
+                return self._read_txt_smart(novel_path)
             elif novel_path.suffix == ".epub":
                 return self._read_epub(novel_path)
             elif novel_path.suffix == ".mobi":

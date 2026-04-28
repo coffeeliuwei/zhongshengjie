@@ -751,7 +751,13 @@ def main():
         total_unclassified = 0
         for txt_file in scan_dir.rglob("*.txt"):
             try:
-                content = txt_file.read_text(encoding="utf-8", errors="ignore")
+                raw = txt_file.read_bytes()
+                try:
+                    from charset_normalizer import from_bytes as _cn
+                    _r = _cn(raw).best()
+                    content = str(_r) if _r else raw.decode("gb18030", errors="replace")
+                except Exception:
+                    content = raw.decode("gb18030", errors="replace")
                 paragraphs = re.split(r"\n\s*\n", content)
                 paragraphs = [
                     p.strip() for p in paragraphs if 100 <= len(p.strip()) <= 5000
