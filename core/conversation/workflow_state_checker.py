@@ -224,42 +224,55 @@ class WorkflowStateChecker:
         return True
 
     def generate_resume_prompt(self, pending: WorkflowState) -> str:
-        """
-        生成恢复提示
+        """生成恢复提示，附加场景摘要上下文（如有）。"""
+        # 原有逻辑：构建基础提示
+        phase_name = ""
+        if pending.workflow_type in self.WORKFLOW_TYPES:
+            phase_names = self.WORKFLOW_TYPES[pending.workflow_type]["phase_names"]
+            if 0 <= pending.current_phase - 1 < len(phase_names):
+                phase_name = phase_names[pending.current_phase - 1]
 
-        Args:
-            pending: 待恢复的工作流状态
+        lines = [
+            f"## 检测到未完成的工作流",
+            f"",
+            f"- **章节**：第 {pending.chapter} 章" if pending.chapter else "",
+            f"- **当前阶段**：阶段 {pending.current_phase}（{phase_name}）",
+            f"- **总阶段数**：{pending.total_phases}",
+            f"- **可恢复**：{'是' if pending.can_resume else '否'}",
+        ]
 
-        Returns:
-            提示文本
-        """
-        if pending.workflow_type == "chapter_creation":
-            workflow_desc = f"创作第{pending.chapter}章"
-        elif pending.workflow_type == "data_extraction":
-            workflow_desc = "数据提炼"
-        else:
-            workflow_desc = pending.workflow_type
-
-        can_resume_text = "✅ 可以恢复" if pending.can_resume else "❌ 已过期"
-
-        prompt = f"""
-检测到未完成的工作流：
-  ├─ 类型：{workflow_desc}
-  ├─ 进度：{pending.current_phase}/{pending.total_phases} 阶段
-  ├─ 开始时间：{pending.started_at or "未知"}
-  ├─ 上次活动：{pending.last_activity or "未知"}
-  └─ 状态：{can_resume_text}
-
-是否继续？
-  1. 继续上次的工作流
-  2. 放弃并开始新的
-        """.strip()
-
-        # 如果有场景进度，添加详细信息
         if pending.scene_progress:
-            prompt += f"\n  ├─ 场景进度：{pending.scene_progress['current']}/{pending.scene_progress['total']}"
+            lines.append(
+                f"- **场景进度**：{pending.scene_progress.get('current', '?')}"
+                f"/{pending.scene_progress.get('total', '?')}"
+            )
 
-        return prompt
+        lines = [l for l in lines if l != ""]
+
+        # 新增：加载已完成场景摘要
+        if pending.chapter:
+            try:
+                from core.conversation.checkpoint_manager import CheckpointManager
+
+                # session_id 从 workflow_id 取前缀（格式：{session_id}_{timestamp}）
+                session_id = (
+                    pending.workflow_id.rsplit("_", 1)[0]
+                    if "_" in pending.workflow_id
+                    else pending.workflow_id
+                )
+                mgr = CheckpointManager(session_id, project_root=self.project_root)
+                scene_ctx = mgr.format_summaries_for_prompt(pending.chapter)
+                if scene_ctx:
+                    lines.append("")
+                    lines.append(scene_ctx)
+                resume_desc = mgr.get_resume_description(pending.chapter)
+                if resume_desc:
+                    lines.append("")
+                    lines.append(f"**断点详情**：{resume_desc}")
+            except Exception:
+                pass  # checkpoint 加载失败不影响主流程
+
+        return "\n".join(lines)
 
     def update_phase(
         self, session_id: str, phase: int, metadata: Optional[Dict[str, Any]] = None
