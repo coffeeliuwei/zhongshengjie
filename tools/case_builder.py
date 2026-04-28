@@ -33,7 +33,8 @@ import sys
 import time
 import tempfile
 import shutil
-from concurrent.futures import ThreadPoolExecutor, Future
+import threading
+from concurrent.futures import ThreadPoolExecutor, Future, as_completed
 from pathlib import Path
 from datetime import datetime
 from typing import Dict, List, Any, Optional, Set
@@ -787,6 +788,8 @@ class Case:
 class CaseBuilder:
     """案例库构建器"""
 
+    _mobi_lock = threading.Lock()  # tempfile.tempdir 是全局变量，mobi 解压需串行
+
     def __init__(self, case_library_dir: Path = None, config: Optional[Dict] = None):
         """
         初始化案例库构建器
@@ -1110,8 +1113,12 @@ python case_builder.py --sync
             return None
 
     def _read_mobi(self, path: Path) -> Optional[str]:
-        """mobi → epub 路径，安全 tempfile.tempdir 设置"""
+        """mobi → epub 路径，安全 tempfile.tempdir 设置（串行锁保证多线程安全）"""
         self.mobi_temp_dir.mkdir(parents=True, exist_ok=True)
+        with self._mobi_lock:
+            return self._read_mobi_locked(path)
+
+    def _read_mobi_locked(self, path: Path) -> Optional[str]:
         old_tempdir = tempfile.tempdir
         try:
             from mobi import extract
@@ -1168,13 +1175,17 @@ python case_builder.py --sync
             print(f"    ⚠ docx 读取失败 {path.name}: {e}")
             return None
 
-    def convert_files(self, source_dirs: Optional[List[Path]] = None, limit: int = 0):
-        """转换小说格式"""
+    def convert_files(
+        self,
+        source_dirs: Optional[List[Path]] = None,
+        limit: int = 0,
+        workers: int = 8,
+    ):
+        """转换小说格式（多线程 I/O 加速）"""
         print("\n" + "=" * 60)
         print("转换小说格式")
         print("=" * 60)
 
-        # 确定来源目录
         if source_dirs:
             dirs = source_dirs
         elif self.novel_sources:
@@ -1183,49 +1194,67 @@ python case_builder.py --sync
             print("    ✗ 未配置小说来源目录")
             return False
 
-        converted_count = 0
-        failed_count = 0
-
         SUPPORTED = {".txt", ".epub", ".mobi", ".pdf", ".docx"}
 
+        # 收集所有待转换文件
+        todo = []
         for source_dir in dirs:
             if not source_dir.exists():
                 continue
-
-            for file_path in source_dir.rglob("*"):
-                if limit > 0 and converted_count >= limit:
-                    break
-
-                if file_path.suffix.lower() not in SUPPORTED:
+            for fp in source_dir.rglob("*"):
+                if fp.suffix.lower() not in SUPPORTED:
                     continue
+                dest = self.converted_dir / f"{fp.stem}.txt"
+                if not dest.exists():
+                    todo.append(fp)
 
-                dest = self.converted_dir / f"{file_path.stem}.txt"
-                if dest.exists():
-                    continue  # 已转换，跳过
+        if limit > 0:
+            todo = todo[:limit]
 
-                content = self._read_novel(file_path)
-                if content:
-                    dest.write_text(content, encoding="utf-8")
-                    converted_count += 1
-                    if converted_count % 100 == 0:
-                        print(f"    已转换: {converted_count}")
-                else:
-                    failed_count += 1
+        total = len(todo)
+        print(f"    待转换: {total} 本（workers={workers}）")
 
-        print(f"\n转换完成: {converted_count} 成功, {failed_count} 失败")
+        ok = fail = 0
+
+        def _do_one(fp: Path) -> str:
+            dest = self.converted_dir / f"{fp.stem}.txt"
+            if dest.exists():
+                return "skip"
+            content = self._read_novel(fp)
+            if content:
+                dest.write_text(content, encoding="utf-8")
+                return "ok"
+            return "fail"
+
+        with ThreadPoolExecutor(max_workers=workers) as ex:
+            futs = {ex.submit(_do_one, fp): fp for fp in todo}
+            for i, fut in enumerate(as_completed(futs), 1):
+                r = fut.result()
+                if r == "ok":
+                    ok += 1
+                elif r == "fail":
+                    fail += 1
+                if i % 200 == 0:
+                    print(f"    进度: {i}/{total}，成功 {ok}，失败 {fail}")
+
+        print(f"\n转换完成: {ok} 成功, {fail} 失败")
         return True
 
-    def extract_cases(self, limit: int = 0, scene_types: Optional[List[str]] = None):
-        """提取案例"""
+    def extract_cases(
+        self,
+        limit: int = 0,
+        scene_types: Optional[List[str]] = None,
+        embed_batch: int = 128,
+    ):
+        """提取案例（Q3/Q4 批量推理，每本书只调两次 BGE-M3 而非逐候选调用）"""
         print("\n" + "=" * 60)
         print("提取案例")
         print("=" * 60)
 
-        # 确定场景类型
         target_scenes = scene_types or list(SCENE_TYPES.keys())
         print(f"    目标场景: {len(target_scenes)} 种")
 
-        # Q3/Q4：尝试加载 BGE-M3 用于边界验证和语义校验（可选）
+        # 加载 BGE-M3（可选，失败则跳过 Q3/Q4）
         _bge_model = None
         _scene_anchors = None
         try:
@@ -1234,41 +1263,33 @@ python case_builder.py --sync
 
             device = get_device()
             model_path = get_model_path()
-            if model_path:
-                _bge_model = BGEM3FlagModel(model_path, use_fp16=True, device=device)
-            else:
-                _bge_model = BGEM3FlagModel("BAAI/bge-m3", use_fp16=True, device=device)
+            _bge_model = BGEM3FlagModel(
+                model_path or "BAAI/bge-m3", use_fp16=True, device=device
+            )
             print("    [Q3] BGE-M3 已加载，启用场景边界验证")
-            # Q4：预计算场景类型锚向量
             _scene_anchors = self._build_scene_type_anchors(_bge_model)
             if _scene_anchors:
                 print(f"    [Q4] 场景类型锚向量已构建，启用 zero-shot 语义校验")
         except Exception as e:
             print(f"    [Q3/Q4] BGE-M3 加载失败，跳过边界验证和语义校验: {e}")
 
-        # 扫描已转换的文件
         novel_files = list(self.converted_dir.glob("*.txt"))
-
         if not novel_files:
-            print("    ✗ 未找到转换后的小说文件")
-            print("    请先运行: python case_builder.py --convert")
+            print("    ✗ 未找到转换后的小说文件，请先运行 --convert")
             return False
 
         print(f"    小说文件: {len(novel_files)} 本")
         print(f"    提取限制: {limit if limit > 0 else '无限制'} 条")
 
-        # 增量标记目录（与 base_extractor 对齐）
         progress_dir = self.converted_dir / ".extract_progress"
         progress_dir.mkdir(parents=True, exist_ok=True)
 
-        # 提取案例
         all_cases: List[Case] = []
 
         for i, novel_file in enumerate(novel_files):
             if limit > 0 and len(all_cases) >= limit:
                 break
 
-            # 增量跳过：已处理过的文件直接跳过
             novel_id = hashlib.md5(novel_file.stem.encode()).hexdigest()[:12]
             processed_marker = progress_dir / f".processed_{novel_id}"
             if processed_marker.exists():
@@ -1279,33 +1300,108 @@ python case_builder.py --sync
                 if not content:
                     continue
                 novel_name = novel_file.stem
-
-                # 检测题材
                 genre = self._detect_genre(content[:5000])
-
-                # 按段落分割
                 paragraphs = self._split_paragraphs(content)
 
-                # 按场景类型提取
+                # ── Phase 1: Q1/Q2 CPU 筛选，不调 BGE-M3 ──────────────
+                # 返回 (para_idx, scene_type, case)，供后续批量 Q3/Q4 使用
+                raw: List[tuple] = []
                 for scene_type in target_scenes:
-                    if limit > 0 and len(all_cases) >= limit:
+                    if limit > 0 and len(all_cases) + len(raw) >= limit:
                         break
-
                     scene_config = SCENE_TYPES.get(scene_type, {})
-                    cases = self._extract_scene_cases(
+                    for para_idx, case in self._extract_scene_cases(
                         paragraphs=paragraphs,
                         scene_type=scene_type,
                         scene_config=scene_config,
                         novel_name=novel_name,
                         genre=genre,
                         source_file=novel_file.name,
-                        bge_model=_bge_model,
-                        scene_anchors=_scene_anchors,
-                    )
+                        bge_model=None,          # Phase1: 不做语义验证
+                        scene_anchors=None,
+                        _return_indices=True,
+                    ):
+                        raw.append((para_idx, scene_type, case))
 
-                    all_cases.extend(cases)
+                if not raw:
+                    processed_marker.touch()
+                    continue
 
-                # 写增量标记，下次跳过
+                # ── Phase 2: 批量 BGE-M3（全书候选一次性推理）──────────
+                if _bge_model is not None:
+                    import numpy as np
+
+                    n = len(raw)
+                    # Q3：每个候选构造 [before_window, after_window] 共 2n 条
+                    q3_texts = []
+                    q3_do = []  # True=做 Q3，False=position 非 any 跳过
+                    for para_idx, scene_type, _ in raw:
+                        pos = SCENE_TYPES.get(scene_type, {}).get("position", "any")
+                        if pos == "any":
+                            before = " ".join(
+                                paragraphs[max(0, para_idx - self.embedding_window_size): para_idx]
+                            )
+                            after = " ".join(
+                                paragraphs[para_idx: para_idx + self.embedding_window_size]
+                            )
+                            q3_texts += [before, after]
+                            q3_do.append(True)
+                        else:
+                            q3_texts += ["", ""]
+                            q3_do.append(False)
+
+                    # Q4：每个候选的正文截断文本（n 条）
+                    q4_texts = [c.content[: self.embed_truncate_len] for _, _, c in raw]
+
+                    # 一次性编码 Q3（2n 条）
+                    q3_vecs = _bge_model.encode(
+                        q3_texts, batch_size=embed_batch, return_dense=True
+                    )["dense_vecs"]
+                    # 一次性编码 Q4（n 条）
+                    q4_vecs = _bge_model.encode(
+                        q4_texts, batch_size=embed_batch, return_dense=True
+                    )["dense_vecs"]
+
+                    for j, (para_idx, scene_type, case) in enumerate(raw):
+                        # Q3 过滤
+                        if q3_do[j]:
+                            a = np.array(q3_vecs[j * 2])
+                            b = np.array(q3_vecs[j * 2 + 1])
+                            if a.any() and b.any():
+                                sim = float(
+                                    np.dot(a, b)
+                                    / (np.linalg.norm(a) * np.linalg.norm(b) + 1e-9)
+                                )
+                                if (1.0 - sim) < self.boundary_delta_threshold:
+                                    continue  # 场景中段噪音，丢弃
+
+                        # Q4 语义校验
+                        if _scene_anchors is not None:
+                            vec = np.array(q4_vecs[j])
+                            corrected = self._semantic_verify_case(
+                                vec, scene_type, _scene_anchors
+                            )
+                            if corrected is None:
+                                continue
+                            if corrected != scene_type:
+                                case = Case(
+                                    case_id=case.case_id,
+                                    scene_type=corrected,
+                                    genre=case.genre,
+                                    novel_name=case.novel_name,
+                                    content=case.content,
+                                    word_count=case.word_count,
+                                    quality_score=case.quality_score,
+                                    emotion_value=case.emotion_value,
+                                    techniques=case.techniques,
+                                    keywords=case.keywords + [f"[语义修正自:{scene_type}]"],
+                                    source_file=case.source_file,
+                                )
+                        all_cases.append(case)
+                else:
+                    # 无 BGE-M3，直接取 Q1/Q2 结果
+                    all_cases.extend(c for _, _, c in raw)
+
                 processed_marker.touch()
 
                 if (i + 1) % 10 == 0:
@@ -1485,8 +1581,13 @@ python case_builder.py --sync
         source_file: str,
         bge_model=None,
         scene_anchors=None,
-    ) -> List[Case]:
-        """提取特定场景类型的案例（含 Q3/Q4 语义验证）"""
+        _return_indices: bool = False,
+    ):
+        """提取特定场景类型的案例（含 Q3/Q4 语义验证）。
+
+        _return_indices=True：跳过 Q3/Q4，返回 [(para_idx, Case), ...]，供批量推理用。
+        _return_indices=False（默认）：直接做 Q3/Q4，返回 [Case, ...]。
+        """
         cases = []
 
         keywords = scene_config.get("keywords", [])
@@ -1553,6 +1654,11 @@ python case_builder.py --sync
                 keywords=matched_keywords[:5],
                 source_file=source_file,
             )
+
+            # 批量推理模式：直接返回 (para_idx, case)，Q3/Q4 由调用方批量处理
+            if _return_indices:
+                cases.append((i, case))
+                continue
 
             # Q3：边界验证（有 BGE-M3 时才做，失败降级通过）
             if bge_model is not None and position == "any":
@@ -2157,6 +2263,7 @@ def main():
     # 参数
     parser.add_argument("--limit", type=int, default=0, help="处理数量限制")
     parser.add_argument("--scenes", nargs="+", help="指定场景类型")
+    parser.add_argument("--workers", type=int, default=8, help="--convert 并发线程数（I/O 密集，默认 8）")
     parser.add_argument("--batch-size", type=int, default=128, help="sync upsert 批次大小")
     parser.add_argument("--embed-batch", type=int, default=128, help="embedding 推理 batch size（GPU 建议 128）")
     parser.add_argument("--skip-existing", action="store_true", help="sync 时条数一致则跳过重建")
@@ -2193,9 +2300,13 @@ def main():
         scan_dirs = [Path(d) for d in args.scan] if args.scan else None
         builder.scan_sources(scan_dirs)
     elif args.convert:
-        builder.convert_files(limit=args.limit)
+        builder.convert_files(limit=args.limit, workers=args.workers)
     elif args.extract:
-        builder.extract_cases(limit=args.limit or 1000, scene_types=args.scenes)
+        builder.extract_cases(
+            limit=args.limit,
+            scene_types=args.scenes,
+            embed_batch=args.embed_batch,
+        )
     elif args.discover:
         builder.discover_new_scenes(
             limit=args.limit or 5000,
