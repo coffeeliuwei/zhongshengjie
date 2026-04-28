@@ -1299,27 +1299,33 @@ python case_builder.py --sync
         print(f"    待转换: {total} 本（非mobi {len(todo_other)} 本 workers={workers}，mobi {len(todo_mobi)} 本 workers={mobi_workers}）")
 
         ok = fail = done = 0
+        fail_log = self.case_library_dir / "convert_failures.txt"
+
+        def _log_fail(name: str, reason: str = ""):
+            with open(fail_log, "a", encoding="utf-8") as f:
+                f.write(f"{name}\t{reason}\n")
 
         # ── 非 mobi：ThreadPoolExecutor（线程安全）──────────────────────
-        def _do_one(fp: Path) -> str:
+        def _do_one(fp: Path) -> tuple:
             dest = self.converted_dir / f"{fp.stem}.txt"
             if dest.exists():
-                return "skip"
+                return "skip", fp.name, ""
             content = self._read_novel(fp)
             if content:
                 dest.write_text(content, encoding="utf-8")
-                return "ok"
-            return "fail"
+                return "ok", fp.name, ""
+            return "fail", fp.name, "内容为空或解析失败"
 
         with ThreadPoolExecutor(max_workers=workers) as ex:
             futs = {ex.submit(_do_one, fp): fp for fp in todo_other}
             for fut in as_completed(futs):
-                r = fut.result()
+                r, name, reason = fut.result()
                 done += 1
                 if r == "ok":
                     ok += 1
                 elif r == "fail":
                     fail += 1
+                    _log_fail(name, reason)
                 if done % 200 == 0:
                     print(f"    进度: {done}/{total}，成功 {ok}，失败 {fail}")
 
@@ -1327,18 +1333,22 @@ python case_builder.py --sync
         if todo_mobi:
             from concurrent.futures import ProcessPoolExecutor
             mobi_temp_str = str(self.mobi_temp_dir)
-            tasks = [
-                (str(fp), str(self.converted_dir / f"{fp.stem}.txt"), mobi_temp_str)
+            task_map = {
+                (str(fp), str(self.converted_dir / f"{fp.stem}.txt"), mobi_temp_str): fp
                 for fp in todo_mobi
-            ]
+            }
             with ProcessPoolExecutor(max_workers=mobi_workers) as ex:
-                for r in as_completed({ex.submit(_mobi_to_txt, t): t for t in tasks}):
+                futs = {ex.submit(_mobi_to_txt, t): t for t in task_map}
+                for fut in as_completed(futs):
+                    task = futs[fut]
+                    fp = task_map[task]
                     done += 1
-                    res = r.result()
+                    res = fut.result()
                     if res == "ok":
                         ok += 1
-                    elif res.startswith("err") or res in ("fail", "no_lib"):
+                    elif res != "skip":
                         fail += 1
+                        _log_fail(fp.name, res)  # res 含 "err:..." 或 "fail"/"no_lib"
                     if done % 200 == 0:
                         print(f"    进度: {done}/{total}，成功 {ok}，失败 {fail}")
 
