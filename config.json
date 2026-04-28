@@ -143,5 +143,51 @@
     "output_dir": "E:/novel_extracted",
     "_output_dir说明": "★必须有足够空间：提炼输出目录，11个维度全量提炼约占 20-55 GB。不要放 C 盘。如没有 E 盘，改为 D:/novel_extracted",
     "progress_dir": ".novel-extractor/progress"
+  },
+
+  "case_builder": {
+    "_说明": "场景案例提炼系统配置（tools/case_builder.py）",
+
+    "quality_score_base": 4.5,
+    "_quality_score_base说明": "质量分起始基准值（与 threshold 分离，允许有小瑕疵的好内容通过）",
+
+    "quality_score_min": 5.0,
+    "_quality_score_min说明": "质量分最低通过阈值，base + 正向加分 >= min 才入库",
+
+    "bigram_entropy_min": 5.0,
+    "_bigram_entropy_min说明": "Bigram 熵下限，低于此值扣分（模板化重复文本）",
+
+    "bigram_entropy_penalty": 1.5,
+    "_bigram_entropy_penalty说明": "Bigram 熵不足时的扣分值",
+
+    "content_max_len": 3000,
+    "_content_max_len说明": "案例存储的最大字符数（截断长度），与场景 max_len 保持一致",
+
+    "embed_truncate_len": 1000,
+    "_embed_truncate_len说明": "Q4 语义校验时段落截断长度（embedding 输入）",
+
+    "boundary_delta_threshold": 0.12,
+    "_boundary_delta_threshold说明": "Q3 Embedding Delta 余弦距离阈值，低于此值视为场景中段噪音",
+
+    "embedding_window_size": 3,
+    "_embedding_window_size说明": "Q3 边界检测滑动窗口段落数",
+
+    "semantic_min_similarity": 0.20,
+    "_semantic_min_similarity说明": "Q4 Zero-shot 语义最低相似度，低于此值丢弃案例",
+
+    "position_start_window": 5,
+    "_position_start_window说明": "开篇场景最大段落索引（前 N 段视为开篇）",
+
+    "position_end_window": 5,
+    "_position_end_window说明": "结尾场景从末尾算起的段落数（最后 N 段）",
+
+    "genre_detection_threshold": 3,
+    "_genre_detection_threshold说明": "题材检测最低命中次数，低于此值归为「未分类」",
+
+    "genre_sample_size": 5000,
+    "_genre_sample_size说明": "题材检测每个采样位置的字符数",
+
+    "minhash_threshold": 0.80,
+    "_minhash_threshold说明": "MinHash LSH 近重复过滤阈值（原 0.85 过松），降低可过滤更多相似内容"
   }
 }
