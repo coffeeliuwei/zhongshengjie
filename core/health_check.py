@@ -314,8 +314,8 @@ class HealthChecker:
         config_files = {
             "CONFIG.md": self.project_root / "CONFIG.md",
             "system_config.json": self.project_root / "system_config.json",
-            ".vectorstore/scene_writer_mapping.json": self.project_root
-            / ".vectorstore"
+            "config/scene_writer_mapping.json": self.project_root
+            / "config"
             / "scene_writer_mapping.json",
         }
 

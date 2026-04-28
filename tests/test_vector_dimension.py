@@ -16,8 +16,8 @@ def test_sync_manager_uses_1024_dimensions():
 
 
 def test_sync_to_qdrant_uses_1024_dimensions():
-    """.case-library/scripts/sync_to_qdrant.py 必须使用 1024 维"""
-    file_path = Path("D:/动画/众生界/.case-library/scripts/sync_to_qdrant.py")
+    """.novel-extractor/sync_to_qdrant.py 必须使用 1024 维"""
+    file_path = Path("D:/动画/众生界/.novel-extractor/sync_to_qdrant.py")
     content = file_path.read_text(encoding="utf-8")
 
     for line in content.splitlines():

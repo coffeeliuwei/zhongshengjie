@@ -1136,7 +1136,7 @@ python case_builder.py --sync
             elif suffix == ".docx":
                 return self._read_docx(novel_path)
         except Exception as e:
-            print(f"    ⚠ 读取失败 {novel_path.name}: {e}")
+            print(f"    [!] 读取失败 {novel_path.name}: {e}")
         return None
 
     def _read_txt(self, path: Path) -> Optional[str]:
@@ -1180,10 +1180,10 @@ python case_builder.py --sync
                         parts.append(text)
             return "\n\n".join(parts) if parts else None
         except ImportError:
-            print("    ⚠ 需要安装 ebooklib: pip install ebooklib")
+            print("    [!] 需要安装 ebooklib: pip install ebooklib")
             return None
         except Exception as e:
-            print(f"    ⚠ epub 读取失败 {path.name}: {e}")
+            print(f"    [!] epub 读取失败 {path.name}: {e}")
             return None
 
     def _read_mobi(self, path: Path) -> Optional[str]:
@@ -1212,10 +1212,10 @@ python case_builder.py --sync
                         shutil.rmtree(clean, ignore_errors=True)
             return None
         except ImportError:
-            print(f"    ⚠ 需要安装 mobi: pip install mobi")
+            print(f"    [!] 需要安装 mobi: pip install mobi")
             return None
         except Exception as e:
-            print(f"    ⚠ mobi 读取失败 {path.name}: {e}")
+            print(f"    [!] mobi 读取失败 {path.name}: {e}")
             return None
         finally:
             tempfile.tempdir = old_tempdir
@@ -1229,10 +1229,10 @@ python case_builder.py --sync
             content = "\n".join(l.strip() for l in content.splitlines() if l.strip())
             return content if content.strip() else None
         except ImportError:
-            print(f"    ⚠ pdfminer.six 未安装，跳过 PDF: {path.name}")
+            print(f"    [!] pdfminer.six 未安装，跳过 PDF: {path.name}")
             return None
         except Exception as e:
-            print(f"    ⚠ pdf 读取失败 {path.name}: {e}")
+            print(f"    [!] pdf 读取失败 {path.name}: {e}")
             return None
 
     def _read_docx(self, path: Path) -> Optional[str]:
@@ -1243,10 +1243,10 @@ python case_builder.py --sync
             parts = [p.text.strip() for p in doc.paragraphs if p.text.strip()]
             return "\n\n".join(parts) if parts else None
         except ImportError:
-            print(f"    ⚠ python-docx 未安装，跳过 DOCX: {path.name}")
+            print(f"    [!] python-docx 未安装，跳过 DOCX: {path.name}")
             return None
         except Exception as e:
-            print(f"    ⚠ docx 读取失败 {path.name}: {e}")
+            print(f"    [!] docx 读取失败 {path.name}: {e}")
             return None
 
     def convert_files(
