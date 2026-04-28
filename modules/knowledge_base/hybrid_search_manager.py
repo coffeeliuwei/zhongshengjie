@@ -876,6 +876,103 @@ class HybridSearchManager:
             print(f"人物关系检索错误: {e}")
             return []
 
+    def search_power_cost(
+        self,
+        query: str,
+        power_type: Optional[str] = None,
+        top_k: int = 10,
+    ) -> List[Dict[str, Any]]:
+        """检索力量代价描写"""
+        collection_name = COLLECTION_NAMES.get("power_cost")
+        if not collection_name:
+            return []
+
+        client = self._get_client()
+        collections = [c.name for c in client.get_collections().collections]
+        if collection_name not in collections:
+            return []
+
+        query_vectors = self._encode_query(query)
+
+        try:
+            results = client.query_points(
+                collection_name=collection_name,
+                query=query_vectors["dense"],
+                using="dense",
+                limit=top_k,
+                with_payload=True,
+            )
+
+            formatted = []
+            for p in results.points:
+                formatted.append(
+                    {
+                        "id": p.id,
+                        "text": p.payload.get("text", ""),
+                        "power_type": p.payload.get("power_type", ""),
+                        "cost_category": p.payload.get("cost_category", ""),
+                        "scene_context": p.payload.get("scene_context", ""),
+                        "score": p.score,
+                    }
+                )
+
+            if power_type:
+                formatted = [
+                    r for r in formatted if power_type in r.get("power_type", "")
+                ]
+
+            return formatted
+        except Exception as e:
+            print(f"力量代价检索错误: {e}")
+            return []
+
+    def search_author_style(
+        self,
+        query: str,
+        genre: Optional[str] = None,
+        top_k: int = 10,
+    ) -> List[Dict[str, Any]]:
+        """检索作者风格段落"""
+        collection_name = COLLECTION_NAMES.get("author_style")
+        if not collection_name:
+            return []
+
+        client = self._get_client()
+        collections = [c.name for c in client.get_collections().collections]
+        if collection_name not in collections:
+            return []
+
+        query_vectors = self._encode_query(query)
+
+        try:
+            results = client.query_points(
+                collection_name=collection_name,
+                query=query_vectors["dense"],
+                using="dense",
+                limit=top_k,
+                with_payload=True,
+            )
+
+            formatted = []
+            for p in results.points:
+                formatted.append(
+                    {
+                        "id": p.id,
+                        "text": p.payload.get("text", ""),
+                        "genre": p.payload.get("genre", ""),
+                        "style_label": p.payload.get("style_label", ""),
+                        "score": p.score,
+                    }
+                )
+
+            if genre:
+                formatted = [r for r in formatted if genre in r.get("genre", "")]
+
+            return formatted
+        except Exception as e:
+            print(f"作者风格检索错误: {e}")
+            return []
+
     def retrieve_for_scene(
         self,
         scene_type: str,
@@ -901,17 +998,23 @@ class HybridSearchManager:
 
         source_map = {
             # 原有8种场景（保持不变）
-            "战斗": ["technique", "case", "power_vocabulary"],
+            "战斗": ["technique", "case", "power_vocabulary", "power_cost"],
             "开篇": ["technique", "case", "worldview_element"],
             "情感": ["technique", "case", "emotion_arc"],
             "对话": ["technique", "case", "dialogue_style"],
             "悬念": ["technique", "case", "foreshadow_pair"],
             "转折": ["technique", "case"],
             "心理": ["technique", "case"],
-            "环境": ["technique", "case", "worldview_element"],
+            "环境": ["technique", "case", "worldview_element", "author_style"],
             # 新增20种场景（2026-04-13统一扩展）
             "打脸": ["technique", "case", "power_vocabulary"],
-            "高潮": ["technique", "case", "power_vocabulary", "emotion_arc"],
+            "高潮": [
+                "technique",
+                "case",
+                "power_vocabulary",
+                "emotion_arc",
+                "power_cost",
+            ],
             "人物出场": ["technique", "case", "novel"],
             "成长蜕变": ["technique", "case", "emotion_arc"],
             "伏笔设置": ["technique", "case", "foreshadow_pair"],
@@ -919,7 +1022,7 @@ class HybridSearchManager:
             "阴谋揭露": ["technique", "case", "foreshadow_pair"],
             "社交": ["technique", "case", "dialogue_style"],
             "势力登场": ["technique", "case", "worldview_element", "novel"],
-            "修炼突破": ["technique", "case", "power_vocabulary"],
+            "修炼突破": ["technique", "case", "power_vocabulary", "power_cost"],
             "资源获取": ["technique", "case", "power_vocabulary"],
             "探索发现": ["technique", "case", "worldview_element"],
             "情报揭示": ["technique", "case"],
@@ -927,9 +1030,9 @@ class HybridSearchManager:
             "冲突升级": ["technique", "case"],
             "团队组建": ["technique", "case"],
             "反派出场": ["technique", "case", "novel"],
-            "恢复休养": ["technique", "case"],
+            "恢复休养": ["technique", "case", "author_style"],
             "回忆场景": ["technique", "case"],
-            "结尾": ["technique", "case", "worldview_element"],
+            "结尾": ["technique", "case", "worldview_element", "author_style"],
         }
 
         sources = source_map.get(scene_type, ["technique", "case"])
@@ -958,6 +1061,10 @@ class HybridSearchManager:
                 )
             elif source == "novel":
                 results["novel"] = self.search_novel(query, top_k=top_k)
+            elif source == "power_cost":
+                results["power_cost"] = self.search_power_cost(query, top_k=top_k)
+            elif source == "author_style":
+                results["author_style"] = self.search_author_style(query, top_k=top_k)
 
         return results
 
