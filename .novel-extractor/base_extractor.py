@@ -151,10 +151,10 @@ class BaseExtractor(ABC):
 
         for enc in ("gb18030", "utf-8"):
             try:
-                text = raw.decode(enc)
-                if _cjk_ratio(text) >= 0.10:
-                    return text
-            except (UnicodeDecodeError, LookupError):
+                sample = raw[:50000].decode(enc, errors="ignore")
+                if _cjk_ratio(sample) >= 0.10:
+                    return raw.decode(enc, errors="ignore")
+            except LookupError:
                 continue
 
         return raw.decode("utf-8", errors="replace")
