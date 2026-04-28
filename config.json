@@ -131,7 +131,7 @@
 
   "clean_pipeline": {
     "_说明": "清洗流程配置",
-    "clean_dir": ".case-library/clean",
+    "clean_dir": "E:/case-library/clean",
     "use_gpu": true,
     "_use_gpu说明": "是否使用GPU加速嵌入生成",
     "validate_before_ingest": true,

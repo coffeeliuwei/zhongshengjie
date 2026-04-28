@@ -36,9 +36,14 @@ from tools.dedup_utils import (  # noqa: E402
 )
 
 
-DEFAULT_CASES_ROOT = Path(".case-library") / "cases"
-DEFAULT_ARCHIVE_ROOT = Path(".case-library") / "cases" / "_duplicates_archive"
-DEFAULT_INDEX_PATH = Path(".case-library") / "dedup_index.pkl"
+try:
+    from core.config_loader import get_case_library_dir as _gcld
+    _case_lib = _gcld()
+except Exception:
+    _case_lib = Path(".case-library")
+DEFAULT_CASES_ROOT = _case_lib / "cases"
+DEFAULT_ARCHIVE_ROOT = _case_lib / "cases" / "_duplicates_archive"
+DEFAULT_INDEX_PATH = _case_lib / "dedup_index.pkl"
 
 
 def _read_content(json_file: Path) -> str:
