@@ -1748,16 +1748,31 @@ python case_builder.py --sync
     def sync_to_vectorstore(
         self,
         batch_size: int = 128,
-        embed_batch: int = 128,
+        embed_batch: Optional[int] = None,
         skip_existing: bool = False,
     ):
         """同步案例到向量库（对齐路径二：HNSW禁用 + upsert重试 + embed/upsert流水线）"""
+        import os
         from qdrant_client import QdrantClient
         from qdrant_client.models import (
             PointStruct, VectorParams, Distance,
             SparseVectorParams, OptimizersConfigDiff,
         )
         from FlagEmbedding import BGEM3FlagModel
+
+        # embed_batch：CLI 传入 > config model.batch_size > 128
+        if embed_batch is None:
+            if HAS_CONFIG_LOADER:
+                from core.config_loader import get_batch_size
+                embed_batch = get_batch_size() or 128
+            else:
+                embed_batch = 128
+
+        # HF_HOME：对齐路径二，防止 HuggingFace 默认写 C 盘
+        hf_cache = self.config.get("model", {}).get("hf_cache_dir")
+        if hf_cache:
+            os.environ["HF_HOME"] = str(hf_cache)
+            os.environ["TRANSFORMERS_CACHE"] = str(hf_cache)
 
         print("\n" + "=" * 60)
         print("同步案例到向量库")
