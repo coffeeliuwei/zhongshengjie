@@ -189,5 +189,49 @@
 
     "minhash_threshold": 0.80,
     "_minhash_threshold说明": "MinHash LSH 近重复过滤阈值（原 0.85 过松），降低可过滤更多相似内容"
+  },
+
+  "writer_mapping": {
+    "_说明": "作家角色与专长场景类型映射，供 writer_memory_retriever.py 读取",
+    "剑尘": {
+      "primary_scenes": ["战斗", "高潮", "危机", "修炼突破"],
+      "memory_filter": {
+        "scene_types": ["战斗", "高潮", "危机"],
+        "weight": 1.5
+      },
+      "description": "战斗设计师，专长热血战斗、功法体系、冲突张力"
+    },
+    "墨言": {
+      "primary_scenes": ["人物", "情感", "心理", "成长"],
+      "memory_filter": {
+        "scene_types": ["人物", "情感", "心理"],
+        "weight": 1.2
+      },
+      "description": "人物刻画师，专长情感细腻、心理描写、人物成长"
+    },
+    "云溪": {
+      "primary_scenes": ["环境", "结尾", "开篇", "氛围"],
+      "memory_filter": {
+        "scene_types": ["环境", "氛围"],
+        "weight": 1.0
+      },
+      "description": "意境营造师，专长氛围描写、诗意语言、美学构建"
+    },
+    "玄一": {
+      "primary_scenes": ["悬念", "转折", "伏笔", "揭秘"],
+      "memory_filter": {
+        "scene_types": ["悬念", "转折"],
+        "weight": 1.3
+      },
+      "description": "剧情编织师，专长伏笔设计、悬念布局、反转策划"
+    },
+    "苍澜": {
+      "primary_scenes": ["开篇", "世界观", "势力", "传承"],
+      "memory_filter": {
+        "scene_types": ["世界观", "势力"],
+        "weight": 1.0
+      },
+      "description": "世界观架构师，专长宏大设定、权力体系、世界规则"
+    }
   }
 }

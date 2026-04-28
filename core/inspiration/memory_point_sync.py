@@ -199,6 +199,84 @@ class MemoryPointSync:
         )
         return points[:top_k]
 
+    def search_by_writer(
+        self,
+        embedding: List[float],
+        writer_agent: str,
+        scene_type: Optional[str] = None,
+        polarity: Optional[str] = None,
+        top_k: int = 5,
+    ) -> List[Dict[str, Any]]:
+        """按作家角色检索记忆点。
+
+        历史数据无 writer_agent 字段时自动回退到 search_similar()。
+        """
+        filter_conditions = [
+            FieldCondition(key="writer_agent", match=MatchValue(value=writer_agent))
+        ]
+        if scene_type:
+            filter_conditions.append(
+                FieldCondition(key="scene_type", match=MatchValue(value=scene_type))
+            )
+        if polarity:
+            filter_conditions.append(
+                FieldCondition(key="polarity", match=MatchValue(value=polarity))
+            )
+
+        flt = Filter(must=filter_conditions)
+        results = self.client.search(
+            collection_name=COLLECTION_NAME,
+            query_vector=embedding,
+            query_filter=flt,
+            limit=top_k,
+        )
+        hits = [{"id": r.id, "score": r.score, "payload": r.payload} for r in results]
+
+        # 历史数据无 writer_agent 字段时回退（不过滤 writer）
+        if not hits:
+            hits = self.search_similar(
+                embedding=embedding,
+                scene_type=scene_type,
+                polarity=polarity,
+                top_k=top_k,
+            )
+
+        return hits
+
+    def list_recent_by_writer(
+        self,
+        polarity: str,
+        writer_agent: str,
+        top_k: int = 5,
+    ) -> List[Dict[str, Any]]:
+        """按作家角色列出最近记忆点（created_at 降序）。
+
+        历史数据无 writer_agent 字段时回退到 list_recent()。
+        """
+        flt = Filter(
+            must=[
+                FieldCondition(key="polarity", match=MatchValue(value=polarity)),
+                FieldCondition(
+                    key="writer_agent", match=MatchValue(value=writer_agent)
+                ),
+            ]
+        )
+        results, _ = self.client.scroll(
+            collection_name=COLLECTION_NAME,
+            scroll_filter=flt,
+            limit=top_k * 3,
+            with_payload=True,
+        )
+        points = [{"id": str(p.id), "payload": p.payload} for p in results]
+        points.sort(key=lambda x: x["payload"].get("created_at", ""), reverse=True)
+        hits = points[:top_k]
+
+        # 历史数据无 writer_agent 字段时回退
+        if not hits:
+            hits = self.list_recent(polarity=polarity, top_k=top_k)
+
+        return hits
+
     def get_stats(self) -> Dict[str, Any]:
         """获取记忆点库统计"""
         total = self.count()
