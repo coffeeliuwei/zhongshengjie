@@ -40,6 +40,7 @@ from datetime import datetime
 from typing import Dict, List, Any, Optional, Set
 from dataclasses import dataclass, asdict
 
+
 # ──────────────────────────────────────────────────────────
 # 段落级内容质量过滤器
 # ──────────────────────────────────────────────────────────
@@ -197,6 +198,14 @@ _project_root = Path(__file__).resolve().parent.parent
 if str(_project_root) not in sys.path:
     sys.path.insert(0, str(_project_root))
 # [N15 2026-04-18] 删除 .vectorstore/core sys.path 注入（已归档）
+
+# fail-fast：dedup 依赖，启动时立即检测，避免跑几小时后才报缺包
+try:
+    from tools.dedup_utils import compute_minhash, load_lsh, save_lsh  # noqa: F401
+except ImportError as _e:
+    raise ImportError(
+        f"[!] 缺少依赖: {_e}\n    请先运行: pip install datasketch"
+    ) from _e
 
 # 尝试导入统一配置加载器
 try:
@@ -1139,14 +1148,63 @@ python case_builder.py --sync
             print(f"    [!] 读取失败 {novel_path.name}: {e}")
         return None
 
-    def _read_txt(self, path: Path) -> Optional[str]:
-        """txt 多编码回退：utf-8 → gbk → gb2312 → utf-16"""
-        for enc in ("utf-8", "gbk", "gb2312", "utf-16"):
+    @staticmethod
+    def _cjk_ratio(text: str, sample: int = 3000) -> float:
+        """CJK 字符在非空白字符中的占比（前 sample 字符采样）"""
+        s = text[:sample].replace(" ", "").replace("\n", "").replace("\r", "")
+        if not s:
+            return 0.0
+        cjk = sum(
+            1 for c in s
+            if "一" <= c <= "鿿" or "㐀" <= c <= "䶿"
+        )
+        return cjk / len(s)
+
+    def _read_txt_meta(self, path: Path) -> "tuple[str, str, float]":
+        """读取 txt，返回 (text, detected_enc, cjk_ratio)。
+        检测链：BOM → charset-normalizer + CJK验证 → gb18030强制 → utf-8兜底
+        """
+        raw = path.read_bytes()
+
+        def _wrap(text: str, enc: str) -> "tuple[str, str, float]":
+            return text, enc, self._cjk_ratio(text)
+
+        # BOM 快速路径
+        if raw.startswith(b"\xef\xbb\xbf"):
+            return _wrap(raw[3:].decode("utf-8", errors="replace"), "utf-8-bom")
+        if raw[:2] in (b"\xff\xfe", b"\xfe\xff"):
+            return _wrap(raw.decode("utf-16", errors="replace"), "utf-16")
+
+        # charset-normalizer 检测 + CJK 验证
+        try:
+            from charset_normalizer import from_bytes
+            result = from_bytes(raw).best()
+            if result:
+                text = str(result)
+                ratio = self._cjk_ratio(text)
+                if ratio >= 0.15:
+                    return text, result.encoding, ratio
+        except Exception:
+            pass
+
+        # CJK 比例不足 → 强制 gb18030 / utf-8
+        for enc in ("gb18030", "utf-8"):
             try:
-                return path.read_text(encoding=enc)
+                text = raw.decode(enc)
+                ratio = self._cjk_ratio(text)
+                if ratio >= 0.10:
+                    return text, enc + "-forced", ratio
             except (UnicodeDecodeError, LookupError):
                 continue
-        return None  # 所有编码均失败
+
+        # 兜底（不崩，但内容可能有乱码）
+        text = raw.decode("utf-8", errors="replace")
+        return text, "utf-8-replace", self._cjk_ratio(text)
+
+    def _read_txt(self, path: Path) -> Optional[str]:
+        """txt 编码自动检测，返回解码后文本（供 _read_novel 调用）"""
+        text, _, _ = self._read_txt_meta(path)
+        return text or None
 
     def _read_epub(self, path: Path) -> Optional[str]:
         """epub 双路径 HTML 检测（对齐 base_extractor）"""
@@ -1300,32 +1358,53 @@ python case_builder.py --sync
 
         ok = fail = done = 0
         fail_log = self.case_library_dir / "convert_failures.txt"
+        quality_log = self.case_library_dir / "convert_quality.tsv"
+        _quality_lock = threading.Lock()
+
+        # 写质量日志头（首次运行时）
+        if not quality_log.exists():
+            quality_log.write_text(
+                "file\tresult\tencoding\tcjk_ratio\treason\n", encoding="utf-8"
+            )
 
         def _log_fail(name: str, reason: str = ""):
             with open(fail_log, "a", encoding="utf-8") as f:
                 f.write(f"{name}\t{reason}\n")
 
+        def _log_quality(name: str, result: str, enc: str, ratio: float, reason: str = ""):
+            suspicious = "[!] " if ratio < 0.10 and result == "ok" else ""
+            with _quality_lock:
+                with open(quality_log, "a", encoding="utf-8") as f:
+                    f.write(f"{suspicious}{name}\t{result}\t{enc}\t{ratio:.3f}\t{reason}\n")
+
         # ── 非 mobi：ThreadPoolExecutor（线程安全）──────────────────────
         def _do_one(fp: Path) -> tuple:
             dest = self.converted_dir / f"{fp.stem}.txt"
             if dest.exists():
-                return "skip", fp.name, ""
-            content = self._read_novel(fp)
+                return "skip", fp.name, "", "", 0.0
+            enc = ""
+            ratio = 0.0
+            if fp.suffix.lower() == ".txt":
+                content, enc, ratio = self._read_txt_meta(fp)
+            else:
+                content = self._read_novel(fp)
             if content:
                 dest.write_text(content, encoding="utf-8")
-                return "ok", fp.name, ""
-            return "fail", fp.name, "内容为空或解析失败"
+                return "ok", fp.name, "", enc, ratio
+            return "fail", fp.name, "内容为空或解析失败", enc, ratio
 
         with ThreadPoolExecutor(max_workers=workers) as ex:
             futs = {ex.submit(_do_one, fp): fp for fp in todo_other}
             for fut in as_completed(futs):
-                r, name, reason = fut.result()
+                r, name, reason, enc, ratio = fut.result()
                 done += 1
                 if r == "ok":
                     ok += 1
+                    _log_quality(name, "ok", enc, ratio)
                 elif r == "fail":
                     fail += 1
                     _log_fail(name, reason)
+                    _log_quality(name, "fail", enc, ratio, reason)
                 if done % 200 == 0:
                     print(f"    进度: {done}/{total}，成功 {ok}，失败 {fail}")
 
@@ -1399,7 +1478,23 @@ python case_builder.py --sync
         progress_dir = self.converted_dir / ".extract_progress"
         progress_dir.mkdir(parents=True, exist_ok=True)
 
+        partial_path = self.case_library_dir / "extract_partial.jsonl"
         all_cases: List[Case] = []
+        if partial_path.exists():
+            print("    [恢复] 加载上次中断的部分结果...")
+            _loaded = 0
+            with partial_path.open("r", encoding="utf-8") as _f:
+                for _line in _f:
+                    _line = _line.strip()
+                    if _line:
+                        try:
+                            all_cases.append(Case(**json.loads(_line)))
+                            _loaded += 1
+                        except Exception:
+                            pass
+            print(f"    [恢复] 已加载 {_loaded} 条案例")
+        _cases_at_last_save = len(all_cases)
+        _novels_since_save = 0
 
         for i, novel_file in enumerate(novel_files):
             if limit > 0 and len(all_cases) >= limit:
@@ -1518,6 +1613,16 @@ python case_builder.py --sync
                     all_cases.extend(c for _, _, c in raw)
 
                 processed_marker.touch()
+                _novels_since_save += 1
+                if _novels_since_save >= 200:
+                    _new = all_cases[_cases_at_last_save:]
+                    if _new:
+                        with partial_path.open("a", encoding="utf-8") as _f:
+                            for _c in _new:
+                                _f.write(json.dumps(asdict(_c), ensure_ascii=False) + "\n")
+                        _cases_at_last_save = len(all_cases)
+                    _novels_since_save = 0
+                    print(f"    [断点保存] 累计 {len(all_cases)} 条，进度已保存")
 
                 if (i + 1) % 10 == 0:
                     print(
@@ -1528,6 +1633,13 @@ python case_builder.py --sync
                 print(f"    ✗ {novel_file.name}: {e}")
 
         print(f"\n提取完成: {len(all_cases)} 条案例")
+
+        # 刷写尚未保存的剩余案例
+        _remaining = all_cases[_cases_at_last_save:]
+        if _remaining:
+            with partial_path.open("a", encoding="utf-8") as _f:
+                for _c in _remaining:
+                    _f.write(json.dumps(asdict(_c), ensure_ascii=False) + "\n")
 
         # MinHash LSH 近重复过滤（跨运行持久化）
         all_cases, dedup_stats = self._filter_near_duplicates(all_cases)
@@ -1540,6 +1652,10 @@ python case_builder.py --sync
 
         # 更新索引
         self._update_index(all_cases)
+
+        # 全流程成功，清理断点文件
+        if partial_path.exists():
+            partial_path.unlink()
 
         return True
 
