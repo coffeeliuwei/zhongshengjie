@@ -30,6 +30,7 @@ class WorkflowState:
     workflow_type: str  # "chapter_creation", "data_extraction", "setting_update"
     current_phase: int
     total_phases: int
+    session_id: Optional[str] = None  # 由 check_pending_workflow 填入，供 checkpoint 查找
     chapter: Optional[int] = None
     scene_progress: Optional[Dict[str, int]] = None  # {"current": 1, "total": 5}
     started_at: Optional[str] = None
@@ -126,6 +127,7 @@ class WorkflowStateChecker:
                 workflow_type=data.get("workflow_type", ""),
                 current_phase=data.get("current_phase", 0),
                 total_phases=data.get("total_phases", 0),
+                session_id=session_id,
                 chapter=data.get("chapter"),
                 scene_progress=data.get("scene_progress"),
                 started_at=data.get("started_at"),
@@ -254,13 +256,8 @@ class WorkflowStateChecker:
             try:
                 from core.conversation.checkpoint_manager import CheckpointManager
 
-                # session_id 从 workflow_id 取前缀（格式：{session_id}_{timestamp}）
-                session_id = (
-                    pending.workflow_id.rsplit("_", 1)[0]
-                    if "_" in pending.workflow_id
-                    else pending.workflow_id
-                )
-                mgr = CheckpointManager(session_id, project_root=self.project_root)
+                sid = pending.session_id or "CURRENT_SESSION"
+                mgr = CheckpointManager(sid, project_root=self.project_root)
                 scene_ctx = mgr.format_summaries_for_prompt(pending.chapter)
                 if scene_ctx:
                     lines.append("")
@@ -269,8 +266,8 @@ class WorkflowStateChecker:
                 if resume_desc:
                     lines.append("")
                     lines.append(f"**断点详情**：{resume_desc}")
-            except Exception:
-                pass  # checkpoint 加载失败不影响主流程
+            except Exception as _cp_err:
+                print(f"[checkpoint] 加载失败（不影响主流程）: {_cp_err}")
 
         return "\n".join(lines)
 

@@ -48,7 +48,7 @@ class WorkflowCheckpoint:
 
     chapter: int
     phase: int  # 主阶段 0-8
-    phase_sub: Optional[str] = None  # 半步阶段，如 "5.5"（不用浮点）
+    phase_sub: Optional[str] = None  # 半步阶段，存小数部分字符串：阶段5.5 → phase=5, phase_sub="5"
     scene_index: int = 0
     scene_total: int = 0
     active_writer: Optional[str] = None
@@ -119,7 +119,8 @@ class CheckpointManager:
             try:
                 data = json.loads(f.read_text(encoding="utf-8"))
                 summaries.append(SceneSummary(**data))
-            except Exception:
+            except Exception as e:
+                print(f"[checkpoint] 跳过损坏文件 {f.name}: {e}")
                 continue
         summaries.sort(key=lambda s: s.scene_index)
         return summaries
