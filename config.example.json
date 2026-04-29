@@ -80,7 +80,7 @@
       "model_path": null,
       "_model_path说明": "留 null 自动下载；如果老师提供了离线模型，填写模型文件夹路径，如 D:/models/bge-m3",
       "vector_size": 1024,
-      "batch_size": 20
+      "batch_size": 64
     },
     "llm": {
       "name": "default",
@@ -92,7 +92,7 @@
     "hf_cache_dir": "D:/huggingface_cache",
     "_hf_cache_dir说明": "HuggingFace 模型缓存目录，约 3 GB，不要放 C 盘",
     "vector_size": 1024,
-    "batch_size": 20
+    "batch_size": 64
   },
 
   "retrieval": {
