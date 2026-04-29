@@ -2,9 +2,12 @@
 # -*- coding: utf-8 -*-
 """检索质量交叉验证工具"""
 
+import argparse
+import json
 import math
 import sys
 import yaml
+from datetime import datetime
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
@@ -23,6 +26,8 @@ def ndcg_at_5(scores: list[int]) -> float:
 
 def precision_at_5(scores: list[int]) -> float:
     """Precision@5，得分 >= 1 视为相关"""
+    if not scores:
+        return 0.0
     return round(sum(1 for s in scores if s >= 1) / len(scores), 4)
 
 
@@ -143,13 +148,7 @@ class CollectionValidator:
         }
 
 
-import argparse
-import json
-import os
-from datetime import datetime
-
-
-_STATUS_EMOJI = {
+_STATUS_LABEL = {
     "empty":   "❌ 空集合",
     "missing": "❌ 不存在",
 }
@@ -157,7 +156,7 @@ _STATUS_EMOJI = {
 
 def _collection_status_emoji(result: dict) -> str:
     if result["status"] != "ok":
-        return _STATUS_EMOJI.get(result["status"], "❌")
+        return _STATUS_LABEL.get(result["status"], "❌")
     ndcg = result.get("avg_ndcg5")
     if ndcg is None:
         return "—"
@@ -208,8 +207,8 @@ def write_markdown_report(all_results: list[dict], judge_name: str) -> Path:
         dist_str = "/".join(
             f"{int(dist.get(k, 0) * 100)}%" for k in ("0", "1", "2")
         ) if dist else "—"
-        emoji = _collection_status_emoji(r)
-        lines.append(f"| {name} | {pts} | {ndcg} | {prec} | {dist_str} | {emoji} |")
+        label = _collection_status_emoji(r)
+        lines.append(f"| {name} | {pts} | {ndcg} | {prec} | {dist_str} | {label} |")
 
     lines += [
         "",
@@ -273,10 +272,10 @@ def main():
         print(f"\n[{i}/{len(target_collections)}] {col}", end="  ", flush=True)
         result = validator.validate_collection(col)
         all_results.append(result)
-        status = _collection_status_emoji(result)
+        label = _collection_status_emoji(result)
         pts = result["point_count"]
         ndcg = f"nDCG={result['avg_ndcg5']:.3f}" if result["avg_ndcg5"] is not None else "nDCG=—"
-        print(f"({pts:,} 点)  {ndcg}  {status}")
+        print(f"({pts:,} 点)  {ndcg}  {label}")
 
     json_path = write_json_report(all_results, judge_name, qdrant_url)
     md_path = write_markdown_report(all_results, judge_name)
