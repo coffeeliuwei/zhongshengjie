@@ -127,6 +127,17 @@ def test_claude_judge_returns_score():
     assert result == 1
 
 
+def test_claude_judge_retries_on_exception():
+    with patch("anthropic.Anthropic") as mock_cls:
+        mock_client = MagicMock()
+        mock_cls.return_value = mock_client
+        mock_client.messages.create.side_effect = Exception("API Error")
+        judge = ClaudeJudge(api_key="sk-ant-test", model="claude-haiku-4-5-20251001")
+        result = judge.score("查询", "结果文本", "case_library_v2")
+    assert result is None
+    assert mock_client.messages.create.call_count == 3  # 重试 2 次
+
+
 def test_make_judge_openai():
     with patch("openai.OpenAI"):
         judge = make_judge("openai", api_key="sk-test", model="gpt-4o")
