@@ -35,8 +35,7 @@ from pathlib import Path
 from datetime import datetime
 from typing import Dict, List, Any, Optional, Set
 from dataclasses import dataclass, asdict, field
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from threading import Lock
+from concurrent.futures import ProcessPoolExecutor, as_completed
 import traceback
 
 # 添加项目路径
@@ -127,6 +126,73 @@ DIMENSION_PRIORITY = {
     "worldview_element": 5,
 }
 
+_EXTRACTORS_MAP = {
+    "case": ("extractors.case_extractor", "CaseExtractor"),
+    "dialogue_style": ("extractors.dialogue_style_extractor", "DialogueStyleExtractor"),
+    "power_cost": ("extractors.power_cost_extractor", "PowerCostExtractor"),
+    "character_relation": ("extractors.character_relation_extractor", "CharacterRelationExtractor"),
+    "emotion_arc": ("extractors.emotion_arc_extractor", "EmotionArcExtractor"),
+    "power_vocabulary": ("extractors.vocabulary_extractor", "VocabularyExtractor"),
+    "chapter_structure": ("extractors.chapter_structure_extractor", "ChapterStructureExtractor"),
+    "author_style": ("extractors.author_style_extractor", "AuthorStyleExtractor"),
+    "foreshadow_pair": ("extractors.foreshadow_pair_extractor", "ForeshadowPairExtractor"),
+    "worldview_element": ("extractors.worldview_element_extractor", "WorldviewElementExtractor"),
+    "technique": ("extractors.technique_extractor", "TechniqueExtractor"),
+}
+
+if HAS_UNIFIED_CONFIG:
+    assert set(_EXTRACTORS_MAP.keys()) == set(EXTRACTION_DIMENSIONS.keys()), (
+        f"_EXTRACTORS_MAP 与 EXTRACTION_DIMENSIONS 不同步！"
+        f"\n  仅在 _EXTRACTORS_MAP: {set(_EXTRACTORS_MAP.keys()) - set(EXTRACTION_DIMENSIONS.keys())}"
+        f"\n  仅在 EXTRACTION_DIMENSIONS: {set(EXTRACTION_DIMENSIONS.keys()) - set(_EXTRACTORS_MAP.keys())}"
+    )
+
+
+def _dimension_worker(
+    dimension_id: str,
+    force: bool,
+    limit,
+) -> dict:
+    """ProcessPoolExecutor 工作函数，在独立子进程中运行单个维度提炼"""
+    # 防御性路径设置：spawn 子进程重新 import 此模块时已执行模块级 sys.path，
+    # 但若 config_loader 在子进程中初始化失败，路径可能缺失，显式补充以保险。
+    _extractor_dir = PROJECT_ROOT / ".novel-extractor"
+    if str(_extractor_dir) not in sys.path:
+        sys.path.insert(0, str(_extractor_dir))
+
+    if dimension_id not in _EXTRACTORS_MAP:
+        return {"status": "failed", "error": f"未知维度: {dimension_id}"}
+
+    module_name, class_name = _EXTRACTORS_MAP[dimension_id]
+    try:
+        module = __import__(module_name, fromlist=[class_name])
+        extractor = getattr(module, class_name)()
+    except Exception as e:
+        return {"status": "skipped", "error": f"无法创建提取器 {dimension_id}: {e}"}
+
+    if force:
+        if HAS_UNIFIED_CONFIG:
+            progress_path = get_progress_path(dimension_id)
+            if progress_path.exists():
+                progress_path.unlink()
+        else:
+            print(f"[WARN] _dimension_worker: HAS_UNIFIED_CONFIG=False，无法清除 {dimension_id} 进度文件")
+
+    try:
+        result = extractor.run(limit=limit, resume=not force)
+        return {
+            "status": "completed",
+            "dimension_id": dimension_id,
+            "items_extracted": result.get("items_extracted", 0),
+            "novels_processed": result.get("novels_processed", 0),
+        }
+    except Exception as e:
+        return {
+            "status": "failed",
+            "error": str(e),
+            "dimension_id": dimension_id,
+        }
+
 
 # ==================== 数据类定义 ====================
 
@@ -202,7 +268,6 @@ class UnifiedExtractor:
             )
 
         self.progress = self._load_progress()
-        self._lock = Lock()
 
         # 初始化子模块
         self._init_submodules()
@@ -270,45 +335,10 @@ class UnifiedExtractor:
 
     def _create_extractor(self, dimension_id: str):
         """创建提取器实例"""
-        extractors_map = {
-            "case": ("extractors.case_extractor", "CaseExtractor"),
-            "dialogue_style": (
-                "extractors.dialogue_style_extractor",
-                "DialogueStyleExtractor",
-            ),
-            "power_cost": ("extractors.power_cost_extractor", "PowerCostExtractor"),
-            "character_relation": (
-                "extractors.character_relation_extractor",
-                "CharacterRelationExtractor",
-            ),
-            "emotion_arc": ("extractors.emotion_arc_extractor", "EmotionArcExtractor"),
-            "power_vocabulary": (
-                "extractors.vocabulary_extractor",
-                "VocabularyExtractor",
-            ),
-            "chapter_structure": (
-                "extractors.chapter_structure_extractor",
-                "ChapterStructureExtractor",
-            ),
-            "author_style": (
-                "extractors.author_style_extractor",
-                "AuthorStyleExtractor",
-            ),
-            "foreshadow_pair": (
-                "extractors.foreshadow_pair_extractor",
-                "ForeshadowPairExtractor",
-            ),
-            "worldview_element": (
-                "extractors.worldview_element_extractor",
-                "WorldviewElementExtractor",
-            ),
-            "technique": ("extractors.technique_extractor", "TechniqueExtractor"),
-        }
-
-        if dimension_id not in extractors_map:
+        if dimension_id not in _EXTRACTORS_MAP:
             return None
 
-        module_name, class_name = extractors_map[dimension_id]
+        module_name, class_name = _EXTRACTORS_MAP[dimension_id]
         try:
             module = __import__(module_name, fromlist=[class_name])
             return getattr(module, class_name)()
@@ -379,7 +409,7 @@ class UnifiedExtractor:
         self._save_progress()
 
         # 3. 并行提取
-        print(f"\n[3/4] 并行提取 - 启动 {workers} 个工作线程...")
+        print(f"\n[3/4] 并行提取 - 启动 {workers} 个工作进程...")
         extraction_results = self._run_parallel_extraction(
             dimensions_to_run,
             workers=workers,
@@ -434,59 +464,46 @@ class UnifiedExtractor:
             dimensions, key=lambda d: DIMENSION_PRIORITY.get(d, 99)
         )
 
-        # 创建线程池
-        with ThreadPoolExecutor(max_workers=workers) as executor:
-            # 提交任务
+        # 创建进程池（绕过 GIL，真正并行 CPU 密集型提炼任务）
+        with ProcessPoolExecutor(max_workers=workers) as executor:
             future_to_dim = {}
             for dim_id in sorted_dimensions:
-                # 更新任务状态
-                with self._lock:
-                    if dim_id in self.progress.dimensions:
-                        self.progress.dimensions[dim_id].status = "running"
-                        self.progress.dimensions[
-                            dim_id
-                        ].start_time = datetime.now().isoformat()
+                if dim_id in self.progress.dimensions:
+                    self.progress.dimensions[dim_id].status = "running"
+                    self.progress.dimensions[dim_id].start_time = datetime.now().isoformat()
 
-                # 提交提取任务
-                future = executor.submit(
-                    self.extract_dimension,
-                    dim_id,
-                    force=force,
-                    limit=limit,
-                )
+                future = executor.submit(_dimension_worker, dim_id, force, limit)
                 future_to_dim[future] = dim_id
 
-            # 收集结果（每个维度最多等待 3600 秒，防止卡死挂起整个流程）
             _DIM_TIMEOUT = 3600
-            for future in as_completed(future_to_dim, timeout=_DIM_TIMEOUT * len(future_to_dim)):
+            try:
+              pending_futures = as_completed(future_to_dim, timeout=_DIM_TIMEOUT * len(future_to_dim))
+            except TimeoutError:
+              pending_futures = []
+              for future, dim_id in future_to_dim.items():
+                  if not future.done():
+                      future.cancel()
+                      results[dim_id] = {"status": "timeout", "error": "全局超时"}
+                      if dim_id in self.progress.dimensions:
+                          self.progress.dimensions[dim_id].status = "timeout"
+                          self.progress.dimensions[dim_id].error = "全局超时"
+                          self.progress.dimensions[dim_id].end_time = datetime.now().isoformat()
+              self._save_progress()
+              print("[ERROR] 全局超时，已取消所有未完成维度")
+            for future in pending_futures:
                 dim_id = future_to_dim[future]
                 try:
                     result = future.result(timeout=_DIM_TIMEOUT)
                     results[dim_id] = result
 
-                    # 更新进度
-                    with self._lock:
-                        if dim_id in self.progress.dimensions:
-                            self.progress.dimensions[dim_id].status = result.get(
-                                "status", "completed"
-                            )
-                            self.progress.dimensions[
-                                dim_id
-                            ].end_time = datetime.now().isoformat()
-                            self.progress.dimensions[
-                                dim_id
-                            ].items_extracted = result.get("items_extracted", 0)
-                            self.progress.dimensions[
-                                dim_id
-                            ].novels_processed = result.get("novels_processed", 0)
-                            if result.get("error"):
-                                self.progress.dimensions[dim_id].error = result.get(
-                                    "error"
-                                )
-
-                        self.progress.total_items_extracted += result.get(
-                            "items_extracted", 0
-                        )
+                    if dim_id in self.progress.dimensions:
+                        self.progress.dimensions[dim_id].status = result.get("status", "completed")
+                        self.progress.dimensions[dim_id].end_time = datetime.now().isoformat()
+                        self.progress.dimensions[dim_id].items_extracted = result.get("items_extracted", 0)
+                        self.progress.dimensions[dim_id].novels_processed = result.get("novels_processed", 0)
+                        if result.get("error"):
+                            self.progress.dimensions[dim_id].error = result.get("error")
+                    self.progress.total_items_extracted += result.get("items_extracted", 0)
 
                     self._save_progress()
                     print(f"  [完成] {dim_id}: {result.get('items_extracted', 0)} 条")
@@ -494,27 +511,19 @@ class UnifiedExtractor:
                 except TimeoutError:
                     error_msg = f"提取超时（>{_DIM_TIMEOUT}s），已跳过"
                     results[dim_id] = {"status": "timeout", "error": error_msg}
-                    with self._lock:
-                        if dim_id in self.progress.dimensions:
-                            self.progress.dimensions[dim_id].status = "timeout"
-                            self.progress.dimensions[dim_id].error = error_msg
-                            self.progress.dimensions[dim_id].end_time = datetime.now().isoformat()
+                    if dim_id in self.progress.dimensions:
+                        self.progress.dimensions[dim_id].status = "timeout"
+                        self.progress.dimensions[dim_id].error = error_msg
+                        self.progress.dimensions[dim_id].end_time = datetime.now().isoformat()
                     self._save_progress()
                     print(f"  [超时] {dim_id}: {error_msg}")
                 except Exception as e:
                     error_msg = str(e)
-                    results[dim_id] = {
-                        "status": "failed",
-                        "error": error_msg,
-                    }
-
-                    with self._lock:
-                        if dim_id in self.progress.dimensions:
-                            self.progress.dimensions[dim_id].status = "failed"
-                            self.progress.dimensions[dim_id].error = error_msg
-                            self.progress.dimensions[
-                                dim_id
-                            ].end_time = datetime.now().isoformat()
+                    results[dim_id] = {"status": "failed", "error": error_msg}
+                    if dim_id in self.progress.dimensions:
+                        self.progress.dimensions[dim_id].status = "failed"
+                        self.progress.dimensions[dim_id].error = error_msg
+                        self.progress.dimensions[dim_id].end_time = datetime.now().isoformat()
                     self._save_progress()
                     print(f"  [失败] {dim_id}: {error_msg}")
 
@@ -843,7 +852,7 @@ def main():
         "--dimensions", type=str, help="只提炼特定维度（逗号分隔，如: case,technique）"
     )
     parser.add_argument(
-        "--workers", type=int, default=4, help="并行工作线程数（默认4）"
+        "--workers", type=int, default=8, help="并行工作进程数（默认8）"
     )
     parser.add_argument(
         "--limit", type=int, help="每个维度处理的小说数量限制（用于测试）"
