@@ -41,10 +41,6 @@ def make_judge(provider: str, **kwargs) -> BaseJudge:
         return SkipJudge()
     if provider == "manual":
         return ManualJudge()
-    if provider == "openai":
-        return OpenAIJudge(**kwargs)
-    if provider == "claude":
-        return ClaudeJudge(**kwargs)
-    if provider == "compatible":
-        return OpenAICompatibleJudge(**kwargs)
+    if provider in ("openai", "claude", "compatible"):
+        raise NotImplementedError(f"judge provider {provider!r} 将在 Task 3 中实现，请追加 LLM judge 类后再使用")
     raise ValueError(f"未知 judge provider: {provider!r}，支持: skip/manual/openai/claude/compatible")
