@@ -15,4 +15,4 @@ def ndcg_at_5(scores: list[int]) -> float:
 
 def precision_at_5(scores: list[int]) -> float:
     """Precision@5，得分 >= 1 视为相关"""
-    return round(sum(1 for s in scores if s >= 1) / 5, 4)
+    return round(sum(1 for s in scores if s >= 1) / len(scores), 4)
