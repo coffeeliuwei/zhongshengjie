@@ -583,4 +583,29 @@ class SyncManager:
                     "status": "not_created",
                 }
 
+
+if __name__ == "__main__":
+    import argparse
+
+    parser = argparse.ArgumentParser(description="同步数据到 Qdrant 向量库")
+    parser.add_argument(
+        "--target",
+        choices=["novel", "technique", "case", "all"],
+        required=True,
+        help="同步目标: novel(设定) / technique(技法) / case(案例) / all(全部)",
+    )
+    parser.add_argument("--rebuild", action="store_true", help="先删除集合再全量重建")
+    args = parser.parse_args()
+
+    sm = SyncManager()
+    if args.target in ("novel", "all"):
+        n = sm.sync_novel_settings(rebuild=args.rebuild)
+        print(f"[novel] 同步完成: {n} 条")
+    if args.target in ("technique", "all"):
+        n = sm.sync_techniques(rebuild=args.rebuild)
+        print(f"[technique] 同步完成: {n} 条")
+    if args.target in ("case", "all"):
+        sm.sync_cases(rebuild=args.rebuild)
+        print("[case] 同步完成（委托 case_builder --sync）")
+
         return status
