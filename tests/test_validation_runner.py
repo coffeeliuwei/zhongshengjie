@@ -20,7 +20,9 @@ def _make_mock_qdrant(point_count: int, results: list):
         hit.score = score
         hit.payload = {"content": text, "scene_type": "战斗"}
         mock_hits.append(hit)
-    client.search.return_value = mock_hits
+    query_resp = MagicMock()
+    query_resp.points = mock_hits
+    client.query_points.return_value = query_resp
     return client
 
 
