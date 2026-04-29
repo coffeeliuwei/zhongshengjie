@@ -40,6 +40,11 @@ from datetime import datetime
 from typing import Dict, List, Any, Optional, Set
 from dataclasses import dataclass, asdict
 
+# Windows GBK 控制台无法输出 ✓/✗ 等 Unicode 符号，保持 GBK 编码但替换无法编码的字符
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(errors="replace")
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(errors="replace")
 
 # ──────────────────────────────────────────────────────────
 # 段落级内容质量过滤器
