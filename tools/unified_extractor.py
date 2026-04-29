@@ -456,11 +456,12 @@ class UnifiedExtractor:
                 )
                 future_to_dim[future] = dim_id
 
-            # 收集结果
-            for future in as_completed(future_to_dim):
+            # 收集结果（每个维度最多等待 3600 秒，防止卡死挂起整个流程）
+            _DIM_TIMEOUT = 3600
+            for future in as_completed(future_to_dim, timeout=_DIM_TIMEOUT * len(future_to_dim)):
                 dim_id = future_to_dim[future]
                 try:
-                    result = future.result()
+                    result = future.result(timeout=_DIM_TIMEOUT)
                     results[dim_id] = result
 
                     # 更新进度
@@ -490,6 +491,16 @@ class UnifiedExtractor:
                     self._save_progress()
                     print(f"  [完成] {dim_id}: {result.get('items_extracted', 0)} 条")
 
+                except TimeoutError:
+                    error_msg = f"提取超时（>{_DIM_TIMEOUT}s），已跳过"
+                    results[dim_id] = {"status": "timeout", "error": error_msg}
+                    with self._lock:
+                        if dim_id in self.progress.dimensions:
+                            self.progress.dimensions[dim_id].status = "timeout"
+                            self.progress.dimensions[dim_id].error = error_msg
+                            self.progress.dimensions[dim_id].end_time = datetime.now().isoformat()
+                    self._save_progress()
+                    print(f"  [超时] {dim_id}: {error_msg}")
                 except Exception as e:
                     error_msg = str(e)
                     results[dim_id] = {

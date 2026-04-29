@@ -279,17 +279,18 @@ class IntentRouter:
                 message="请告诉我要从哪个文件提炼技法（如：正文/第一章.md）",
                 needs_clarification=True,
             )
-        extractor = TechniqueExtractor()
-        candidates = extractor.extract_from_file(file_path)
+        candidates = self._technique_extractor.extract_from_file(file_path)
         if not candidates:
             return RoutingResult(
                 success=True, message=f"在 {file_path} 中未发现可提炼的技法候选。"
             )
+        # 将第一个候选存入共享实例，供后续 confirm_technique 使用
+        self._technique_extractor.pending_technique = candidates[0]
         lines = [f"从 {file_path} 提炼到 {len(candidates)} 个技法候选："]
         for c in candidates[:5]:
             c_str = str(c)[:60] if hasattr(c, "__str__") else c.name[:60]
             lines.append(f"  - {c_str}...")
-        lines.append('\n回复"确认第N个"逐一入库。')
+        lines.append('\n回复"确认"将第一个候选入库，或"确认第N个"指定。')
         return RoutingResult(
             success=True,
             message="\n".join(lines),
@@ -363,16 +364,13 @@ class IntentRouter:
                 message="请告诉我要扫描哪个文件（如：正文/第一章.md）",
                 needs_clarification=True,
             )
-        extractor = EvaluationCriteriaExtractor()
-        candidates = (
-            extractor.discover_from_file(file_path)
-            if hasattr(extractor, "discover_from_file")
-            else []
-        )
+        candidates = self._eval_criteria_extractor.discover_from_file(file_path)
         if not candidates:
             return RoutingResult(
                 success=True, message=f"在 {file_path} 中未发现可疑表达。"
             )
+        # 将第一个候选存入共享实例，供后续 confirm_evaluation_criteria 使用
+        self._eval_criteria_extractor.pending_criteria = candidates[0]
         lines = [f"从 {file_path} 发现 {len(candidates)} 个潜在禁止项："]
         for i, c in enumerate(candidates[:5], 1):
             c_str = str(c)[:80] if hasattr(c, "__str__") else c.name[:80]

@@ -234,7 +234,14 @@ class FileUpdater:
 
             try:
                 from core.config_loader import get_device
-                model = BGEM3FlagModel(model_path, use_fp16=True, device=get_device(verbose=False))
+                try:
+                    model = BGEM3FlagModel(model_path, use_fp16=True, device=get_device(verbose=False))
+                except RuntimeError as oom_err:
+                    if "CUDA out of memory" in str(oom_err) or "out of memory" in str(oom_err).lower():
+                        print(f"[WARN] GPU 显存不足，降级 CPU 重试: {oom_err}")
+                        model = BGEM3FlagModel(model_path, use_fp16=False, device="cpu")
+                    else:
+                        raise
 
                 # 生成嵌入向量
                 embedding = model.encode(
@@ -855,8 +862,8 @@ class FileUpdater:
         try:
             with open(log_file, "a", encoding="utf-8") as f:
                 f.write(json.dumps(entry, ensure_ascii=False) + "\n")
-        except Exception:
-            pass
+        except OSError as e:
+            print(f"[WARN] 向量库日志写入失败 ({log_file.name}): {e}")
 
     # ===== 案例库回流：阶段8触发 =====
 

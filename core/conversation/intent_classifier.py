@@ -612,7 +612,12 @@ class IntentClassifier:
 
     def __init__(self):
         """初始化意图分类器（[M4] 从 config/intent_patterns.json 加载 patterns）"""
-        core, extended = self._load_patterns_from_json()
+        try:
+            core, extended = self._load_patterns_from_json()
+        except (FileNotFoundError, ValueError, KeyError) as e:
+            print(f"[WARN] intent_patterns.json 加载失败，降级使用内置 patterns: {e}")
+            core = self.CORE_INTENTS
+            extended = self.EXTENDED_INTENTS
         self._all_intents = {**core, **extended}
         # 类属性 CORE_INTENTS/EXTENDED_INTENTS 暂保留供向后兼容（如有外部代码读取）
         # 预编译正则表达式
@@ -621,6 +626,8 @@ class IntentClassifier:
 
     def _compile_patterns(self):
         """预编译所有正则表达式"""
+        import warnings
+        failed = []
         for intent_name, intent_config in self._all_intents.items():
             patterns = []
             for pattern_str in intent_config["patterns"]:
@@ -628,10 +635,14 @@ class IntentClassifier:
                     compiled = re.compile(pattern_str, re.IGNORECASE)
                     patterns.append((compiled, intent_config["entities"]))
                 except re.error as e:
-                    print(
-                        f"Warning: Invalid pattern for {intent_name}: {pattern_str} - {e}"
-                    )
+                    failed.append(f"{intent_name}: {pattern_str!r} → {e}")
             self._compiled_patterns[intent_name] = patterns
+        if failed:
+            warnings.warn(
+                f"intent_classifier: {len(failed)} 个正则编译失败，对应意图将无法匹配:\n"
+                + "\n".join(f"  {f}" for f in failed),
+                stacklevel=2,
+            )
 
     def classify(self, user_input: str) -> IntentResult:
         """
