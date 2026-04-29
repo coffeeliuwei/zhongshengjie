@@ -89,8 +89,9 @@ class EvaluationCriteriaExtractor:
             confidence=confidence,
         )
 
-        # 保存待确认
-        self.pending_criteria = candidate
+        # 置信度过低时不保存待确认，避免引导用户确认低质量候选
+        if confidence >= 0.6:
+            self.pending_criteria = candidate
 
         return candidate
 
@@ -154,9 +155,11 @@ class EvaluationCriteriaExtractor:
         except UnicodeDecodeError:
             try:
                 return path.read_text(encoding="gbk")
-            except:
+            except (UnicodeDecodeError, OSError) as e:
+                print(f"[WARN] 无法读取文件 {path.name}: {e}")
                 return ""
-        except:
+        except (OSError, IOError) as e:
+            print(f"[WARN] 读取文件失败 {path.name}: {e}")
             return ""
 
     def _scan_for_fake_expressions(self, content: str) -> List[ProhibitionCandidate]:

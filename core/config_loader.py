@@ -730,10 +730,10 @@ def ensure_all_dirs() -> list:
         try:
             d.mkdir(parents=True, exist_ok=True)
             created.append(d)
-        except PermissionError:
-            pass  # E 盘不存在时跳过，不崩溃
-        except Exception:
-            pass
+        except PermissionError as e:
+            print(f"[WARN] 目录创建权限不足，跳过: {d}  ({e})")
+        except OSError as e:
+            print(f"[WARN] 目录创建失败，跳过: {d}  ({e})")
 
     return created
 

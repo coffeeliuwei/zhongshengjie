@@ -170,6 +170,22 @@ class ConversationDataExtractor:
             data=structured_data,
         )
 
+    @staticmethod
+    def _sanitize_entities(entities: Dict[str, str]) -> Dict[str, str]:
+        """清洗实体值：截断超长字符串、去除控制字符"""
+        sanitized = {}
+        for key, value in entities.items():
+            if not isinstance(value, str):
+                continue
+            value = value.strip()
+            # 去除 NUL 字节及其他控制字符（保留换行/制表）
+            value = "".join(c for c in value if c >= " " or c in "\t\n")
+            # 单字段超过 500 字截断，防止污染 Markdown 文件
+            if len(value) > 500:
+                value = value[:500]
+            sanitized[key] = value
+        return sanitized
+
     def _extract_structured_data(
         self, intent: str, entities: Dict[str, str]
     ) -> Optional[Dict[str, Any]]:
@@ -183,6 +199,8 @@ class ConversationDataExtractor:
         Returns:
             结构化数据字典
         """
+        entities = self._sanitize_entities(entities)
+
         # 根据不同意图类型构建不同的数据结构
         data_builders = {
             "add_character": self._build_character_data,
