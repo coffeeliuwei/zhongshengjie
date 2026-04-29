@@ -69,6 +69,13 @@ class CollectionValidator:
                     "point_count": 0, "avg_ndcg5": None, "precision5": None,
                     "avg_qdrant_score": None, "score_distribution": None, "queries": []}
 
+        # 检测向量名：有名向量取第一个，无名向量不传 using
+        vectors_config = info.config.params.vectors
+        if isinstance(vectors_config, dict):
+            vector_name = "dense" if "dense" in vectors_config else next(iter(vectors_config))
+        else:
+            vector_name = None  # 无名向量
+
         col_config = self._queries.get(collection_name, {})
         query_texts = col_config.get("queries", [])
         query_results = []
@@ -77,11 +84,15 @@ class CollectionValidator:
 
         for query_text in query_texts:
             vector = embed_query(query_text)
-            hits = self._client.search(
+            query_kwargs = dict(
                 collection_name=collection_name,
-                query_vector=vector,
+                query=vector,
                 limit=5,
             )
+            if vector_name is not None:
+                query_kwargs["using"] = vector_name
+            resp = self._client.query_points(**query_kwargs)
+            hits = resp.points
             result_items = []
             judge_scores = []
             for rank, hit in enumerate(hits[:5]):
