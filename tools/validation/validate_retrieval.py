@@ -130,3 +130,147 @@ class CollectionValidator:
             "score_distribution": {str(k): round(v / total, 3) for k, v in dist.items()},
             "queries": query_results,
         }
+
+
+import argparse
+import json
+import os
+from datetime import datetime
+
+
+_STATUS_EMOJI = {
+    "empty":   "❌ 空集合",
+    "missing": "❌ 不存在",
+}
+
+
+def _collection_status_emoji(result: dict) -> str:
+    if result["status"] != "ok":
+        return _STATUS_EMOJI.get(result["status"], "❌")
+    ndcg = result.get("avg_ndcg5")
+    if ndcg is None:
+        return "—"
+    if ndcg >= 0.6:
+        return "✅"
+    if ndcg >= 0.4:
+        return "⚠️"
+    return "❌"
+
+
+def write_json_report(all_results: list[dict], judge_name: str, qdrant_url: str) -> Path:
+    logs_dir = PROJECT_ROOT / "logs"
+    logs_dir.mkdir(exist_ok=True)
+    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+    path = logs_dir / f"retrieval_validation_{ts}.json"
+    report = {
+        "meta": {
+            "date": datetime.now().isoformat(),
+            "judge": judge_name,
+            "qdrant_url": qdrant_url,
+        },
+        "collections": {r["collection"]: r for r in all_results},
+    }
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(report, f, ensure_ascii=False, indent=2)
+    return path
+
+
+def write_markdown_report(all_results: list[dict], judge_name: str) -> Path:
+    logs_dir = PROJECT_ROOT / "logs"
+    logs_dir.mkdir(exist_ok=True)
+    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+    path = logs_dir / f"retrieval_validation_{ts}.md"
+
+    lines = [
+        "# 检索质量验证报告",
+        f"日期：{datetime.now().strftime('%Y-%m-%d %H:%M')}  Judge：{judge_name}",
+        "",
+        "| Collection | 点数 | avg nDCG@5 | Precision@5 | 分布(0/1/2) | 状态 |",
+        "|------------|------|-----------|-------------|------------|------|",
+    ]
+    for r in all_results:
+        name = r["collection"]
+        pts = f"{r['point_count']:,}" if r["point_count"] else "0"
+        ndcg = f"{r['avg_ndcg5']:.3f}" if r["avg_ndcg5"] is not None else "—"
+        prec = f"{r['precision5']:.3f}" if r["precision5"] is not None else "—"
+        dist = r.get("score_distribution") or {}
+        dist_str = "/".join(
+            f"{int(dist.get(k, 0) * 100)}%" for k in ("0", "1", "2")
+        ) if dist else "—"
+        emoji = _collection_status_emoji(r)
+        lines.append(f"| {name} | {pts} | {ndcg} | {prec} | {dist_str} | {emoji} |")
+
+    lines += [
+        "",
+        "## 阈值说明",
+        "- ✅ nDCG@5 ≥ 0.6",
+        "- ⚠️ nDCG@5 ∈ [0.4, 0.6)",
+        "- ❌ nDCG@5 < 0.4 或集合为空/不存在",
+    ]
+
+    with open(path, "w", encoding="utf-8") as f:
+        f.write("\n".join(lines))
+    return path
+
+
+def main():
+    parser = argparse.ArgumentParser(description="众生界检索质量交叉验证")
+    parser.add_argument("--judge", default="skip",
+                        choices=["skip", "manual", "openai", "claude", "compatible"],
+                        help="LLM judge 类型（默认 skip）")
+    parser.add_argument("--judge-model", default=None, help="模型名")
+    parser.add_argument("--judge-api-key", default=None, help="API Key")
+    parser.add_argument("--judge-base-url", default=None, help="兼容接口 base_url")
+    parser.add_argument("--queries", default=None, help="自定义查询 YAML 文件路径")
+    parser.add_argument("--collections", default=None,
+                        help="逗号分隔的 collection 名，不填则验证全部")
+    args = parser.parse_args()
+
+    from qdrant_client import QdrantClient
+    from core.config_loader import get_qdrant_url
+    from tools.validation.judge import make_judge
+
+    qdrant_url = get_qdrant_url()
+    print(f"连接 Qdrant: {qdrant_url}")
+    client = QdrantClient(url=qdrant_url, timeout=10)
+
+    judge_kwargs = {}
+    if args.judge_model:
+        judge_kwargs["model"] = args.judge_model
+    if args.judge_api_key:
+        judge_kwargs["api_key"] = args.judge_api_key
+    if args.judge_base_url:
+        judge_kwargs["base_url"] = args.judge_base_url
+    judge = make_judge(args.judge, **judge_kwargs)
+    judge_name = args.judge if not args.judge_model else f"{args.judge}/{args.judge_model}"
+
+    queries = load_queries(args.queries)
+
+    if args.collections:
+        target_collections = [c.strip() for c in args.collections.split(",")]
+    else:
+        target_collections = list(queries.keys())
+
+    validator = CollectionValidator(
+        qdrant_client=client,
+        judge=judge,
+        queries=queries,
+    )
+
+    all_results = []
+    for i, col in enumerate(target_collections, 1):
+        print(f"\n[{i}/{len(target_collections)}] {col}", end="  ", flush=True)
+        result = validator.validate_collection(col)
+        all_results.append(result)
+        status = _collection_status_emoji(result)
+        pts = result["point_count"]
+        ndcg = f"nDCG={result['avg_ndcg5']:.3f}" if result["avg_ndcg5"] is not None else "nDCG=—"
+        print(f"({pts:,} 点)  {ndcg}  {status}")
+
+    json_path = write_json_report(all_results, judge_name, qdrant_url)
+    md_path = write_markdown_report(all_results, judge_name)
+    print(f"\n报告已保存：\n  {json_path}\n  {md_path}")
+
+
+if __name__ == "__main__":
+    main()
