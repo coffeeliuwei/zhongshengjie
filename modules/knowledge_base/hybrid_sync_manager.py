@@ -620,6 +620,154 @@ class HybridSyncManager:
         print(f"  ✅ 已同步 {total_synced} 条案例")
         return total_synced
 
+    def sync_technique_json(
+        self,
+        json_path: Optional[str] = None,
+        rebuild: bool = True,
+    ) -> int:
+        """
+        直接从 technique_all.json 同步 138,968 条批量提炼技法到 writing_techniques_v2。
+
+        JSON 字段：technique_name, dimension, description, keywords,
+                   example_count, examples, source_novels, _novel_id
+
+        Args:
+            json_path: technique_all.json 路径，None 时从 config.json 自动推断
+            rebuild:   是否重建 Collection（默认 True）
+        """
+        print("\n" + "=" * 60)
+        print("[同步批量技法 JSON] BGE-M3 混合检索模式")
+        print("=" * 60)
+
+        # 解析 JSON 路径
+        if json_path is None:
+            try:
+                cfg_file = Path(get_project_root()) / "config.json"
+                with open(cfg_file, "r", encoding="utf-8") as _f:
+                    _cfg = json.load(_f)
+                output_dir = _cfg.get("extractor", {}).get(
+                    "output_dir", "E:/novel_extracted"
+                )
+            except Exception:
+                output_dir = "E:/novel_extracted"
+            resolved_path = Path(output_dir) / "technique" / "technique_all.json"
+        else:
+            resolved_path = Path(json_path)
+
+        if not resolved_path.exists():
+            print(f"  [错误] 文件不存在: {resolved_path}")
+            return 0
+
+        # 读取 JSON
+        print(f"  读取: {resolved_path}")
+        with open(resolved_path, "r", encoding="utf-8") as f:
+            raw_data = json.load(f)
+        print(f"  原始条数: {len(raw_data):,}")
+
+        # 过滤：description 不为空，长度 >= 20
+        valid_data = [
+            t
+            for t in raw_data
+            if t.get("description") and len(t.get("description", "")) >= 20
+        ]
+        print(f"  有效条数（description >= 20字）: {len(valid_data):,}")
+
+        if not valid_data:
+            return 0
+
+        # 创建 Collection（重建）
+        collection_name = COLLECTION_NAMES["writing_techniques"]
+        if rebuild:
+            client = self._get_client()
+            existing = [c.name for c in client.get_collections().collections]
+            if collection_name in existing:
+                client.delete_collection(collection_name)
+                print(f"  [删除] 旧 collection: {collection_name}")
+        if not self._create_hybrid_collection(collection_name):
+            return 0
+
+        # 分批处理（138k 条，每批 1000）
+        batch_size = 1000
+        total_synced = 0
+
+        for batch_start in range(0, len(valid_data), batch_size):
+            batch = valid_data[batch_start : batch_start + batch_size]
+
+            # 组合嵌入文本：技法名 + 描述 + 第一条示例（截断）
+            texts = []
+            for t in batch:
+                parts = [t["technique_name"]]
+                if t.get("description"):
+                    parts.append(t["description"])
+                if t.get("examples") and t["examples"]:
+                    parts.append("示例：" + str(t["examples"][0])[:300])
+                texts.append("\n".join(parts)[:500])
+
+            batch_num = batch_start // batch_size + 1
+            total_batches = (len(valid_data) + batch_size - 1) // batch_size
+            print(f"\n  批次 {batch_num}/{total_batches}（{len(texts)} 条）")
+
+            embeddings = self._encode_batch(texts)
+
+            # 构建 Points（payload 与 sync_techniques 保持一致）
+            points = []
+            for i, tech in enumerate(batch):
+                idx = batch_start + i
+                dense_vec = embeddings["dense_vecs"][i].tolist()
+                sparse_dict = embeddings["lexical_weights"][i]
+                colbert_vecs = embeddings["colbert_vecs"][i]
+
+                sparse_indices = list(sparse_dict.keys())
+                sparse_values = list(sparse_dict.values())
+
+                if isinstance(colbert_vecs, list):
+                    colbert_list = [
+                        v.tolist() if hasattr(v, "tolist") else v for v in colbert_vecs
+                    ]
+                else:
+                    colbert_list = (
+                        colbert_vecs.tolist()
+                        if hasattr(colbert_vecs, "tolist")
+                        else colbert_vecs
+                    )
+
+                dimension = tech.get("dimension", "未知")
+                writer = self.WRITER_MAP.get(dimension, "未知")
+                source_novels = tech.get("source_novels", [])
+                source_file = (
+                    source_novels[0] if source_novels else tech.get("_novel_id", "")
+                )
+                full_content = texts[i]
+
+                point = PointStruct(
+                    id=idx,
+                    vector={
+                        "dense": dense_vec,
+                        "colbert": colbert_list,
+                        "sparse": SparseVector(
+                            indices=sparse_indices, values=sparse_values
+                        ),
+                    },
+                    payload={
+                        "name": tech["technique_name"],
+                        "dimension": dimension,
+                        "writer": writer,
+                        "source_file": str(source_file),
+                        "source_title": tech["technique_name"],
+                        "content": full_content,
+                        "word_count": len(full_content),
+                        "keywords": tech.get("keywords", []),
+                        "occurrence_count": tech.get("occurrence_count", 0),
+                    },
+                )
+                points.append(point)
+
+            self._upload_points(collection_name, points)
+            total_synced += len(points)
+
+        print(f"\n  ✅ 已同步 {total_synced:,} 条批量提炼技法")
+        return total_synced
+
     def _upload_points(self, collection_name: str, points: List[PointStruct]):
         """批量上传 Points"""
         client = self._get_client()
@@ -712,11 +860,16 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="BGE-M3 混合同步管理器")
     parser.add_argument(
         "--sync",
-        choices=["novel", "technique", "case", "all"],
+        choices=["novel", "technique", "case", "all", "technique-json"],
         default="all",
-        help="同步目标",
+        help="同步目标（technique-json: 直接从 technique_all.json 同步）",
     )
     parser.add_argument("--rebuild", action="store_true", help="重建 Collection")
+    parser.add_argument(
+        "--json-path",
+        default=None,
+        help="technique_all.json 路径（仅 --sync technique-json 时使用，默认从 config.json 自动推断）",
+    )
 
     args = parser.parse_args()
 
@@ -730,3 +883,5 @@ if __name__ == "__main__":
         sync.sync_techniques(rebuild=args.rebuild)
     elif args.sync == "case":
         sync.sync_cases(rebuild=args.rebuild)
+    elif args.sync == "technique-json":
+        sync.sync_technique_json(json_path=args.json_path, rebuild=args.rebuild)
