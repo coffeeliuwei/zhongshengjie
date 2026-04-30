@@ -336,131 +336,22 @@ class SyncManager:
         """
         同步创作技法
 
-        Args:
-            rebuild: 是否重建数据库
+        ⚠️ 已停用：writing_techniques_v2 使用 BGE-M3 混合向量（dense+sparse+colbert），
+        本方法创建的是无名单向量集合，与 HybridSearchManager.search_technique() 不兼容。
+
+        请改用：
+            python -m modules.knowledge_base.hybrid_sync_manager --sync technique --rebuild
 
         Returns:
-            同步数量
+            0（始终跳过）
         """
-        print("\n[同步创作技法]")
-
-        client = self._get_client()
-        model = self._load_model()
-
-        if not self.techniques_dir.exists():
-            print(f"  [错误] 技法目录不存在: {self.techniques_dir}")
-            return 0
-
-        # 收集所有MD文件
-        skip_files = [
-            "README.md",
-            "01-创作检查清单.md",
-            "00-学习路径规划.md",
-            "创作技法速查表.md",
-        ]
-        md_files = [
-            f for f in self.techniques_dir.rglob("*.md") if f.name not in skip_files
-        ]
-        print(f"  发现 {len(md_files)} 个技法文件")
-
-        # 重建集合
-        if rebuild:
-            collections = [c.name for c in client.get_collections().collections]
-            if self.TECHNIQUE_COLLECTION in collections:
-                print(f"  [删除] 旧集合 {self.TECHNIQUE_COLLECTION}")
-                client.delete_collection(collection_name=self.TECHNIQUE_COLLECTION)
-
-        # 创建集合
-        client.create_collection(
-            collection_name=self.TECHNIQUE_COLLECTION,
-            vectors_config=VectorParams(
-                size=self.VECTOR_SIZE, distance=Distance.COSINE
-            ),
+        print(
+            "\n[sync_techniques] ⚠️ 已停用。\n"
+            "  writing_techniques_v2 需要 BGE-M3 混合向量（dense+sparse+colbert）。\n"
+            "  请改用：python -m modules.knowledge_base.hybrid_sync_manager --sync technique --rebuild\n"
+            "  本次跳过技法同步，其余目标继续执行。"
         )
-
-        # 提取技法
-        techniques = []
-        for md_file in md_files:
-            try:
-                parent_dir = md_file.parent.name
-                dimension = self.DIMENSION_MAP.get(parent_dir, "未知")
-                writer = self.WRITER_MAP.get(dimension, "未知")
-
-                with open(md_file, "r", encoding="utf-8") as f:
-                    content = f.read()
-
-                # 提取文件标题
-                file_title = md_file.stem
-                for line in content.split("\n")[:5]:
-                    if line.startswith("# "):
-                        file_title = line[2:].strip()
-                        break
-
-                # 提取章节
-                sections = self._extract_technique_sections(content)
-
-                for section in sections:
-                    tech_content = section["content"]
-                    if len(tech_content) < 100:  # 太短的跳过
-                        continue
-
-                    techniques.append(
-                        {
-                            "name": section["name"],
-                            "dimension": dimension,
-                            "writer": writer,
-                            "source_file": md_file.name,
-                            "source_title": file_title,
-                            "content": tech_content[:500],  # 用于嵌入
-                            "full_content": tech_content[:5000],  # 存储
-                        }
-                    )
-
-            except Exception as e:
-                print(f"  [跳过] {md_file}: {e}")
-
-        print(f"  提取技法条目: {len(techniques)} 条")
-
-        # 批量生成嵌入（BGE-M3）
-        texts = [t["content"] for t in techniques]
-        print("  [生成] 正在生成嵌入向量...")
-        _output = model.encode(
-            texts,
-            batch_size=32,
-            max_length=512,
-            return_dense=True,
-            return_sparse=False,
-            return_colbert_vecs=False,
-        )
-        vectors = _output["dense_vecs"]
-
-        # 创建点
-        points = []
-        for i, (tech, vector) in enumerate(zip(techniques, vectors)):
-            point = PointStruct(
-                id=i,
-                vector=vector.tolist(),
-                payload={
-                    "name": tech["name"],
-                    "dimension": tech["dimension"],
-                    "writer": tech["writer"],
-                    "source_file": tech["source_file"],
-                    "source_title": tech["source_title"],
-                    "content": tech["full_content"],
-                    "word_count": len(tech["full_content"]),
-                },
-            )
-            points.append(point)
-
-        # 批量上传
-        batch_size = 100
-        for j in range(0, len(points), batch_size):
-            batch = points[j : j + batch_size]
-            client.upsert(collection_name=self.TECHNIQUE_COLLECTION, points=batch)
-            print(f"    上传: {min(j + batch_size, len(points))}/{len(points)}")
-
-        print(f"  [完成] 已同步 {len(points)} 条创作技法")
-        return len(points)
+        return 0
 
     def sync_cases(self, rebuild: bool = False) -> int:
         """[M3-β] 委托给 tools/case_builder.py --sync 完成案例向量化同步
@@ -607,5 +498,3 @@ if __name__ == "__main__":
     if args.target in ("case", "all"):
         sm.sync_cases(rebuild=args.rebuild)
         print("[case] 同步完成（委托 case_builder --sync）")
-
-        return status
