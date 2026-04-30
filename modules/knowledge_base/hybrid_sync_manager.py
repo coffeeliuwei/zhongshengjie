@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+import sys
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+
 """
 BGE-M3 混合同步管理器
 支持 Dense + Sparse + ColBERT 三种向量同步到 Qdrant
@@ -43,7 +50,7 @@ except ImportError:
 # 导入配置
 import sys
 
-config_dir = Path(__file__).parent
+config_dir = Path(__file__).resolve().parent.parent.parent / ".vectorstore"
 if str(config_dir) not in sys.path:
     sys.path.insert(0, str(config_dir))
 from bge_m3_config import (
@@ -139,29 +146,38 @@ class HybridSyncManager:
         self._client = None
         self._model = None
         self.use_docker = use_docker
-        self.docker_url = docker_url or get_qdrant_url()
+        self.docker_url = docker_url or (get_qdrant_url() if HAS_CONFIG_LOADER else "http://localhost:6333")
 
         # 设置 HuggingFace 缓存
         os.environ["HF_HOME"] = BGE_M3_CACHE_DIR
-        model_path = get_model_path()
-        if model_path is not None:
-            os.environ["HF_ENDPOINT"] = "https://hf-mirror.com"
+        self._model_path = (get_model_path() if HAS_CONFIG_LOADER else None) or BGE_M3_MODEL_NAME
 
     def _get_client(self) -> QdrantClient:
         """获取 Qdrant 客户端"""
         if self._client is None:
             if self.use_docker:
                 try:
-                    self._client = QdrantClient(url=self.docker_url)
+                    self._client = QdrantClient(url=self.docker_url, timeout=300)
                     self._client.get_collections()  # 测试连接
-                    print(f"✅ 已连接 Docker Qdrant: {self.docker_url}")
+                    print(f"[OK] 已连接 Docker Qdrant: {self.docker_url}")
                 except Exception as e:
-                    print(f"⚠️ Docker Qdrant 连接失败: {e}")
+                    print(f"[!] Docker Qdrant 连接失败: {e}")
                     print(f"   使用本地存储: {self.qdrant_dir}")
                     self._client = QdrantClient(path=str(self.qdrant_dir))
             else:
                 self._client = QdrantClient(path=str(self.qdrant_dir))
         return self._client
+
+    def _resolve_model_path(self) -> str:
+        """从本地缓存目录找 BGE-M3 snapshot 路径（必须含 tokenizer.json），找不到返回模型名"""
+        cache = Path(BGE_M3_CACHE_DIR)
+        for sub in (cache / "hub", cache):
+            snap_dir = sub / "models--BAAI--bge-m3" / "snapshots"
+            if snap_dir.exists():
+                for snap in sorted(snap_dir.iterdir()):
+                    if (snap / "tokenizer.json").exists():
+                        return str(snap)
+        return BGE_M3_MODEL_NAME
 
     def _load_model(self):
         """加载 BGE-M3 模型"""
@@ -169,13 +185,13 @@ class HybridSyncManager:
             try:
                 from FlagEmbedding import BGEM3FlagModel
 
-                print(f"[~] 加载 BGE-M3 模型: {BGE_M3_MODEL_NAME}")
-                print(f"    缓存目录: {BGE_M3_CACHE_DIR}")
+                model_path = self._resolve_model_path()
+                print(f"[~] 加载 BGE-M3 模型: {model_path}")
 
                 self._model = BGEM3FlagModel(
-                    BGE_M3_MODEL_NAME,
+                    model_path,
                     use_fp16=USE_FP16,
-                    device="cpu",  # 可改为 'cuda' 如果有 GPU
+                    device="cuda",
                 )
                 print("[OK] BGE-M3 模型加载完成")
             except ImportError as e:
@@ -199,7 +215,7 @@ class HybridSyncManager:
         """
         model = self._load_model()
 
-        print(f"🔄 编码 {len(texts)} 条文本 (Dense + Sparse + ColBERT)...")
+        print(f"[~] 编码 {len(texts)} 条文本 (Dense + Sparse + ColBERT)...")
 
         output = model.encode(
             texts,
@@ -211,6 +227,39 @@ class HybridSyncManager:
         )
 
         return output
+
+    def _encode_batch_lite(self, texts: list) -> dict:
+        """只编码 dense + sparse，不编 colbert，节省内存"""
+        model = self._load_model()
+        print(f"[~] 编码 {len(texts)} 条文本 (Dense + Sparse)...")
+        return model.encode(
+            texts,
+            return_dense=True,
+            return_sparse=True,
+            return_colbert_vecs=False,
+            batch_size=BATCH_SIZE,
+            max_length=8192,
+        )
+
+    def _create_lite_collection(self, collection_name: str) -> bool:
+        """创建只含 dense + sparse 的 collection（无 colbert）"""
+        from qdrant_client.models import VectorParams, Distance, SparseVectorParams
+        client = self._get_client()
+        try:
+            collections = [c.name for c in client.get_collections().collections]
+            if collection_name in collections:
+                print(f"  [删除] 旧 collection: {collection_name}")
+                client.delete_collection(collection_name=collection_name)
+            client.create_collection(
+                collection_name=collection_name,
+                vectors_config={"dense": VectorParams(size=DENSE_VECTOR_SIZE, distance=Distance.COSINE)},
+                sparse_vectors_config={"sparse": SparseVectorParams()},
+            )
+            print(f"  [创建] Collection: {collection_name}")
+            return True
+        except Exception as e:
+            print(f"  [错误] 创建 Collection 失败: {e}")
+            return False
 
     def _create_hybrid_collection(self, collection_name: str) -> bool:
         """
@@ -262,7 +311,7 @@ class HybridSyncManager:
 
         # 打印汇总
         print("\n" + "=" * 60)
-        print("📊 同步汇总")
+        print("[=] 同步汇总")
         print("=" * 60)
         total = 0
         for name, count in results.items():
@@ -367,7 +416,7 @@ class HybridSyncManager:
         # 批量上传
         self._upload_points(collection_name, points)
 
-        print(f"  ✅ 已同步 {len(points)} 条小说设定")
+        print(f"  [OK] 已同步 {len(points)} 条小说设定")
         return len(points)
 
     def sync_techniques(self, rebuild: bool = True) -> int:
@@ -495,7 +544,7 @@ class HybridSyncManager:
         # 批量上传
         self._upload_points(collection_name, points)
 
-        print(f"  ✅ 已同步 {len(points)} 条创作技法")
+        print(f"  [OK] 已同步 {len(points)} 条创作技法")
         return len(points)
 
     def sync_cases(self, rebuild: bool = True) -> int:
@@ -617,7 +666,7 @@ class HybridSyncManager:
             self._upload_points(collection_name, points)
             total_synced += len(points)
 
-        print(f"  ✅ 已同步 {total_synced} 条案例")
+        print(f"  [OK] 已同步 {total_synced} 条案例")
         return total_synced
 
     def sync_technique_json(
@@ -642,7 +691,7 @@ class HybridSyncManager:
         # 解析 JSON 路径
         if json_path is None:
             try:
-                cfg_file = Path(get_project_root()) / "config.json"
+                cfg_file = Path(get_project_root() if HAS_CONFIG_LOADER else Path.cwd()) / "config.json"
                 with open(cfg_file, "r", encoding="utf-8") as _f:
                     _cfg = json.load(_f)
                 output_dir = _cfg.get("extractor", {}).get(
@@ -664,13 +713,13 @@ class HybridSyncManager:
             raw_data = json.load(f)
         print(f"  原始条数: {len(raw_data):,}")
 
-        # 过滤：description 不为空，长度 >= 20
+        # 过滤：technique_name 或 description 非空即可
         valid_data = [
             t
             for t in raw_data
-            if t.get("description") and len(t.get("description", "")) >= 20
+            if t.get("technique_name") or t.get("description")
         ]
-        print(f"  有效条数（description >= 20字）: {len(valid_data):,}")
+        print(f"  有效条数: {len(valid_data):,}")
 
         if not valid_data:
             return 0
@@ -683,7 +732,7 @@ class HybridSyncManager:
             if collection_name in existing:
                 client.delete_collection(collection_name)
                 print(f"  [删除] 旧 collection: {collection_name}")
-        if not self._create_hybrid_collection(collection_name):
+        if not self._create_lite_collection(collection_name):
             return 0
 
         # 分批处理（138k 条，每批 1000）
@@ -707,29 +756,17 @@ class HybridSyncManager:
             total_batches = (len(valid_data) + batch_size - 1) // batch_size
             print(f"\n  批次 {batch_num}/{total_batches}（{len(texts)} 条）")
 
-            embeddings = self._encode_batch(texts)
+            embeddings = self._encode_batch_lite(texts)
 
-            # 构建 Points（payload 与 sync_techniques 保持一致）
+            # 构建 Points（batch_v1 只存 dense + sparse，不存 colbert 节省内存）
             points = []
             for i, tech in enumerate(batch):
                 idx = batch_start + i
                 dense_vec = embeddings["dense_vecs"][i].tolist()
                 sparse_dict = embeddings["lexical_weights"][i]
-                colbert_vecs = embeddings["colbert_vecs"][i]
 
                 sparse_indices = list(sparse_dict.keys())
                 sparse_values = list(sparse_dict.values())
-
-                if isinstance(colbert_vecs, list):
-                    colbert_list = [
-                        v.tolist() if hasattr(v, "tolist") else v for v in colbert_vecs
-                    ]
-                else:
-                    colbert_list = (
-                        colbert_vecs.tolist()
-                        if hasattr(colbert_vecs, "tolist")
-                        else colbert_vecs
-                    )
 
                 dimension = tech.get("dimension", "未知")
                 writer = self.WRITER_MAP.get(dimension, "未知")
@@ -743,7 +780,6 @@ class HybridSyncManager:
                     id=idx,
                     vector={
                         "dense": dense_vec,
-                        "colbert": colbert_list,
                         "sparse": SparseVector(
                             indices=sparse_indices, values=sparse_values
                         ),
@@ -765,13 +801,13 @@ class HybridSyncManager:
             self._upload_points(collection_name, points)
             total_synced += len(points)
 
-        print(f"\n  ✅ 已同步 {total_synced:,} 条批量提炼技法")
+        print(f"\n  [OK] 已同步 {total_synced:,} 条批量提炼技法")
         return total_synced
 
     def _upload_points(self, collection_name: str, points: List[PointStruct]):
         """批量上传 Points"""
         client = self._get_client()
-        batch_size = 100
+        batch_size = 20
 
         for j in range(0, len(points), batch_size):
             batch = points[j : j + batch_size]
