@@ -490,71 +490,106 @@ def verify_system(project_dir: Path):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="一键构建小说创作系统")
-    parser.add_argument("--project-dir", default=".", help="项目目录")
-    parser.add_argument("--novel-name", default="我的小说", help="小说名称")
-    parser.add_argument("--skip-cases", action="store_true", help="跳过案例库构建")
-    parser.add_argument("--quick", action="store_true", help="快速模式（仅初始化目录）")
-    parser.add_argument("--skip-deps", action="store_true", help="跳过依赖检查")
+    parser = argparse.ArgumentParser(
+        description="众生界统一入库管线",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+示例:
+  python tools/build_all.py                          # 全量入库（断点续跑）
+  python tools/build_all.py --status                 # 查看 collection 条数
+  python tools/build_all.py --only case,dialogue     # 只跑指定阶段
+  python tools/build_all.py --rebuild                # 强制清数据重跑
+  python tools/build_all.py --only technique_batch --rebuild
+
+阶段列表: case, extract, technique_batch, dialogue
+        """,
+    )
+    parser.add_argument("--status", action="store_true", help="显示各 collection 条数")
+    parser.add_argument(
+        "--only",
+        help="只跑指定阶段，逗号分隔（如 case,dialogue）",
+    )
+    parser.add_argument(
+        "--rebuild",
+        action="store_true",
+        help="强制清数据重跑（默认：断点续跑）",
+    )
+    parser.add_argument(
+        "--technique-json",
+        default=DEFAULT_TECHNIQUE_JSON,
+        help=f"technique_all.json 路径（默认：{DEFAULT_TECHNIQUE_JSON}）",
+    )
+    # 保留旧参数，静默忽略，兼容旧调用
+    parser.add_argument("--project-dir", default=".", help=argparse.SUPPRESS)
+    parser.add_argument("--novel-name", default="", help=argparse.SUPPRESS)
+    parser.add_argument("--skip-cases", action="store_true", help=argparse.SUPPRESS)
+    parser.add_argument("--quick", action="store_true", help=argparse.SUPPRESS)
+    parser.add_argument("--skip-deps", action="store_true", help=argparse.SUPPRESS)
 
     args = parser.parse_args()
 
-    print_header("一键构建小说创作系统")
-    print(f"    项目目录: {args.project_dir}")
-    print(f"    小说名称: {args.novel_name}")
-    print(f"    快速模式: {'是' if args.quick else '否'}")
+    if args.status:
+        show_status()
+        return
 
-    project_dir = Path(args.project_dir)
-
-    # 检查依赖
-    if not args.skip_deps:
-        if not check_dependencies():
-            print("\n请先安装缺失的依赖")
-            return
-
-        if not check_docker():
-            print("\n请先启动Docker和Qdrant")
-            return
-
-    # 构建
-    results = []
-
-    # 1. 初始化项目
-    results.append(init_project(project_dir, args.novel_name))
-
-    # 2. 构建技法库
-    results.append(build_techniques(project_dir / "创作技法", args.quick))
-
-    # 3. 构建知识库
-    results.append(build_knowledge(project_dir / "设定", args.quick))
-
-    # 4. 构建案例库
-    results.append(
-        build_cases(project_dir / ".case-library", args.skip_cases, args.quick)
-    )
-
-    # 5. 验证系统
-    results.append(verify_system(project_dir))
-
-    # 总结
-    print_header("构建完成")
-
-    if all(results):
-        print("    ✓ 所有步骤完成")
-        print("\n完整使用流程：")
-        print("    步骤0: 安装Skills（已完成）")
-        print("    步骤1-5: 构建数据系统（已完成）")
-        print("\n下一步（对话方式）：")
-        print('    6. 创建总大纲 → 对话 "创建总大纲"')
-        print('    7. 添加角色设定 → 对话 "添加角色：XXX，性格：XXX"')
-        print('    8. 添加势力设定 → 对话 "添加势力：XXX，类型：宗门"')
-        print('    9. 开始创作 → 对话 "写第一章"')
-        print("\n或使用工具命令：")
-        print("    python tools/unified_extractor.py  # 提炼外部小说库")
-        print("    python tools/unified_extractor.py --status  # 查看状态")
+    # 确定要跑哪些阶段（按 STAGE_ORDER 顺序）
+    if args.only:
+        requested = [s.strip() for s in args.only.split(",")]
+        invalid = [s for s in requested if s not in STAGE_ORDER]
+        if invalid:
+            print(f"[错误] 未知阶段: {invalid}")
+            print(f"有效阶段: {STAGE_ORDER}")
+            sys.exit(1)
+        stages_to_run = [s for s in STAGE_ORDER if s in requested]
     else:
-        print("    ⚠ 部分步骤未完成")
-        print("    请检查上方输出中的错误信息")
+        stages_to_run = list(STAGE_ORDER)
+
+    stage_map = {s["name"]: s for s in STAGES}
+
+    print("=" * 60)
+    print("众生界统一入库管线")
+    print("=" * 60)
+    print(f"阶段: {' → '.join(stages_to_run)}")
+    print(f"模式: {'强制重建' if args.rebuild else '断点续跑'}")
+
+    # --rebuild 时清除 case 索引文件
+    if args.rebuild and "case" in stages_to_run:
+        print("\n[预处理] 清除 case 旧索引...")
+        clear_case_data()
+
+    # 执行各阶段
+    total_start = datetime.now()
+    results = {}
+
+    for stage_name in stages_to_run:
+        stage = stage_map[stage_name]
+        ok = run_stage(stage, args.rebuild, args.technique_json)
+        results[stage_name] = ok
+        if not ok:
+            print(f"\n[中止] {stage_name} 失败，跳过后续阶段")
+            break
+
+    # 汇总
+    elapsed = datetime.now() - total_start
+    hours = int(elapsed.total_seconds() // 3600)
+    minutes = int((elapsed.total_seconds() % 3600) // 60)
+
+    print("\n" + "=" * 60)
+    print("执行汇总")
+    print("=" * 60)
+    for stage_name in stages_to_run:
+        if stage_name in results:
+            status = "[OK]  " if results[stage_name] else "[FAIL]"
+        else:
+            status = "[跳过]"
+        label = stage_map[stage_name]["label"]
+        print(f"  {status} {label}")
+
+    print(f"\n总耗时: {hours}h {minutes}m")
+
+    if results and all(results.values()):
+        print("\n[DONE] 全部入库完成，当前状态：")
+        show_status()
 
 
 if __name__ == "__main__":
