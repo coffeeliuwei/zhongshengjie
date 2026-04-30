@@ -54,6 +54,7 @@ from core.logging_utils import get_logger
 try:
     from core.metrics import record_retrieval
 except ImportError:
+
     def record_retrieval(source, dimension=None, latency_seconds=0.0, results_count=0):
         pass
 
@@ -428,6 +429,158 @@ class UnifiedRetrievalAPI:
             min_score=min_score,
             use_rerank=use_rerank,
         )
+
+    # ── 维度专属技法检索（各写手 skill 便捷接口）──────────────────────────
+
+    def search_by_keywords(
+        self,
+        keywords: list,
+        dimension: Optional[str] = None,
+        top_k: int = 10,
+    ) -> List[Dict[str, Any]]:
+        """关键词列表合并为查询串后检索技法"""
+        query = " ".join(str(k) for k in keywords)
+        return self.search_techniques(query, dimension=dimension, top_k=top_k)
+
+    # ── 世界观维度（苍澜） ──────────────────────────────────────────────────
+
+    def search_worldview_techniques(
+        self,
+        query: str = "世界观构建",
+        dimension: str = "世界观维度",
+        limit: int = 10,
+    ) -> List[Dict[str, Any]]:
+        """检索世界观维度技法"""
+        return self.search_techniques(query, dimension=dimension, top_k=limit)
+
+    def get_worldview_expert_techniques(self, top_k: int = 5) -> List[Dict[str, Any]]:
+        """获取世界观专家级技法（史诗级世界观 + 力量体系）"""
+        return self.search_techniques(
+            "史诗级世界观架构 力量体系设计 世界观自生长",
+            dimension="世界观维度",
+            top_k=top_k,
+        )
+
+    # ── 剧情维度（玄一） ────────────────────────────────────────────────────
+
+    def search_plot_techniques(
+        self,
+        query: str = "剧情推进",
+        dimension: str = "剧情维度",
+        limit: int = 10,
+    ) -> List[Dict[str, Any]]:
+        """检索剧情维度技法"""
+        return self.search_techniques(query, dimension=dimension, top_k=limit)
+
+    def search_foreshadowing_techniques(self, top_k: int = 5) -> List[Dict[str, Any]]:
+        """检索伏笔设置技法"""
+        return self.search_techniques(
+            "伏笔设置 埋线技法 伏笔回收",
+            dimension="剧情维度",
+            top_k=top_k,
+        )
+
+    def search_suspense_techniques(self, top_k: int = 5) -> List[Dict[str, Any]]:
+        """检索悬念制造技法"""
+        return self.search_techniques(
+            "悬念制造 钩子设计 读者好奇心",
+            dimension="叙事维度",
+            top_k=top_k,
+        )
+
+    def search_reversal_techniques(self, top_k: int = 5) -> List[Dict[str, Any]]:
+        """检索反转技法"""
+        return self.search_techniques(
+            "剧情反转 意外结局 逆转时机",
+            dimension="剧情维度",
+            top_k=top_k,
+        )
+
+    def get_plot_expert_techniques(self, top_k: int = 5) -> List[Dict[str, Any]]:
+        """获取剧情专家级技法"""
+        return self.search_techniques(
+            "史诗级剧情架构 伏笔回收 三幕结构 高潮设计",
+            dimension="剧情维度",
+            top_k=top_k,
+        )
+
+    # ── 氛围意境维度（云溪） ────────────────────────────────────────────────
+
+    def search_poetry_techniques(
+        self,
+        query: str = "氛围意境",
+        dimension: str = "氛围意境维度",
+        limit: int = 10,
+    ) -> List[Dict[str, Any]]:
+        """检索氛围意境维度技法"""
+        return self.search_techniques(query, dimension=dimension, top_k=limit)
+
+    def search_poetry_by_keywords(
+        self, keywords: list, top_k: int = 10
+    ) -> List[Dict[str, Any]]:
+        """关键词检索氛围意境技法"""
+        query = " ".join(str(k) for k in keywords)
+        return self.search_techniques(query, dimension="氛围意境维度", top_k=top_k)
+
+    def get_poetry_expert_techniques(self, top_k: int = 5) -> List[Dict[str, Any]]:
+        """获取氛围意境专家级技法"""
+        return self.search_techniques(
+            "诗意氛围 意境营造 五感写作 留白技法",
+            dimension="氛围意境维度",
+            top_k=top_k,
+        )
+
+    # ── 人物维度（墨言） ────────────────────────────────────────────────────
+
+    def search_character_techniques(
+        self,
+        query: str = "人物刻画",
+        dimension: str = "人物维度",
+        limit: int = 10,
+    ) -> List[Dict[str, Any]]:
+        """检索人物维度技法"""
+        return self.search_techniques(query, dimension=dimension, top_k=limit)
+
+    def search_emotion_techniques(self, top_k: int = 5) -> List[Dict[str, Any]]:
+        """检索情感描写技法"""
+        return self.search_techniques(
+            "情感描写 情绪渲染 内心独白",
+            dimension="情感维度",
+            top_k=top_k,
+        )
+
+    def get_character_expert_techniques(self, top_k: int = 5) -> List[Dict[str, Any]]:
+        """获取人物塑造专家级技法"""
+        return self.search_techniques(
+            "史诗级人物塑造 角色弧光 创伤成长 群像技法",
+            dimension="人物维度",
+            top_k=top_k,
+        )
+
+    # ── 战斗冲突维度（剑尘） ────────────────────────────────────────────────
+
+    def search_battle_techniques(
+        self,
+        query: str = "战斗描写",
+        dimension: str = "战斗冲突维度",
+        limit: int = 10,
+    ) -> List[Dict[str, Any]]:
+        """检索战斗冲突维度技法"""
+        return self.search_techniques(query, dimension=dimension, top_k=limit)
+
+    def search_battle_by_keywords(
+        self, keywords: list, top_k: int = 10
+    ) -> List[Dict[str, Any]]:
+        """关键词检索战斗技法"""
+        query = " ".join(str(k) for k in keywords)
+        return self.search_techniques(query, dimension="战斗冲突维度", top_k=top_k)
+
+    def get_battle_expert_techniques(
+        self, power_system: str = "", top_k: int = 5
+    ) -> List[Dict[str, Any]]:
+        """获取战斗冲突专家级技法，可按力量体系过滤"""
+        query = f"史诗级战斗设计 力量体系对抗 弱胜强技法 {power_system}".strip()
+        return self.search_techniques(query, dimension="战斗冲突维度", top_k=top_k)
 
     def search_cases(
         self,
