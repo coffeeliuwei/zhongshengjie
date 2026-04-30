@@ -676,7 +676,7 @@ class HybridSyncManager:
             return 0
 
         # 创建 Collection（重建）
-        collection_name = COLLECTION_NAMES["writing_techniques"]
+        collection_name = COLLECTION_NAMES["writing_techniques_batch"]
         if rebuild:
             client = self._get_client()
             existing = [c.name for c in client.get_collections().collections]

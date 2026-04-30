@@ -350,31 +350,26 @@ class HybridSearchManager:
         use_rerank: bool = True,
     ) -> List[Dict[str, Any]]:
         """
-        混合检索创作技法
-
-        Args:
-            query: 查询文本
-            dimension: 维度过滤（世界观维度、剧情维度等）
-            top_k: 返回数量
-            min_score: 最低相似度
-            use_rerank: 是否使用 ColBERT 重排
-
-        Returns:
-            检索结果列表
+        混合检索创作技法，同时查 writing_techniques_v2（auto-ingest活数据）
+        和 writing_techniques_batch_v1（批量历史数据），合并后按 score 降序返回 top_k。
         """
         client = self._get_client()
-        collection_name = COLLECTION_NAMES["writing_techniques"]
+        existing_collections = {c.name for c in client.get_collections().collections}
 
-        # 检查 Collection 是否存在
-        collections = [c.name for c in client.get_collections().collections]
-        if collection_name not in collections:
-            print(f"Collection {collection_name} 不存在，请先运行同步")
+        collection_names = []
+        for key in ("writing_techniques", "writing_techniques_batch"):
+            name = COLLECTION_NAMES.get(key)
+            if name and name in existing_collections:
+                collection_names.append(name)
+
+        if not collection_names:
+            print(
+                "writing_techniques_v2 / writing_techniques_batch_v1 均不存在，请先运行同步"
+            )
             return []
 
-        # 编码查询
         query_vectors = self._encode_query(query)
 
-        # 构建过滤条件
         query_filter = None
         if dimension:
             query_filter = models.Filter(
@@ -386,48 +381,57 @@ class HybridSearchManager:
                 ]
             )
 
-        # 阶段1: Dense + Sparse 混合召回
-        try:
-            sparse_vector = SparseVector(
-                indices=query_vectors["sparse_indices"],
-                values=query_vectors["sparse_values"],
-            )
+        all_points = []
+        for collection_name in collection_names:
+            try:
+                sparse_vector = SparseVector(
+                    indices=query_vectors["sparse_indices"],
+                    values=query_vectors["sparse_values"],
+                )
+                results = client.query_points(
+                    collection_name=collection_name,
+                    prefetch=[
+                        models.Prefetch(
+                            query=query_vectors["dense"],
+                            using="dense",
+                            limit=self.recall_config["dense_limit"],
+                            filter=query_filter,
+                        ),
+                        models.Prefetch(
+                            query=sparse_vector,
+                            using="sparse",
+                            limit=self.recall_config["sparse_limit"],
+                            filter=query_filter,
+                        ),
+                    ],
+                    query=models.FusionQuery(fusion=models.Fusion.RRF),
+                    limit=self.recall_config["fusion_limit"],
+                    with_payload=True,
+                )
+                if (
+                    use_rerank
+                    and self.rerank_config["enabled"]
+                    and len(results.points) > 0
+                ):
+                    reranked = self._colbert_rerank(
+                        client,
+                        collection_name,
+                        query_vectors["colbert"],
+                        results.points,
+                        top_k,
+                    )
+                    all_points.extend(reranked)
+                else:
+                    all_points.extend(results.points[:top_k])
+            except Exception as e:
+                print(f"检索 {collection_name} 错误: {e}")
 
-            results = client.query_points(
-                collection_name=collection_name,
-                prefetch=[
-                    models.Prefetch(
-                        query=query_vectors["dense"],
-                        using="dense",
-                        limit=self.recall_config["dense_limit"],
-                        filter=query_filter,
-                    ),
-                    models.Prefetch(
-                        query=sparse_vector,
-                        using="sparse",
-                        limit=self.recall_config["sparse_limit"],
-                        filter=query_filter,
-                    ),
-                ],
-                query=models.FusionQuery(fusion=models.Fusion.RRF),
-                limit=self.recall_config["fusion_limit"],
-                with_payload=True,
-            )
-        except Exception as e:
-            print(f"检索错误: {e}")
-            return []
+        # 按 score 降序，取 top_k
+        all_points.sort(key=lambda p: p.score, reverse=True)
+        top_points = all_points[:top_k]
 
-        # 阶段2: ColBERT 重排
-        if use_rerank and self.rerank_config["enabled"] and len(results.points) > 0:
-            results = self._colbert_rerank(
-                client, collection_name, query_vectors["colbert"], results.points, top_k
-            )
-        else:
-            results = results.points[:top_k]
-
-        # 格式化结果
         formatted = []
-        for p in results:
+        for p in top_points:
             if p.score < min_score:
                 continue
             formatted.append(
@@ -442,7 +446,6 @@ class HybridSearchManager:
                     "score": p.score,
                 }
             )
-
         return formatted
 
     def list_dimensions(self) -> List[str]:
