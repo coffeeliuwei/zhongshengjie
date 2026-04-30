@@ -62,7 +62,8 @@ STAGES = [
         "name": "case",
         "label": "案例库构建（case_library_v2）",
         "cmd": [
-            sys.executable, "-u",
+            sys.executable,
+            "-u",
             str(PROJECT_ROOT / "tools" / "case_builder.py"),
             "--all",
         ],
@@ -73,7 +74,8 @@ STAGES = [
         "name": "extract",
         "label": "10维度提炼+入库",
         "cmd": [
-            sys.executable, "-u",
+            sys.executable,
+            "-u",
             str(PROJECT_ROOT / "tools" / "batch_extract.py"),
             "--skip-case",
         ],
@@ -84,10 +86,13 @@ STAGES = [
         "name": "technique_batch",
         "label": "批量技法入库（writing_techniques_batch_v1）",
         "cmd": [
-            sys.executable, "-u",
+            sys.executable,
+            "-u",
             str(PROJECT_ROOT / "modules" / "knowledge_base" / "hybrid_sync_manager.py"),
-            "--sync", "technique-json",
-            "--json-path", "{technique_json}",
+            "--sync",
+            "technique-json",
+            "--json-path",
+            "{technique_json}",
         ],
         "rebuild_extra": ["--rebuild"],
         "log": str(PROJECT_ROOT / "logs" / "technique_batch_sync.log"),
@@ -96,7 +101,8 @@ STAGES = [
         "name": "dialogue",
         "label": "对话风格聚合（dialogue_style_v1）",
         "cmd": [
-            sys.executable, "-u",
+            sys.executable,
+            "-u",
             str(PROJECT_ROOT / "tools" / "aggregate_dialogue_style.py"),
         ],
         "rebuild_extra": [],
@@ -115,6 +121,88 @@ def _build_cmd(stage: dict, rebuild: bool, technique_json: str) -> List[str]:
     if rebuild:
         cmd.extend(stage["rebuild_extra"])
     return cmd
+
+
+def run_stage(stage: dict, rebuild: bool, technique_json: str) -> bool:
+    """运行一个阶段，输出同时打印到终端和写入日志文件"""
+    log_path = Path(stage["log"])
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+
+    cmd = _build_cmd(stage, rebuild, technique_json)
+
+    print(f"\n{'=' * 60}")
+    print(f"[阶段] {stage['label']}")
+    print(f"命令: {' '.join(cmd)}")
+    print(f"日志: {log_path}")
+    print("=" * 60)
+
+    start = datetime.now()
+    env = {**os.environ, "PYTHONIOENCODING": "utf-8"}
+
+    with open(log_path, "w", encoding="utf-8", errors="replace") as log_file:
+        process = subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            cwd=str(PROJECT_ROOT),
+            env=env,
+        )
+        for raw_line in process.stdout:
+            text = raw_line.decode("utf-8", errors="replace")
+            print(text, end="", flush=True)
+            log_file.write(text)
+            log_file.flush()
+        process.wait()
+
+    elapsed = datetime.now() - start
+    minutes = int(elapsed.total_seconds() // 60)
+    seconds = int(elapsed.total_seconds() % 60)
+
+    if process.returncode == 0:
+        print(f"\n[OK] {stage['label']} 完成，耗时 {minutes}m {seconds}s")
+        return True
+    else:
+        print(f"\n[FAIL] {stage['label']} 失败（返回码 {process.returncode}）")
+        print(f"查看日志: {log_path}")
+        return False
+
+
+def show_status(qdrant_url: str = None) -> None:
+    """显示各 collection 当前条数"""
+    url = qdrant_url or QDRANT_URL
+    try:
+        from qdrant_client import QdrantClient
+
+        client = QdrantClient(url=url, timeout=10)
+        cols = client.get_collections().collections
+        print(f"\n{'Collection':<35} {'条数':>10}")
+        print("-" * 47)
+        for c in sorted(cols, key=lambda x: x.name):
+            info = client.get_collection(c.name)
+            print(f"{c.name:<35} {info.points_count:>10,}")
+    except Exception as e:
+        print(f"[错误] 无法连接 Qdrant ({url}): {e}")
+
+
+def clear_case_data(case_lib_path: Path = None) -> None:
+    """--rebuild 时清除 case 阶段索引文件，不删小说源文件"""
+    case_lib = case_lib_path or Path("E:/case-library")
+    targets = [
+        "case_index.json",
+        "dedup_index.pkl",
+        "convert_failures.txt",
+        "convert_quality.tsv",
+    ]
+    for name in targets:
+        p = case_lib / name
+        if p.exists():
+            p.unlink()
+            print(f"    [删除] {name}")
+    cases_dir = case_lib / "cases"
+    if cases_dir.exists():
+        shutil.rmtree(cases_dir)
+        cases_dir.mkdir()
+        print("    [清空] cases/")
 
 
 def print_header(title):
