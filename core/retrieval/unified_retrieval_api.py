@@ -614,6 +614,53 @@ class UnifiedRetrievalAPI:
             use_rerank=use_rerank,
         )
 
+    # ==================== 写手专属案例检索 ====================
+
+    def search_worldview_cases(
+        self,
+        query: str,
+        scene_type: Optional[str] = None,
+        limit: int = 10,
+    ) -> List[Dict[str, Any]]:
+        """世界观/势力案例检索（苍澜专用）"""
+        return self.search_cases(query=query, scene_type=scene_type, top_k=limit)
+
+    def search_plot_cases(
+        self,
+        query: str,
+        scene_type: Optional[str] = None,
+        limit: int = 10,
+    ) -> List[Dict[str, Any]]:
+        """剧情/伏笔案例检索（玄一专用）"""
+        return self.search_cases(query=query, scene_type=scene_type, top_k=limit)
+
+    def search_poetry_cases(
+        self,
+        query: str,
+        scene_type: Optional[str] = None,
+        limit: int = 10,
+    ) -> List[Dict[str, Any]]:
+        """意境/诗意案例检索（云溪专用）"""
+        return self.search_cases(query=query, scene_type=scene_type, top_k=limit)
+
+    def search_character_cases(
+        self,
+        query: str,
+        scene_type: Optional[str] = None,
+        limit: int = 10,
+    ) -> List[Dict[str, Any]]:
+        """人物/情感案例检索（墨言专用）"""
+        return self.search_cases(query=query, scene_type=scene_type, top_k=limit)
+
+    def search_battle_cases(
+        self,
+        query: str,
+        scene_type: Optional[str] = None,
+        limit: int = 10,
+    ) -> List[Dict[str, Any]]:
+        """战斗/力量案例检索（剑尘专用）"""
+        return self.search_cases(query=query, scene_type=scene_type, top_k=limit)
+
     def search_novel(
         self,
         query: str,

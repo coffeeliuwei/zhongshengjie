@@ -379,9 +379,21 @@ SCENE_TYPES = {
     },
     "人物出场": {
         "keywords": [
-            "首次", "第一次", "登场", "亮相", "出现在",
-            "身着", "容貌", "相貌", "身形", "气质",
-            "年约", "一袭", "此人", "眉宇", "面容",
+            "首次",
+            "第一次",
+            "登场",
+            "亮相",
+            "出现在",
+            "身着",
+            "容貌",
+            "相貌",
+            "身形",
+            "气质",
+            "年约",
+            "一袭",
+            "此人",
+            "眉宇",
+            "面容",
         ],
         "neg_keywords": ["攻击", "出手", "战斗"],
         "min_kw_score": 1.5,
@@ -393,15 +405,43 @@ SCENE_TYPES = {
     "环境场景": {
         "keywords": [
             # 地理地貌
-            "山脉", "森林", "宫殿", "城池", "荒野", "平原", "峡谷",
-            "天空", "大地", "远处", "山峰", "湖泊", "河流", "草原",
+            "山脉",
+            "森林",
+            "宫殿",
+            "城池",
+            "荒野",
+            "平原",
+            "峡谷",
+            "天空",
+            "大地",
+            "远处",
+            "山峰",
+            "湖泊",
+            "河流",
+            "草原",
             # 氛围环境
-            "云雾弥漫", "月光如水", "风景如画", "景色宜人",
-            "鸟语花香", "寂静无声", "万籁俱寂",
-            "笼罩", "弥漫", "延伸", "连绵", "苍茫", "茫茫",
+            "云雾弥漫",
+            "月光如水",
+            "风景如画",
+            "景色宜人",
+            "鸟语花香",
+            "寂静无声",
+            "万籁俱寂",
+            "笼罩",
+            "弥漫",
+            "延伸",
+            "连绵",
+            "苍茫",
+            "茫茫",
             # 建筑/场所描写
-            "古朴", "巍峨", "雄伟", "幽深", "静谧",
-            "屹立", "矗立", "蔓延",
+            "古朴",
+            "巍峨",
+            "雄伟",
+            "幽深",
+            "静谧",
+            "屹立",
+            "矗立",
+            "蔓延",
         ],
         "neg_keywords": ["冲向", "追赶", "逃跑", "厮杀", "攻击", "出手"],  # 动作段排除
         "min_kw_score": 1.0,
@@ -816,6 +856,7 @@ def _mobi_to_txt(task: tuple) -> str:
     tmpdir_path = None
     try:
         from mobi import extract
+
         result = extract(path_str)
         if isinstance(result, tuple):
             tmpdir_path = _P(result[0]) if result[0] else None
@@ -829,6 +870,7 @@ def _mobi_to_txt(task: tuple) -> str:
         # epub → text（与 _read_epub 逻辑一致，不能跨进程调用实例方法）
         try:
             from ebooklib import epub as _epub
+
             book = _epub.read_epub(str(epub_path), options={"ignore_ncx": True})
             parts = []
             for item in book.get_items():
@@ -838,7 +880,11 @@ def _mobi_to_txt(task: tuple) -> str:
                         html = item.get_body_content()
                     except Exception:
                         pass
-                if html is None and hasattr(item, "get_content") and hasattr(item, "media_type"):
+                if (
+                    html is None
+                    and hasattr(item, "get_content")
+                    and hasattr(item, "media_type")
+                ):
                     if item.media_type and "html" in item.media_type.lower():
                         try:
                             html = item.get_content()
@@ -1156,10 +1202,7 @@ python case_builder.py --sync
         s = text[:sample].replace(" ", "").replace("\n", "").replace("\r", "")
         if not s:
             return 0.0
-        cjk = sum(
-            1 for c in s
-            if "一" <= c <= "鿿" or "㐀" <= c <= "䶿"
-        )
+        cjk = sum(1 for c in s if "一" <= c <= "鿿" or "㐀" <= c <= "䶿")
         return cjk / len(s)
 
     def _read_txt_meta(self, path: Path) -> "tuple[str, str, float]":
@@ -1180,6 +1223,7 @@ python case_builder.py --sync
         # charset-normalizer 检测 + CJK 验证
         try:
             from charset_normalizer import from_bytes
+
             result = from_bytes(raw).best()
             if result:
                 text = str(result)
@@ -1213,6 +1257,7 @@ python case_builder.py --sync
         """epub 双路径 HTML 检测（对齐 base_extractor）"""
         try:
             from ebooklib import epub
+
             book = epub.read_epub(str(path), options={"ignore_ncx": True})
             parts = []
             for item in book.get_items():
@@ -1257,10 +1302,14 @@ python case_builder.py --sync
         old_tempdir = tempfile.tempdir
         try:
             from mobi import extract
+
             tempfile.tempdir = str(self.mobi_temp_dir)
             result = extract(str(path))
             if isinstance(result, tuple):
-                tmpdir, epub_path = result[0], (result[1] if len(result) > 1 else result[0])
+                tmpdir, epub_path = (
+                    result[0],
+                    (result[1] if len(result) > 1 else result[0]),
+                )
             else:
                 tmpdir, epub_path = None, result
             epub_path = Path(epub_path)
@@ -1269,7 +1318,9 @@ python case_builder.py --sync
                     return self._read_epub(epub_path)
                 finally:
                     clean = Path(tmpdir) if tmpdir else epub_path.parent
-                    if clean.exists() and str(clean).startswith(str(self.mobi_temp_dir)):
+                    if clean.exists() and str(clean).startswith(
+                        str(self.mobi_temp_dir)
+                    ):
                         shutil.rmtree(clean, ignore_errors=True)
             return None
         except ImportError:
@@ -1285,6 +1336,7 @@ python case_builder.py --sync
         """pdf → pdfminer.six（可选依赖）"""
         try:
             from pdfminer.high_level import extract_text
+
             content = extract_text(str(path))
             content = content.replace("\x00", "")
             content = "\n".join(l.strip() for l in content.splitlines() if l.strip())
@@ -1300,6 +1352,7 @@ python case_builder.py --sync
         """docx → python-docx（可选依赖）"""
         try:
             from docx import Document
+
             doc = Document(str(path))
             parts = [p.text.strip() for p in doc.paragraphs if p.text.strip()]
             return "\n\n".join(parts) if parts else None
@@ -1353,11 +1406,13 @@ python case_builder.py --sync
             all_todo = todo_other + todo_mobi
             all_todo = all_todo[:limit]
             todo_other = [f for f in all_todo if f.suffix.lower() != ".mobi"]
-            todo_mobi  = [f for f in all_todo if f.suffix.lower() == ".mobi"]
+            todo_mobi = [f for f in all_todo if f.suffix.lower() == ".mobi"]
 
         total = len(todo_other) + len(todo_mobi)
         mobi_workers = max(1, min(workers, 4))
-        print(f"    待转换: {total} 本（非mobi {len(todo_other)} 本 workers={workers}，mobi {len(todo_mobi)} 本 workers={mobi_workers}）")
+        print(
+            f"    待转换: {total} 本（非mobi {len(todo_other)} 本 workers={workers}，mobi {len(todo_mobi)} 本 workers={mobi_workers}）"
+        )
 
         ok = fail = done = 0
         fail_log = self.case_library_dir / "convert_failures.txt"
@@ -1374,11 +1429,15 @@ python case_builder.py --sync
             with open(fail_log, "a", encoding="utf-8") as f:
                 f.write(f"{name}\t{reason}\n")
 
-        def _log_quality(name: str, result: str, enc: str, ratio: float, reason: str = ""):
+        def _log_quality(
+            name: str, result: str, enc: str, ratio: float, reason: str = ""
+        ):
             suspicious = "[!] " if ratio < 0.10 and result == "ok" else ""
             with _quality_lock:
                 with open(quality_log, "a", encoding="utf-8") as f:
-                    f.write(f"{suspicious}{name}\t{result}\t{enc}\t{ratio:.3f}\t{reason}\n")
+                    f.write(
+                        f"{suspicious}{name}\t{result}\t{enc}\t{ratio:.3f}\t{reason}\n"
+                    )
 
         # ── 非 mobi：ThreadPoolExecutor（线程安全）──────────────────────
         def _do_one(fp: Path) -> tuple:
@@ -1414,6 +1473,7 @@ python case_builder.py --sync
         # ── mobi：ProcessPoolExecutor（每进程独立 tempfile.tempdir）────
         if todo_mobi:
             from concurrent.futures import ProcessPoolExecutor
+
             mobi_temp_str = str(self.mobi_temp_dir)
             task_map = {
                 (str(fp), str(self.converted_dir / f"{fp.stem}.txt"), mobi_temp_str): fp
@@ -1530,7 +1590,7 @@ python case_builder.py --sync
                         novel_name=novel_name,
                         genre=genre,
                         source_file=novel_file.name,
-                        bge_model=None,          # Phase1: 不做语义验证
+                        bge_model=None,  # Phase1: 不做语义验证
                         scene_anchors=None,
                         _return_indices=True,
                     ):
@@ -1552,10 +1612,16 @@ python case_builder.py --sync
                         pos = SCENE_TYPES.get(scene_type, {}).get("position", "any")
                         if pos == "any":
                             before = " ".join(
-                                paragraphs[max(0, para_idx - self.embedding_window_size): para_idx]
+                                paragraphs[
+                                    max(
+                                        0, para_idx - self.embedding_window_size
+                                    ) : para_idx
+                                ]
                             )
                             after = " ".join(
-                                paragraphs[para_idx: para_idx + self.embedding_window_size]
+                                paragraphs[
+                                    para_idx : para_idx + self.embedding_window_size
+                                ]
                             )
                             q3_texts += [before, after]
                             q3_do.append(True)
@@ -1607,7 +1673,8 @@ python case_builder.py --sync
                                     quality_score=case.quality_score,
                                     emotion_value=case.emotion_value,
                                     techniques=case.techniques,
-                                    keywords=case.keywords + [f"[语义修正自:{scene_type}]"],
+                                    keywords=case.keywords
+                                    + [f"[语义修正自:{scene_type}]"],
                                     source_file=case.source_file,
                                 )
                         all_cases.append(case)
@@ -1622,7 +1689,9 @@ python case_builder.py --sync
                     if _new:
                         with partial_path.open("a", encoding="utf-8") as _f:
                             for _c in _new:
-                                _f.write(json.dumps(asdict(_c), ensure_ascii=False) + "\n")
+                                _f.write(
+                                    json.dumps(asdict(_c), ensure_ascii=False) + "\n"
+                                )
                         _cases_at_last_save = len(all_cases)
                     _novels_since_save = 0
                     print(f"    [断点保存] 累计 {len(all_cases)} 条，进度已保存")
@@ -2102,8 +2171,11 @@ python case_builder.py --sync
         import os
         from qdrant_client import QdrantClient
         from qdrant_client.models import (
-            PointStruct, VectorParams, Distance,
-            SparseVectorParams, OptimizersConfigDiff,
+            PointStruct,
+            VectorParams,
+            Distance,
+            SparseVectorParams,
+            OptimizersConfigDiff,
         )
         from FlagEmbedding import BGEM3FlagModel
 
@@ -2111,6 +2183,7 @@ python case_builder.py --sync
         if embed_batch is None:
             if HAS_CONFIG_LOADER:
                 from core.config_loader import get_batch_size
+
                 embed_batch = get_batch_size() or 128
             else:
                 embed_batch = 128
@@ -2125,8 +2198,55 @@ python case_builder.py --sync
         print("同步案例到向量库")
         print("=" * 60)
 
+        # 维度名 → 场景类型映射（inspiration-ingest 用维度名，写手 skill 用场景类型）
+        _DIMENSION_TO_SCENE_TYPE = {
+            "世界观维度": "世界观展示",
+            "剧情维度": "剧情",
+            "人物维度": "心理",
+            "战斗冲突维度": "战斗",
+            "氛围意境维度": "意境营造",
+            "叙事维度": "信息传递",
+            "主题维度": "内省",
+            "情感维度": "情感",
+            "读者体验维度": "内省",
+            "元维度": "信息传递",
+            "节奏维度": "日常",
+        }
+
+        def _parse_md_case(md_file):
+            """解析 inspiration-ingest 写入的 .md 案例（YAML frontmatter + 正文）"""
+            text = md_file.read_text(encoding="utf-8")
+            meta = {}
+            body = text
+            if text.startswith("---"):
+                end = text.find("---", 3)
+                if end != -1:
+                    fm = text[3:end].strip()
+                    for line in fm.splitlines():
+                        if ":" in line:
+                            k, _, v = line.partition(":")
+                            meta[k.strip()] = v.strip()
+                    body = text[end + 3 :].strip()
+            raw_scene = meta.get("scene_type", md_file.parent.name)
+            scene_type = _DIMENSION_TO_SCENE_TYPE.get(raw_scene, raw_scene)
+            return {
+                "case_id": meta.get("case_id", md_file.stem),
+                "scene_type": scene_type,
+                "genre": meta.get("genre", "未分类"),
+                "novel_name": meta.get("source", md_file.stem),
+                "content": body,
+                "word_count": len(body),
+                "quality_score": 5.0,
+                "emotion_value": 0.0,
+                "techniques": [],
+                "keywords": [],
+                "source_file": str(md_file),
+            }
+
         # 收集所有案例
         all_cases = []
+
+        # 路径一：原有 JSON 案例（cases/{场景类型}/*.json，一层子目录）
         for scene_dir in self.cases_dir.iterdir():
             if not scene_dir.is_dir():
                 continue
@@ -2135,6 +2255,16 @@ python case_builder.py --sync
                     with open(meta_file, "r", encoding="utf-8") as f:
                         all_cases.append(json.load(f))
                 except Exception:
+                    continue
+
+        # 路径二：inspiration-ingest 写入的 .md 案例（cases/99-从小说提取/{维度名}/*.md，两层子目录）
+        ingest_dir = self.cases_dir / "99-从小说提取"
+        if ingest_dir.exists():
+            for md_file in ingest_dir.rglob("*.md"):
+                try:
+                    all_cases.append(_parse_md_case(md_file))
+                except Exception as e:
+                    print(f"    [跳过 md] {md_file.name}: {e}")
                     continue
 
         if not all_cases:
@@ -2157,7 +2287,9 @@ python case_builder.py --sync
                     if info.points_count == total:
                         print(f"    [跳过] 已同步 {total:,} 条，条数一致")
                         return True
-                    print(f"    [重建] Qdrant {info.points_count:,} 条 ≠ 本地 {total:,} 条，重建")
+                    print(
+                        f"    [重建] Qdrant {info.points_count:,} 条 ≠ 本地 {total:,} 条，重建"
+                    )
             except Exception as e:
                 print(f"    [警告] 无法检查已有条数（{e}），继续")
 
@@ -2178,6 +2310,7 @@ python case_builder.py --sync
         # 加载模型
         print("\n加载 BGE-M3 模型...")
         from core.config_loader import get_device
+
         device = get_device()
         model = BGEM3FlagModel(
             self.model_path or "BAAI/bge-m3", use_fp16=True, device=device
@@ -2194,7 +2327,9 @@ python case_builder.py --sync
                     if attempt == retries - 1:
                         raise
                     wait = backoff * (attempt + 1)
-                    print(f"\n    [重试] {e.__class__.__name__}，{wait}s 后重试({attempt+1}/{retries})...")
+                    print(
+                        f"\n    [重试] {e.__class__.__name__}，{wait}s 后重试({attempt + 1}/{retries})..."
+                    )
                     time.sleep(wait)
 
         # 流水线：GPU 推理下一批时，后台线程上传当前批
@@ -2206,35 +2341,39 @@ python case_builder.py --sync
 
         with ThreadPoolExecutor(max_workers=1) as executor:
             for batch_start in range(0, total, batch_size):
-                batch = all_cases[batch_start: batch_start + batch_size]
+                batch = all_cases[batch_start : batch_start + batch_size]
                 texts = [c.get("content", "")[:1000] for c in batch]
 
-                out = model.encode(texts, batch_size=embed_batch, return_dense=True, return_sparse=True)
+                out = model.encode(
+                    texts, batch_size=embed_batch, return_dense=True, return_sparse=True
+                )
 
                 points = []
                 for j, case in enumerate(batch):
                     cid = case.get("case_id", f"case_{batch_start + j}")
-                    points.append(PointStruct(
-                        id=str(uuid.uuid5(uuid.NAMESPACE_DNS, cid)),
-                        vector={
-                            "dense": out["dense_vecs"][j].tolist(),
-                            "sparse": {
-                                "indices": list(out["lexical_weights"][j].keys()),
-                                "values": list(out["lexical_weights"][j].values()),
+                    points.append(
+                        PointStruct(
+                            id=str(uuid.uuid5(uuid.NAMESPACE_DNS, cid)),
+                            vector={
+                                "dense": out["dense_vecs"][j].tolist(),
+                                "sparse": {
+                                    "indices": list(out["lexical_weights"][j].keys()),
+                                    "values": list(out["lexical_weights"][j].values()),
+                                },
                             },
-                        },
-                        payload={
-                            "novel_name": case.get("novel_name", ""),
-                            "scene_type": case.get("scene_type", ""),
-                            "genre": case.get("genre", ""),
-                            "content": case.get("content", "")[:500],
-                            "word_count": case.get("word_count", 0),
-                            "quality_score": case.get("quality_score", 7.0),
-                            "keywords": case.get("keywords", []),
-                            "cross_genre_value": case.get("cross_genre_value", ""),
-                            "source": case.get("source_file", ""),
-                        },
-                    ))
+                            payload={
+                                "novel_name": case.get("novel_name", ""),
+                                "scene_type": case.get("scene_type", ""),
+                                "genre": case.get("genre", ""),
+                                "content": case.get("content", "")[:500],
+                                "word_count": case.get("word_count", 0),
+                                "quality_score": case.get("quality_score", 7.0),
+                                "keywords": case.get("keywords", []),
+                                "cross_genre_value": case.get("cross_genre_value", ""),
+                                "source": case.get("source_file", ""),
+                            },
+                        )
+                    )
 
                 # 等上一批完成
                 if pending_future is not None:
@@ -2244,9 +2383,10 @@ python case_builder.py --sync
                     speed = synced / elapsed if elapsed > 0 else 0
                     eta = (total - synced) / speed if speed > 0 else 0
                     print(
-                        f"  [{synced:>6}/{total}] {synced/total*100:5.1f}%"
-                        f"  速度:{speed:.0f}条/s  剩余:{eta/60:.1f}min",
-                        end="\r", flush=True,
+                        f"  [{synced:>6}/{total}] {synced / total * 100:5.1f}%"
+                        f"  速度:{speed:.0f}条/s  剩余:{eta / 60:.1f}min",
+                        end="\r",
+                        flush=True,
                     )
 
                 pending_future = executor.submit(_upsert_with_retry, points)
@@ -2265,7 +2405,9 @@ python case_builder.py --sync
 
         elapsed = time.time() - t0
         info = client.get_collection(self.collection_name)
-        print(f"✓ {self.collection_name}: {info.points_count:,} 条  耗时:{elapsed/60:.1f}min")
+        print(
+            f"✓ {self.collection_name}: {info.points_count:,} 条  耗时:{elapsed / 60:.1f}min"
+        )
         return True
 
     def get_status(self):
@@ -2492,7 +2634,11 @@ def main():
         metavar="DIR",
         help="扫描小说资源目录（无参数则使用 config.json 中的 novel_sources）",
     )
-    parser.add_argument("--all", action="store_true", help="一键完整流程：convert → extract → sync（等价于分别执行三步）")
+    parser.add_argument(
+        "--all",
+        action="store_true",
+        help="一键完整流程：convert → extract → sync（等价于分别执行三步）",
+    )
     parser.add_argument("--convert", action="store_true", help="转换小说格式")
     parser.add_argument("--extract", action="store_true", help="提取案例")
     parser.add_argument("--discover", action="store_true", help="自动发现新场景类型")
@@ -2505,10 +2651,24 @@ def main():
     # 参数
     parser.add_argument("--limit", type=int, default=0, help="处理数量限制")
     parser.add_argument("--scenes", nargs="+", help="指定场景类型")
-    parser.add_argument("--workers", type=int, default=8, help="--convert 并发线程数（I/O 密集，默认 8）")
-    parser.add_argument("--batch-size", type=int, default=128, help="sync upsert 批次大小")
-    parser.add_argument("--embed-batch", type=int, default=128, help="embedding 推理 batch size（GPU 建议 128）")
-    parser.add_argument("--skip-existing", action="store_true", help="sync 时条数一致则跳过重建")
+    parser.add_argument(
+        "--workers",
+        type=int,
+        default=8,
+        help="--convert 并发线程数（I/O 密集，默认 8）",
+    )
+    parser.add_argument(
+        "--batch-size", type=int, default=128, help="sync upsert 批次大小"
+    )
+    parser.add_argument(
+        "--embed-batch",
+        type=int,
+        default=128,
+        help="embedding 推理 batch size（GPU 建议 128）",
+    )
+    parser.add_argument(
+        "--skip-existing", action="store_true", help="sync 时条数一致则跳过重建"
+    )
     parser.add_argument("--min-cluster-size", type=int, default=10, help="最小聚类大小")
     parser.add_argument("--max-clusters", type=int, default=20, help="最大发现场景数")
     parser.add_argument("--confidence", type=float, default=0.6, help="置信度阈值")
