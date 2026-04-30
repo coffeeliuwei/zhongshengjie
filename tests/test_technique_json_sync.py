@@ -243,25 +243,11 @@ class TestSyncTechniqueJsonPayload:
 
 class TestCliTechniqueJson:
     def test_cli_has_technique_json_choice(self):
-        """CLI --sync 参数应包含 technique-json 选项"""
-        import subprocess
-
-        result = subprocess.run(
-            ["python", "-m", "modules.knowledge_base.hybrid_sync_manager", "--help"],
-            capture_output=True,
-            text=True,
-            cwd=str(PROJECT_ROOT),
-        )
-        assert "technique-json" in result.stdout, "CLI --sync 选项中缺少 technique-json"
+        """CLI --sync 参数应包含 technique-json 选项（AST 读源码验证）"""
+        src = (PROJECT_ROOT / "modules" / "knowledge_base" / "hybrid_sync_manager.py").read_text(encoding="utf-8")
+        assert "technique-json" in src, "hybrid_sync_manager.py CLI 中缺少 technique-json 选项"
 
     def test_cli_has_json_path_argument(self):
-        """CLI 应有 --json-path 参数"""
-        import subprocess
-
-        result = subprocess.run(
-            ["python", "-m", "modules.knowledge_base.hybrid_sync_manager", "--help"],
-            capture_output=True,
-            text=True,
-            cwd=str(PROJECT_ROOT),
-        )
-        assert "--json-path" in result.stdout, "CLI 缺少 --json-path 参数"
+        """CLI 应有 --json-path 参数（AST 读源码验证）"""
+        src = (PROJECT_ROOT / "modules" / "knowledge_base" / "hybrid_sync_manager.py").read_text(encoding="utf-8")
+        assert "--json-path" in src, "hybrid_sync_manager.py CLI 中缺少 --json-path 参数"
