@@ -404,7 +404,10 @@ class HybridSyncManager:
         for md_file in md_files:
             try:
                 parent_dir = md_file.parent.name
-                dimension = self.DIMENSION_MAP.get(parent_dir, "未知")
+                if parent_dir == "99-从小说提取":
+                    dimension = md_file.stem
+                else:
+                    dimension = self.DIMENSION_MAP.get(parent_dir, "未知")
                 writer = self.WRITER_MAP.get(dimension, "未知")
 
                 with open(md_file, "r", encoding="utf-8") as f:
