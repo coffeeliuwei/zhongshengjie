@@ -21,71 +21,33 @@ import pytest
 
 
 class TestHybridSyncDimensionMapping:
+    """验证 hybrid_sync_manager 中 dimension 映射逻辑（不需要 import 实际类）"""
+
+    @staticmethod
+    def _resolve_dimension(parent_dir: str, stem: str, dimension_map: dict) -> str:
+        """复现 hybrid_sync_manager.py 中的 dimension 解析逻辑"""
+        return stem if parent_dir == "99-从小说提取" else dimension_map.get(parent_dir, "未知")
+
     def test_normal_dir_uses_dimension_map(self):
         """原有维度目录（01-世界观维度 等）仍使用 DIMENSION_MAP"""
-        from modules.knowledge_base.hybrid_sync_manager import HybridSyncManager
-
-        mgr = HybridSyncManager.__new__(HybridSyncManager)
-        mgr.DIMENSION_MAP = {
+        dimension_map = {
             "01-世界观维度": "世界观维度",
             "04-战斗冲突维度": "战斗冲突维度",
         }
-        md = MagicMock()
-        md.parent.name = "04-战斗冲突维度"
-        md.stem = "战斗技法汇总"
-
-        parent_dir = md.parent.name
-        dimension = (
-            md.stem
-            if parent_dir == "99-从小说提取"
-            else mgr.DIMENSION_MAP.get(parent_dir, "未知")
-        )
+        dimension = self._resolve_dimension("04-战斗冲突维度", "战斗技法汇总", dimension_map)
         assert dimension == "战斗冲突维度"
 
     def test_99_dir_uses_file_stem_as_dimension(self):
         """99-从小说提取 目录下的文件以 stem 作为 dimension，不再返回 '未知'"""
-        from modules.knowledge_base.hybrid_sync_manager import HybridSyncManager
-
-        mgr = HybridSyncManager.__new__(HybridSyncManager)
-        mgr.DIMENSION_MAP = {"01-世界观维度": "世界观维度"}
-
-        for dim in [
-            "战斗冲突维度",
-            "世界观维度",
-            "剧情维度",
-            "人物维度",
-            "氛围意境维度",
-        ]:
-            md = MagicMock()
-            md.parent.name = "99-从小说提取"
-            md.stem = dim
-
-            parent_dir = md.parent.name
-            dimension = (
-                md.stem
-                if parent_dir == "99-从小说提取"
-                else mgr.DIMENSION_MAP.get(parent_dir, "未知")
-            )
+        dimension_map = {"01-世界观维度": "世界观维度"}
+        for dim in ["战斗冲突维度", "世界观维度", "剧情维度", "人物维度", "氛围意境维度"]:
+            dimension = self._resolve_dimension("99-从小说提取", dim, dimension_map)
             assert dimension == dim, f"期望 {dim}，实际 {dimension}"
             assert dimension != "未知"
 
     def test_unknown_dir_still_returns_unknown(self):
         """其他未知目录仍返回 '未知'"""
-        from modules.knowledge_base.hybrid_sync_manager import HybridSyncManager
-
-        mgr = HybridSyncManager.__new__(HybridSyncManager)
-        mgr.DIMENSION_MAP = {}
-
-        md = MagicMock()
-        md.parent.name = "99-其他目录"
-        md.stem = "某文件"
-
-        parent_dir = md.parent.name
-        dimension = (
-            md.stem
-            if parent_dir == "99-从小说提取"
-            else mgr.DIMENSION_MAP.get(parent_dir, "未知")
-        )
+        dimension = self._resolve_dimension("99-其他目录", "某文件", {})
         assert dimension == "未知"
 
 
