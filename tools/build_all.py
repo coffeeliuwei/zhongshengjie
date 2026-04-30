@@ -1,26 +1,31 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-一键构建全部数据
-================
+众生界统一入库管线
+==================
 
 新用户使用此脚本从零构建完整的小说创作系统。
 
 作者：coffeeliuwei
-版本：v14.0
-日期：2026-04-13
+版本：v15.0
+日期：2026-04-30
 
 用法：
-    python build_all.py                    # 完整构建
-    python build_all.py --skip-cases       # 跳过案例库
-    python build_all.py --quick            # 快速模式（仅初始化）
-    python build_all.py --status           # 查看状态
+    python tools/build_all.py                          # 全量入库（断点续跑）
+    python tools/build_all.py --status                 # 查看 collection 条数
+    python tools/build_all.py --only case,dialogue     # 只跑指定阶段
+    python tools/build_all.py --rebuild                # 强制清数据重跑
+    python tools/build_all.py --only technique_batch --rebuild
+
+阶段列表：case, extract, technique_batch, dialogue
 
 完整使用流程：
     0. 安装Skills：cp -r skills/* ~/.agents/skills/
     1. 克隆项目：git clone https://github.com/coffeeliuwei/zhongshengjie.git
     2. 安装依赖：pip install -r requirements.txt
-    3. 启动Qdrant：docker run -d --name qdrant -p 6333:6333 qdrant/qdrant
+    3. 启动Qdrant：docker run -d --name qdrant-server -p 6333:6333
+                   -p 6334:6334 -v E:/qdrant_storage:/qdrant/storage
+                   -e QDRANT__SERVICE__MAX_REQUEST_SIZE_MB=256 qdrant/qdrant
     4. 配置系统：cp config.example.json config.json（编辑路径）
     5. 构建数据：python tools/build_all.py
     6. 创建大纲：对话 "创建总大纲"
@@ -31,15 +36,85 @@
 import argparse
 import json
 import os
+import shutil
+import subprocess
 import sys
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
+from typing import List
 
-# 加载配置
-sys.path.insert(0, str(Path(__file__).parent.parent))
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(PROJECT_ROOT))
+
 from core.config_loader import get_qdrant_url
 
 QDRANT_URL = get_qdrant_url()
+
+DEFAULT_TECHNIQUE_JSON = "E:/novel_extracted/technique/technique_all.json"
+
+STAGES = [
+    {
+        "name": "case",
+        "label": "案例库构建（case_library_v2）",
+        "cmd": [
+            sys.executable, "-u",
+            str(PROJECT_ROOT / "tools" / "case_builder.py"),
+            "--all",
+        ],
+        "rebuild_extra": [],
+        "log": str(PROJECT_ROOT / "logs" / "case_log.txt"),
+    },
+    {
+        "name": "extract",
+        "label": "10维度提炼+入库",
+        "cmd": [
+            sys.executable, "-u",
+            str(PROJECT_ROOT / "tools" / "batch_extract.py"),
+            "--skip-case",
+        ],
+        "rebuild_extra": [],
+        "log": str(PROJECT_ROOT / "logs" / "batch_log.txt"),
+    },
+    {
+        "name": "technique_batch",
+        "label": "批量技法入库（writing_techniques_batch_v1）",
+        "cmd": [
+            sys.executable, "-u",
+            str(PROJECT_ROOT / "modules" / "knowledge_base" / "hybrid_sync_manager.py"),
+            "--sync", "technique-json",
+            "--json-path", "{technique_json}",
+        ],
+        "rebuild_extra": ["--rebuild"],
+        "log": str(PROJECT_ROOT / "logs" / "technique_batch_sync.log"),
+    },
+    {
+        "name": "dialogue",
+        "label": "对话风格聚合（dialogue_style_v1）",
+        "cmd": [
+            sys.executable, "-u",
+            str(PROJECT_ROOT / "tools" / "aggregate_dialogue_style.py"),
+        ],
+        "rebuild_extra": [],
+        "log": str(PROJECT_ROOT / "logs" / "aggregate_dialogue_style.log"),
+    },
+]
+
+STAGE_ORDER = ["case", "extract", "technique_batch", "dialogue"]
+
+
+def _build_cmd(stage: dict, rebuild: bool, technique_json: str) -> List[str]:
+    """构建阶段的实际命令，替换占位符，按需追加 rebuild_extra"""
+    cmd = []
+    for arg in stage["cmd"]:
+        cmd.append(technique_json if arg == "{technique_json}" else arg)
+    if rebuild:
+        cmd.extend(stage["rebuild_extra"])
+    return cmd
 
 
 def print_header(title):
