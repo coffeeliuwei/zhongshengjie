@@ -71,6 +71,23 @@ class TestSyncTechniqueJsonExists:
             "缺失方法 sync_technique_json"
         )
 
+    def test_uses_batch_collection_not_v2(self):
+        """sync_technique_json 必须写入 writing_techniques_batch_v1，不得动 v2"""
+        import pathlib
+
+        src = pathlib.Path("modules/knowledge_base/hybrid_sync_manager.py").read_text(
+            encoding="utf-8"
+        )
+        fn_start = src.index("def sync_technique_json(")
+        fn_body = src[fn_start : fn_start + 3000]
+        assert "writing_techniques_batch" in fn_body, (
+            "sync_technique_json 未使用 writing_techniques_batch collection"
+        )
+        # 方法体内不应出现直接写死 writing_techniques_v2 的字符串
+        assert '"writing_techniques_v2"' not in fn_body, (
+            "sync_technique_json 不得硬编码 writing_techniques_v2"
+        )
+
 
 class TestSyncTechniqueJsonBasic:
     def test_returns_zero_when_file_missing(self, mock_manager):
@@ -244,10 +261,204 @@ class TestSyncTechniqueJsonPayload:
 class TestCliTechniqueJson:
     def test_cli_has_technique_json_choice(self):
         """CLI --sync 参数应包含 technique-json 选项（AST 读源码验证）"""
-        src = (PROJECT_ROOT / "modules" / "knowledge_base" / "hybrid_sync_manager.py").read_text(encoding="utf-8")
-        assert "technique-json" in src, "hybrid_sync_manager.py CLI 中缺少 technique-json 选项"
+        src = (
+            PROJECT_ROOT / "modules" / "knowledge_base" / "hybrid_sync_manager.py"
+        ).read_text(encoding="utf-8")
+        assert "technique-json" in src, (
+            "hybrid_sync_manager.py CLI 中缺少 technique-json 选项"
+        )
 
     def test_cli_has_json_path_argument(self):
         """CLI 应有 --json-path 参数（AST 读源码验证）"""
-        src = (PROJECT_ROOT / "modules" / "knowledge_base" / "hybrid_sync_manager.py").read_text(encoding="utf-8")
-        assert "--json-path" in src, "hybrid_sync_manager.py CLI 中缺少 --json-path 参数"
+        src = (
+            PROJECT_ROOT / "modules" / "knowledge_base" / "hybrid_sync_manager.py"
+        ).read_text(encoding="utf-8")
+        assert "--json-path" in src, (
+            "hybrid_sync_manager.py CLI 中缺少 --json-path 参数"
+        )
+
+
+# ==================== 双 collection 合并检索 ====================
+
+
+class TestSearchTechniqueMultiCollection:
+    """验证 search_technique() 同时查两个 collection 并合并结果"""
+
+    def test_search_technique_queries_both_collections(self):
+        """当两个 collection 都存在时，两个都应被查询"""
+        import sys
+        from pathlib import Path
+
+        sys.path.insert(0, str(Path(__file__).parent.parent))
+        from unittest.mock import MagicMock, patch
+        from modules.knowledge_base.hybrid_search_manager import HybridSearchManager
+
+        mgr = HybridSearchManager.__new__(HybridSearchManager)
+        mgr.recall_config = {"dense_limit": 50, "sparse_limit": 50, "fusion_limit": 20}
+        mgr.rerank_config = {"enabled": False}
+
+        # mock _get_client：两个 collection 都存在
+        mock_client = MagicMock()
+        # 创建简单的 mock collection 对象，确保 .name 返回字符串
+        mock_v2 = MagicMock()
+        mock_v2.name = "writing_techniques_v2"
+        mock_batch = MagicMock()
+        mock_batch.name = "writing_techniques_batch_v1"
+        mock_client.get_collections.return_value.collections = [mock_v2, mock_batch]
+
+        # 每次 query_points 返回 2 个点
+        def fake_query(collection_name, **kwargs):
+            r = MagicMock()
+            p1 = MagicMock()
+            p1.score = 0.9
+            p1.id = hash(collection_name + "1")
+            p1.payload = {
+                "name": f"tech_{collection_name}_1",
+                "dimension": "剧情维度",
+                "writer": "玄一",
+                "source_file": "",
+                "content": "测试内容",
+                "word_count": 10,
+            }
+            p2 = MagicMock()
+            p2.score = 0.7
+            p2.id = hash(collection_name + "2")
+            p2.payload = {
+                "name": f"tech_{collection_name}_2",
+                "dimension": "剧情维度",
+                "writer": "玄一",
+                "source_file": "",
+                "content": "测试内容2",
+                "word_count": 10,
+            }
+            r.points = [p1, p2]
+            return r
+
+        mock_client.query_points.side_effect = fake_query
+        mgr._get_client = MagicMock(return_value=mock_client)
+        mgr._encode_query = MagicMock(
+            return_value={
+                "dense": [0.0] * 1024,
+                "sparse_indices": [0],
+                "sparse_values": [0.1],
+                "colbert": [[0.0] * 128],
+            }
+        )
+
+        results = mgr.search_technique("测试查询", top_k=10, use_rerank=False)
+        # 两个 collection 各 2 条，应返回 4 条（top_k=10）
+        assert len(results) == 4, f"期望4条，实际{len(results)}条"
+        # query_points 应被调用两次（各查一个 collection）
+        assert mock_client.query_points.call_count == 2, (
+            f"期望查询2次，实际{mock_client.query_points.call_count}次"
+        )
+
+    def test_search_technique_only_v2_if_batch_missing(self):
+        """当 batch collection 不存在时，只查 v2，不报错"""
+        import sys
+        from pathlib import Path
+
+        sys.path.insert(0, str(Path(__file__).parent.parent))
+        from unittest.mock import MagicMock
+        from modules.knowledge_base.hybrid_search_manager import HybridSearchManager
+
+        mgr = HybridSearchManager.__new__(HybridSearchManager)
+        mgr.recall_config = {"dense_limit": 50, "sparse_limit": 50, "fusion_limit": 20}
+        mgr.rerank_config = {"enabled": False}
+
+        mock_client = MagicMock()
+        # 只有 v2，没有 batch - 确保 .name 是字符串
+        mock_v2 = MagicMock()
+        mock_v2.name = "writing_techniques_v2"
+        mock_client.get_collections.return_value.collections = [mock_v2]
+        r = MagicMock()
+        p = MagicMock()
+        p.score = 0.8
+        p.id = 1
+        p.payload = {
+            "name": "tech1",
+            "dimension": "剧情维度",
+            "writer": "玄一",
+            "source_file": "",
+            "content": "内容",
+            "word_count": 5,
+        }
+        r.points = [p]
+        mock_client.query_points.return_value = r
+        mgr._get_client = MagicMock(return_value=mock_client)
+        mgr._encode_query = MagicMock(
+            return_value={
+                "dense": [0.0] * 1024,
+                "sparse_indices": [0],
+                "sparse_values": [0.1],
+                "colbert": [[0.0] * 128],
+            }
+        )
+
+        results = mgr.search_technique("测试", top_k=5, use_rerank=False)
+        assert len(results) == 1
+        assert mock_client.query_points.call_count == 1, "只有 v2 存在时只应查询1次"
+
+    def test_results_sorted_by_score_descending(self):
+        """合并结果必须按 score 降序排列"""
+        import sys
+        from pathlib import Path
+
+        sys.path.insert(0, str(Path(__file__).parent.parent))
+        from unittest.mock import MagicMock
+        from modules.knowledge_base.hybrid_search_manager import HybridSearchManager
+
+        mgr = HybridSearchManager.__new__(HybridSearchManager)
+        mgr.recall_config = {"dense_limit": 50, "sparse_limit": 50, "fusion_limit": 20}
+        mgr.rerank_config = {"enabled": False}
+
+        mock_client = MagicMock()
+        # 确保 .name 是字符串
+        mock_v2 = MagicMock()
+        mock_v2.name = "writing_techniques_v2"
+        mock_batch = MagicMock()
+        mock_batch.name = "writing_techniques_batch_v1"
+        mock_client.get_collections.return_value.collections = [mock_v2, mock_batch]
+        scores_by_collection = {
+            "writing_techniques_v2": [0.6, 0.4],
+            "writing_techniques_batch_v1": [0.9, 0.5],
+        }
+        call_count = [0]
+
+        def fake_query(collection_name, **kwargs):
+            r = MagicMock()
+            points = []
+            for i, sc in enumerate(scores_by_collection.get(collection_name, [])):
+                p = MagicMock()
+                p.score = sc
+                p.id = call_count[0] * 10 + i
+                p.payload = {
+                    "name": f"t{i}",
+                    "dimension": "剧情维度",
+                    "writer": "玄一",
+                    "source_file": "",
+                    "content": "x",
+                    "word_count": 1,
+                }
+                points.append(p)
+                call_count[0] += 1
+            r.points = points
+            return r
+
+        mock_client.query_points.side_effect = fake_query
+        mgr._get_client = MagicMock(return_value=mock_client)
+        mgr._encode_query = MagicMock(
+            return_value={
+                "dense": [0.0] * 1024,
+                "sparse_indices": [0],
+                "sparse_values": [0.1],
+                "colbert": [[0.0] * 128],
+            }
+        )
+
+        results = mgr.search_technique(
+            "测试", min_score=0.0, top_k=10, use_rerank=False
+        )
+        scores = [r["score"] for r in results]
+        assert scores == sorted(scores, reverse=True), f"结果未按score降序：{scores}"
+        assert scores[0] == 0.9, f"最高分应为0.9，实际{scores[0]}"

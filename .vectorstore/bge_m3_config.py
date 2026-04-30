@@ -43,6 +43,7 @@ USE_FP16 = True  # 使用半精度加速
 COLLECTION_NAMES = {
     "novel_settings": "novel_settings_v2",  # 小说设定（混合版）
     "writing_techniques": "writing_techniques_v2",  # 创作技法（混合版）
+    "writing_techniques_batch": "writing_techniques_batch_v1",  # 批量提炼技法（一次性历史数据）
     "case_library": "case_library_v2",  # 标杆案例（混合版）
     # 扩展维度Collection
     "worldview_element": "worldview_element_v1",  # 世界观元素
