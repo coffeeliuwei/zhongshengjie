@@ -26,6 +26,7 @@
 
 import argparse
 import json
+import os
 import re
 import hashlib
 import uuid
@@ -33,6 +34,9 @@ import sys
 import time
 import tempfile
 import shutil
+
+os.environ.setdefault("no_proxy", "localhost,127.0.0.1")
+os.environ.setdefault("NO_PROXY", "localhost,127.0.0.1")
 import threading
 from concurrent.futures import ThreadPoolExecutor, Future, as_completed
 from pathlib import Path
