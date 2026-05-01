@@ -6,7 +6,10 @@
 
 from .feedback_collector import FeedbackCollector
 from .feedback_processor import FeedbackProcessor
-from .experience_writer import ExperienceWriter
+try:
+    from .experience_writer import ExperienceWriter
+except ImportError:
+    ExperienceWriter = None
 
 __all__ = [
     "FeedbackCollector",

@@ -11,7 +11,12 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from collections import Counter
 
-import jsonschema as _jsonschema
+try:
+    import jsonschema as _jsonschema
+    _HAS_JSONSCHEMA = True
+except ImportError:
+    _jsonschema = None
+    _HAS_JSONSCHEMA = False
 from pathlib import Path as _Path
 
 # 懒加载 schema，避免模块导入时 IO
@@ -84,7 +89,7 @@ class ExperienceWriter:
             "what_didnt_work",
             "for_next_chapter",
         }
-        if set(experience.keys()) & schema_fields:
+        if _HAS_JSONSCHEMA and set(experience.keys()) & schema_fields:
             try:
                 _jsonschema.validate(
                     instance=experience, schema=_get_experience_schema()
