@@ -163,7 +163,7 @@ def main():
     )
     from bge_m3_config import get_collection_config
 
-    client = QdrantClient(url="http://localhost:6333", timeout=300)
+    client = QdrantClient(url=os.environ.get("QDRANT_URL", "http://localhost:6333"), timeout=300)
     existing = [c.name for c in client.get_collections().collections]
     if COLLECTION in existing:
         client.delete_collection(COLLECTION)

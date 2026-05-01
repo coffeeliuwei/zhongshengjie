@@ -13,6 +13,7 @@
 - 便于快速诊断问题
 """
 
+import os
 from enum import Enum
 from typing import Dict, List, Any, Optional, Callable
 from dataclasses import dataclass, field
@@ -22,7 +23,7 @@ import json
 
 # 从配置加载器导入路径获取函数
 try:
-    from .config_loader import get_project_root
+    from .config_loader import get_project_root, get_qdrant_url
 
     HAS_CONFIG_LOADER = True
 except ImportError:
@@ -201,7 +202,8 @@ class HealthChecker:
         try:
             from qdrant_client import QdrantClient
 
-            client = QdrantClient(host="localhost", port=6333)
+            qdrant_url = get_qdrant_url() if HAS_CONFIG_LOADER else os.environ.get("QDRANT_URL", "http://localhost:6333")
+            client = QdrantClient(url=qdrant_url)
 
             # 检查连接
             collections = client.get_collections()
@@ -232,7 +234,7 @@ class HealthChecker:
                 try:
                     info = client.get_collection(coll)
                     details[coll] = info.points_count
-                except:
+                except Exception:
                     details[coll] = "无法获取"
 
             return HealthCheckResult(
