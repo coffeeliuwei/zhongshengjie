@@ -12,12 +12,17 @@ tools/sync_extracted_to_qdrant.py
 """
 
 import json
+import os
 import sys
 import argparse
 import time
 from concurrent.futures import ThreadPoolExecutor, Future
 from pathlib import Path
 from typing import List, Dict, Optional
+
+# 防止系统代理拦截对本地 Qdrant 的请求
+os.environ.setdefault("no_proxy", "localhost,127.0.0.1")
+os.environ.setdefault("NO_PROXY", "localhost,127.0.0.1")
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))

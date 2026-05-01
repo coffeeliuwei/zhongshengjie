@@ -9,6 +9,9 @@ import sys
 import os
 import json
 from pathlib import Path
+
+os.environ.setdefault("no_proxy", "localhost,127.0.0.1")
+os.environ.setdefault("NO_PROXY", "localhost,127.0.0.1")
 from collections import defaultdict, Counter
 
 if hasattr(sys.stdout, "reconfigure"):

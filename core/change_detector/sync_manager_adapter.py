@@ -188,14 +188,15 @@ class SyncManagerAdapter:
             )
 
         try:
-            sync_manager = self._get_sync_manager()
-            result = sync_manager.sync_techniques(rebuild=rebuild)
+            from modules.knowledge_base.hybrid_sync_manager import HybridSyncManager
+            hybrid_manager = HybridSyncManager(project_dir=self.project_root)
+            result = hybrid_manager.sync_techniques(rebuild=rebuild)
 
             return SyncResult(
                 target="techniques",
                 status="success",
                 count=result,
-                message="技法库已同步",
+                message="技法库已同步（HybridSyncManager BGE-M3）",
             )
         except Exception as e:
             return SyncResult(
