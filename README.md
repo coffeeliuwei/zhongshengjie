@@ -78,6 +78,28 @@
 
 ## 更新日志
 
+### v0.2.3 (2026-05-01，master) - 全面代码审计修复
+
+**配置安全**：
+- 🔧 `core/health_check.py`：`check_database()` 硬编码 `host="localhost", port=6333` → 改用 `get_qdrant_url()` / `QDRANT_URL` 环境变量，支持非本机部署
+- 🔧 `tools/aggregate_dialogue_style.py`：硬编码 URL → `os.environ.get("QDRANT_URL", ...)`
+- 🔧 `modules/migration/init_environment.py`：硬编码 `host="localhost"` → `os.environ.get("QDRANT_URL", ...)`
+
+**代码质量**：
+- 🔧 `core/health_check.py`：裸 `except:` → `except Exception:`
+- 🔧 `core/retrieval/unified_retrieval_api.py`：删除导入但从未使用的 `lru_cache`
+
+**导入链防护**（级联崩溃修复）：
+- 🔧 `core/feedback/experience_writer.py`：`import jsonschema` 改为条件导入，缺失时 schema 校验静默跳过而非抛 `ImportError` 阻断整条 `conversation→intent_router→feedback` 导入链
+- 🔧 `core/feedback/__init__.py`：`ExperienceWriter` 导入包 `try/except`，避免底层缺失影响上层所有调用者
+
+**依赖管理**：
+- 🔧 `requirements.txt`：核心 ML/推理包从 `>=` 锁定为精确版本（`sentence-transformers==5.4.1`、`FlagEmbedding==1.4.0`、`qdrant-client==1.17.1`、`numpy==2.4.4` 等），防止大版本升级静默破坏向量维度或 API；`torch` 保留 `>=` 因 CUDA 后缀因机器而异
+
+**测试**：导入链防护修复后，此前因 `jsonschema` 缺失导致无法收集的 2 个测试文件恢复正常
+
+---
+
 ### v0.2.2 (2026-04-28，master) - 案例库性能 & 稳定性 & 架构修复
 
 **案例库检索扩展**：
