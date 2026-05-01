@@ -34,7 +34,6 @@ import os
 import time
 from pathlib import Path
 from typing import Dict, List, Any, Optional
-from functools import lru_cache
 
 # 导入现有检索器
 from modules.knowledge_base.hybrid_search_manager import HybridSearchManager

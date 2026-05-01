@@ -9,6 +9,7 @@
 """
 
 import json
+import os
 from pathlib import Path
 from typing import Dict, Any, List
 from datetime import datetime
@@ -422,7 +423,7 @@ python -m core create --workflow
             from qdrant_client import QdrantClient
             from qdrant_client.models import Distance, VectorParams
 
-            client = QdrantClient(host="localhost", port=6333)
+            client = QdrantClient(url=os.environ.get("QDRANT_URL", "http://localhost:6333"))
 
             # 创建集合
             from sentence_transformers import SentenceTransformer
