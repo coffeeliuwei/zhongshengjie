@@ -390,6 +390,10 @@ def get_case_library_dir() -> Path:
     return get_path("case_library_dir")
 
 
+def get_judicial_cases_dir() -> Path:
+    return get_path("judicial_cases_dir")
+
+
 def get_logs_dir() -> Path:
     return get_path("logs_dir")
 

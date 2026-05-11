@@ -660,6 +660,82 @@ class UnifiedRetrievalAPI:
         """战斗/力量案例检索（剑尘专用）"""
         return self.search_cases(query=query, scene_type=scene_type, top_k=limit)
 
+    def search_judicial_cases(
+        self,
+        query: str,
+        section: Optional[str] = None,
+        top_k: int = 5,
+        min_score: float = 0.4,
+    ) -> List[Dict[str, Any]]:
+        """
+        司法案例检索（真实犯罪案例写作素材）
+
+        从 judicial_cases_v1 collection 中检索与 query 语义相关的案例片段。
+        结果可直接用于写手参考犯罪手法、案件经过、庭审细节等。
+
+        Args:
+            query: 查询文本（如 "诈骗受害者"、"故意伤害判决"）
+            section: 栏目过滤（典型案例 / 检察要闻 / 检察动态），None 表示不过滤
+            top_k: 返回数量
+            min_score: 最低相似度阈值
+
+        Returns:
+            List[Dict]，每条含 title / date / section / url / content / score
+        """
+        try:
+            from qdrant_client import QdrantClient
+            from qdrant_client import models as qmodels
+
+            client = QdrantClient(url=get_qdrant_url(), timeout=30)
+            collection = get_collection_name("judicial_cases")
+
+            existing = [c.name for c in client.get_collections().collections]
+            if collection not in existing:
+                return []
+
+            query_vecs = self._search_manager._encode_query(query)
+            dense_vec = query_vecs["dense"]
+
+            qf = None
+            if section:
+                qf = qmodels.Filter(
+                    must=[
+                        qmodels.FieldCondition(
+                            key="section",
+                            match=qmodels.MatchValue(value=section),
+                        )
+                    ]
+                )
+
+            results_obj = client.query_points(
+                collection_name=collection,
+                query=dense_vec,
+                using="dense",
+                query_filter=qf,
+                limit=top_k,
+                score_threshold=min_score,
+                with_payload=True,
+            )
+            out = []
+            for h in results_obj.points:
+                p = h.payload or {}
+                out.append({
+                    "title": p.get("title", ""),
+                    "date": p.get("date", ""),
+                    "source_site": p.get("source_site", ""),
+                    "section": p.get("section", ""),
+                    "url": p.get("url", ""),
+                    "content": p.get("content", ""),
+                    "chunk_index": p.get("chunk_index", 0),
+                    "total_chunks": p.get("total_chunks", 1),
+                    "score": h.score,
+                    "_source": "judicial_cases",
+                })
+            return out
+        except Exception as e:
+            self._logger.warning(f"司法案例检索失败: {e}")
+            return []
+
     def search_novel(
         self,
         query: str,

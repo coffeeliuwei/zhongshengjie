@@ -27,6 +27,8 @@
     "vectorstore_dir": ".vectorstore",
     "case_library_dir": "E:/case-library",
     "_case_library_dir说明": "案例库目录（converted/ + cases/），转换后数据量大（可能50GB+），必须放 E 盘",
+    "judicial_cases_dir": "E:/司法案例",
+    "_judicial_cases_dir说明": "司法/犯罪案例爬取输出目录（scrape_thepaper.py 等工具写入），审阅后手动导入案例库",
     "logs_dir": "logs",
     "cache_dir": "E:/众生界_cache",
     "_cache_dir说明": "缓存目录，需要 5-10 GB 空间。如果没有 E 盘，改为其他数据盘（如 D:/众生界_cache）",
@@ -64,7 +66,8 @@
       "novel_settings": "novel_settings_v2",
       "writing_techniques": "writing_techniques_v2",
       "case_library": "case_library_v2",
-      "creation_context": "creation_context"
+      "creation_context": "creation_context",
+      "judicial_cases": "judicial_cases_v1"
     }
   },
 

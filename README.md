@@ -82,6 +82,21 @@
 
 ## 更新日志
 
+### v0.2.5 (2026-05-11，master) - 司法案例写作素材管道
+
+**司法案例爬取 → 过滤 → 向量入库全链路**：
+- 🕷️ `tools/scrape_spp.py`：抓取最高人民检察院 spp.gov.cn 典型案例/检察要闻/检察动态；静态 .shtml 无需 JS；断点续传；本次抓取 749 篇（310+450+0）
+- 🕷️ `tools/scrape_thepaper.py`：澎湃新闻辅助爬取，17 个司法频道，与 spp 输出格式兼容
+- 🔍 `tools/filter_judicial_cases.py`：关键词评分过滤（STRONG×3 / WEAK×1 / NEGATIVE×−4）；自动分流到 `reviewed/`（保留）/ `uncertain/`（待查）/ `rejected/`（丢弃）；本次 749 篇 → 保留256 / 待查62 / 丢弃431
+- 📥 `tools/ingest_judicial_cases.py`：BGE-M3 dense+sparse 嵌入，800字分块，写入 `judicial_cases_v1` collection；当前入库 **1007 块（256篇）**
+- 🔎 `UnifiedRetrievalAPI.search_judicial_cases(query, section, top_k)`：写手可直接调用，按语义检索真实案例片段
+
+**配置**：
+- `config.json`：新增 `paths.judicial_cases_dir`（默认 `E:/司法案例`）、`database.collections.judicial_cases`（`judicial_cases_v1`）
+- `core/config_loader.py`：新增 `get_judicial_cases_dir()` 函数
+
+---
+
 ### v0.2.4 (2026-05-02，master) - 二阶段实训文档发布
 
 **二阶段云原生 API 架构改造文档**：
