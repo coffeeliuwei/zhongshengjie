@@ -1261,7 +1261,9 @@ curl http://192.168.1.yyy/health
 
 ---
 
-> 第三步部署的 Qdrant 现在是空的，需要把一阶段在本地积累的所有数据（13 个 collection，几十万条记录）迁移到云端。
+> 第三步部署的 Qdrant 现在是空的，需要把一阶段在本地积累的所有数据（**14 个 collection**，几十万条记录）迁移到云端。
+>
+> 14 个 collection 清单：`novel_settings_v2`、`writing_techniques_v2`、`writing_techniques_batch_v1`、`case_library_v2`、`chapter_outlines`、`worldview`、`novel_plot_v1`、`dialogue_style_v1`、`emotion_arc_v1`、`power_vocabulary_v1`、`foreshadow_pair_v1`、`power_cost_v1`、`author_style_v1`、`judicial_cases_v1`（司法案例素材库，256篇/1007块，需先在本地运行三步建库命令，见一阶段指导书"司法案例素材库"章节）
 >
 > **本步骤时间较长（1-3小时），建议在网络稳定的环境下进行，不要中途断网。**
 
@@ -1348,17 +1350,21 @@ E:\anaconda3\envs\python13\python.exe tools\migrate_to_cloud.py `
 源：localhost:6333
 目标：47.98.xxx.xxx:6333
 
-共 13 个 collection 需要迁移
+共 14 个 collection 需要迁移
 
-[1/13] 开始迁移：novel_settings_v2  (12,451 条数据)
+[1/14] 开始迁移：novel_settings_v2  (12,451 条数据)
   已迁移：12,451 / 12,451 条
   ✓ 完成：novel_settings_v2（12,451 条）
 
-[2/13] 开始迁移：writing_techniques_v2  (986 条数据)
+[2/14] 开始迁移：writing_techniques_v2  (986 条数据)
 ...
-[8/13] 开始迁移：writing_techniques_batch_v1  (138,968 条数据)
+[8/14] 开始迁移：writing_techniques_batch_v1  (138,968 条数据)
   已迁移：138,968 / 138,968 条     ← 这个最慢，约 20-30 分钟
   ✓ 完成：writing_techniques_batch_v1（138,968 条）
+...
+[14/14] 开始迁移：judicial_cases_v1  (1,007 条数据)
+  已迁移：1,007 / 1,007 条
+  ✓ 完成：judicial_cases_v1（1,007 条）
 ...
 🎉 全部 collection 迁移完成！
 ```
@@ -1386,7 +1392,9 @@ curl -s -H "api-key: ZsjCloud2026@Qdrant#DB" \
     http://localhost:6333/collections | python3 -m json.tool
 ```
 
-应该看到 13 个 collection，每个的 `points_count` 与本地一致。
+应该看到 14 个 collection，每个的 `points_count` 与本地一致。
+
+> **关于 judicial_cases_v1**：这是真实司法案例知识库（1,007块/256篇，来自最高检spp.gov.cn），是一阶段用 `tools/scrape_spp.py → filter_judicial_cases.py → ingest_judicial_cases.py` 三步建立的。迁移时与其他 collection 无区别，migrate_to_cloud.py 会自动处理。
 
 ---
 
