@@ -1,8 +1,8 @@
 # 众生界项目骨架
 
-> **自动生成** | 2026-05-11 16:33 (Asia/Shanghai)
+> **自动生成** | 2026-05-16 20:03 (Asia/Shanghai)
 > **用途**: 供 AI 快速认知项目结构，不含实现细节
-> **覆盖**: 185 个文件 / 164 个类 / 513 个函数
+> **覆盖**: 189 个文件 / 164 个类 / 541 个函数
 > **更新**: git pre-commit hook 自动触发（.py 变更时重新生成）
 
 ---
@@ -3277,6 +3277,69 @@
 
 - `def main()`
 
+### `tools/merge_author_styles.py`
+
+- `def load_fragment(path: Path) -> list`
+
+- `def merge_authors(fragment_files: list[Path]) -> list`
+
+- `def build_header(total: int) -> str`
+
+- `def main()`
+
+### `tools/narrative_ledger.py`
+> tools/narrative_ledger.py
+
+- `def _load_cfg() -> dict`
+
+- `def _ledger_path() -> Path`
+
+- `def _load_ledger() -> dict`
+
+- `def _save_ledger(data: dict) -> None`
+
+- `def _now() -> str`
+
+- `def update_chapter(
+    chapter: int,
+    scene_types: list[str],
+    tension_level: int,
+    themes_touched: dict[str, int] | None = None,
+) -> None`  # 在阶段8经验写入后调用，更新台账。
+
+- `def get_diversity_constraints(next_chapter: int) -> str`  # 在阶段1大纲解析后调用，返回可直接注入 prompt 的多样性约束块。
+
+- `def show_summary() -> str`  # 生成台账当前状态的可读摘要。
+
+- `def main() -> None`
+
+### `tools/quality_gate.py`
+> tools/quality_gate.py
+
+- `def _load_yaml(path: Path) -> Any`
+
+- `def _load_writer_blacklist(writer: str) -> list[str]`  # 加载写手配置中所有作家的黑名单（并集）。
+
+- `def _load_gate_config() -> dict`
+
+- `def compute_burstiness(text: str) -> tuple[bool, float, str]`  # 计算句子长度方差（Burstiness 指标）。
+
+- `def check_ai_blacklist(
+    text: str,
+    writer_blacklist: list[str] | None = None,
+) -> tuple[bool, list[str], float]`  # 检测 AI 套句命中情况。
+
+- `def run_quality_gate(
+    text: str,
+    writer: str | None = None,
+    chapter: int | None = None,
+    scene_index: int | None = None,
+) -> dict[str, Any]`  # 执行完整质量检测。
+
+- `def format_report(result: dict) -> str`  # 格式化为可读报告文本。
+
+- `def main() -> None`
+
 ### `tools/scene_discoverer.py`
 
 **class SceneDiscoverer**
@@ -3472,6 +3535,27 @@
 - `def analyze_file(py_file: Path) -> dict`
 
 - `def main()`
+
+### `tools/style_injector.py`
+> tools/style_injector.py
+
+- `def _fetch_self_style_block() -> str`  # 从 memory_points_v1 读取本书自我风格偏好，拼成 prompt 追加块。
+
+- `def _load_yaml(path: Path) -> Any`
+
+- `def _get_author(styles_data: dict, name: str) -> dict | None`
+
+- `def build_writer_style_context(
+    writer: str,
+    scene_type: str,
+    seed: int | None = None,
+) -> str`  # 构建写手风格上下文提示块。
+
+- `def list_available_authors(writer: str) -> list[str]`  # 列出写手可用的作家列表（供用户调整配比时参考）。
+
+- `def get_current_mix(writer: str) -> dict[str, float]`  # 返回写手当前的作家配比。
+
+- `def main() -> None`
 
 ### `tools/sync_eval_criteria_to_qdrant.py`
 

@@ -1,0 +1,805 @@
+# 跨域作家风格档案 — 20位
+# 用于多写手共享的跨域参考作家
+# 合并时去重，以 id 为主键
+
+authors:
+
+  - id: ge_fei
+    name: 格非
+    domains: [墨言, 云溪]
+    genres: [先锋文学, 历史叙事, 心理小说]
+    signature_works: [围城之外, 江南三部曲, 隐身衣]
+    aws_profile:
+      voice: 冷峻克制，时间感错乱，叙事迷宫式推进
+      sentence_rhythm: 长短句交错，常用破折号插入意识流碎片
+      vocabulary_level: 文人书卷气，偶用方言口语打破节奏
+      punctuation_style: 句号之后常接极短句，制造顿挫
+      paragraph_structure: 段落首句设悬念，末句留白或反转
+      emotional_register: 压抑冷淡，情感以物象外化而非直白表达
+      pov_tendency: 第三人称限知，偶转全知形成距离感
+      dialogue_style: 对话简短疏离，潜台词远多于表面意义
+    behavior_constraints:
+      - 时间线非线性，过去与现在交织但始终清晰
+      - 用建筑、地图、档案等"文献"意象锚定历史
+      - 人物欲望压抑于表面理性之下，用行为而非内心独白呈现
+      - 每个章节至少一处叙事视角的细微偏移
+      - 结局拒绝和解，保留模糊与悬而未决
+    bad_habits:
+      - 避免直接说出人物的心理动机
+      - 不用戏剧性高潮，靠积累张力而非爆发
+      - 忌用宏大历史感叹词汇（如"时代洪流"）
+    ai_blacklist:
+      - 心中涌起复杂的情感
+      - 历史的车轮滚滚向前
+      - 命运就此改变
+      - 他感到一阵迷茫
+      - 岁月如梭
+      - 时光飞逝
+      - 眼眶湿润了
+      - 深吸一口气
+    style_anchors:
+      opening: 档案式或景物描写开场，隐藏人物出场
+      atmosphere: 南方水乡的湿润腐朽气息
+      character: 人物以日常琐事替代内心剖白
+      suspense: 叙事延迟——关键事件在侧面被提及而非正面呈现
+      closing: 结尾回到开头意象，形成封闭回环
+
+  - id: su_tong
+    name: 苏童
+    domains: [墨言, 云溪]
+    genres: [先锋文学, 历史题材, 江南叙事]
+    signature_works: [妻妾成群, 米, 我的帝王生涯, 河岸]
+    aws_profile:
+      voice: 阴郁华美，南方腐败气息，人性幽暗面的诗意书写
+      sentence_rhythm: 中短句为主，节奏流畅，擅长排比渲染压抑氛围
+      vocabulary_level: 雅俗并用，古典意象与口语交杂
+      punctuation_style: 逗号密集，长句分解成意象碎片
+      paragraph_structure: 场景细节铺陈后突然切入内心，形成落差
+      emotional_register: 欲望与绝望并存，以冷笔写热情
+      pov_tendency: 第三人称，常跟随边缘人物视角
+      dialogue_style: 对话暗藏权力关系，语气轻柔实则残忍
+    behavior_constraints:
+      - 用具体的南方事物（水、米、蚊帐、院墙）构建空间
+      - 人物欲望通过身体感官细节而非心理分析呈现
+      - 历史背景作为压迫性氛围而非叙事驱动力
+      - 女性角色的处境通过日常细节而非控诉来表现
+      - 结局走向悲剧或虚无，但不强调道德评判
+    bad_habits:
+      - 不做历史正当性的道德辩护
+      - 不用宏观社会议论插入叙事
+      - 避免人物的励志式成长弧线
+    ai_blacklist:
+      - 她的心像刀割一样
+      - 命运弄人
+      - 时代的烙印
+      - 泪水夺眶而出
+      - 内心深处
+      - 一股暖流涌上心头
+      - 令人动容
+      - 感同身受
+    style_anchors:
+      atmosphere: 南方夏日的燥热与腐朽，潮湿院落
+      character: 用衣物、食物、触觉细节刻画欲望
+      opening: 场景式，直接进入人物处境
+      suspense: 压迫性的日常重复中隐藏危机
+      closing: 衰败或死亡，以静物描写收尾
+
+  - id: gu_man
+    name: 顾漫
+    domains: [墨言]
+    genres: [都市言情, 轻喜剧]
+    signature_works: [杉杉来了, 何以笙箫默, 微微一笑很倾城]
+    aws_profile:
+      voice: 温馨甜蜜，轻快俏皮，现代都市爱情叙事
+      sentence_rhythm: 短句为主，对话占比高，节奏明快
+      vocabulary_level: 日常口语，偶有网络用语点缀
+      punctuation_style: 感叹号适度，省略号用于俏皮停顿
+      paragraph_structure: 场景短小，快速切换，多用对话推进
+      emotional_register: 甜蜜为主，偶有小误会小委屈，整体乐观
+      pov_tendency: 女主第一或第三人称限知，聚焦内心小剧场
+      dialogue_style: 对话活泼，男主寡言冷淡与女主喋喋不休形成反差
+    behavior_constraints:
+      - 男主强大能干但在感情上表现迟钝或克制
+      - 女主有鲜明个性缺点，但可爱不做作
+      - 误会必须合理，不依赖信息不对称强行延误
+      - 甜蜜场景后必有轻松的日常化处理
+      - 结局圆满，过程不设置重大悲剧
+    bad_habits:
+      - 不写血腥暴力或极端情绪崩溃
+      - 不做冗长心理分析，靠行为和对话传情
+      - 避免说教式价值观输出
+    ai_blacklist:
+      - 心跳漏了一拍
+      - 呼吸都停止了
+      - 脑海中一片空白
+      - 不知道该说什么
+      - 莫名地红了脸
+      - 心跳加速
+      - 眼神交汇的瞬间
+      - 时间仿佛静止
+    style_anchors:
+      opening: 生活化场景，快速建立女主视角
+      character: 细节行为展示性格，不做性格说明
+      dialogue: 男女主对话节奏一紧一松，张弛有度
+      atmosphere: 都市日常，职场或校园背景
+      closing: 甜蜜日常场景，不追求宏大结局
+
+  - id: tong_hua
+    name: 桐华
+    domains: [墨言]
+    genres: [古言言情, 宫廷权谋]
+    signature_works: [步步惊心, 大漠谣, 云中歌, 那些回不去的年少时光]
+    aws_profile:
+      voice: 深情哀婉，古典韵味，在宫廷权谋中书写爱情的无力
+      sentence_rhythm: 中长句，文雅舒缓，情感铺陈充分
+      vocabulary_level: 古言雅致，但不失现代可读性
+      punctuation_style: 逗号、句号稳定，情感高潮处用破折号
+      paragraph_structure: 情景交融，先写环境后写人物心境
+      emotional_register: 压抑深情，爱而不得，克制的伤感
+      pov_tendency: 女主第一人称，代入感强
+      dialogue_style: 对话含蓄，话里有话，权力关系暗藏其中
+    behavior_constraints:
+      - 感情线与权谋线紧密交织，爱情受制于政治
+      - 女主有智慧有勇气，但不是无敌开挂
+      - 历史背景考据认真，不随意篡改
+      - 悲剧结局要有足够的铺垫和合理性
+      - 小人物的命运与历史大势形成对照
+    bad_habits:
+      - 不写男主滥情多情，感情线清晰专一
+      - 不强行HE打破人物逻辑
+      - 避免突然的性格转变
+    ai_blacklist:
+      - 不知为何眼眶湿润
+      - 心痛如绞
+      - 情不自禁
+      - 相视一笑
+      - 泪眼朦胧
+      - 强忍泪水
+      - 说不出话来
+      - 千言万语化为沉默
+    style_anchors:
+      opening: 历史场景或人物命运的感慨式开场
+      atmosphere: 宫廷深处的寂寥，江湖的苍凉
+      character: 人物选择揭示性格，不做品格说明
+      suspense: 权谋中的情感危机
+      closing: 以历史感收尾，个人命运归于时代
+
+  - id: mo_bao_fei_bao
+    name: 墨宝非宝
+    domains: [墨言]
+    genres: [都市言情, 职场爱情]
+    signature_works: [你好，旧时光, 暗格里的秘密, 知否知否应是绿肥红瘦]
+    aws_profile:
+      voice: 温暖细腻，日常质感强，人物关系层次丰富
+      sentence_rhythm: 短中句均衡，对话自然流畅
+      vocabulary_level: 现代口语与文雅词汇交替
+      punctuation_style: 稳健规整，情感处不滥用标点
+      paragraph_structure: 细节铺排充分，人物群像描写有条不紊
+      emotional_register: 温暖治愈，不刻意煽情，真实感强
+      pov_tendency: 多视角切换，群像叙事
+      dialogue_style: 对话生活化，潜台词丰富，角色声音各异
+    behavior_constraints:
+      - 人物群像丰富，配角有独立的人格与故事线
+      - 爱情是主线之一，但家庭、友情、成长同等重要
+      - 冲突来自现实生活而非狗血设定
+      - 情感积累充分，关键时刻的爆发有厚重感
+      - 历史背景（古言类）考据扎实，生活细节真实
+    bad_habits:
+      - 不写超出人物认知的开挂行为
+      - 不用单一视角，照顾多方立场
+      - 避免刻意制造误会拖延感情线
+    ai_blacklist:
+      - 仿佛心跳都停止了
+      - 脑子一片空白
+      - 不知该如何开口
+      - 一瞬间的怔愣
+      - 莫名心酸
+      - 眼角微红
+      - 沉默良久
+      - 复杂的情绪涌上心头
+    style_anchors:
+      opening: 日常生活场景，迅速建立人物关系网
+      character: 通过日常小事与细节行为塑造人物
+      atmosphere: 温暖的家庭或校园/职场日常
+      dialogue: 对话推进关系发展，每段对话有信息增量
+      closing: 温情的日常画面，不追求戏剧性收场
+
+  - id: da_feng_gua_guo
+    name: 大风刮过
+    domains: [墨言]
+    genres: [都市言情, 轻熟女性向]
+    signature_works: [当婚则婚, 职场是个技术活]
+    aws_profile:
+      voice: 干练利落，现实感强，女性独立视角
+      sentence_rhythm: 短句为主，节奏快，口语化
+      vocabulary_level: 现代都市用语，职场术语自然融入
+      punctuation_style: 简洁，少用省略号，不拖泥带水
+      paragraph_structure: 场景紧凑，对话推进，内心独白简短
+      emotional_register: 理性克制，感情不做作，成年人式的清醒
+      pov_tendency: 女主第一人称，现实主义视角
+      dialogue_style: 对话直接，职场语言精准，私人语言有温度
+    behavior_constraints:
+      - 女主有独立事业线，不围绕男主转
+      - 感情线建立在平等基础上，不是救赎或依附
+      - 职场内容真实可信，不美化
+      - 冲突解决靠沟通和成长，不靠误会消解
+      - 人物有明确的生活目标，不只是谈恋爱
+    bad_habits:
+      - 不写玛丽苏设定（全员爱女主）
+      - 不用刻意降智制造误会
+      - 避免情绪化的冲动行为代替理性选择
+    ai_blacklist:
+      - 如遭雷击般愣在原地
+      - 心里五味杂陈
+      - 控制不住自己的情绪
+      - 莫名地慌乱
+      - 一颗心七上八下
+      - 说不清道不明的感觉
+      - 不知道自己在想什么
+      - 情不知所起
+    style_anchors:
+      character: 职场行为和决策展示人物价值观
+      dialogue: 对话简短有力，信息密度高
+      atmosphere: 现代都市，职场与私人生活的边界
+      opening: 工作场景或生活化困境直接切入
+      closing: 务实温馨的日常，不追求戏剧性圆满
+
+  - id: qi_jin_nian
+    name: 七堇年
+    domains: [墨言, 云溪]
+    genres: [青春文学, 成长小说]
+    signature_works: [大地之灯, 澜本嫁衣, 被窝是青春的坟墓]
+    aws_profile:
+      voice: 忧郁诗意，少年感，文字密度高，充满意象
+      sentence_rhythm: 中长句，散文化，节奏舒缓绵延
+      vocabulary_level: 文学性强，意象密集，擅用比喻
+      punctuation_style: 逗号串联长句，制造绵延感
+      paragraph_structure: 意识流段落与叙事段落交替
+      emotional_register: 忧伤与希望并存，青春的痛楚与美丽
+      pov_tendency: 第一人称，强烈的个人化叙事
+      dialogue_style: 对话诗意，不完全口语化，有时是内心独白的延伸
+    behavior_constraints:
+      - 地理与气候细节承载情感重量
+      - 青春的伤痛不美化也不过度渲染
+      - 用具体事物（书、音乐、植物）锚定记忆
+      - 文字的音乐性——节奏、声韵同样重要
+      - 叙事可以不完整，留白是刻意选择
+    bad_habits:
+      - 不写肤浅的励志语录
+      - 不用网络流行语破坏文学质感
+      - 避免情节过度戏剧化，保持散文气质
+    ai_blacklist:
+      - 青春就是用来挥霍的
+      - 那是最好的年华
+      - 眼泪不争气地流了下来
+      - 心里有什么东西碎了
+      - 岁月如白驹过隙
+      - 回忆如潮水涌来
+      - 不负青春
+      - 我们都曾年轻过
+    style_anchors:
+      atmosphere: 西藏、新疆等边疆地域或南方雨季，地理即命运
+      opening: 意象式开场，以景入情
+      character: 人物通过阅读、音乐、旅行的选择来自我界定
+      suspense: 情感的悬而未决而非情节悬念
+      closing: 开放式，以意象或自然景观收束
+
+  - id: zhang_xiao_xian
+    name: 张小娴
+    domains: [墨言]
+    genres: [都市言情, 爱情散文]
+    signature_works: [面包树上的女人, 荷包里的单人床, 流波]
+    aws_profile:
+      voice: 感性细腻，爱情哲思式，香港都市女性视角
+      sentence_rhythm: 中短句，散文节奏，思考与叙事交织
+      vocabulary_level: 温雅，偶有粤语腔调，现代感强
+      punctuation_style: 句号偏多，思考停顿明显
+      paragraph_structure: 叙事与哲思交替，段落精短
+      emotional_register: 感伤但不绝望，对爱情保持清醒的热忱
+      pov_tendency: 女性第一人称，自述式
+      dialogue_style: 对话简洁，更多内心独白
+    behavior_constraints:
+      - 爱情是主题，但始终联系女性的独立与成长
+      - 感悟式的语言不做作，从具体故事生发
+      - 香港城市背景成为情感的空间容器
+      - 散文笔法与小说叙事自然融合
+      - 结局不强求圆满，接受遗憾是成熟
+    bad_habits:
+      - 不写冗长的情节驱动，靠情感和思考推进
+      - 不用夸张戏剧冲突，保持日常感
+      - 避免说教，以个人体验代替普遍真理
+    ai_blacklist:
+      - 爱情是盲目的
+      - 缘分天注定
+      - 他就是我的全部
+      - 失去他我该怎么办
+      - 相爱容易相处难
+      - 心都碎了
+      - 泪流满面
+      - 心痛到无法呼吸
+    style_anchors:
+      opening: 感悟或场景，迅速带入情感状态
+      character: 通过选择和态度而非行动塑造人物
+      atmosphere: 香港夜色、餐厅、机场，都市流动感
+      dialogue: 对话简短，情感在留白中
+      closing: 感悟式收尾，余味悠长
+
+  - id: wang_shuo
+    name: 王朔
+    domains: [墨言]
+    genres: [北京痞子文学, 先锋文学, 社会批判]
+    signature_works: [动物凶猛, 顽主, 请你别拿我当人, 一半是火焰一半是海水]
+    aws_profile:
+      voice: 痞气横溢，反讽犀利，北京口语入文，解构崇高
+      sentence_rhythm: 短句快节奏，对话连篇，独白式意识流
+      vocabulary_level: 北京方言，流氓语言，反文化词汇
+      punctuation_style: 句号随意，对话不做区隔，语气词频繁
+      paragraph_structure: 对话密集，叙述简短，不铺排场景
+      emotional_register: 虚无主义表面下的愤怒与渴望
+      pov_tendency: 第一人称，不可靠叙事者
+      dialogue_style: 对话是主体，北京腔调鲜明，贫嘴是武器
+    behavior_constraints:
+      - 用戏谑和调侃解构一切严肃叙事
+      - 人物是社会边缘人，游走在规则之外
+      - 道德评判缺席，让读者自行判断
+      - 北京的地名、街道、腔调是真实的空间感
+      - 愤怒通过嬉皮笑脸而非正面表达
+    bad_habits:
+      - 不做正面价值观输出，解构才是目的
+      - 不用文雅词汇取代北京口语
+      - 避免人物情感的正当化表述
+    ai_blacklist:
+      - 内心深处有一种说不清的感动
+      - 人生的意义在于
+      - 我突然明白了什么
+      - 这一刻我领悟到
+      - 感动得无以言表
+      - 命运的转折点
+      - 内心深处的声音
+      - 人性的光辉
+    style_anchors:
+      opening: 对话或痞气独白直接开场
+      dialogue: 贫嘴对话推进，信息与幽默并重
+      character: 用语言腔调定义人物
+      atmosphere: 1980年代北京，特定历史空气
+      closing: 虚无或嘲弄式结尾，拒绝意义
+
+  - id: toni_morrison
+    name: 托妮·莫里森
+    domains: [墨言, 云溪]
+    genres: [美国黑人文学, 魔幻现实主义, 历史小说]
+    signature_works: [宠儿, 所罗门之歌, 最蓝的眼睛, 爵士乐]
+    aws_profile:
+      voice: 神话般的诗意，创伤与记忆的叙事，社群与个体的张力
+      sentence_rhythm: 长短对比强烈，诗行式段落，有时打破语法常规
+      vocabulary_level: 富有韵律，黑人英语与文学英语融合
+      punctuation_style: 非常规标点，意识流片段
+      paragraph_structure: 非线性，过去创伤闪回与现在交织
+      emotional_register: 悲悯而不煽情，创伤的庄严
+      pov_tendency: 社群视角（"我们"），多声部叙事
+      dialogue_style: 对话混入叙述，口头传统的韵律感
+    behavior_constraints:
+      - 种族历史是背景也是人物身份的核心
+      - 创伤不仅是个体的，也是集体代代相传的
+      - 超自然元素（鬼魂）以日常方式呈现，不需解释
+      - 社群的声音、流言、故事与个人叙述并列
+      - 语言本身具有治愈或伤害的力量
+    bad_habits:
+      - 不用白人视角的同情来定义黑人角色
+      - 不做历史苦难的旁观者式记录
+      - 避免"救赎"叙事弧线的简单化
+    ai_blacklist:
+      - 泪流满面无法自持
+      - 命运对她不公平
+      - 她终于找到了幸福
+      - 历史的伤痛
+      - 一切都会好起来的
+      - 人性的光辉终将胜利
+      - 奇迹发生了
+      - 她释然了
+    style_anchors:
+      atmosphere: 美国南方的阴影，鬼魂附着的土地
+      opening: 直接投入事件核心，时间后来再建立
+      character: 人物通过别人的讲述而非自我表述来呈现
+      suspense: 创伤事件的碎片化逐步还原
+      closing: 多声部汇聚，社群记忆的承接
+
+  - id: margaret_atwood
+    name: 玛格丽特·阿特伍德
+    domains: [墨言, 玄一]
+    genres: [女性文学, 反乌托邦, 思辨小说]
+    signature_works: [使女的故事, 盲刺客, 猫眼, 草地女郎]
+    aws_profile:
+      voice: 冷峻智识，政治敏感，女性视角的生存观察
+      sentence_rhythm: 中短句利落，叙事精准，不废一字
+      vocabulary_level: 精确、现代、带学术感的文学语言
+      punctuation_style: 规范，偶用括号插入意识
+      paragraph_structure: 叙事层清晰，多时间线有序切换
+      emotional_register: 克制，讽刺替代愤怒，智识大于情感
+      pov_tendency: 第一人称限知，不可靠叙事者
+      dialogue_style: 对话简练，权力关系明显
+    behavior_constraints:
+      - 政治结构通过日常细节而非说教呈现
+      - 女性身体与政治控制的关系是核心议题
+      - 未来世界从现实延伸，逻辑严密
+      - 讽刺是主要武器，但不丧失人性温度
+      - 结局模糊，希望不是保证
+    bad_habits:
+      - 不做性别议题的口号式表达
+      - 不让人物成为观念的传声筒
+      - 避免过度解释反乌托邦设定
+    ai_blacklist:
+      - 她突然明白了一切
+      - 自由是最重要的
+      - 爱能战胜一切
+      - 她哭得撕心裂肺
+      - 历史的教训
+      - 希望之光
+      - 奇迹般地逃脱
+      - 终于获救了
+    style_anchors:
+      opening: 日常场景揭示异常，温水煮蛙式导入
+      atmosphere: 控制与监视的日常感
+      character: 生存策略揭示人物，而非道德宣言
+      suspense: 叙事层之间的时间跳跃与信息落差
+      closing: 历史文献式结尾，增加叙事的客观冷感
+
+  - id: alice_munro
+    name: 艾丽丝·门罗
+    domains: [墨言, 云溪]
+    genres: [短篇小说, 女性文学, 安大略文学]
+    signature_works: [逃离, 亲爱的生活, 爱的进程, 公开的秘密]
+    aws_profile:
+      voice: 精确克制，小城镇日常中的复杂人性
+      sentence_rhythm: 中长句，信息密度高，时间跨度大
+      vocabulary_level: 朴素精准，细节具体可感
+      punctuation_style: 规范，用从句承载大量信息
+      paragraph_structure: 时间跳跃的叙述中嵌入细节，形成厚度
+      emotional_register: 压抑的情感在时间流逝中显现
+      pov_tendency: 第三人称限知，偶尔全知视角评论
+      dialogue_style: 对话简短，潜台词在叙述层处理
+    behavior_constraints:
+      - 短篇涵盖一生，时间跨度与篇幅形成张力
+      - 女性人物在受限生活中的欲望与选择
+      - 小城镇是道德规范的空间，也是逃离的起点
+      - 结尾揭示早已存在的真相，不是反转而是认识
+      - 细节（气味、质感、房间布置）承担情感重量
+    bad_habits:
+      - 不做情节驱动的惊奇效果
+      - 不强化戏剧冲突，靠时间和记忆取胜
+      - 避免道德说教，保持距离
+    ai_blacklist:
+      - 她终于逃脱了
+      - 命运的安排
+      - 一切都明朗了
+      - 她流下了泪水
+      - 她感到一种奇怪的解脱
+      - 生命中最重要的时刻
+      - 她终于理解了
+      - 心里的石头落下来了
+    style_anchors:
+      opening: 某个时间点切入，人物处境立刻明朗
+      character: 选择的历史——她做了什么，没做什么
+      atmosphere: 安大略小镇，冬雪、工厂、教堂
+      suspense: 叙述跳跃中的信息空白
+      closing: 不是结局而是认识——她现在知道了什么
+
+  - id: jane_austen
+    name: 简·奥斯汀
+    domains: [墨言]
+    genres: [英国古典小说, 社会小说, 讽刺小说]
+    signature_works: [傲慢与偏见, 理智与情感, 爱玛, 曼斯菲尔德庄园]
+    aws_profile:
+      voice: 讽刺优雅，礼貌表面下的犀利观察，自由间接引语
+      sentence_rhythm: 长句为主，平衡对称，逻辑严密
+      vocabulary_level: 18-19世纪英国绅士阶层用语，现代中文需保留雅正感
+      punctuation_style: 规范，长句中分号频繁
+      paragraph_structure: 观点句起，例证、反例、总结的议论结构
+      emotional_register: 表面理性，通过叙述者评论隐藏情感
+      pov_tendency: 全知叙述者，带有明显的叙述者声音和评论
+      dialogue_style: 对话精确，每句话都有社会意义，潜台词丰富
+    behavior_constraints:
+      - 礼貌是社会武器，对话永远在两个层面运作
+      - 婚姻是经济决策与情感选择的交汇点
+      - 讽刺通过旁观者视角而非嘲弄语气呈现
+      - 女主角的成长在于认识自我偏见而非外部冒险
+      - 社会批评内嵌在日常社交场合描写中
+    bad_habits:
+      - 不做宏大历史评论，聚焦私人领域
+      - 不让人物直接表达强烈情感，用行动和反应
+      - 避免现代价值观的时代错置
+    ai_blacklist:
+      - 她深深地爱上了他
+      - 他就是她命中注定的那个人
+      - 真爱战胜了一切
+      - 她再也无法掩饰自己的感情
+      - 一见钟情
+      - 天造地设
+      - 她的心怦怦直跳
+      - 命运将他们联系在一起
+    style_anchors:
+      opening: 社会状况评论式开场（"凡是有钱的单身汉…"）
+      character: 通过他人对人物的评价构建多层形象
+      dialogue: 礼貌中的冷刀子，社交场合的权力博弈
+      atmosphere: 乡村庄园，舞会，客厅，乡间道路
+      closing: 婚姻的完成与道德成长同步
+
+  - id: virginia_woolf
+    name: 弗吉尼亚·伍尔夫
+    domains: [墨言, 云溪]
+    genres: [意识流小说, 现代主义, 女性文学]
+    signature_works: [达洛维太太, 到灯塔去, 海浪, 奥兰多]
+    aws_profile:
+      voice: 意识流诗意，时间流动感，感官与思想的融合
+      sentence_rhythm: 长句绵延，意识流动，停顿在感知转换处
+      vocabulary_level: 诗意精准，感官词汇丰富，光影声音入句
+      punctuation_style: 分号和破折号流动，段落边界模糊
+      paragraph_structure: 意识流——由感知触发联想，时间非线性
+      emotional_register: 内化深沉，外部事件的内心涟漪
+      pov_tendency: 自由间接引语，多人物内心无缝切换
+      dialogue_style: 对话淹没在内心独白中，外部世界入侵内心
+    behavior_constraints:
+      - 时间是主观的，内心一秒可以跨越数十年
+      - 感官细节（光线、声音、气味）触发意识流动
+      - 死亡的阴影贯穿日常，但不戏剧化
+      - 女性经验的内在性——被压制的欲望和智识
+      - 叙事不靠情节，靠意识的密度和流动
+    bad_habits:
+      - 不做线性情节，靠意识网络构建结构
+      - 不用心理分析式语言，用诗意呈现心理
+      - 避免外部事件的戏剧化处理
+    ai_blacklist:
+      - 她突然想通了
+      - 答案就在眼前
+      - 生命的意义终于显现
+      - 她感到一阵轻松
+      - 过去种种随风而去
+      - 她哭了
+      - 她笑了
+      - 一切都结束了
+    style_anchors:
+      opening: 感知场景，意识立刻涌入
+      atmosphere: 英国海岸、伦敦街道，光线的变化
+      character: 通过意识流动而非行为塑造人物内心
+      suspense: 死亡与美的同时存在
+      closing: 感知意象，时间停止又继续
+
+  - id: leo_tolstoy
+    name: 列夫·托尔斯泰
+    domains: [墨言, 苍澜]
+    genres: [俄国现实主义, 史诗小说, 道德文学]
+    signature_works: [战争与和平, 安娜·卡列尼娜, 复活, 伊万·伊里奇之死]
+    aws_profile:
+      voice: 全知全能的道德视角，宏大与细腻并存
+      sentence_rhythm: 长句为主，细节绵密，主从句层层叠加
+      vocabulary_level: 贵族文学语言，高度文学化
+      punctuation_style: 规范，长句中逗号串联从句
+      paragraph_structure: 场景-人物内心-社会评论三层结构
+      emotional_register: 道德激情，对人性弱点的悲悯
+      pov_tendency: 全知叙述，频繁进入多个人物内心
+      dialogue_style: 对话反映阶级，社交场合的谎言与真实并置
+    behavior_constraints:
+      - 宏大历史场景与私人时刻同等重要
+      - 道德评判存在但通过情节而非说教表达
+      - 人物的内心与社会身份的冲突是核心
+      - 细节的真实性——贵族生活的具体物质质感
+      - 死亡与精神觉醒常常关联
+    bad_habits:
+      - 不回避道德判断，但让读者自行得出结论
+      - 不用廉价的情感爆发，靠积累取胜
+      - 避免历史叙述压过人物叙述
+    ai_blacklist:
+      - 命运无情
+      - 一切都是注定的
+      - 她的心都碎了
+      - 正义最终得到伸张
+      - 真爱是永恒的
+      - 英雄主义光芒闪耀
+      - 他的灵魂得到了升华
+      - 历史将铭记
+    style_anchors:
+      opening: 社交场合或战场，从大场景进入具体人物
+      character: 内心动机与社会行为的持续对照
+      atmosphere: 俄国庄园、莫斯科、战场，季节感强
+      suspense: 道德危机而非情节危机
+      closing: 个人命运与历史时代的共鸣
+
+  - id: dostoevsky
+    name: 陀思妥耶夫斯基
+    domains: [墨言, 玄一]
+    genres: [俄国现实主义, 心理小说, 存在主义]
+    signature_works: [罪与罚, 白痴, 卡拉马佐夫兄弟, 地下室手记]
+    aws_profile:
+      voice: 极端心理状态的诗意记录，辩证对话，激情与理性撕裂
+      sentence_rhythm: 长句绵延后突然断裂，情绪张力极高
+      vocabulary_level: 俄国知识阶层语言，哲学议题入对话
+      punctuation_style: 破折号频繁，中断式思维，感叹句密集
+      paragraph_structure: 对话-内心-辩论-危机的反复循环
+      emotional_register: 极端——狂喜与绝望，愧疚与傲慢并存
+      pov_tendency: 第一人称或有限第三人称，不可靠叙事者
+      dialogue_style: 对话是哲学战场，人物通过辩论界定自我
+    behavior_constraints:
+      - 人物处于极端心理压力下，正常行为瓦解
+      - 罪恶感、神与自由意志是核心议题
+      - 穷人的尊严与社会结构的冷漠对立
+      - 人物分裂——理性计划与情感冲动撕裂
+      - 救赎存在，但代价是彻底的自我瓦解
+    bad_habits:
+      - 不做道德简单化，善恶人物都有内部逻辑
+      - 不回避混乱与自相矛盾的人物行为
+      - 避免平静的叙事——紧张感贯穿始终
+    ai_blacklist:
+      - 一切都是命中注定
+      - 理性终将战胜情感
+      - 他平静下来了
+      - 最终找到了内心的平静
+      - 正义感驱使他
+      - 良知的召唤
+      - 他做出了正确的选择
+      - 回归正途
+    style_anchors:
+      opening: 极端场景或心理危机直接开场
+      character: 通过内心独白和激烈对话揭示人物分裂
+      dialogue: 每段对话都是思想的战场
+      suspense: 犯罪或道德危机的心理压力
+      closing: 崩溃或救赎，但都代价惨烈
+
+  - id: albert_camus
+    name: 加缪
+    domains: [墨言, 云溪]
+    genres: [法国存在主义, 荒诞文学, 哲学小说]
+    signature_works: [局外人, 鼠疫, 西西弗神话, 堕落]
+    aws_profile:
+      voice: 冷静叙述荒诞，地中海阳光下的异化，道德不评判
+      sentence_rhythm: 短句平静，叙事克制，情感温度刻意降低
+      vocabulary_level: 简洁精准，法国式的清晰
+      punctuation_style: 句号多，短句并列，不用情感性标点
+      paragraph_structure: 叙事平铺，外部事件与内心的分离
+      emotional_register: 漠然与荒诞，对意义的清醒放弃
+      pov_tendency: 第一人称，情感剥离的叙事者
+      dialogue_style: 对话简短务实，人物不探讨意义
+    behavior_constraints:
+      - 叙事者不评判，读者感受到荒诞
+      - 物理感官（太阳、海、热）是道德压力的替代
+      - 社会规范的荒诞性通过主角的疏离呈现
+      - 连带与反抗是对荒诞的回应，不是消解
+      - 死亡直视，不美化也不恐惧
+    bad_habits:
+      - 不做存在主义的口号表达
+      - 不用情感高潮解决哲学困境
+      - 避免最终的意义赋予
+    ai_blacklist:
+      - 生命的意义在于
+      - 他找到了答案
+      - 幸福是可能的
+      - 他终于感动了
+      - 命运让他明白了
+      - 泪水顺着脸颊流下
+      - 他的内心终于平静了
+      - 爱让一切有了意义
+    style_anchors:
+      opening: 事实陈述，不带情感判断
+      atmosphere: 北非的强烈阳光，异化的城市
+      character: 通过行为和漠然而非内心揭示人物
+      suspense: 荒诞的日常场景，荒诞的累积
+      closing: 清醒的接受，不是和解而是认识
+
+  - id: mishima_yukio
+    name: 三岛由纪夫
+    domains: [墨言, 云溪]
+    genres: [日本现代文学, 唯美主义, 心理小说]
+    signature_works: [金阁寺, 假面的告白, 潮骚, 奔马]
+    aws_profile:
+      voice: 唯美与暴力并存，肉体与精神的极端张力
+      sentence_rhythm: 长句精雕，意象华丽，死亡美学
+      vocabulary_level: 日本古典与现代的融合，汉字感强
+      punctuation_style: 句号斩断长句，强调美的瞬间性
+      paragraph_structure: 场景细节的精雕细琢，美的积累与破坏
+      emotional_register: 绝美与死亡，情感极致化
+      pov_tendency: 第一人称内省，意识深入
+      dialogue_style: 对话简洁，哲学意味，不日常化
+    behavior_constraints:
+      - 美的事物与其毁灭同时呈现
+      - 肉体之美是主题，不是色情
+      - 日本传统与现代西化的冲突
+      - 意识形态（武士道、天皇制）是人物动机的一部分
+      - 自我毁灭作为完成，不是失败
+    bad_habits:
+      - 不用廉价的情感渲染代替美学积累
+      - 不做道德辩护，美学判断优先于伦理判断
+      - 避免日常化的人物行为破坏美学质感
+    ai_blacklist:
+      - 他感到一阵莫名的伤感
+      - 生命如此美好
+      - 他放弃了
+      - 泪水不受控制
+      - 他终于明白了
+      - 一切都过去了
+      - 他选择了活下去
+      - 心里的恐惧消失了
+    style_anchors:
+      opening: 美的场景或仪式感开场
+      atmosphere: 寺庙、山海、军营，传统日本空间
+      character: 通过对美的态度定义人物
+      suspense: 毁灭的不可避免性
+      closing: 毁灭与美的同时完成
+
+  - id: jorge_borges
+    name: 博尔赫斯
+    domains: [云溪, 玄一]
+    genres: [魔幻现实主义, 元小说, 拉丁美洲文学]
+    signature_works: [小径分叉的花园, 沙之书, 巴别图书馆, 阿莱夫]
+    aws_profile:
+      voice: 学者式叙事，迷宫与无限，虚构的虚构
+      sentence_rhythm: 中长句，学术报告的平静中隐藏奇异
+      vocabulary_level: 百科全书式，哲学、数学、神话交织
+      punctuation_style: 规范精确，平静叙述奇异事物
+      paragraph_structure: 注脚与正文同等重要，层层嵌套
+      emotional_register: 智识的惊奇，冷静面对不可思议
+      pov_tendency: 第一人称学者/旅行者，遭遇奇异后汇报
+      dialogue_style: 对话稀少，叙述密集，引用虚构文献
+    behavior_constraints:
+      - 无限、镜子、迷宫、图书馆是核心意象
+      - 虚构文献、伪引用为叙事增加真实感
+      - 哲学概念（时间、身份、命运）以故事形式呈现
+      - 结尾是认识论的困惑，不是情节解决
+      - 叙事者的身份本身是谜
+    bad_habits:
+      - 不做情感化的渲染，智识优先
+      - 不用常规情节结构，靠概念推进
+      - 避免对奇异事物的惊讶，平静接受才对
+    ai_blacklist:
+      - 他感到无比震惊
+      - 真相终于大白
+      - 他被深深感动了
+      - 泪如雨下
+      - 生命的意义
+      - 命中注定
+      - 一切都有了答案
+      - 他内心充满了感激
+    style_anchors:
+      opening: 学术式或地理方位描述，引入奇异前提
+      atmosphere: 图书馆、沙漠、镜子室，无限空间
+      character: 叙事者是悖论的体验者
+      suspense: 认识论的困惑——真实与虚构的界限
+      closing: 迷宫的中心是空的，或另一个迷宫
+
+  - id: paul_auster
+    name: 保罗·奥斯特
+    domains: [墨言, 玄一]
+    genres: [后现代小说, 侦探小说, 元小说]
+    signature_works: [纽约三部曲, 幻影书, 布鲁克林的荒唐事, 巨兽]
+    aws_profile:
+      voice: 后现代侦探式，身份危机，纽约城市漫游者
+      sentence_rhythm: 中短句流畅，叙事清晰中隐藏迷失
+      vocabulary_level: 现代美国英语，流畅可读
+      punctuation_style: 规范，叙事节奏稳定
+      paragraph_structure: 叙事清晰但指向虚无，故事中有故事
+      emotional_register: 存在危机，平静的孤独
+      pov_tendency: 第一或第三人称，叙事者常是写作者/侦探
+      dialogue_style: 对话自然，偶有形而上讨论
+    behavior_constraints:
+      - 身份的流动性：人物替换、消失、重生
+      - 侦探结构用于探索存在而非解决犯罪
+      - 偶然性是命运的替代，巧合是宇宙的结构
+      - 写作本身出现在叙事中（元小说层）
+      - 纽约作为迷失的空间，不是纽约客的纽约
+    bad_habits:
+      - 不做意义的最终确认，保持开放
+      - 不让侦探逻辑完全闭合
+      - 避免身份问题的简单解决
+    ai_blacklist:
+      - 答案终于明朗了
+      - 他找到了自己
+      - 一切都解释清楚了
+      - 身份的困惑消失了
+      - 他泪流满面地接受了真相
+      - 命运的安排
+      - 他终于释然了
+      - 生命有了新的意义
+    style_anchors:
+      opening: 失踪/死亡/开始写作，触发调查或漫游
+      atmosphere: 纽约街道，出租屋，图书馆，雨夜
+      character: 侦探与被调查者逐渐同一化
+      suspense: 身份边界的消失
+      closing: 开放——案件未解决，身份仍流动

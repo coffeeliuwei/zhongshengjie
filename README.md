@@ -56,6 +56,8 @@
 - **场景契约系统**：解决多作家并行创作拼接冲突（12大一致性规则）
 - **多世界观支持**：可切换不同世界观配置
 - **变更自动检测**：大纲/设定/技法变更自动同步
+- **去AI感管线（v0.3）**：100位作家风格档案 + Stage 3.7风格包注入 + Phase 3.5质量门控（Burstiness/套句双检测）+ 自我风格自动融合
+- **叙事台账（v0.3）**：跨章节节拍/情绪/主题三维度追踪，30-40章后自动触发多样性约束，防重复感
 
 ---
 
@@ -81,6 +83,34 @@
 ---
 
 ## 更新日志
+
+### v0.3.0 (2026-05-16，master) - 去AI感管线 + 叙事台账
+
+**Problem 1：去AI感（人味注入）**
+
+- ✨ `docs/style_collection/author_styles.yaml`：100位作家风格总档案（178KB），含 aws_profile 8维、行为约束、AI套句黑名单、风格锚点
+- ✨ `docs/style_collection/authors_*.yaml`：7个领域碎片文件（剑尘/墨言/云溪/玄一/苍澜/跨域），`merge_author_styles.py` 一键合并
+- ✨ `config/writers_style_config.yaml`：5写手默认作家配比（剑尘=天蚕土豆40%+麦卡锡15%等）+ quality_gate 参数
+- ✨ `tools/style_injector.py`：Stage 3.7 风格包生成器，按写手+场景类型按权重采样约束/quirk/锚点/黑名单；自动融合 `memory_points_v1` 自我风格（记忆点≥10条时追加）
+- ✨ `tools/quality_gate.py`：Phase 3.5 双重检测——Burstiness（句长方差≥50）+ AI套句命中率（≤15%）；FAIL→定向重写建议→最多1次重试
+- ✨ `tools/merge_author_styles.py`：碎片YAML合并工具，自动去重
+- 🔧 `novel-workflow/SKILL.md`：新增 Stage 3.7（风格包预加载）和 Phase 3.5（质量门控）节点，补充完整 Python 调用代码
+- 🔧 5个 `novelist-*/SKILL.md`：全部加入"作家风格包接收"说明（接收格式 + 4条应用规则 + 配比调整命令）
+
+**Problem 2：叙事台账（防30-40章重复感）**
+
+- ✨ `tools/narrative_ledger.py`：跨章节三维度多样性追踪核心模块
+  - 节拍台账：同类型组连续3章 → 禁用强制约束；窗口内4+次 → 降频建议
+  - 情绪曲线：连续4章张力≥4 → 强制降温；连续3章≤2 → 升温建议
+  - 主题权重：8大核心主题，≥30章未出现→沉睡提醒，≥50章→遗失警告
+- ✨ `config/narrative_ledger_config.yaml`：场景类型7大分组、阈值、众生界8大核心主题
+- 🔧 `novel-workflow/SKILL.md`：阶段1末尾读台账注入多样性约束，阶段8末尾更新台账（含张力换算规则）
+- 🔧 `novelist-xuanyi/SKILL.md`：新增主题标注规则（Phase 1 草稿末追加 `[主题标注]` 块）
+
+**文档**：
+- 📖 `docs/系统架构.md`：新增 §十五（去AI感管线，含实测验证表）和 §十六（叙事台账）
+
+---
 
 ### v0.2.5 (2026-05-11，master) - 司法案例写作素材管道
 

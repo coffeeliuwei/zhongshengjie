@@ -1,0 +1,79 @@
+# 叙事台账配置
+# 用于跨章节多样性追踪，防止节拍/情绪/主题三维度重复
+
+# 台账数据文件路径（相对项目根）
+ledger_path: "data/narrative_ledger.json"
+
+# ─── 节拍类型追踪 ─────────────────────────────────────────────
+beat_tracking:
+  # 追踪窗口（最近N章）
+  window: 10
+  # 同类型连续出现N次 → 触发禁用约束
+  consecutive_ban_threshold: 3
+  # 同类型在窗口内出现N次 → 触发降频建议
+  window_frequency_warn: 4
+
+  # 场景类型分组（用于判断"同类"）
+  # 同一组内的类型视为同质，跨组切换才算多样化
+  type_groups:
+    冲突组: [战斗, 高潮, 危机, 对抗, 追杀]
+    成长组: [突破, 修炼, 领悟, 成长]
+    人物组: [人物, 情感, 心理, 对话, 关系]
+    世界组: [世界观, 设定展示, 势力, 传承]
+    叙事组: [开篇, 结尾, 过渡, 铺垫]
+    悬念组: [悬念, 伏笔, 转折, 反转, 揭秘]
+    氛围组: [环境, 氛围, 意境, 日常]
+
+# ─── 情绪曲线追踪 ─────────────────────────────────────────────
+tension_tracking:
+  # 追踪窗口（最近N章）
+  window: 10
+  # 张力等级：1（极低）→ 5（极高）
+  # 连续N章 >= high_threshold → 强制降温
+  high_consecutive_threshold: 4
+  high_level: 4
+  # 连续N章 <= low_threshold → 触发升温建议
+  low_consecutive_threshold: 3
+  low_level: 2
+
+# ─── 主题权重追踪 ─────────────────────────────────────────────
+theme_tracking:
+  # 超过N章未出现 → 标记为"沉睡议题"，建议唤醒
+  dormant_threshold: 30
+  # 超过N章未出现 → 升级为"遗失议题"警告
+  lost_threshold: 50
+
+  # 众生界核心议题（可在创作中修改/扩展）
+  # depth: 本章触碰该议题的深度（1=浅提/背景  2=中等/推进  3=核心/颠覆）
+  core_themes:
+    - id: power_cost
+      name: 力量的代价
+      description: 使用能力/境界突破所付出的代价与牺牲
+    - id: identity
+      name: 身份认同
+      description: 主角/配角对自我身份的疑惑、接受与重构
+    - id: loyalty_betrayal
+      name: 忠诚与背叛
+      description: 信任的建立与崩塌，选边站队的代价
+    - id: rules_vs_freedom
+      name: 规则与自由
+      description: 体制/传承规则与个人意志的冲突
+    - id: sacrifice_choice
+      name: 牺牲与选择
+      description: 在两难中做出选择，并承担其代价
+    - id: inheritance
+      name: 传承与断裂
+      description: 上一代留下的东西：遗产、伤痛、使命、秘密
+    - id: connection
+      name: 联结与孤独
+      description: 人与人之间羁绊的建立、维持与失去
+    - id: truth_illusion
+      name: 真相与幻象
+      description: 被隐瞒的真相浮出水面，颠覆既有认知
+
+# ─── 多样性约束输出格式 ──────────────────────────────────────
+output:
+  # 最多输出N条强制约束（超出按优先级截断）
+  max_hard_constraints: 3
+  # 最多输出N条建议（软约束）
+  max_suggestions: 2
