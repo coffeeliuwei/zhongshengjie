@@ -84,6 +84,30 @@
 
 ## 更新日志
 
+### v0.3.1 (2026-05-18，master) - 全面审计修复 + 集成补全
+
+**P0 阻断级修复**：
+- 🔧 `tools/quality_gate.py`：`hit_rate` 计算公式修复（原用 `len(hits)` 即套句种类数 → 改为 `total_hits` 即套句总出现次数），以及句子分割正则补充省略号（`[。！？；]` → `[。！？；…]+`）；修复前黑名单检测实际永远通过
+- 🔧 `requirements.txt`：补充 4 个缺失依赖（`PyYAML>=6.0`、`requests>=2.31.0`、`beautifulsoup4>=4.12.2`、`lxml>=4.9.0`）
+
+**P1 测试覆盖（新增 20 tests，全通过）**：
+- ✨ `tests/test_quality_gate.py`：9 个用例，覆盖 Burstiness 方差检测、套句命中率公式、省略号分割
+- ✨ `tests/test_narrative_ledger.py`：6 个用例，覆盖台账写入/覆盖/张力截断/多样性约束/冷启动
+- ✨ `tests/test_style_injector.py`：4 个用例，覆盖风格包生成、作家列表、配比读取
+- ✨ `tests/test_judicial_cases_search.py`：6 个用例，覆盖司法案例检索接口与 config 路径
+
+**P2 中等优先级**：
+- 🔧 `tools/build_all.py` v15→v16：新增 `judicial_cases` 阶段（`ingest_judicial_cases.py`，支持 `--rebuild`）
+- 🔧 `config.json`：补全 8 个缺失 collection 键名，从 5 条扩充至完整 13 条（含 `worldview` / `novel_plot` / `chapter_outlines` / `writing_techniques_batch` / `dialogue_style` / `evaluation_criteria` / `poetry_imagery` / `memory_points`）
+- 🔧 `AGENTS.md`：更新时间戳，新增去AI感管线 / 叙事台账 / 司法案例三类工具说明
+
+**集成修复**：
+- 🔧 `core/retrieval/unified_retrieval_api.py`：`search_judicial_cases()` 从 dense-only 改为 **dense+sparse RRF 融合检索**（与其余集合保持一致），修复召回率偏低问题
+- 🔧 `novel-workflow` SKILL.md：阶段 8 叙事台账写入链路全面接通（`scene_types` ← 阶段2场景计划 `type` 字段；`tension_level` ← 阶段6评估分 0-1→1-5；`themes_touched` ← 阶段4 `[主题标注]` 块）；修复叙事台账永远冷启动问题
+- 🔧 `novel-inspiration-ingest` SKILL.md：新增 §4.6 术语类写入路径；案例分支添加警告（仅写入 `case_library_v2`，司法案例走离线管道）
+
+---
+
 ### v0.3.0 (2026-05-16，master) - 去AI感管线 + 叙事台账
 
 **Problem 1：去AI感（人味注入）**
