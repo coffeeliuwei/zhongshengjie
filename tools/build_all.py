@@ -7,8 +7,8 @@
 新用户使用此脚本从零构建完整的小说创作系统。
 
 作者：coffeeliuwei
-版本：v15.0
-日期：2026-04-30
+版本：v16.0
+日期：2026-05-18
 
 用法：
     python tools/build_all.py                          # 全量入库（断点续跑）
@@ -17,7 +17,7 @@
     python tools/build_all.py --rebuild                # 强制清数据重跑
     python tools/build_all.py --only technique_batch --rebuild
 
-阶段列表：case, extract, technique_batch, dialogue
+阶段列表：case, extract, technique_batch, dialogue, judicial_cases
 
 完整使用流程：
     0. 安装Skills：cp -r skills/* ~/.agents/skills/
@@ -108,9 +108,20 @@ STAGES = [
         "rebuild_extra": [],
         "log": str(PROJECT_ROOT / "logs" / "aggregate_dialogue_style.log"),
     },
+    {
+        "name": "judicial_cases",
+        "label": "司法案例向量入库（judicial_cases_v1）",
+        "cmd": [
+            sys.executable,
+            "-u",
+            str(PROJECT_ROOT / "tools" / "ingest_judicial_cases.py"),
+        ],
+        "rebuild_extra": ["--rebuild"],
+        "log": str(PROJECT_ROOT / "logs" / "ingest_judicial_cases.log"),
+    },
 ]
 
-STAGE_ORDER = ["case", "extract", "technique_batch", "dialogue"]
+STAGE_ORDER = ["case", "extract", "technique_batch", "dialogue", "judicial_cases"]
 
 
 def _build_cmd(stage: dict, rebuild: bool, technique_json: str) -> List[str]:

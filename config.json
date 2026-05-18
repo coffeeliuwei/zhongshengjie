@@ -65,9 +65,17 @@
     "collections": {
       "novel_settings": "novel_settings_v2",
       "writing_techniques": "writing_techniques_v2",
+      "writing_techniques_batch": "writing_techniques_batch_v1",
       "case_library": "case_library_v2",
-      "creation_context": "creation_context",
-      "judicial_cases": "judicial_cases_v1"
+      "dialogue_style": "dialogue_style_v1",
+      "evaluation_criteria": "evaluation_criteria_v1",
+      "poetry_imagery": "poetry_imagery_v2",
+      "judicial_cases": "judicial_cases_v1",
+      "memory_points": "memory_points_v1",
+      "worldview": "worldview",
+      "novel_plot": "novel_plot_v1",
+      "chapter_outlines": "chapter_outlines",
+      "creation_context": "creation_context"
     }
   },
 

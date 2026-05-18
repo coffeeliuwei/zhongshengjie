@@ -42,3 +42,11 @@ datasketch==1.10.0
 # 批量提炼可选格式支持
 pdfminer.six>=20221105
 python-docx==1.2.0
+
+# 去AI感管线 / 叙事台账配置（2026-05-16 新增）
+PyYAML>=6.0
+
+# 司法案例爬虫（2026-05-11 新增）
+requests>=2.31.0
+beautifulsoup4>=4.12.2
+lxml>=4.9.0

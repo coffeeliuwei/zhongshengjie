@@ -148,15 +148,17 @@ def check_ai_blacklist(
     combined = list(dict.fromkeys(combined))
 
     hits: list[str] = []
+    total_hits: int = 0
     for phrase in combined:
         count = text.count(phrase)
         if count > 0:
             hits.append(f"{phrase}（×{count}）")
+            total_hits += count
 
-    # 句子数估算
-    sentences = [s for s in re.split(r"[。！？；]", text) if s.strip()]
+    # 句子数估算（与 compute_burstiness 保持相同分割标准）
+    sentences = [s for s in re.split(r"[。！？；…]+", text) if s.strip()]
     sentence_count = max(len(sentences), 1)
-    hit_rate = len(hits) / sentence_count
+    hit_rate = total_hits / sentence_count
 
     passed = len(hits) <= max_hits and hit_rate <= max_rate
     return passed, hits, hit_rate
