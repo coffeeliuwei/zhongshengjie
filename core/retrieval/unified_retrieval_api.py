@@ -685,6 +685,7 @@ class UnifiedRetrievalAPI:
         try:
             from qdrant_client import QdrantClient
             from qdrant_client import models as qmodels
+            from qdrant_client.models import SparseVector
 
             client = QdrantClient(url=get_qdrant_url(), timeout=30)
             collection = get_collection_name("judicial_cases")
@@ -695,6 +696,10 @@ class UnifiedRetrievalAPI:
 
             query_vecs = self._search_manager._encode_query(query)
             dense_vec = query_vecs["dense"]
+            sparse_vec = SparseVector(
+                indices=query_vecs["sparse_indices"],
+                values=query_vecs["sparse_values"],
+            )
 
             qf = None
             if section:
@@ -707,17 +712,31 @@ class UnifiedRetrievalAPI:
                     ]
                 )
 
+            # dense + sparse RRF 混合召回（与 case_library_v2 检索策略对齐）
             results_obj = client.query_points(
                 collection_name=collection,
-                query=dense_vec,
-                using="dense",
-                query_filter=qf,
+                prefetch=[
+                    qmodels.Prefetch(
+                        query=dense_vec,
+                        using="dense",
+                        limit=top_k * 4,
+                        filter=qf,
+                    ),
+                    qmodels.Prefetch(
+                        query=sparse_vec,
+                        using="sparse",
+                        limit=top_k * 4,
+                        filter=qf,
+                    ),
+                ],
+                query=qmodels.FusionQuery(fusion=qmodels.Fusion.RRF),
                 limit=top_k,
-                score_threshold=min_score,
                 with_payload=True,
             )
             out = []
             for h in results_obj.points:
+                if h.score < min_score:
+                    continue
                 p = h.payload or {}
                 out.append({
                     "title": p.get("title", ""),
