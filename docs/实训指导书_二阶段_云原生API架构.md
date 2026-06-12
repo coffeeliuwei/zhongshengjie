@@ -202,9 +202,11 @@ RAM 控制台左侧有导航栏，找到「**身份管理**」→ 「**用户**�
 |------|---------|------|
 | 登录名称 | `zsj-admin` | 用于登录的用户名（字母数字和横杠） |
 | 显示名称 | `众生界管理员` | 显示用，随意填写 |
-| 访问方式 | 同时勾选「控制台访问」和「OpenAPI调用访问」 | 两个都要 |
+| 访问方式 | 同时勾选「**控制台访问**」和「**使用永久 AccessKey 访问**」 | 控制台版本不同，后者旧文案叫「OpenAPI 调用访问」 |
 | 控制台密码 | 自行设置，16 位以上 | 记在安全的地方 |
 | 是否要求重置密码 | 关闭 | 管理员账号不需要 |
+
+> 📌 官方安全建议是「一个用户只选一种访问方式」。本实训为了少建一个账号，让管理员同时有控制台和 AccessKey；如果想严格遵循官方建议，可以建 `zsj-admin`（仅控制台）和 `zsj-admin-api`（仅 AccessKey）两个用户。
 
 填写完毕点击「**确定**」。
 
@@ -445,6 +447,9 @@ C:\Users\你的用户名\.ssh\zsj-key.pem
 
 > **为什么 Qdrant 只允许 192.168.0.0/16 访问？**
 > `192.168.0.0/16` 就是我们 VPC 的内网地址段。这样配置意味着：只有也在这个 VPC 里的服务（比如 SAE）才能访问 Qdrant，互联网上的陌生人无法直接连到数据库，安全很多。
+
+![ECS 安全组添加规则界面](img/ecs-sg-quick-add.png)
+> △ 阿里云官方文档截图：添加安全组规则——填授权对象和端口范围，下方实时预览生成的规则
 
 添加后点击「**保存**」。
 
@@ -731,9 +736,8 @@ docker logs qdrant
 > 模型文件有几十个小文件，网页端一次只能选少量文件上传，很慢。OSS Browser 是阿里云官方的桌面客户端，支持拖拽批量上传，速度快得多，还能断点续传。
 
 **下载方式：**
-1. 进入 OSS 管理控制台
-2. 点击右上角「**OSS Browser**」链接，或者百度搜索「阿里云 OSS Browser 下载」
-3. 选择 Windows 版本下载，安装（一路下一步）
+1. 在阿里云帮助文档搜索「**ossbrowser**」，打开"安装和登录 ossbrowser"文档页，里面有各平台官方下载链接（也可以百度搜索「阿里云 ossbrowser 下载」）
+2. 选择 Windows 版本下载，解压即用（绿色软件，无需安装）
 
 **登录 OSS Browser：**
 
@@ -968,6 +972,9 @@ SAE 控制台左侧找到「**命名空间**」→「**创建命名空间**」
 
 点击「**确定**」。
 
+![SAE 创建命名空间面板](img/sae-create-namespace.png)
+> △ 阿里云官方文档截图：创建命名空间——注意底部的"专有网络 VPC"下拉，必须选 `zsj-vpc`
+
 > **为什么 SAE 也要配置 VPC？** 这样 SAE 里的应用分配的是 VPC 内网 IP，就能直接通过内网 IP 访问 ECS 上的 Qdrant（6333 端口只对 VPC 内网开放）。
 
 ---
@@ -983,6 +990,9 @@ SAE 控制台左侧找到「**命名空间**」→「**创建命名空间**」
 | 应用名称 | `zsj-retrieval-api` | 只能用字母数字和横杠 |
 | 命名空间 | 选择刚创建的 `zsj-prod` |  |
 | 应用描述 | 众生界检索API服务 |  |
+
+![SAE 创建应用"应用基本信息"表单](img/sae-create-app-basic.png)
+> △ 阿里云官方文档截图：创建应用第一步——应用名称、部署方式、资源规格都在这张表单里
 
 **选择部署方式（重要）：**
 
@@ -1040,30 +1050,38 @@ INFO:     Application startup complete.
 INFO:     Uvicorn running on http://0.0.0.0:8080 (Press CTRL+C to quit)
 ```
 
+![SAE 应用实时日志界面](img/sae-logs.png)
+> △ 阿里云官方文档截图：SAE 实时日志长这样，在这里确认上面的启动信息
+
 **如果应用启动失败（状态为「异常」），查看日志：**
 - 最常见原因：环境变量 `QDRANT_HOST` 填的是公网 IP 导致连接超时
 - 检查 `QDRANT_API_KEY` 是否与 Qdrant 配置文件里的一致
 
 ---
 
-## 5.6 为 SAE 配置 SLB（负载均衡）
+## 5.6 为 SAE 配置 CLB（负载均衡）
 
-> **为什么需要 SLB？** API 网关需要一个稳定的 IP 地址来访问 SAE 里的服务，SAE 应用的内网 IP 每次重启可能变化，但 SLB 的 IP 固定，通过 SLB 访问更稳定。
+> **为什么需要 CLB？** API 网关需要一个稳定的 IP 地址来访问 SAE 里的服务，SAE 应用的内网 IP 每次重启可能变化，但 CLB 的 IP 固定，通过 CLB 访问更稳定。
+>
+> **术语说明：** CLB（传统型负载均衡）就是以前的 SLB，阿里云已改名，控制台现在显示 CLB。本文后面提到的「SLB」均指它。
 
-进入 SAE 应用详情 → 「**访问配置**」→「**私网访问**」→「**添加私网 SLB**」
+**操作路径（官方文档路径）：** SAE 应用详情 → 「**基础信息**」页的「**应用访问设置**」区域 → 「**添加私网 CLB 访问**」
 
 | 选项 | 填写 |
 |------|------|
 | 监听协议 | HTTP |
-| 监听端口 | `80` |
+| HTTP 端口 | `80` |
 | 容器端口 | `8080` |
-| SLB 实例 | 选「**新建 SLB**」，规格选「**slb.s1.small**」（最小规格，费用低） |
+| CLB 实例 | 选「**新建**」——SAE 会自动**代购**一个全新的 CLB 实例并绑定，无需自己选规格 |
 
-点击「**确定**」，等待约 1 分钟 SLB 创建完成。
+点击「**确定**」，等待约 1 分钟 CLB 创建完成。
 
-**记录 SLB 的私网 IP 地址：**
+![SAE 添加 CLB 访问弹窗](img/sae-add-clb.png)
+> △ 阿里云官方文档截图：添加 CLB 访问的弹窗（图为公网 CLB，私网 CLB 界面相同），按表填监听端口和容器端口
 
-SLB 创建完成后，页面显示 SLB 的「**私网 IP**」，格式如 `192.168.1.yyy`。**把这个地址记下来，第六步 API 网关配置要用。**
+**记录 CLB 的私网 IP 地址：**
+
+CLB 创建完成后，「应用访问设置」区域显示私网访问地址，格式如 `192.168.1.yyy:80`。**把这个 IP 记下来，第六步 API 网关配置要用。**
 
 ---
 
@@ -1117,11 +1135,13 @@ abc123def456.cn-hangzhou.alicloudapi.com
 |------|------|------|
 | 名称 | `zsj-sae-slb` |  |
 | VPC | 选择 `zsj-vpc` | 我们的专有网络 |
-| 实例类型 | **负载均衡 SLB** | SAE 前面有 SLB |
-| 实例 ID 或 IP | 填写 SAE SLB 的**私网 IP**（5.6 节记录的） | `192.168.1.yyy` |
-| 端口 | `80` | SLB 监听的端口 |
+| 实例 ID 或 IP | 填写 SAE CLB 的**私网 IP**（5.6 节记录的） | `192.168.1.yyy` |
+| 端口 | `80` | CLB 监听的端口 |
 
 点击「**确定**」。
+
+![API 网关创建 VPC 授权弹窗](img/apigw-vpc-auth.png)
+> △ 阿里云官方文档截图：创建 VPC 授权——选 VPC、填实例 IP 和端口
 
 ---
 
@@ -1143,9 +1163,12 @@ abc123def456.cn-hangzhou.alicloudapi.com
 
 **安全认证配置：**
 
-找到「**安全认证**」，选择「**AppCode 认证**」
+「**安全认证**」选「**阿里云APP**」，下方出现的「**AppCode 认证**」选「**允许 AppCode 认证（Header & Query）**」
 
-> **AppCode 是什么？** 一个随机字符串，类似 API 密钥。写手机器在请求头里带上 `Authorization: APPCODE xxxxx`，API 网关验证这个字符串，通过则转发请求。比用户名密码简单，但需要妥善保管。
+![创建 API 时的安全认证配置](img/apigw-create-api-auth.png)
+> △ 阿里云官方文档截图：安全认证选"阿里云APP"（红框），AppCode 认证在它下面单独一行选择
+
+> **AppCode 是什么？** 一个随机字符串，类似 API 密钥。写手机器在请求头里带上 `Authorization: APPCODE xxxxx`，API 网关验证这个字符串，通过则转发请求。比用户名密码简单，但需要妥善保管。AppCode 不是独立的认证类型，而是"阿里云APP"认证下的简化用法。
 
 **第二步：后端配置**
 
@@ -1155,8 +1178,11 @@ abc123def456.cn-hangzhou.alicloudapi.com
 | VPC | 选择 `zsj-vpc` |
 | VPC 授权名称 | 选择 `zsj-sae-slb` |
 | 后端请求方法 | `POST` |
-| 后端请求 URL | `http://` + SAE SLB 私网IP + `/search/dense`（如 `http://192.168.1.yyy/search/dense`） |
+| 后端请求 URL | `http://` + SAE CLB 私网IP + `/search/dense`（如 `http://192.168.1.yyy/search/dense`） |
 | 后端超时时间 | `30000`（毫秒，即 30 秒） |
+
+![创建 API 第二步：后端基础定义（VPC 内网）](img/apigw-backend-vpc.png)
+> △ 阿里云官方文档截图：后端服务类型选 VPC，引用 VPC 授权后填后端请求路径
 
 **第三步：请求参数配置**
 
@@ -1184,36 +1210,43 @@ abc123def456.cn-hangzhou.alicloudapi.com
 
 > 创建完 API 后，还需要「发布」才能生效。阿里云 API 网关有「测试」和「线上」两个环境，我们直接发布到线上。
 
-**操作路径：** API 网关控制台 → 「**API 管理**」→ 列表中勾选所有 4 个 API → 点击「**批量发布**」→ 选择「**线上**」→「**确认**」
+**操作路径：** API 网关控制台 → 「**API 管理**」→ 列表中勾选所有 4 个 API → 点击「**批量发布**」→ 选择「**线上**」→ 填写变更备注 →「**确认**」
+
+![发布 API 弹窗：选择线上环境](img/apigw-publish.png)
+> △ 阿里云官方文档截图：发布弹窗——环境选"线上"，备注随意填（如"首次发布"）
 
 发布后，API 状态从「草稿」变为「已发布」。
 
 ---
 
-## 6.6 创建 AppCode（写手身份凭证）
+## 6.6 创建应用并获取 AppCode（写手身份凭证）
 
-**操作路径：** API 网关控制台 → 左侧「**应用管理**」→「**创建应用**」
+**操作路径：** API 网关控制台 → 左侧「**调用 API**」→「**应用管理**」→「**创建应用**」
 
 | 选项 | 填写 |
 |------|------|
 | 应用名称 | `zsj-writers` |
 | 描述 | 众生界写手访问凭证 |
 
-点击「**确定**」，进入刚创建的应用详情页。
+![API 网关创建应用弹窗](img/apigw-create-app.png)
+> △ 阿里云官方文档截图：创建应用——填名称即可，AppKey/AppCode 会自动生成
 
-找到「**AppCode**」区域，点击「**创建 AppCode**」，系统自动生成一串随机字符，类似：
+点击「**确定**」。**创建应用时系统会自动生成一个 AppCode**，点击应用名称进入详情页，在「**AppCode**」页签即可查看，类似：
 
 ```
 7b3f9a2e1c4d8b6f0e5a2d9c3f7b1e4a8d2f5e1b
 ```
 
-**把这串字符记下来**（也可以在 AppCode 列表随时查看），这就是写手访问 API 的密码。
+![应用详情页查看 AppCode](img/apigw-app-detail.png)
+> △ 阿里云官方文档截图：应用详情页——AppCode、AppKey 都在这里查看
 
-**为应用授权分组（重要）：**
+**把这串字符记下来**，这就是写手访问 API 的密码。
 
-在应用详情页找到「**已绑定的分组**」→「**添加授权**」→ 选择 `zsj-api-group` → 点击「**确认**」
+**把 4 个 API 授权给这个应用（重要——官方的授权是按 API 做的，不是按分组）：**
 
-> 不添加授权的话，用这个 AppCode 访问 API 会返回 403 鉴权失败。
+回到「**API 管理**」→ 列表中勾选 4 个 API → 点击「**授权**」→ 环境选「**线上**」→ 搜索并选中应用 `zsj-writers` → 「**添加**」→「**确定**」
+
+> 不授权的话，用这个 AppCode 访问 API 会返回 403 鉴权失败。注意授权选择的环境要和 6.5 发布的环境一致（都是「线上」）。
 
 ---
 
@@ -1238,8 +1271,8 @@ status
 ok
 ```
 
-如果出现 `403`：AppCode 没有绑定分组授权，检查 6.6 步骤。
-如果出现 `502`：API 网关到 SAE 不通，检查 VPC 授权配置和 SLB 地址是否填错。
+如果出现 `403`：API 没有授权给应用（或授权环境不是线上），检查 6.6 步骤。
+如果出现 `502`：API 网关到 SAE 不通，检查 VPC 授权配置和 CLB 地址是否填错。
 如果出现 `503`：SAE 服务异常，查看 SAE 应用日志。
 
 ---
@@ -1444,10 +1477,9 @@ curl -s -H "api-key: ZsjCloud2026@Qdrant#DB" \
 
 **方法二：命令行下载（写手也可以用）**
 
-```powershell
-# 安装 ossutil（阿里云的命令行 OSS 工具）
-pip install ossutil
+> **安装 ossutil（注意：不是 pip 包！）** ossutil 是阿里云提供的独立可执行程序，官方安装方式是下载安装包：在阿里云帮助文档搜索「**安装 ossutil**」，下载 Windows 安装包（zip），解压后双击运行 `ossutil.bat`（或把解压目录加入 PATH 后直接用 `ossutil` 命令）。
 
+```powershell
 # 配置 ossutil（用写手自己的 AccessKey）
 ossutil config `
     -e oss-cn-hangzhou.aliyuncs.com `
@@ -1535,7 +1567,7 @@ E:\anaconda3\envs\python13\python.exe -m pip install requests
 |------|---------|
 | 登录名称 | `writer-zhangsan`（用拼音，不用中文） |
 | 显示名称 | `写手-张三` |
-| 访问方式 | 只勾选「**OpenAPI调用访问**」 |
+| 访问方式 | 只勾选「**使用永久 AccessKey 访问**」（旧版控制台叫「OpenAPI 调用访问」） |
 
 > **为什么不勾选控制台访问？** 写手不需要登录阿里云控制台，只需要 AccessKey 来下载 OSS 模型。减少权限，更安全。
 
@@ -1615,7 +1647,7 @@ Invoke-RestMethod -Uri "https://$domain/collections" `
     -Headers @{"Authorization" = "APPCODE $appcode"}
 ```
 
-**期望：** 看到 13 个 collection（包括 `novel_settings_v2`、`writing_techniques_v2` 等），每个的 `points_count` 与一阶段本地数据一致。
+**期望：** 看到 14 个 collection（包括 `novel_settings_v2`、`writing_techniques_v2`、`judicial_cases_v1` 等），每个的 `points_count` 与一阶段本地数据一致。
 
 ---
 
@@ -1681,7 +1713,7 @@ for r in results:
 | 第四步 OSS | OSS Browser 查看 | `bge-m3/` 目录下有模型文件 |
 | 第五步 SAE | SAE 应用日志 | `Uvicorn running on ...` |
 | 第六步 API 网关 | PowerShell `Invoke-RestMethod` | `/health` 返回 `ok` |
-| 第七步 迁移 | 云端 Qdrant collections 接口 | 13 个 collection，点数正确 |
+| 第七步 迁移 | 云端 Qdrant collections 接口 | 14 个 collection，点数正确 |
 | 第八步 写手机器 | Python 测试脚本 | 向量维度 1024，检索到结果 |
 | 全链路 | opencode 写章节 | 正常完成，无报错 |
 
@@ -1779,7 +1811,7 @@ docker logs qdrant
 
 可能原因：
 1. AppCode 填写有误 → 检查 `config.json` 里的 `appcode`
-2. 应用未授权分组 → API 网关 → 应用管理 → `zsj-writers` → 已绑定分组，确认有 `zsj-api-group`
+2. API 未授权给应用 → API 网关 → API 管理 → 勾选 API → 授权，确认 `zsj-writers` 在「线上」环境的授权列表里
 3. API 未发布 → API 管理，确认 4 个 API 状态都是「已发布」
 
 ---
@@ -1789,7 +1821,7 @@ docker logs qdrant
 API 网关到 SAE 的连接失败，检查：
 1. VPC 授权配置里的 SLB 私网 IP 是否正确
 2. SAE 应用是否在运行中（不是异常状态）
-3. SAE SLB 是否已创建（进入 SAE 应用详情 → 访问配置）
+3. SAE CLB 是否已创建（进入 SAE 应用详情 → 基础信息 → 应用访问设置）
 
 ---
 
@@ -1839,6 +1871,7 @@ API 网关到 SAE 的连接失败，检查：
 | v3.0.0 | 2026-05-02 | 初学者扩写：每步骤增加服务说明、预期输出、排查指引 |
 | v3.1.0 | 2026-05-02 | 新增附录 A（高并发）+ 附录 B（商用全场景） |
 | v3.2.0 | 2026-05-02 | 设计审查：增加目录、修复示例密码警告、SSH IP 限制指引、SAE 内网 IP 步骤、安全组前向提示、附录标题对齐 |
+| v3.3.0 | 2026-06-12 | 对照阿里云官方文档全文核对：修正 RAM 访问方式文案、ossutil 安装方式（非 pip）、SAE 私网 CLB 路径与代购机制、API 网关授权方式（按 API 授权而非分组绑定）、AppCode 认证归属（阿里云APP 认证的子选项）、流控/IP黑名单改插件体系、云监控菜单名；修复 collection 数量不一致（13→14）和附录命令路径控制字符；新增 12 张官方文档截图（docs/img/） |
 
 ---
 
@@ -1900,6 +1933,9 @@ API 网关到 SAE 的连接失败，检查：
 
 > **为什么最小实例数设 2？**
 > 单实例时，如果那台实例重启（SAE 部署新版本、实例故障），会有短暂的服务中断。2 台实例时，1 台重启另 1 台继续服务，用户感知不到。这叫「高可用」（HA）。
+
+![SAE 添加弹性策略面板](img/sae-scaling.png)
+> △ 阿里云官方文档截图："添加弹性策略"面板，红框处即最小/最大实例数
 
 点击「**保存**」，SAE 会立即启动第 2 个实例（因为最小值设为 2）。
 
@@ -1980,21 +2016,24 @@ Invoke-RestMethod -Method POST `
 
 > **为什么要限流？** 即使你的系统能抗 200 QPS，但如果某个写手的机器出 bug 进入死循环狂发请求，或者 AppCode 泄露被人恶意调用，整个系统会被打垮。限流就是设置「每个调用方每秒最多能发多少请求」的上限。
 
-### A.4.1 为 API 分组配置流控策略
+### A.4.1 为 API 配置流量控制插件
 
-**操作路径：** API 网关控制台 → 左侧「**流控策略**」→「**创建流控策略**」
+> 官方说明：API 网关的流量控制现已并入**插件**体系——创建一个"流量控制"类型的插件，再把它**绑定到已发布的 API**（不是绑定到分组）。
+
+**操作路径：** API 网关控制台 → 左侧「**插件**」→「**创建插件**」→ 插件类型选「**流量控制**」
 
 | 选项 | 填写 | 说明 |
 |------|------|------|
-| 策略名称 | `zsj-rate-limit` |  |
-| 时长 | `1` 秒 | 限流统计窗口 |
-| API 每秒请求上限（QPS） | `200` | 整个分组的总上限 |
-| 用户/APP 每秒请求上限 | `20` | 每个 AppCode 每秒最多 20 次 |
-| 超出后的响应 | 返回 `429 Too Many Requests` |  |
+| 插件名称 | `zsj-rate-limit` |  |
+| 单位时间 | 秒 | 限流统计窗口 |
+| API 流量限制 | `200` | 绑定该插件的每个 API 每秒总调用上限 |
+| APP 流量限制 | `20` | 每个应用（AppCode）每秒最多 20 次 |
 
-创建完成后，在分组详情页绑定此流控策略：
+超出限制时 API 网关自动返回 `429 Too Many Requests`。
 
-**操作路径：** API 网关 → 「**分组管理**」→ 点击 `zsj-api-group` → 「**流控策略**」→「**绑定**」→ 选择 `zsj-rate-limit`
+创建完成后，把插件**绑定到 API**：
+
+**操作路径：** 插件列表 → `zsj-rate-limit` → 「**绑定 API**」→ 选择分组 `zsj-api-group`、环境「线上」→ 勾选 4 个 API → 确定
 
 ### A.4.2 在写手机器的 cloud_client.py 中添加重试逻辑
 
@@ -2168,7 +2207,7 @@ locust -f tests\locustfile.py --host https://abc123def456.cn-hangzhou.alicloudap
 
 ### A.7.1 阿里云云监控基础告警
 
-**操作路径：** 控制台 → 搜索「**云监控**」→ 进入控制台 → 「**告警服务**」→「**告警规则**」→「**创建告警规则**」
+**操作路径：** 控制台 → 搜索「**云监控**」→ 进入控制台 → 「**报警服务**」→「**报警规则**」→「**创建报警规则**」（官方菜单用"报警"二字）
 
 **为 ECS 配置关键告警（推荐）：**
 
@@ -2300,7 +2339,7 @@ with _stats_lock:
 
 执行 P3 后，为每位写手签发 Token：
 ```powershell
-E:naconda3\envs\python13\python.exe tools\issue_token.py --sub zhangsan --days 180
+E:\anaconda3\envs\python13\python.exe tools\issue_token.py --sub zhangsan --days 180
 ```
 
 写手把输出的 Token 填入自己机器 `config.json` → `cloud_api.jwt_token` 字段。
@@ -2356,10 +2395,7 @@ HTTP 是明文传输，AppCode 或 JWT Token 会在网络上裸奔。必须启�
 
 **开启 API 网关的 IP 黑名单（防爬虫/攻击）：**
 
-**操作路径：** API 网关控制台 → 「**访问控制**」→「**IP 访问控制**」→「**创建规则**」
-
-- 类型：黑名单
-- IP 段：手动添加已知恶意 IP，或开启「自动封禁异常 IP」
+**操作路径：** API 网关控制台 → 「**插件**」→「**创建插件**」→ 类型选「**IP 访问控制**」→ 黑名单模式，添加已知恶意 IP → 创建后绑定到 API（与 A.4.1 流控插件的绑定方式相同）
 
 **开启 API 网关的防重放攻击：**
 
@@ -2665,9 +2701,9 @@ payload = {
 
 执行 P3 后，从 SLS 下载日志 CSV 并运行：
 ```powershell
-E:naconda3\envs\python13\python.exe tools\export_billing.py `
-    --log-file docs\m7_artifactspi_logs.csv `
-    --output docs\m7_artifactsilling_report.csv
+E:\anaconda3\envs\python13\python.exe tools\export_billing.py `
+    --log-file docs\m7_artifacts\api_logs.csv `
+    --output docs\m7_artifacts\billing_report.csv
 ```
 
 
