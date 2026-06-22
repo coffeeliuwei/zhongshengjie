@@ -348,6 +348,10 @@ https://signin.aliyun.com/123456789012/login.htm
 | 实例规格 | 搜索 `ecs.c7.xlarge`（4核8GB） | Qdrant 运行需要一定内存 |
 | 镜像 | 公共镜像 → **Ubuntu 22.04 64位** | 稳定的 Linux 版本，教程丰富 |
 
+![ECS 自定义购买首屏：付费类型、地域华东1（杭州）、网络及可用区、实例规格筛选](img/ecs-buy-basic.png)
+> △ 云服务器 ECS → 创建实例（自定义购买）：从上到下选 **付费类型**（包年包月）、**地域** 华东1（杭州）、**网络及可用区** 选你的 `zsj-vpc` 和交换机，再在 **实例和镜像** 里筛选/搜索规格。
+> 🔗 官方文档：[自定义购买实例](https://help.aliyun.com/zh/ecs/user-guide/create-an-instance-by-using-the-wizard)
+
 > **怎么搜索实例规格？** 在「实例规格」区域有搜索框，直接输入 `c7.xlarge`，选第一个结果即可。
 
 ### ② 存储配置
