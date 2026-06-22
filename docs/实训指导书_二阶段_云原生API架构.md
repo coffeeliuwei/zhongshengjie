@@ -208,6 +208,10 @@ RAM 控制台左侧有导航栏，找到「**身份管理**」→ 「**用户**�
 
 > 📌 官方安全建议是「一个用户只选一种访问方式」。本实训为了少建一个账号，让管理员同时有控制台和 AccessKey；如果想严格遵循官方建议，可以建 `zsj-admin`（仅控制台）和 `zsj-admin-api`（仅 AccessKey）两个用户。
 
+![RAM 创建用户表单：登录名称、显示名称、访问配置（控制台访问 / 永久 AccessKey 访问）](img/ram-create-user.png)
+> △ RAM 访问控制 → 身份管理 → 用户 → **创建用户**：填 **登录名称**（后缀是你的账号 ID）、**显示名称**，下方 **访问配置** 勾选「使用控制台访问」+「使用永久 AccessKey 访问」。
+> 🔗 官方文档：[创建 RAM 用户](https://help.aliyun.com/zh/ram/user-guide/create-a-ram-user)
+
 填写完毕点击「**确定**」。
 
 **⚠️ 重要：保存 AccessKey（只显示一次！）**
