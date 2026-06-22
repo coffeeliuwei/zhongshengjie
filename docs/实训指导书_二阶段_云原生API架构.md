@@ -738,6 +738,10 @@ docker logs qdrant
 | 读写权限 | **私有** | 必须是私有！不然模型文件会公开 |
 | 版本控制 | 关闭 | 不需要 |
 
+![OSS 创建 Bucket 表单：Bucket 名称、地域、存储类型、存储冗余类型](img/oss-create-bucket.png)
+> △ 对象存储 OSS → Bucket 列表 → **创建 Bucket**：填全局唯一的 **Bucket 名称**、**地域** 选「华东1（杭州）」（与 ECS 同地域）、**存储类型** 选「标准存储」；往下滚到 **读写权限** 选「私有」、**版本控制** 选「关闭」。
+> 🔗 官方文档：[创建存储空间 Bucket](https://help.aliyun.com/zh/oss/user-guide/create-a-bucket-4)
+
 填写后点击「**确定**」，Bucket 创建完成。
 
 ---
