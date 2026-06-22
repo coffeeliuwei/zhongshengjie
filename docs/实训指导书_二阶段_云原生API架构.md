@@ -1123,6 +1123,12 @@ CLB 创建完成后，「应用访问设置」区域显示私网访问地址，�
 
 > API 网关按调用次数计费，学生测试量级费用可以忽略不计。
 
+![API 网关控制台概览：左侧分组管理 / API 列表 / VPC 授权 / 应用管理 菜单](img/apigw-overview.png)
+> △ API 网关控制台概览：左侧菜单 **API 管理 → 分组管理 / API 列表 / 后端服务 / VPC 授权 / 环境管理**、**API 调用 → 应用管理**，本步骤后面用到的都在这里。
+> 🔗 官方文档：[API 网关产品概述](https://help.aliyun.com/zh/api-gateway/traditional-api-gateway/product-overview/what-is-api-gateway)
+
+> ⚠️ **对照现行控制台**：① 这里指的是 **传统 API 网关**（带 AppCode 鉴权、共享/Serverless 实例），不是新版「云原生 API 网关」，搜索时认准带"分组管理/API 列表"菜单的这个。② 文档下文写的「**共享实例**」在现行控制台叫 **Serverless 实例**（适合开发测试，可免费用），创建分组时选它即可；正式生产才用「专享实例」。
+
 ---
 
 ## 6.2 创建 API 分组
