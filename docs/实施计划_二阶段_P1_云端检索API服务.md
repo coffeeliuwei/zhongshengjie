@@ -23,6 +23,11 @@
 - 本机 Python 环境：`E:\anaconda3\envs\python13\python.exe`
 - 本机已安装 Docker Desktop（用于 5.3 节构建和推送镜像）
 
+> ⚠️ **新手注意：下文命令里的两个路径是示例，请替换成你自己的实际路径**：
+> - `E:\anaconda3\envs\python13\python.exe` → 换成**你自己的 Python 解释器路径**（不确定就用 `python` 或 `python3`，已加入 PATH 时可直接用）。
+> - `D:\动画\众生界` → 换成**你本地项目根目录**（即你 `git clone` 项目后的文件夹路径）。
+> 用 opencode 执行本计划时，它会在你的项目目录里自动操作，一般无需手填这些路径；只有你**手动跑验收命令**时才需要替换。
+
 ---
 
 ## 文件分发规则
