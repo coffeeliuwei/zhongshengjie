@@ -144,6 +144,50 @@ opencode "read and execute docs/实施计划_二阶段_P1_云端检索API服务.
 
 ---
 
+### 写手端 ↔ 云：谁在本地、谁在云上（重要，先看懂再动手）
+
+很多人会问：**上云之后，写手是不是只要一个 opencode 就能创作了？** —— **不是。** 本方案是「**半瘦客户端**」：把**共享数据库（Qdrant）和检索服务**搬上云，但**把向量模型 BGE-M3 仍留在写手本地**。写手机器需要的是 **opencode + 本地 BGE-M3 模型 + 项目代码 + 一份 config.json**，不是"光一个 opencode"。
+
+**什么跑在哪：**
+
+| 位置 | 跑什么 | 作用 |
+|------|--------|------|
+| **写手本地** | opencode | 写作工具（和一阶段完全一样） |
+| 写手本地 | BGE-M3 模型（约 2.3GB，从 OSS 下载） | 把查询**文字 → 向量** |
+| 写手本地 | `core/retrieval/cloud_client.py` + `config.json` | 带 AppCode 调云端检索；`mode=cloud` 切到云端 |
+| **云端** | API 网关（公网 + AppCode 鉴权） | 写手访问的唯一入口，把内网挡在后面 |
+| 云端 | SAE 上的 FastAPI 检索服务 | 接收**向量**、查 Qdrant、返回结果 |
+| 云端 | ECS 上的 Qdrant（共享知识库） | 向量检索，团队所有写手共用 |
+| 云端 | OSS | 存放 BGE-M3 模型，供新写手下载 |
+
+**一次创作中的检索，数据是这样流的：**
+
+```
+写手电脑：opencode / novel-workflow
+   │  需要检索知识库时
+   ▼
+写手电脑：本地 BGE-M3 把【查询文字】→ 转成【向量】   ← embedding 在本地做
+   │
+   ▼  cloud_client.py 带 AppCode，POST【向量】（不是文字）
+云端：API 网关（公网，校验 AppCode）
+   │
+   ▼
+云端：SAE 上的 FastAPI（/search/dense 或 /search/hybrid）
+   │  VPC 内网
+   ▼
+云端：ECS 上的 Qdrant 向量检索
+   │
+   └────────►  结果原路返回 opencode，用于继续写作
+```
+
+> **关键点：云端检索 API 收的是「向量」不是「文字」**（见 P1 的 `main.py`：请求体里就是 `vector`，标注"本地 BGE-M3 生成的查询向量"），**云端不做 embedding**。所以那 2.3GB 的 BGE-M3 模型必须留在写手本地——这是为了让云端轻、省成本（embedding 很吃 CPU/GPU）而做的取舍。
+
+**所以一个新写手要接入云，就是做第八步那 3 件事**：① 从 OSS 下载 BGE-M3 模型；② 改 `config.json` 切到 `cloud`、填 API 网关地址和 AppCode；③ 加上云端检索客户端代码（P2 生成）。装好后，**opencode 的写作流程和一阶段一模一样**，只是检索悄悄走了云端的共享知识库、不再依赖本地 Qdrant。
+
+> 💡 如果想把写手端做成「**纯 opencode 瘦客户端**」（连模型都不用下），也能实现，但要把 embedding 搬到云端、由 SAE 跑 BGE-M3，代价是云端算力/成本上升、且查询原始文字要过网络。本方案默认不这么做，保持云端轻量。
+
+---
+
 ## 完整路线图（请先看完再动手）
 
 ```
