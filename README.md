@@ -61,6 +61,26 @@
 
 ---
 
+## AI Skills（已提交）
+
+本仓库已提交 11 个众生界专用 Skill，统一位于 [`skills/novel/`](skills/novel/)。其他协作者可直接查看、复用和维护这些工作流定义。
+
+| Skill | 功能 |
+|---|---|
+| `novel-inspiration-ingest` | 信息储备唯一入口：处理素材、设定、技法、案例和灵感，并提出落库方案 |
+| `novel-workflow` | 章节创作完整工作流：从大纲、场景规划、写作到评估和经验沉淀 |
+| `novelist-shared` | 所有写手共用的文风、字数、段落、情感和禁用项规范 |
+| `novelist-canglan` | 世界观、势力、时代、规则和权力体系设计 |
+| `novelist-jianchen` | 战斗、功法、力量体系、冲突和战斗节奏设计 |
+| `novelist-moyan` | 人物塑造、情感关系、心理活动和角色成长设计 |
+| `novelist-xuanyi` | 剧情编织、伏笔、悬念、信息差和反转设计 |
+| `novelist-yunxi` | 氛围、意境、诗性语言和章节润色 |
+| `novelist-technique-search` | 从技法知识库检索可用于当前场景的创作技法 |
+| `novelist-evaluator` | 按质量标准审核章节，并输出维度评分和修改建议 |
+| `novelist-connoisseur` | 发现段落级创意问题，提出创意建议并派单重写 |
+
+> `novelist-worldview-generator` 已归档，本次不纳入现行 Skill 包。
+
 
 
 ## 📖 学生用户请看这里
